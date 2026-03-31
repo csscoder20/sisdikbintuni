@@ -6,7 +6,12 @@ use App\Models\Sekolah;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
+use Filament\Notifications\Notification;
 use Filament\Auth\Pages\Register as BaseRegister;
+use Illuminate\Auth\Events\Registered;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Facades\Filament;
 
 class CustomRegister extends BaseRegister
 {
@@ -29,5 +34,40 @@ class CustomRegister extends BaseRegister
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ]);
+    }
+
+    public function register(): ?RegistrationResponse
+    {
+        try {
+            $this->rateLimit(2);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedNotification($exception)?->send();
+
+            return null;
+        }
+
+        $data = $this->form->getState();
+
+        $user = $this->handleRegistration($data);
+
+        event(new Registered($user));
+
+        // Skip automatic login after registration
+        // Filament::auth()->login($user);
+
+        Notification::make()
+            ->title('Pendaftaran Berhasil')
+            ->body('Akun Anda telah berhasil didaftarkan. Harap tunggu verifikasi dari Admin Dinas sebelum Anda dapat masuk ke panel.')
+            ->success()
+            ->persistent()
+            ->send();
+
+        // Redirect to login page using the correct RegistrationResponse contract
+        return new class implements RegistrationResponse {
+            public function toResponse($request)
+            {
+                return redirect()->route('filament.admin.auth.login');
+            }
+        };
     }
 }
