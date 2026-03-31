@@ -25,7 +25,7 @@ class RombelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Rombel';
 
-    protected static ?string $navigationGroup = 'Sekolah';
+    protected static string | \UnitEnum | null $navigationGroup = 'Sekolah';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 

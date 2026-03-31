@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\GedungRuangs\Schemas;
 
-use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\TextInput;
+use Filament\Schemas\Components\Select;
 use Filament\Schemas\Schema;
 
 class GedungRuangForm
@@ -12,7 +13,8 @@ class GedungRuangForm
         return $schema
             ->components([
                 TextInput::make('nama_gedung_ruang')
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
                 TextInput::make('jumlah')
                     ->required()
                     ->numeric()
@@ -25,10 +27,14 @@ class GedungRuangForm
                     ->required()
                     ->numeric()
                     ->default(0),
-                TextInput::make('status_kepemilikan'),
-                TextInput::make('id_sekolah')
-                    ->required()
-                    ->numeric(),
+                Select::make('status_kepemilikan')
+                    ->options([
+                        'milik' => 'Milik',
+                        'pinjam' => 'Pinjam',
+                    ]),
+                Select::make('id_sekolah')
+                    ->relationship('sekolah', 'nama_sekolah')
+                    ->required(),
             ]);
     }
 }

@@ -24,11 +24,16 @@ class UserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'User';
 
-    protected static ?string $navigationGroup = 'Sistem';
+    protected static string | \UnitEnum | null $navigationGroup = 'Sistem';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     protected static ?string $recordTitleAttribute = 'user';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && auth()->user()->role === 'admin';
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -50,11 +55,6 @@ class UserResource extends Resource
         return [
             //
         ];
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->check() && auth()->user()->role === 'admin';
     }
 
     public static function getPages(): array

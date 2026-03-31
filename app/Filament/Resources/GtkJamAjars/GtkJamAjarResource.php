@@ -25,7 +25,7 @@ class GtkJamAjarResource extends Resource
 
     protected static ?string $pluralModelLabel = 'GTK Jam Ajar';
 
-    protected static ?string $navigationGroup = 'Warga Belajar';
+    protected static string | \UnitEnum | null $navigationGroup = 'Warga Belajar';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
@@ -41,7 +41,7 @@ class GtkJamAjarResource extends Resource
         $query = parent::getEloquentQuery();
 
         if (auth()->check() && auth()->user()->role === 'operator') {
-            // Note: tbl_gtk_jam_ajar currently lacks a link to GTK or Sekolah in its schema.
+            // No current filter
         }
 
         return $query;

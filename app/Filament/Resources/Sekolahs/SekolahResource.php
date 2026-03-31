@@ -25,7 +25,7 @@ class SekolahResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Sekolah';
 
-    protected static ?string $navigationGroup = 'Sekolah';
+    protected static string | \UnitEnum | null $navigationGroup = 'Sekolah';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHomeModern;
 
@@ -38,11 +38,8 @@ class SekolahResource extends Resource
 
     public static function getNavigationUrl(): string
     {
-        if (auth()->check() && auth()->user()->role === 'operator') {
-            $sekolahId = auth()->user()->sekolah_id;
-            if ($sekolahId) {
-                return static::getUrl('edit', ['record' => $sekolahId]);
-            }
+        if (auth()->check() && auth()->user()->role === 'operator' && auth()->user()->sekolah_id) {
+            return static::getUrl('edit', ['record' => auth()->user()->sekolah_id]);
         }
 
         return parent::getNavigationUrl();

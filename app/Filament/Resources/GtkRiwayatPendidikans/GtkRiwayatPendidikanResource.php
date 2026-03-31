@@ -25,7 +25,7 @@ class GtkRiwayatPendidikanResource extends Resource
 
     protected static ?string $pluralModelLabel = 'GTK Riwayat Pendidikan';
 
-    protected static ?string $navigationGroup = 'Warga Belajar';
+    protected static string | \UnitEnum | null $navigationGroup = 'Warga Belajar';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 

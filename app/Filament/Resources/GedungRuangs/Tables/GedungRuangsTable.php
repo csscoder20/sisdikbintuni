@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\GedungRuangs\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 
 class GedungRuangsTable
 {
@@ -26,28 +26,15 @@ class GedungRuangsTable
                 TextColumn::make('kondisi_rusak')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('status_kepemilikan')
-                    ->searchable(),
-                TextColumn::make('id_sekolah')
-                    ->numeric()
+                TextColumn::make('status_kepemilikan'),
+                TextColumn::make('sekolah.nama_sekolah')
                     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
+            ->actions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

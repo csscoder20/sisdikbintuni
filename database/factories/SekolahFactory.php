@@ -23,7 +23,7 @@ class SekolahFactory extends Factory
             'nss' => $this->faker->numerify('###########'),
             'npwp' => $this->faker->numerify('##.###.###.#-###.###'),
             'alamat' => $this->faker->address(),
-            'desa' => $this->faker->city(),
+            'desa' => $this->faker->numberBetween(1, 100),
             'kecamatan' => $this->faker->city(),
             'kabupaten' => $this->faker->city(),
             'provinsi' => $this->faker->state(),

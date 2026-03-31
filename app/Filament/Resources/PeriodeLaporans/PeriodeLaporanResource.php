@@ -25,7 +25,7 @@ class PeriodeLaporanResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Periode Laporan';
 
-    protected static ?string $navigationGroup = 'Laporan';
+    protected static string | \UnitEnum | null $navigationGroup = 'Laporan';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
@@ -41,7 +41,7 @@ class PeriodeLaporanResource extends Resource
         $query = parent::getEloquentQuery();
 
         if (auth()->check() && auth()->user()->role === 'operator') {
-            // Global resource, no school isolation required currently.
+            // No current filter
         }
 
         return $query;
