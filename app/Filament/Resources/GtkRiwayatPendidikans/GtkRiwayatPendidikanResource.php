@@ -21,15 +21,18 @@ class GtkRiwayatPendidikanResource extends Resource
 {
     protected static ?string $model = GtkRiwayatPendidikan::class;
 
-    protected static ?string $modelLabel = 'GTK Riwayat Pendidikan';
+    protected static ?string $modelLabel = 'GTK RIWAYAT PENDIDIKAN';
 
-    protected static ?string $pluralModelLabel = 'GTK Riwayat Pendidikan';
+    protected static ?string $pluralModelLabel = 'GTK RIWAYAT PENDIDIKAN';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Warga Belajar';
+    // protected static ?string $navigationLabel = 'KEADAAN SARPRAS';
+    protected static ?int $navigationSort = 5;
+    protected static string | \UnitEnum | null $navigationGroup = 'LAPORAN BULANAN';
+
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-    protected static ?string $recordTitleAttribute = 'Gtk Riwayat Pendidikan';
+    protected static ?string $recordTitleAttribute = 'GTK RIWAYAT PENDIDIKAN';
 
     public static function canViewAny(): bool
     {

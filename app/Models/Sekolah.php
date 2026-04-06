@@ -32,16 +32,27 @@ class Sekolah extends Model
         'akreditasi_sekolah',
         'status_tanah_sekolah',
         'luas_tanah_sekolah',
-        'email_sekolah'
+        'email_sekolah',
+        'user_id'
     ];
-
-    public function gedungRuang()
-    {
-        return $this->hasMany(GedungRuang::class, 'id_sekolah');
-    }
 
     public function rombel()
     {
         return $this->hasMany(Rombel::class, 'id_sekolah');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function getJenjangAttribute(): string
+    {
+        $name = strtolower($this->nama_sekolah);
+
+        if (str_contains($name, 'sma')) return 'sma';
+        if (str_contains($name, 'smk')) return 'smk';
+
+        return 'lainnya';
     }
 }

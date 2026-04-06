@@ -28,7 +28,13 @@ class CustomRegister extends BaseRegister
                     ->maxLength(255),
                 Select::make('sekolah_id')
                     ->label('Asal Sekolah')
-                    ->options(Sekolah::query()->pluck('nama_sekolah', 'id'))
+                    ->options(Sekolah::query()
+                        ->whereNull('user_id')
+                        ->where(function ($query) {
+                            $query->where('nama_sekolah', 'ilike', '%sma%')
+                                ->orWhere('nama_sekolah', 'ilike', '%smk%');
+                        })
+                        ->pluck('nama_sekolah', 'id'))
                     ->required()
                     ->searchable(),
                 $this->getPasswordFormComponent(),
@@ -48,7 +54,19 @@ class CustomRegister extends BaseRegister
 
         $data = $this->form->getState();
 
+        $sekolahId = $data['sekolah_id'];
+        unset($data['sekolah_id']);
+
         $user = $this->handleRegistration($data);
+
+        // Set role and verification status
+        $user->update([
+            'role' => 'operator',
+            'is_verified' => false,
+        ]);
+
+        // Link user to school
+        Sekolah::find($sekolahId)?->update(['user_id' => $user->id]);
 
         event(new Registered($user));
 
@@ -66,7 +84,7 @@ class CustomRegister extends BaseRegister
         return new class implements RegistrationResponse {
             public function toResponse($request)
             {
-                return redirect()->route('filament.admin.auth.login');
+                return redirect()->route('filament.dinas.auth.login');
             }
         };
     }

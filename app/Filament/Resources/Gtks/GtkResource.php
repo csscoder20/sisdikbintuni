@@ -21,15 +21,15 @@ class GtkResource extends Resource
 {
     protected static ?string $model = Gtk::class;
 
-    protected static ?string $modelLabel = 'GTK';
+    protected static ?string $modelLabel = 'NOMINATIF GTK';
 
-    protected static ?string $pluralModelLabel = 'GTK';
+    protected static ?string $pluralModelLabel = 'NOMINATIF GTK';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Warga Belajar';
+    protected static string | \UnitEnum | null $navigationGroup = 'MASTER DATA';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
-    protected static ?string $recordTitleAttribute = 'Gtk';
+    protected static ?string $recordTitleAttribute = 'NOMINATIF GTK';
 
     public static function canViewAny(): bool
     {

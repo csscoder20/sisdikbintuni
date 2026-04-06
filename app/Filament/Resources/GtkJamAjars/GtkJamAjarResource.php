@@ -21,15 +21,16 @@ class GtkJamAjarResource extends Resource
 {
     protected static ?string $model = GtkJamAjar::class;
 
-    protected static ?string $modelLabel = 'GTK Jam Ajar';
+    protected static ?string $modelLabel = 'SEBARAN JAM AJAR';
 
-    protected static ?string $pluralModelLabel = 'GTK Jam Ajar';
+    protected static ?string $pluralModelLabel = 'SEBARAN JAM AJAR';
+    protected static ?int $navigationSort = 4;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Warga Belajar';
+    protected static string | \UnitEnum | null $navigationGroup = 'LAPORAN BULANAN';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static ?string $recordTitleAttribute = 'GTK Jam AJar';
+    protected static ?string $recordTitleAttribute = 'SEBARAN JAM AJAR';
 
     public static function canViewAny(): bool
     {

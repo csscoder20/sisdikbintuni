@@ -21,15 +21,16 @@ class RombelResource extends Resource
 {
     protected static ?string $model = Rombel::class;
 
-    protected static ?string $modelLabel = 'Rombel';
+    protected static ?string $modelLabel = 'ROMBEL';
 
-    protected static ?string $pluralModelLabel = 'Rombel';
+    protected static ?string $pluralModelLabel = 'ROMBEL';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Sekolah';
+    protected static ?int $navigationSort = 6;
+    protected static string | \UnitEnum | null $navigationGroup = 'LAPORAN BULANAN';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
-    protected static ?string $recordTitleAttribute = 'Rombel';
+    protected static ?string $recordTitleAttribute = 'ROMBEL';
 
     public static function canViewAny(): bool
     {

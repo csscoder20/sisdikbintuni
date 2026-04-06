@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Http\Middleware\Filament;
+
+use Closure;
+use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class RedirectIncorrectPanel
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = Filament::auth()->user();
+        $panel = Filament::getCurrentPanel();
+
+        // If not logged in, let the default Filament authentication handle it
+        if (! $user || ! $panel) {
+            return $next($request);
+        }
+
+        // 1. If Operator tries to access Dinas panel (unless they are on the login/register/logout/profile pages)
+        if ($panel->getId() === 'dinas' && $user->role === 'operator') {
+            // Check if it's an internal page, not auth pages. 
+            // In Filament v3, we can check if it's the dashboard or a resource.
+            // Actually, any internal access should be restricted.
+            $path = $request->path();
+            if (! str_contains($path, 'login') && ! str_contains($path, 'register') && ! str_contains($path, 'logout')) {
+                Notification::make()
+                    ->title('Maaf, Anda tidak diizinkan untuk mengakses url ini')
+                    ->danger()
+                    ->persistent()
+                    ->send();
+
+                $jenjang = $user->sekolah?->jenjang ?? 'lainnya';
+                $id = $user->sekolah?->id;
+                
+                return redirect()->to("/admin/{$jenjang}/{$id}/operator");
+            }
+        }
+
+        // 2. If Admin tries to access a School panel
+        if ($panel->getId() !== 'dinas' && $user->role === 'admin') {
+            Notification::make()
+                ->title('Dialihkan ke Dashboard Admin Dinas')
+                ->info()
+                ->send();
+
+            return redirect()->to('/admin/dinas');
+        }
+
+        return $next($request);
+    }
+}

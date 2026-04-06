@@ -21,15 +21,17 @@ class SiswaResource extends Resource
 {
     protected static ?string $model = Siswa::class;
 
-    protected static ?string $modelLabel = 'Siswa';
+    protected static ?string $modelLabel = 'NOMINATIF SISWA';
 
-    protected static ?string $pluralModelLabel = 'Siswa';
+    protected static ?string $pluralModelLabel = 'NOMINATIF SISWA';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Warga Belajar';
+    protected static string | \UnitEnum | null $navigationGroup = 'MASTER DATA';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-    protected static ?string $recordTitleAttribute = 'Siswa';
+    protected static ?string $recordTitleAttribute = 'NOMINATIF SISWA';
+
+    protected static bool $isScopedToTenant = false;
 
     public static function canViewAny(): bool
     {
