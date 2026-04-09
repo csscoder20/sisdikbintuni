@@ -25,8 +25,8 @@ class RombelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Rombel';
 
-    protected static ?int $navigationSort = 6;
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static ?int $navigationSort = 2;
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     protected static bool $isScopedToTenant = true;
 

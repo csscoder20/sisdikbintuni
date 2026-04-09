@@ -22,12 +22,15 @@ class SiswaResource extends Resource
 {
     protected static ?string $model = Siswa::class;
 
+    protected static ?string $navigationLabel = 'Nominatif Siswa';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Siswa';
+
     protected static ?string $modelLabel = 'Nominatif Siswa';
 
     protected static ?string $pluralModelLabel = 'Nominatif Siswa';
-
-    // FIXED: Use the same type as parent class
-    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 

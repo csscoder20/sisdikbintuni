@@ -24,7 +24,11 @@ class GtkJamAjarForm
                     ->searchable()
                     ->preload()
                     ->required(),
-                TextInput::make('mata_pelajaran')
+                Select::make('mapel_id')
+                    ->label('Mata Pelajaran')
+                    ->relationship('mapel', 'nama_mapel')
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('jumlah_jam')
                     ->numeric()

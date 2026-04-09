@@ -14,14 +14,16 @@ class GtkKeuanganTable
                 TextColumn::make('gtk.nama')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('gapok')
-                    ->money('IDR')
+                TextColumn::make('nomor_rekening')
+                ->label('No. Rekening')
                     ->sortable(),
-                TextColumn::make('bruto')
-                    ->money('IDR'),
-                TextColumn::make('netto')
-                    ->money('IDR')
+                TextColumn::make('nama_bank')
+                ->label('Nama Bank'),
+                TextColumn::make('npwp')
+                ->label('NPWP')
                     ->sortable(),
             ]);
     }
 }
+
+

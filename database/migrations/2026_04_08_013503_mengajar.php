@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('gtk_id')->constrained('gtk')->cascadeOnDelete();
             $table->foreignId('rombel_id')->constrained('rombel')->cascadeOnDelete();
-            $table->string('mata_pelajaran');
+            $table->foreignId('mapel_id')->constrained('mapel')->cascadeOnDelete();
             $table->integer('jumlah_jam');
             $table->enum('semester', ['ganjil','genap'])->nullable();
             $table->string('tahun_ajaran')->nullable();
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->unique([
                 'gtk_id',
                 'rombel_id',
-                'mata_pelajaran'
+                'mapel_id'
             ]);
         });
     }

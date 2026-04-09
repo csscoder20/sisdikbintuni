@@ -32,7 +32,9 @@ return new class extends Migration
             $table->string('nama_ayah')->nullable();
             $table->string('nama_ibu')->nullable();
             $table->string('nama_wali')->nullable();
-            $table->enum('status', ['aktif', 'pindah', 'lulus', 'dropout']);
+            $table->enum('disabilitas', ['Tidak', 'Tuna Netra', 'Tuna Rungu', 'Tuna Wicara', 'Tuna Daksa', 'Tuna Grahita', 'Tuna Lainnya'])->default('Tidak');
+            $table->enum('beasiswa', ['Tidak', 'Beasiswa Pemerintah Pusat', 'Beasiswa Pemerintah Daerah', 'Beasisswa Swasta', 'Beasiswa Khusus', 'Beasiswa Afirmasi', 'Beasiswa Lainnya'])->default('Tidak');
+            $table->enum('status', ['aktif', 'mutasi_masuk', 'mutasi_keluar', 'lulus', 'putus_sekolah', 'mengulang'])->default('aktif');
             $table->timestamps();
         });
     }

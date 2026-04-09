@@ -23,9 +23,11 @@ class GtkResource extends Resource
 
     protected static ?string $modelLabel = 'Nominatif GTK';
 
-    protected static ?string $pluralModelLabel = 'Nominatif GTK';
+    protected static ?string $navigationLabel = 'Nominatif GTK';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static ?int $navigationSort = 1;
+
+    protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 
     protected static bool $isScopedToTenant = true;
 

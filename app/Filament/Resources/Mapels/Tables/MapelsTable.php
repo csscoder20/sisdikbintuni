@@ -1,42 +1,41 @@
 <?php
 
-namespace App\Filament\Resources\GtkJamAjars\Tables;
+namespace App\Filament\Resources\Mapels\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class GtkJamAjarsTable
+class MapelsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('gtk.nama')
-                    ->label('GTK')
+                TextColumn::make('kode_mapel')
+                    ->label('Kode')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('rombel.nama')
-                    ->label('Rombel')
+                TextColumn::make('nama_mapel')
+                    ->label('Nama Mata Pelajaran')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('mapel.nama_mapel')
-                    ->label('Mata Pelajaran')
+                TextColumn::make('jjp')
+                    ->label('JJP')
+                    ->sortable(),
+                TextColumn::make('jenjang')
+                    ->label('Jenjang')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('jumlah_jam')
-                    ->label('Jam')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('semester')
-                    ->label('Semester')
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
-                TextColumn::make('tahun_ajaran')
-                    ->label('Tahun Ajaran'),
                 TextColumn::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Diperbarui Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -45,7 +44,6 @@ class GtkJamAjarsTable
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([

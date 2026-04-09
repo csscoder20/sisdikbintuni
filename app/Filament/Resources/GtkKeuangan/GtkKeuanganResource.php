@@ -16,14 +16,14 @@ class GtkKeuanganResource extends Resource
 {
     protected static ?string $model = GtkKeuangan::class;
 
+    protected static ?int $navigationSort = 3;
+    protected static ?string $modelLabel = 'Rekening & NPWP';
 
-    protected static ?string $modelLabel = 'Keuangan GTK';
-
-    protected static ?string $pluralModelLabel = 'Keuangan GTK';
+    protected static ?string $pluralModelLabel = 'Rekening & NPWP';
 
     // Fixed: Remove the union type syntax, just use string|null
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 

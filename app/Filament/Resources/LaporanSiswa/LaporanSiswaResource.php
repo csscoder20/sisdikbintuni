@@ -24,6 +24,11 @@ class LaporanSiswaResource extends Resource
     // Gunakan tipe yang benar untuk navigationGroup
     protected static string|\UnitEnum|null $navigationGroup = 'Laporan Bulanan';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && !auth()->user()->hasRole('operator');
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $recordTitleAttribute = 'id';

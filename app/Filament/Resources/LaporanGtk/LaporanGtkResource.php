@@ -27,6 +27,11 @@ class LaporanGtkResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && !auth()->user()->hasRole('operator');
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
     protected static ?string $recordTitleAttribute = 'NOMINATIF GTK';

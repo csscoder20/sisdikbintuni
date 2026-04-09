@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             LaporanSiswaKategoriSeeder::class,
             LaporanGtkSeeder::class,
             LaporanGtkKategoriSeeder::class,
+            MapelSeeder::class,
             MengajarSeeder::class,
             KehadiranGtkSeeder::class,
             KelulusanSeeder::class,

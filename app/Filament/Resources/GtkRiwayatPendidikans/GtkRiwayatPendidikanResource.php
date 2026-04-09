@@ -21,13 +21,13 @@ class GtkRiwayatPendidikanResource extends Resource
 {
     protected static ?string $model = GtkPendidikan::class;
 
-    protected static ?string $modelLabel = 'GTK Riwayat Pendidikan';
+    protected static ?string $modelLabel = 'Riwayat Pendidikan GTK';
 
-    protected static ?string $pluralModelLabel = 'GTK Riwayat Pendidikan';
+    protected static ?string $pluralModelLabel = 'Riwayat Pendidikan GTK';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 2;
     
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 
     protected static bool $isScopedToTenant = true;
 

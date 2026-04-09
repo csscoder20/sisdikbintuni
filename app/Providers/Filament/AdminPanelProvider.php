@@ -27,6 +27,21 @@ use Filament\Navigation\MenuItem;
 use Filament\Support\Enums\Width;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
+use App\Filament\Pages\KeadaanGtk;
+use App\Filament\Pages\KeadaanSiswa;
+use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
+use App\Filament\Resources\GtkKeuangan\GtkKeuanganResource;
+use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
+use App\Filament\Resources\Gtks\GtkResource;
+use App\Filament\Resources\KehadiranGtk\KehadiranGtkResource;
+use App\Filament\Resources\Kelulusan\KelulusanResource;
+use App\Filament\Resources\LaporanGedung\LaporanGedungResource;
+use App\Filament\Resources\Mapels\MapelResource;
+use App\Filament\Resources\Rombels\RombelResource;
+use App\Filament\Resources\Siswas\SiswaResource;
+use Filament\Navigation\NavigationBuilder;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -132,6 +147,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->tenant(Sekolah::class)
             ->tenantMenu(false)
+            ->navigationGroups([
+                'Data Sekolah',
+                'Data Siswa',
+                'Data GTK',
+                'Laporan Bulanan',
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -143,7 +164,6 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
-
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>

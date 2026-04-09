@@ -26,6 +26,11 @@ class LaporanResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && !auth()->user()->hasRole('operator');
+    }
+
     protected static bool $isScopedToTenant = true;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;

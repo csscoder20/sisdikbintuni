@@ -21,12 +21,12 @@ class GtkJamAjarResource extends Resource
 {
     protected static ?string $model = \App\Models\Mengajar::class;
 
-    protected static ?string $modelLabel = 'Sebaran Jam Ajar';
+    protected static ?string $modelLabel = 'Sebaran Jam Mengajar';
 
-    protected static ?string $pluralModelLabel = 'Sebaran Jam Ajar';
+    protected static ?string $pluralModelLabel = 'Sebaran Jam Mengajar';
     protected static ?int $navigationSort = 4;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
 
     protected static bool $isScopedToTenant = true;
 

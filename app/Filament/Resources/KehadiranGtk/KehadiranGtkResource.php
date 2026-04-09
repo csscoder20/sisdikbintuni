@@ -18,16 +18,15 @@ class KehadiranGtkResource extends Resource
 
 
 
-    protected static ?string $modelLabel = 'Rekap Kehadiran GTK';
+    protected static ?string $modelLabel = 'Kehadiran GTK';
 
-    protected static ?string $pluralModelLabel = 'Rekap Kehadiran GTK';
+    protected static ?string $pluralModelLabel = 'Kehadiran GTK';
 
+    protected static ?string $navigationLabel = 'Kehadiran GTK';
 
+    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
 
-
-    // Fixed: Remove the union type syntax, just use string|null
-
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static ?int $navigationSort = 5;
 
     protected static bool $isScopedToTenant = true;
 

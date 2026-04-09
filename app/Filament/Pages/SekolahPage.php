@@ -30,11 +30,15 @@ class SekolahPage extends Page implements HasSchemas
     use InteractsWithSchemas;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static ?string $navigationLabel = 'Profil Sekolah';
+    protected static ?string $navigationLabel = 'Profil';
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $modelLabel = 'Profil';
+    protected static ?string $pluralModelLabel = 'Profil';
+    
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     protected static ?string $title = 'PROFIL SEKOLAH';
-
-    protected static ?int $navigationSort = 1;
 
     protected string $view = 'filament.pages.sekolah-page';
 

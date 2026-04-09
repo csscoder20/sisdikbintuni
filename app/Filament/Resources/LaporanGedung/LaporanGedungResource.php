@@ -20,10 +20,10 @@ class LaporanGedungResource extends Resource
 {
     protected static ?string $model = LaporanGedung::class;
     
-    protected static ?string $modelLabel = 'Keadaan Sarpras';
-    protected static ?string $pluralModelLabel = 'Keadaan Sarpras';
+    protected static ?string $modelLabel = 'Keadaan Gedung/Ruang';
+    protected static ?string $pluralModelLabel = 'Keadaan Gedung/Ruang';
     
-    protected static ?string $navigationLabel = 'Keadaan Sarpras';
+    protected static ?string $navigationLabel = 'Keadaan Gedung/Ruang';
     protected static ?int $navigationSort = 1;
     protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
 

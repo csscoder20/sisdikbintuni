@@ -16,14 +16,16 @@ class KelulusanResource extends Resource
 {
     protected static ?string $model = Kelulusan::class;
 
-    protected static ?string $modelLabel = 'Data Kelulusan';
+    protected static ?string $modelLabel = 'Kelulusan';
 
-    protected static ?string $pluralModelLabel = 'Data Kelulusan';
+    protected static ?string $pluralModelLabel = 'Kelulusan';
 
 
     // Fixed: Remove the union type syntax, just use string|null
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
+
+    protected static ?int $navigationSort = 6;
 
     protected static bool $isScopedToTenant = true;
 

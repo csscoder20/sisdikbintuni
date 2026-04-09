@@ -11,7 +11,7 @@ class Mengajar extends Model
     protected $fillable = [
         'gtk_id',
         'rombel_id',
-        'mata_pelajaran',
+        'mapel_id',
         'jumlah_jam',
         'semester',
         'tahun_ajaran',
@@ -26,6 +26,11 @@ class Mengajar extends Model
     public function rombel()
     {
         return $this->belongsTo(Rombel::class);
+    }
+
+    public function mapel()
+    {
+        return $this->belongsTo(Mapel::class);
     }
 
     public function laporan()
