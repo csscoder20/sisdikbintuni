@@ -9,7 +9,7 @@ use App\Filament\Resources\GtkRiwayatPendidikans\Pages\ViewGtkRiwayatPendidikan;
 use App\Filament\Resources\GtkRiwayatPendidikans\Schemas\GtkRiwayatPendidikanForm;
 use App\Filament\Resources\GtkRiwayatPendidikans\Schemas\GtkRiwayatPendidikanInfolist;
 use App\Filament\Resources\GtkRiwayatPendidikans\Tables\GtkRiwayatPendidikansTable;
-use App\Models\GtkRiwayatPendidikan;
+use App\Models\GtkPendidikan;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,16 +19,17 @@ use Filament\Tables\Table;
 
 class GtkRiwayatPendidikanResource extends Resource
 {
-    protected static ?string $model = GtkRiwayatPendidikan::class;
+    protected static ?string $model = GtkPendidikan::class;
 
-    protected static ?string $modelLabel = 'GTK RIWAYAT PENDIDIKAN';
+    protected static ?string $modelLabel = 'GTK Riwayat Pendidikan';
 
-    protected static ?string $pluralModelLabel = 'GTK RIWAYAT PENDIDIKAN';
+    protected static ?string $pluralModelLabel = 'GTK Riwayat Pendidikan';
 
-    // protected static ?string $navigationLabel = 'KEADAAN SARPRAS';
     protected static ?int $navigationSort = 5;
-    protected static string | \UnitEnum | null $navigationGroup = 'LAPORAN BULANAN';
+    
+    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
 
+    protected static bool $isScopedToTenant = true;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
@@ -36,20 +37,7 @@ class GtkRiwayatPendidikanResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
-
-        if (auth()->check() && auth()->user()->role === 'operator') {
-            return $query->whereHas('gtk', function ($q) {
-                $q->where('id_sekolah', auth()->user()->sekolah_id);
-            });
-        }
-
-        return $query;
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
     public static function form(Schema $schema): Schema

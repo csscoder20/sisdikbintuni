@@ -11,9 +11,8 @@ class RombelInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('nama_rombel'),
-                TextEntry::make('id_sekolah')
-                    ->numeric(),
+                TextEntry::make('nama'),
+                TextEntry::make('sekolah.nama'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

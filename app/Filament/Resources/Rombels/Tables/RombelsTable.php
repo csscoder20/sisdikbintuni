@@ -15,10 +15,11 @@ class RombelsTable
     {
         return $table
             ->columns([
-                TextColumn::make('nama_rombel')
+                TextColumn::make('nama')
                     ->searchable(),
-                TextColumn::make('id_sekolah')
-                    ->numeric()
+                TextColumn::make('tingkat')
+                    ->sortable(),
+                TextColumn::make('sekolah.nama')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

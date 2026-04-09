@@ -15,11 +15,28 @@ class GtkJamAjarsTable
     {
         return $table
             ->columns([
+                TextColumn::make('gtk.nama')
+                    ->label('GTK')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('rombel.nama')
+                    ->label('Rombel')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('mata_pelajaran')
+                    ->label('Mata Pelajaran')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('jumlah_jam')
+                    ->label('Jam')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('semester')
+                    ->label('Semester')
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                TextColumn::make('tahun_ajaran')
+                    ->label('Tahun Ajaran'),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

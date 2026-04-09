@@ -11,9 +11,9 @@ class RombelForm
     {
         return $schema
             ->components([
-                TextInput::make('nama_rombel')
+                TextInput::make('nama')
                     ->required(),
-                TextInput::make('id_sekolah')
+                TextInput::make('tingkat')
                     ->required()
                     ->numeric(),
             ]);

@@ -2,91 +2,76 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-
-use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable implements FilamentUser, HasTenants
+class User extends Authenticatable implements HasTenants
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'nohp',
-        'is_verified',
-        'role',
+        'status',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function operatorSekolah()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_verified' => 'boolean',
-        ];
+        return $this->hasOne(OperatorSekolah::class);
     }
 
-    public function sekolah(): HasOne
+    public function sekolah()
     {
-        return $this->hasOne(Sekolah::class, 'user_id');
+        return $this->hasOneThrough(
+            Sekolah::class,
+            OperatorSekolah::class,
+            'user_id',
+            'id',
+            'id',
+            'sekolah_id'
+        );
     }
 
-    public function canAccessPanel(Panel $panel): bool
+    public function isOperator()
     {
-        if ($panel->getId() === 'dinas') {
-            // Allow both admin and operator to access the 'dinas' panel gateway
-            // (Operator will be redirected by middleware if they try to access internal pages)
-            return in_array($this->role, ['admin', 'operator']);
+        return $this->hasRole('operator');
+    }
+
+    public function isAdminDinas()
+    {
+        return $this->hasRole('admin_dinas');
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->hasRole('super_admin');
+    }
+
+    public function getTenants(Panel $panel): array|Collection
+    {
+        if ($this->hasRole(['super_admin', 'admin_dinas'])) {
+            return Sekolah::all();
         }
 
-        // For school panels, check if the user is an operator and is verified
-        if ($this->role === 'operator' && $this->is_verified) {
-            // Also ensure their school jenjang matches the panel ID
-            return $this->sekolah?->jenjang === $panel->getId();
-        }
-
-        return false;
-    }
-
-    public function getTenants(Panel $panel): Collection
-    {
-        return collect([$this->sekolah])->filter();
+        return $this->sekolah ? collect([$this->sekolah]) : collect();
     }
 
     public function canAccessTenant(Model $tenant): bool
     {
+        if ($this->hasRole(['super_admin', 'admin_dinas'])) {
+            return true;
+        }
+
         return $this->sekolah?->id === $tenant->id;
     }
 }

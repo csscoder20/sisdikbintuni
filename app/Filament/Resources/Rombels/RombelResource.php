@@ -21,12 +21,14 @@ class RombelResource extends Resource
 {
     protected static ?string $model = Rombel::class;
 
-    protected static ?string $modelLabel = 'ROMBEL';
+    protected static ?string $modelLabel = 'Rombel';
 
-    protected static ?string $pluralModelLabel = 'ROMBEL';
+    protected static ?string $pluralModelLabel = 'Rombel';
 
     protected static ?int $navigationSort = 6;
-    protected static string | \UnitEnum | null $navigationGroup = 'LAPORAN BULANAN';
+    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+
+    protected static bool $isScopedToTenant = true;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
@@ -34,19 +36,10 @@ class RombelResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
 
-        if (auth()->check() && auth()->user()->role === 'operator') {
-            return $query->where('id_sekolah', auth()->user()->sekolah_id);
-        }
-
-        return $query;
-    }
 
     public static function form(Schema $schema): Schema
     {

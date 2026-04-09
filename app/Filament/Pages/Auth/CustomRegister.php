@@ -31,10 +31,10 @@ class CustomRegister extends BaseRegister
                     ->options(Sekolah::query()
                         ->whereNull('user_id')
                         ->where(function ($query) {
-                            $query->where('nama_sekolah', 'ilike', '%sma%')
-                                ->orWhere('nama_sekolah', 'ilike', '%smk%');
+                            $query->where('nama', 'ilike', '%sma%')
+                                ->orWhere('nama', 'ilike', '%smk%');
                         })
-                        ->pluck('nama_sekolah', 'id'))
+                        ->pluck('nama', 'id'))
                     ->required()
                     ->searchable(),
                 $this->getPasswordFormComponent(),
@@ -60,9 +60,9 @@ class CustomRegister extends BaseRegister
         $user = $this->handleRegistration($data);
 
         // Set role and verification status
+        $user->assignRole('operator');
         $user->update([
-            'role' => 'operator',
-            'is_verified' => false,
+            'status' => 'pending',
         ]);
 
         // Link user to school

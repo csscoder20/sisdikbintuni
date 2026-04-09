@@ -3,16 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Sekolah extends Model
 {
-    use HasFactory;
-
-    protected $table = 'tbl_sekolah';
+    protected $table = 'sekolah';
 
     protected $fillable = [
-        'nama_sekolah',
+        'nama',
         'npsn',
         'nss',
         'npwp',
@@ -23,36 +20,48 @@ class Sekolah extends Model
         'provinsi',
         'tahun_berdiri',
         'nomor_sk_pendirian',
-        'tgl_sk_pendirian',
-        'status_sekolah',
-        'nama_penyelenggara_yayasan',
-        'alamat_penyelenggara_yayasan',
-        'sk_pendirian_yayasan',
-        'gedung_sekolah',
-        'akreditasi_sekolah',
-        'status_tanah_sekolah',
-        'luas_tanah_sekolah',
-        'email_sekolah',
-        'user_id'
+        'tanggal_sk_pendirian',
+        'nama_yayasan',
+        'alamat_yayasan',
+        'nomor_sk_yayasan',
+        'tanggal_sk_yayasan',
+        'akreditasi',
+        'status_tanah',
+        'luas_tanah',
+        'email',
     ];
+
+    public function laporan()
+    {
+        return $this->hasMany(Laporan::class);
+    }
 
     public function rombel()
     {
-        return $this->hasMany(Rombel::class, 'id_sekolah');
+        return $this->hasMany(Rombel::class);
     }
 
-    public function user()
+    public function gtk()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(Gtk::class);
     }
 
-    public function getJenjangAttribute(): string
+    public function siswa()
     {
-        $name = strtolower($this->nama_sekolah);
+        return $this->hasMany(Siswa::class);
+    }
 
-        if (str_contains($name, 'sma')) return 'sma';
-        if (str_contains($name, 'smk')) return 'smk';
+    public function operator()
+    {
+        return $this->hasMany(OperatorSekolah::class);
+    }
 
-        return 'lainnya';
+    public function getJenjangAttribute()
+    {
+        $nama = strtoupper($this->nama);
+        if (str_contains($nama, 'SMK')) {
+            return 'smk';
+        }
+        return 'sma'; // Default to sma
     }
 }

@@ -3,38 +3,36 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Siswa extends Model
 {
-    use HasFactory;
-
-    protected $table = 'tbl_siswa';
-
+    protected $table = 'siswa';
     protected $fillable = [
-        'nik',
+        'nama',
         'nisn',
-        'no_bpjs',
-        'nama_siswa',
+        'nik',
         'tempat_lahir',
-        'tgl_lahir',
-        'jenkel',
+        'tanggal_lahir',
+        'jenis_kelamin',
         'agama',
-        'kategori_papua',
-        'disabilitas',
-        'penerima_beasiswa',
-        'id_rombel',
-        'nama_ayah',
-        'nama_ibu',
-        'nama_wali'
+        'alamat',
+        'desa',
+        'kecamatan',
+        'kabupaten',
+        'provinsi',
+        'tahun_masuk',
+        'tahun_keluar',
+        'status_siswa',
+        'sekolah_id',
     ];
 
-    protected $casts = [
-        'tgl_lahir' => 'date'
-    ];
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
 
     public function rombel()
     {
-        return $this->belongsTo(Rombel::class, 'id_rombel');
+        return $this->belongsToMany(Rombel::class, 'siswa_rombel');
     }
 }

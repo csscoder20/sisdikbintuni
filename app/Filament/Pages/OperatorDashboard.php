@@ -5,16 +5,22 @@ namespace App\Filament\Pages;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Panel;
 use Illuminate\Contracts\Support\Htmlable;
+use App\Models\LaporanGedung;
+use App\Models\Gtk;
+use App\Models\Siswa;
+use App\Models\Rombel;
+use App\Models\Sekolah;
+use Filament\Facades\Filament;
 
 class OperatorDashboard extends BaseDashboard
 {
-    protected static ?string $navigationLabel = 'DASHBOARD';
+    protected static ?string $navigationLabel = 'Dashboard';
     protected static ?int $navigationSort = 1;
     protected string $view = 'filament.pages.laporan-bulanan';
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
     public array $checklist = [
@@ -52,18 +58,18 @@ class OperatorDashboard extends BaseDashboard
 
         $this->checklistStatus['identitas_sekolah'] =
             auth()->user()->sekolah?->alamat != null &&
-            auth()->user()->sekolah?->nama_sekolah != null;
+            auth()->user()->sekolah?->nama != null;
 
         $this->checklistStatus['nominatif_gtk'] =
-            \App\Models\Gtk::where('id_sekolah', $schoolId)->count() > 0;
+            Gtk::where('sekolah_id', $schoolId)->count() > 0;
 
         $this->checklistStatus['nominatif_siswa'] =
-            \App\Models\Siswa::whereHas('rombel', function ($q) use ($schoolId) {
-                $q->where('id_sekolah', $schoolId);
-            })->count() > 0;
+            Siswa::where('sekolah_id', $schoolId)->count() > 0;
 
         $this->checklistStatus['kondisi_sarpras'] =
-            \App\Models\Sarpras::where('id_sekolah', $schoolId)->count() > 0;
+            LaporanGedung::whereHas('laporan', function ($q) use ($schoolId) {
+                $q->where('sekolah_id', $schoolId);
+            })->count() > 0;
 
         $this->checklistStatus['kondisi_gtk'] =
             $this->checklistStatus['nominatif_gtk'];
@@ -78,9 +84,7 @@ class OperatorDashboard extends BaseDashboard
             $this->checklistStatus['nominatif_gtk'];
 
         $this->checklistStatus['kelulusan'] =
-            \App\Models\Siswa::whereHas('rombel', function ($q) use ($schoolId) {
-                $q->where('id_sekolah', $schoolId);
-            })->count() > 0;
+            $this->checklistStatus['nominatif_siswa'];
     }
 
     public static function getNavigationIcon(): ?string
@@ -93,14 +97,9 @@ class OperatorDashboard extends BaseDashboard
         return 'Dashboard';
     }
 
-    public static function getRoutePath(Panel $panel): string
-    {
-        return 'operator';
-    }
-
     public function getHeading(): string | Htmlable
     {
-        return 'Dashboard ' . (auth()->user()->sekolah?->nama_sekolah ?? 'Sekolah');
+        return 'Dashboard ' . (auth()->user()->sekolah?->nama ?? 'Sekolah');
     }
 
     // Method untuk mendapatkan data preview sesuai tipe checklist
@@ -124,65 +123,35 @@ class OperatorDashboard extends BaseDashboard
 
     private function getIdentitasSekolahData($schoolId)
     {
-        $sekolah = \App\Models\Sekolah::find($schoolId);
+        $sekolah = Sekolah::find($schoolId);
         if (!$sekolah) return [];
 
         return [
-            [
-                'label' => 'Nama Sekolah',
-                'value' => $sekolah->nama_sekolah
-            ],
-            [
-                'label' => 'NPSN',
-                'value' => $sekolah->npsn ?? '-'
-            ],
-            [
-                'label' => 'NSS',
-                'value' => $sekolah->nss ?? '-'
-            ],
-            [
-                'label' => 'Alamat',
-                'value' => $sekolah->alamat ?? '-'
-            ],
-            [
-                'label' => 'Desa',
-                'value' => $sekolah->desa ?? '-'
-            ],
-            [
-                'label' => 'Kecamatan',
-                'value' => $sekolah->kecamatan ?? '-'
-            ],
-            [
-                'label' => 'Kabupaten/Kota',
-                'value' => $sekolah->kabupaten ?? '-'
-            ],
-            [
-                'label' => 'Provinsi',
-                'value' => $sekolah->provinsi ?? '-'
-            ],
-            [
-                'label' => 'Email',
-                'value' => $sekolah->email_sekolah ?? '-'
-            ]
+            ['label' => 'Nama Sekolah', 'value' => $sekolah->nama],
+            ['label' => 'NPSN', 'value' => $sekolah->npsn ?? '-'],
+            ['label' => 'Alamat', 'value' => $sekolah->alamat ?? '-'],
+            ['label' => 'Desa', 'value' => $sekolah->desa ?? '-'],
+            ['label' => 'Kecamatan', 'value' => $sekolah->kecamatan ?? '-'],
+            ['label' => 'Kabupaten', 'value' => $sekolah->kabupaten ?? '-'],
+            ['label' => 'Provinsi', 'value' => $sekolah->provinsi ?? '-'],
+            ['label' => 'Email', 'value' => $sekolah->email ?? '-']
         ];
     }
 
     private function getNominatifGtkData($schoolId)
     {
-        $gtkList = \App\Models\Gtk::where('id_sekolah', $schoolId)
-            ->limit(100)
-            ->get();
+        $gtkList = Gtk::where('sekolah_id', $schoolId)->limit(100)->get();
 
         return $gtkList->map(function ($gtk) {
             return [
-                'label' => $gtk->nama_gtk ?? 'N/A',
+                'label' => $gtk->nama ?? 'N/A',
                 'details' => [
                     'NIP' => $gtk->nip ?? '-',
-                    'NUPTK' => $gtk->nuptk ?? '-',
-                    'Tempat/Tgl Lahir' => ($gtk->tempat_lahir ?? '-') . ' / ' . ($gtk->tgl_lahir?->format('d-m-Y') ?? '-'),
-                    'Jenis GTK' => $gtk->jenis_gtk ?? '-',
-                    'Pendidikan' => $gtk->pendidikan_terakhir ?? '-',
-                    'Status' => $gtk->status_kepegawaian ?? '-'
+                    'NIK' => $gtk->nik ?? '-',
+                    'Tempat/Tgl Lahir' => ($gtk->tempat_lahir ?? '-') . ' / ' . ($gtk->tanggal_lahir ? date('d-m-Y', strtotime($gtk->tanggal_lahir)) : '-'),
+                    'Jenis Kelamin' => $gtk->jenis_kelamin ?? '-',
+                    'Agama' => $gtk->agama ?? '-',
+                    'Status' => $gtk->status_gtk ?? '-'
                 ]
             ];
         })->toArray();
@@ -190,20 +159,18 @@ class OperatorDashboard extends BaseDashboard
 
     private function getNominatifSiswaData($schoolId)
     {
-        $siswaList = \App\Models\Siswa::whereHas('rombel', function ($q) use ($schoolId) {
-            $q->where('id_sekolah', $schoolId);
-        })->limit(100)->get();
+        $siswaList = Siswa::where('sekolah_id', $schoolId)->limit(100)->get();
 
         return $siswaList->map(function ($siswa) {
             return [
-                'label' => $siswa->nama_siswa ?? 'N/A',
+                'label' => $siswa->nama ?? 'N/A',
                 'details' => [
                     'NISN' => $siswa->nisn ?? '-',
                     'NIK' => $siswa->nik ?? '-',
-                    'Tempat/Tgl Lahir' => ($siswa->tempat_lahir ?? '-') . ' / ' . ($siswa->tgl_lahir?->format('d-m-Y') ?? '-'),
-                    'Jenis Kelamin' => $siswa->jenkel ?? '-',
+                    'Tempat/Tgl Lahir' => ($siswa->tempat_lahir ?? '-') . ' / ' . ($siswa->tanggal_lahir ? date('d-m-Y', strtotime($siswa->tanggal_lahir)) : '-'),
+                    'Jenis Kelamin' => $siswa->jenis_kelamin ?? '-',
                     'Agama' => $siswa->agama ?? '-',
-                    'Rombel' => $siswa->rombel?->nama_rombel ?? '-'
+                    'Rombel' => $siswa->rombel->pluck('nama')->implode(', ') ?: '-'
                 ]
             ];
         })->toArray();
@@ -211,17 +178,18 @@ class OperatorDashboard extends BaseDashboard
 
     private function getKondisiSarprasData($schoolId)
     {
-        $sarpasList = \App\Models\Sarpras::where('id_sekolah', $schoolId)->get();
+        $sarpasList = LaporanGedung::whereHas('laporan', function($q) use ($schoolId) {
+            $q->where('sekolah_id', $schoolId);
+        })->get();
 
         return $sarpasList->map(function ($sarpras) {
             return [
-                'label' => $sarpras->nama_gedung_ruang ?? 'N/A',
+                'label' => $sarpras->nama_ruang ?? 'N/A',
                 'details' => [
-                    'Jumlah' => $sarpras->jumlah ?? 0,
-                    'Kondisi Baik' => $sarpras->baik ?? 0,
-                    'Rusak' => $sarpras->rusak ?? 0,
+                    'Jumlah' => $sarpras->jumlah_total ?? 0,
+                    'Kondisi Baik' => $sarpras->jumlah_baik ?? 0,
+                    'Rusak' => $sarpras->jumlah_rusak ?? 0,
                     'Kepemilikan' => $sarpras->status_kepemilikan ?? '-',
-                    'Keterangan' => $sarpras->keterangan ?? '-'
                 ]
             ];
         })->toArray();
@@ -229,55 +197,24 @@ class OperatorDashboard extends BaseDashboard
 
     private function getKondisiGtkData($schoolId)
     {
-        $gtkList = \App\Models\Gtk::where('id_sekolah', $schoolId)
-            ->limit(50)
-            ->get();
-
-        return $gtkList->map(function ($gtk) {
-            return [
-                'label' => $gtk->nama_gtk ?? 'N/A',
-                'details' => [
-                    'Status Kepegawaian' => $gtk->status_kepegawaian ?? '-',
-                    'Golongan' => $gtk->golongan_pegawai ?? '-',
-                    'TMT Pegawai' => $gtk->tmt_pegawai?->format('d-m-Y') ?? '-',
-                    'Pendidikan' => $gtk->pendidikan_terakhir ?? '-'
-                ]
-            ];
-        })->toArray();
+        return $this->getNominatifGtkData($schoolId);
     }
 
     private function getKondisiSiswaData($schoolId)
     {
-        $siswaList = \App\Models\Siswa::whereHas('rombel', function ($q) use ($schoolId) {
-            $q->where('id_sekolah', $schoolId);
-        })->limit(50)->get();
-
-        return $siswaList->map(function ($siswa) {
-            $disabilitas = $siswa->disabilitas ? json_decode($siswa->disabilitas, true) : [];
-            return [
-                'label' => $siswa->nama_siswa ?? 'N/A',
-                'details' => [
-                    'Agama' => $siswa->agama ?? '-',
-                    'Disabilitas' => is_array($disabilitas) && !empty($disabilitas) ? implode(', ', $disabilitas) : '-',
-                    'Beasiswa' => $siswa->penerima_beasiswa ?? '-',
-                    'Rombel' => $siswa->rombel?->nama_rombel ?? '-'
-                ]
-            ];
-        })->toArray();
+        return $this->getNominatifSiswaData($schoolId);
     }
 
     private function getSebaranJamData($schoolId)
     {
-        $gtkList = \App\Models\Gtk::where('id_sekolah', $schoolId)->limit(50)->get();
+        $gtkList = Gtk::where('sekolah_id', $schoolId)->limit(50)->get();
 
-        return $gtkList->map(function ($gtk, $index) {
+        return $gtkList->map(function ($gtk) {
             return [
-                'label' => $gtk->nama_gtk ?? 'N/A',
+                'label' => $gtk->nama ?? 'N/A',
                 'details' => [
-                    'Mapel 1' => 'Matematika - 12 jam',
-                    'Mapel 2' => 'Bahasa Indonesia - 8 jam',
-                    'Mapel 3' => 'IPA - 6 jam',
-                    'Total' => '26 jam/minggu'
+                    'Tugas' => 'Mengajar',
+                    'Keterangan' => 'Data sebaran jam menyusul'
                 ]
             ];
         })->toArray();
@@ -285,36 +222,20 @@ class OperatorDashboard extends BaseDashboard
 
     private function getRekapKehadiranData($schoolId)
     {
-        $gtkList = \App\Models\Gtk::where('id_sekolah', $schoolId)->limit(50)->get();
-
-        return $gtkList->map(function ($gtk) {
-            return [
-                'label' => $gtk->nama_gtk ?? 'N/A',
-                'details' => [
-                    'Hadir' => '20 hari',
-                    'Sakit' => '1 hari',
-                    'Izin' => '0 hari',
-                    'Tanpa Keterangan' => '0 hari',
-                    'Persentase' => '95%'
-                ]
-            ];
-        })->toArray();
+        return $this->getNominatifGtkData($schoolId);
     }
 
     private function getKelulusanData($schoolId)
     {
-        $rombels = \App\Models\Rombel::where('id_sekolah', $schoolId)->get();
+        $rombels = Rombel::where('sekolah_id', $schoolId)->get();
 
         return $rombels->map(function ($rombel) {
-            $jumlahSiswa = $rombel->siswa()->count();
             return [
-                'label' => $rombel->nama_rombel ?? 'N/A',
+                'label' => $rombel->nama ?? 'N/A',
                 'details' => [
                     'Tahun' => date('Y'),
-                    'Jumlah Siswa' => $jumlahSiswa,
-                    'Lulus' => $jumlahSiswa,
-                    'Tidak Lulus' => 0,
-                    'Persentase' => '100%'
+                    'Tingkat' => $rombel->tingkat ?? '-',
+                    'Status' => 'Data kelulusan diproses'
                 ]
             ];
         })->toArray();

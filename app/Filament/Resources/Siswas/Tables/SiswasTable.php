@@ -15,43 +15,57 @@ class SiswasTable
     {
         return $table
             ->columns([
-                TextColumn::make('nik')
+                TextColumn::make('nama')
+                ->label('Nama Siswa')
                     ->searchable(),
                 TextColumn::make('nisn')
+                ->label('NISN')
                     ->searchable(),
-                TextColumn::make('no_bpjs')
+                TextColumn::make('nik')
+                ->label('NIK')
                     ->searchable(),
-                TextColumn::make('nama_siswa')
+                TextColumn::make('jenis_kelamin')
+                ->label('Jenis Kelamin')
                     ->searchable(),
+                TextColumn::make('rombel.nama')
+                    ->label('Rombel')
+                    ->sortable()
+                    ->badge(),
+                TextColumn::make('status_siswa')
+                ->label('Status Siswa')
+                    ->searchable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Aktif' => 'success',
+                        'Lulus' => 'info',
+                        'Pindah' => 'warning',
+                        'Drop Out' => 'danger',
+                        default => 'gray',
+                    }),
+                TextColumn::make('tahun_masuk')
+                ->label('Tahun Masuk')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tempat_lahir')
-                    ->searchable(),
-                TextColumn::make('tgl_lahir')
+                ->label('Tempat Lahir')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tanggal_lahir')
+                ->label('Tanggal Lahir')
                     ->date()
-                    ->sortable(),
-                TextColumn::make('jenkel')
-                    ->searchable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('agama')
-                    ->searchable(),
-                TextColumn::make('kategori_papua')
-                    ->searchable(),
-                TextColumn::make('disabilitas')
-                    ->searchable(),
-                TextColumn::make('penerima_beasiswa')
-                    ->searchable(),
-                TextColumn::make('id_rombel')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('nama_ayah')
-                    ->searchable(),
-                TextColumn::make('nama_ibu')
-                    ->searchable(),
-                TextColumn::make('nama_wali')
-                    ->searchable(),
+                ->label('Agama')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
+                ->label('Dibuat Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                ->label('Diperbarui Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

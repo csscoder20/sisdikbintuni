@@ -16,14 +16,14 @@ class GtkInfolist
                     ->placeholder('-'),
                 TextEntry::make('nuptk')
                     ->placeholder('-'),
-                TextEntry::make('nama_gtk'),
+                TextEntry::make('nama'),
                 TextEntry::make('tempat_lahir')
                     ->placeholder('-'),
-                TextEntry::make('tgl_lahir')
+                TextEntry::make('tanggal_lahir')
                     ->date()
                     ->placeholder('-'),
                 TextEntry::make('jenis_gtk'),
-                TextEntry::make('jenkel'),
+                TextEntry::make('jenis_kelamin'),
                 TextEntry::make('agama')
                     ->placeholder('-'),
                 TextEntry::make('kategori_papua')

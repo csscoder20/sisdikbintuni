@@ -13,19 +13,27 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin User
-        User::factory()->create([
-            'name' => 'Administrator',
-            'email' => 'admin@sisdik.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'is_verified' => true,
-        ]);
-
-        // Dummy Data for Schools, Operators, students, etc.
+       
         $this->call([
-            DummyDataSeeder::class,
+            RoleSeeder::class,
+            UserSeeder::class,
             SekolahSeeder::class,
+            OperatorSekolahSeeder::class,
+            RombelSeeder::class,
+            GtkSeeder::class,
+            GtkPendidikanSeeder::class,
+            GtkKeuanganSeeder::class,
+            SiswaSeeder::class,
+            LaporanSeeder::class,
+            LaporanGedungSeeder::class,
+            LaporanSiswaSeeder::class,
+            LaporanSiswaRekapSeeder::class,
+            LaporanSiswaKategoriSeeder::class,
+            LaporanGtkSeeder::class,
+            LaporanGtkKategoriSeeder::class,
+            MengajarSeeder::class,
+            KehadiranGtkSeeder::class,
+            KelulusanSeeder::class,
         ]);
     }
 }

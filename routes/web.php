@@ -9,12 +9,13 @@ Route::get('/', function () {
 Route::get('/admin', function () {
     if (auth()->check()) {
         $user = auth()->user();
-        if ($user->role === 'admin') {
-            return redirect()->to('/admin/dinas');
+        if ($user->hasRole('operator')) {
+            $sekolah = $user->sekolah;
+            if ($sekolah) {
+                return redirect()->to("/admin/{$sekolah->jenjang}/{$sekolah->id}");
+            }
         }
-        if ($user->role === 'operator' && $user->sekolah) {
-            return redirect()->to("/admin/{$user->sekolah->jenjang}/{$user->sekolah->id}/operator");
-        }
+        return redirect()->to('/admin/dinas');
     }
     return redirect()->to('/admin/login');
 });

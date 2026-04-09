@@ -3,61 +3,42 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Sekolah;
 
 class SekolahSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        $csvFile = database_path('seeders/data/data_sekolah.csv');
+        $data = [
+            ['nama' => 'SMA NEGERI KAITARO', 'npsn' => '69879192'],
+            ['nama' => 'SMKN 1 BINTUNI', 'npsn' => '60403490'],
+            ['nama' => 'SMAN MERDEY', 'npsn' => '60403660'],
+            ['nama' => 'SMAS YPK BINTUNI', 'npsn' => '60401962'],
+            ['nama' => 'SMAN 1 BINTUNI', 'npsn' => '60401961'],
+            ['nama' => 'SMA NEGERI MAYERGA', 'npsn' => '69879197'],
+            ['nama' => 'SMA Negeri Tembuni', 'npsn' => '69935461'],
+            ['nama' => 'SMAN PERSIAPAN BABO', 'npsn' => '60403488'],
+            ['nama' => 'SMAS YPPK ST ARNOLDUS YANSEN', 'npsn' => '60403663'],
+            ['nama' => 'SMAS SANEWESYEN BINTUNI', 'npsn' => '60401960'],
+            ['nama' => 'SMA NEGERI KAMUNDAN', 'npsn' => '69879194'],
+            ['nama' => 'SMAN Saengga', 'npsn' => '69879191'],
+            ['nama' => 'SMAS MUHAMMADIYAH BINTUNI', 'npsn' => '60401959'],
+            ['nama' => 'SMAN TOFOI', 'npsn' => '60403662'],
+            ['nama' => 'SMA NEGERI 2 BINTUNI', 'npsn' => '70049979'],
+            ['nama' => 'SMAN MEYADO', 'npsn' => '60403661'],
+            ['nama' => 'SMA NEGERI ARANDAY', 'npsn' => '60403489'],
+            ['nama' => 'SMA HARMONI SCHOOL TERPADU BINTUNI', 'npsn' => '70025727'],
+            ['nama' => 'SMA NEGERI KURI', 'npsn' => '70050919'],
+        ];
 
-        if (!file_exists($csvFile)) {
-            $this->command->error("CSV file not found: $csvFile");
-            return;
-        }
-
-        $file = fopen($csvFile, 'r');
-
-        // Lewati header
-        fgetcsv($file, 0, ';');
-
-        while (($row = fgetcsv($file, 0, ';')) !== false) {
-
-            // convert semua kolom ke UTF8
-            $row = array_map(function ($value) {
-                return $value ? mb_convert_encoding($value, 'UTF-8', 'auto') : null;
-            }, $row);
-
-            $row = array_pad($row, 21, null);
-
-            DB::table('tbl_sekolah')->insert([
-                'nama_sekolah' => trim($row[0]),
-                'npsn' => trim($row[1]) ?: null,
-                'nss' => trim($row[2]) ?: null,
-                'npwp' => trim($row[3]) ?: null,
-                'alamat' => trim($row[4]) ?: null,
-                'desa' => trim($row[5]) ?: null,
-                'kecamatan' => trim($row[6]) ?: null,
-                'kabupaten' => trim($row[7]) ?: null,
-                'provinsi' => trim($row[8]) ?: null,
-                'tahun_berdiri' => trim($row[9]) ?: null,
-                'nomor_sk_pendirian' => trim($row[10]) ?: null,
-                'tgl_sk_pendirian' => !empty($row[11]) ? Carbon::parse($row[11]) : null,
-                'status_sekolah' => trim($row[12]) ?: null,
-                'nama_penyelenggara_yayasan' => trim($row[13]) ?: null,
-                'alamat_penyelenggara_yayasan' => trim($row[14]) ?: null,
-                'sk_pendirian_yayasan' => trim($row[15]) ?: null,
-                'gedung_sekolah' => trim($row[16]) ?: null,
-                'akreditasi_sekolah' => trim($row[17]) ?: null,
-                'status_tanah_sekolah' => trim($row[18]) ?: null,
-                'luas_tanah_sekolah' => trim($row[19]) ?: null,
-                'email_sekolah' => trim($row[20]) ?: null,
-                'created_at' => now(),
-                'updated_at' => now(),
+        foreach ($data as $item) {
+            Sekolah::create([
+                'nama' => $item['nama'],
+                'npsn' => $item['npsn'],
+                'kabupaten' => 'Teluk Bintuni',
+                'provinsi' => 'Papua Barat',
+                'status_tanah' => 'shm', // default aman
             ]);
         }
-
-        fclose($file);
     }
 }

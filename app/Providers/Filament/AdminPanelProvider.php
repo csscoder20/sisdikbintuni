@@ -36,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('dinas')
             ->path('admin')
+            ->darkMode(false)
             ->brandName('ADMIN')
             ->simpleProfilePage(true)
             ->profile()

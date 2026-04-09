@@ -33,7 +33,11 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class DinasDashboard extends BaseDashboard
 {
-    protected static bool $shouldRegisterNavigation = false;
+    public static function canAccess(): bool
+    {
+        return auth()->check() && !auth()->user()->hasRole('operator');
+    }
+
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-home';

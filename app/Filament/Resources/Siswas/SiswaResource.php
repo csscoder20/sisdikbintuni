@@ -16,40 +16,31 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum; // Add this import
 
 class SiswaResource extends Resource
 {
     protected static ?string $model = Siswa::class;
 
-    protected static ?string $modelLabel = 'NOMINATIF SISWA';
+    protected static ?string $modelLabel = 'Nominatif Siswa';
 
-    protected static ?string $pluralModelLabel = 'NOMINATIF SISWA';
+    protected static ?string $pluralModelLabel = 'Nominatif Siswa';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'MASTER DATA';
+    // FIXED: Use the same type as parent class
+    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-    protected static ?string $recordTitleAttribute = 'NOMINATIF SISWA';
+    protected static ?string $recordTitleAttribute = 'nama';
 
-    protected static bool $isScopedToTenant = false;
+    protected static bool $isScopedToTenant = true;
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
 
-        if (auth()->check() && auth()->user()->role === 'operator') {
-            return $query->whereHas('rombel', function ($q) {
-                $q->where('id_sekolah', auth()->user()->sekolah_id);
-            });
-        }
-
-        return $query;
-    }
 
     public static function form(Schema $schema): Schema
     {

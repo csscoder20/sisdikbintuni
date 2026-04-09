@@ -27,21 +27,24 @@ class UsersTable
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
-                TextColumn::make('role')
+                TextColumn::make('roles.name')
+                    ->label('Role')
                     ->badge()
                     ->colors([
                         'primary' => 'operator',
-                        'success' => 'admin',
+                        'success' => 'admin_dinas',
+                        'warning' => 'super_admin',
                     ]),
-                TextColumn::make('sekolah.nama_sekolah')
+                TextColumn::make('sekolah.nama')
                     ->label('Sekolah')
                     ->searchable(),
-                TextColumn::make('nohp')
-                    ->label('No HP')
-                    ->searchable(),
-                IconColumn::make('is_verified')
-                    ->label('Verified')
-                    ->boolean(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->colors([
+                        'success' => 'active',
+                        'warning' => 'pending',
+                        'danger' => 'inactive',
+                    ]),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable()
@@ -64,18 +67,22 @@ class UsersTable
                         ->label('Verifikasi')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->hidden(fn ($record) => $record->is_verified || $record->role === 'admin')
+                        ->hidden(fn ($record) => $record->status === 'active' || $record->hasRole(['admin_dinas', 'super_admin']))
                         ->requiresConfirmation()
                         ->modalHeading('Verifikasi Operator')
                         ->modalDescription('Dengan mengaktifkan user ini, yang bersangkutan akan mendapatkan notifikasi via email untuk dapat login ke system. Lanjutkan?')
                         ->action(function ($record) {
-                            $record->update(['is_verified' => true]);
+                            $record->update(['status' => 'active']);
 
-                            Mail::to($record->email)->send(new OperatorVerified($record));
+                            try {
+                                Mail::to($record->email)->send(new OperatorVerified($record));
+                            } catch (\Exception $e) {
+                                // Silent fail if mail not configured, or handle as needed
+                            }
 
                             Notification::make()
                                 ->title('User Berhasil Diverifikasi')
-                                ->body('Notifikasi email telah dikirim ke ' . $record->email)
+                                ->body('Status user telah diubah menjadi Aktif.')
                                 ->success()
                                 ->send();
                         }),

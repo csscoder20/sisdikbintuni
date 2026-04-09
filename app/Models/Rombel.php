@@ -3,26 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Rombel extends Model
 {
-    use HasFactory;
-
-    protected $table = 'tbl_rombel';
+    protected $table = 'rombel';
 
     protected $fillable = [
-        'nama_rombel',
-        'id_sekolah'
+        'sekolah_id',
+        'nama',
+        'tingkat',
     ];
 
+    // Relasi
     public function sekolah()
     {
-        return $this->belongsTo(Sekolah::class, 'id_sekolah');
+        return $this->belongsTo(Sekolah::class);
     }
 
     public function siswa()
     {
-        return $this->hasMany(Siswa::class, 'id_rombel');
+        return $this->belongsToMany(Siswa::class, 'siswa_rombel');
     }
 }

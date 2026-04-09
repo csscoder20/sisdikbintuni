@@ -15,48 +15,54 @@ class GtksTable
     {
         return $table
             ->columns([
+                TextColumn::make('nama')
+                ->label ('Nama GTK')
+                    ->searchable(),
                 TextColumn::make('nik')
+                ->label('NIK')
                     ->searchable(),
                 TextColumn::make('nip')
+                ->label('NIP')
                     ->searchable(),
+                TextColumn::make('nokarpeg')
+                ->label('No Karpeg')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nuptk')
+                ->label('NUPTK')
                     ->searchable(),
-                TextColumn::make('nama_gtk')
-                    ->searchable(),
-                TextColumn::make('tempat_lahir')
-                    ->searchable(),
-                TextColumn::make('tgl_lahir')
-                    ->date()
-                    ->sortable(),
                 TextColumn::make('jenis_gtk')
+                ->label('Jenis GTK')
                     ->searchable(),
-                TextColumn::make('jenkel')
-                    ->searchable(),
-                TextColumn::make('agama')
-                    ->searchable(),
-                TextColumn::make('kategori_papua')
-                    ->searchable(),
-                TextColumn::make('pendidikan_terakhir')
+                TextColumn::make('jenis_kelamin')
+                ->label('Jenis Kelamin')
                     ->searchable(),
                 TextColumn::make('status_kepegawaian')
+                ->label('Status Kepegawaian')
                     ->searchable(),
-                TextColumn::make('golongan_pegawai')
+                TextColumn::make('pangkat_gol_terakhir')
+                ->label('Pangkat Gol Terakhir')
                     ->searchable(),
-                TextColumn::make('tmt_pegawai')
+                TextColumn::make('tmt_pns')
+                ->label('TMT PNS')
                     ->date()
-                    ->sortable(),
-                TextColumn::make('tgl_penempatan_sk_terakhir')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('npwp')
-                    ->searchable(),
-                TextColumn::make('no_rekening')
-                    ->searchable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('pendidikan_terakhir')
+                ->label('Pendidikan Terakhir')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('daerah_asal')
+                ->label('Daerah Asal')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
+                ->label('Dibuat Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                ->label('Diperbarui Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

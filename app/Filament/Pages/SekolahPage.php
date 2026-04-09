@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Sekolah;
+use App\Models\WilayahKabBintuni;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -26,12 +27,12 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 class SekolahPage extends Page implements HasSchemas
 {
 
-        use InteractsWithSchemas;
+    use InteractsWithSchemas;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static ?string $navigationLabel = 'SEKOLAH';
+    protected static ?string $navigationLabel = 'Profil Sekolah';
 
-    protected static ?string $title = 'SEKOLAH';
+    protected static ?string $title = 'PROFIL SEKOLAH';
 
     protected static ?int $navigationSort = 1;
 
@@ -43,9 +44,9 @@ class SekolahPage extends Page implements HasSchemas
     public ?array $data = [];
 
     // Hanya tampil di panel operator (bukan panel dinas/admin)
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
     public function mount(): void
@@ -72,7 +73,7 @@ class SekolahPage extends Page implements HasSchemas
     public function getTitle(): string|Htmlable
     {
         $sekolah = $this->getSekolah();
-        return $sekolah?->nama_sekolah ?? 'Data Sekolah';
+        return $sekolah?->nama ?? 'Data Sekolah';
     }
 
     /**
@@ -97,11 +98,11 @@ class SekolahPage extends Page implements HasSchemas
                 ->icon('heroicon-o-identification')
                 ->columns(3)
                 ->schema([
-                    TextInput::make('nama_sekolah')
+                    TextInput::make('nama')
                         ->label('Nama Sekolah')
                         ->required()
                         ->maxLength(255),
-                        // ->columnSpanFull(),
+                    // ->columnSpanFull(),
 
                     TextInput::make('npsn')
                         ->label('NPSN')
@@ -115,7 +116,7 @@ class SekolahPage extends Page implements HasSchemas
                         ->label('NPWP')
                         ->maxLength(30),
 
-                    TextInput::make('email_sekolah')
+                    TextInput::make('email')
                         ->label('Email Sekolah')
                         ->email()
                         ->maxLength(255),
@@ -127,7 +128,7 @@ class SekolahPage extends Page implements HasSchemas
                             'Swasta' => 'Swasta',
                         ]),
 
-                    Select::make('akreditasi_sekolah')
+                    Select::make('akreditasi')
                         ->label('Akreditasi')
                         ->options([
                             'A'     => 'A',
@@ -146,7 +147,6 @@ class SekolahPage extends Page implements HasSchemas
                         ->label('Alamat')
                         ->rows(3)
                         ->columnSpanFull(),
-
                     TextInput::make('desa')
                         ->label('Desa / Kelurahan'),
 
@@ -192,7 +192,7 @@ class SekolahPage extends Page implements HasSchemas
                             'Pinjam Pakai'  => 'Pinjam Pakai',
                         ]),
 
-                    Select::make('status_tanah_sekolah')
+                    Select::make('status_tanah')
                         ->label('Status Tanah')
                         ->options([
                             'Milik Sendiri'     => 'Milik Sendiri',
@@ -201,7 +201,7 @@ class SekolahPage extends Page implements HasSchemas
                             'Pinjam Pakai'      => 'Pinjam Pakai',
                         ]),
 
-                    TextInput::make('luas_tanah_sekolah')
+                    TextInput::make('luas_tanah')
                         ->label('Luas Tanah')
                         ->numeric()
                         ->suffix('m²'),
@@ -212,11 +212,11 @@ class SekolahPage extends Page implements HasSchemas
                 ->icon('heroicon-o-briefcase')
                 ->columns(3)
                 ->schema([
-                    TextInput::make('nama_penyelenggara_yayasan')
+                    TextInput::make('nama_yayasan')
                         ->label('Nama Penyelenggara / Yayasan'),
-                    TextInput::make('sk_pendirian_yayasan')
+                    TextInput::make('nomor_sk_yayasan')
                         ->label('SK Pendirian Yayasan'),
-                    Textarea::make('alamat_penyelenggara_yayasan')
+                    Textarea::make('alamat_yayasan')
                         ->label('Alamat Penyelenggara / Yayasan')
                         ->rows(3)
                         ->columnSpanFull(),

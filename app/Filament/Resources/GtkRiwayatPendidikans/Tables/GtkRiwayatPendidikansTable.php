@@ -15,77 +15,23 @@ class GtkRiwayatPendidikansTable
     {
         return $table
             ->columns([
-                TextColumn::make('id_gtk')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('thn_tamat_sd')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('thn_tamat_smp')
-                    ->numeric()
+                TextColumn::make('gtk.nama')
+                    ->label('GTK')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('thn_tamat_sma')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('thn_tamat_d1')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_d1')
-                    ->searchable(),
-                TextColumn::make('thn_tamat_d2')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_d2')
-                    ->searchable(),
-                TextColumn::make('thn_tamat_d3')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_d3')
-                    ->searchable(),
-                TextColumn::make('thn_tamat_s1')
-                    ->numeric()
+                    ->label('Tamat SMA')
                     ->sortable(),
                 TextColumn::make('jurusan_s1')
+                    ->label('Jurusan S1')
                     ->searchable(),
-                TextColumn::make('thn_tamat_s2')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_s2')
-                    ->searchable(),
-                TextColumn::make('thn_tamat_s3')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_s3')
-                    ->searchable(),
-                TextColumn::make('thn_akta_1')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_akta_1')
-                    ->searchable(),
-                TextColumn::make('thn_akta_2')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_akta_2')
-                    ->searchable(),
-                TextColumn::make('thn_akta_3')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_akta_3')
-                    ->searchable(),
-                TextColumn::make('thn_akta_4')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('jurusan_akta_4')
-                    ->searchable(),
-                TextColumn::make('nama_perguruan_tinggi')
+                TextColumn::make('perguruan_tinggi_s1')
+                    ->label('PT S1')
                     ->searchable(),
                 TextColumn::make('gelar_akademik')
+                    ->label('Gelar')
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

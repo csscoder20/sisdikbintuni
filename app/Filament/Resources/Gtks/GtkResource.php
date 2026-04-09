@@ -21,31 +21,24 @@ class GtkResource extends Resource
 {
     protected static ?string $model = Gtk::class;
 
-    protected static ?string $modelLabel = 'NOMINATIF GTK';
+    protected static ?string $modelLabel = 'Nominatif GTK';
 
-    protected static ?string $pluralModelLabel = 'NOMINATIF GTK';
+    protected static ?string $pluralModelLabel = 'Nominatif GTK';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'MASTER DATA';
+    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
+    protected static bool $isScopedToTenant = true;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
     protected static ?string $recordTitleAttribute = 'NOMINATIF GTK';
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
 
-        if (auth()->check() && auth()->user()->role === 'operator') {
-            return $query->where('id_sekolah', auth()->user()->sekolah_id);
-        }
-
-        return $query;
-    }
 
     public static function form(Schema $schema): Schema
     {

@@ -19,14 +19,16 @@ use Filament\Tables\Table;
 
 class GtkJamAjarResource extends Resource
 {
-    protected static ?string $model = GtkJamAjar::class;
+    protected static ?string $model = \App\Models\Mengajar::class;
 
-    protected static ?string $modelLabel = 'SEBARAN JAM AJAR';
+    protected static ?string $modelLabel = 'Sebaran Jam Ajar';
 
-    protected static ?string $pluralModelLabel = 'SEBARAN JAM AJAR';
+    protected static ?string $pluralModelLabel = 'Sebaran Jam Ajar';
     protected static ?int $navigationSort = 4;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'LAPORAN BULANAN';
+    protected static string | \UnitEnum | null $navigationGroup = 'Master Data';
+
+    protected static bool $isScopedToTenant = true;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
@@ -34,19 +36,10 @@ class GtkJamAjarResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->role === 'operator';
+        return auth()->check() && auth()->user()->hasRole('operator');
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
 
-        if (auth()->check() && auth()->user()->role === 'operator') {
-            // No current filter
-        }
-
-        return $query;
-    }
 
     public static function form(Schema $schema): Schema
     {

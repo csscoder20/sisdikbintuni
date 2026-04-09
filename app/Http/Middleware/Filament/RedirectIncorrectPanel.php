@@ -26,7 +26,7 @@ class RedirectIncorrectPanel
         }
 
         // 1. If Operator tries to access Dinas panel (unless they are on the login/register/logout/profile pages)
-        if ($panel->getId() === 'dinas' && $user->role === 'operator') {
+        if ($panel->getId() === 'dinas' && $user->hasRole('operator')) {
             // Check if it's an internal page, not auth pages. 
             // In Filament v3, we can check if it's the dashboard or a resource.
             // Actually, any internal access should be restricted.
@@ -38,15 +38,20 @@ class RedirectIncorrectPanel
                     ->persistent()
                     ->send();
 
-                $jenjang = $user->sekolah?->jenjang ?? 'lainnya';
-                $id = $user->sekolah?->id;
+                $sekolah = $user->sekolah;
+                $jenjang = $sekolah?->jenjang ?? 'sma';
+                $id = $sekolah?->id;
                 
-                return redirect()->to("/admin/{$jenjang}/{$id}/operator");
+                if ($id) {
+                    return redirect()->to("/admin/{$jenjang}/{$id}");
+                }
+                
+                return redirect()->to('/admin/login');
             }
         }
 
         // 2. If Admin tries to access a School panel
-        if ($panel->getId() !== 'dinas' && $user->role === 'admin') {
+        if ($panel->getId() !== 'dinas' && ! $user->hasRole('operator')) {
             Notification::make()
                 ->title('Dialihkan ke Dashboard Admin Dinas')
                 ->info()

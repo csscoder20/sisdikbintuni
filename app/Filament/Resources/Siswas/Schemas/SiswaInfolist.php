@@ -15,13 +15,13 @@ class SiswaInfolist
                 TextEntry::make('nisn'),
                 TextEntry::make('no_bpjs')
                     ->placeholder('-'),
-                TextEntry::make('nama_siswa'),
+                TextEntry::make('nama'),
                 TextEntry::make('tempat_lahir')
                     ->placeholder('-'),
-                TextEntry::make('tgl_lahir')
+                TextEntry::make('tanggal_lahir')
                     ->date()
                     ->placeholder('-'),
-                TextEntry::make('jenkel'),
+                TextEntry::make('jenis_kelamin'),
                 TextEntry::make('agama')
                     ->placeholder('-'),
                 TextEntry::make('kategori_papua')
@@ -30,8 +30,7 @@ class SiswaInfolist
                     ->placeholder('-'),
                 TextEntry::make('penerima_beasiswa')
                     ->placeholder('-'),
-                TextEntry::make('id_rombel')
-                    ->numeric(),
+                TextEntry::make('rombel.nama'),
                 TextEntry::make('nama_ayah')
                     ->placeholder('-'),
                 TextEntry::make('nama_ibu')

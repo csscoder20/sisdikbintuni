@@ -20,27 +20,26 @@ class UserForm
                     ->label('Email address')
                     ->email()
                     ->required(),
-                TextInput::make('nohp')
-                    ->label('No. Handphone')
-                    ->tel()
-                    ->maxLength(255),
-                Select::make('sekolah_id')
+                Select::make('sekolah')
                     ->label('Asal Sekolah')
-                    ->relationship('sekolah', 'nama_sekolah')
+                    ->relationship('sekolah', 'nama')
                     ->searchable()
                     ->preload(),
-                Select::make('role')
+                Select::make('roles')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->preload(),
+                Select::make('status')
                     ->options([
-                        'admin' => 'Admin',
-                        'operator' => 'Operator',
+                        'active' => 'Aktif',
+                        'pending' => 'Pending',
+                        'inactive' => 'Tidak Aktif',
                     ])
                     ->required()
-                    ->default('operator'),
-                Toggle::make('is_verified')
-                    ->label('Verifikasi Operator')
-                    ->default(false),
+                    ->default('pending'),
                 TextInput::make('password')
                     ->password()
+                    ->placeholder('Kosongkan jika tidak ingin mengubah')
                     ->required(fn (string $context): bool => $context === 'create')
                     ->dehydrated(fn ($state) => filled($state)),
             ]);

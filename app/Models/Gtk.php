@@ -3,48 +3,47 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Gtk extends Model
 {
-    use HasFactory;
-
-    protected $table = 'tbl_gtk';
-
+    protected $table = 'gtk';
     protected $fillable = [
-        'nik',
+        'nama',
         'nip',
+        'nik',
+        'nokarpeg',
         'nuptk',
-        'nama_gtk',
         'tempat_lahir',
-        'tgl_lahir',
-        'jenis_gtk',
-        'jenkel',
+        'tanggal_lahir',
+        'jenis_kelamin',
         'agama',
-        'kategori_papua',
+        'alamat',
+        'desa',
+        'kecamatan',
+        'kabupaten',
+        'provinsi',
         'pendidikan_terakhir',
+        'daerah_asal',
+        'jenis_gtk',
         'status_kepegawaian',
-        'golongan_pegawai',
-        'tmt_pegawai',
-        'tgl_penempatan_sk_terakhir',
-        'npwp',
-        'no_rekening',
-        'id_sekolah'
+        'tmt_pns',
+        'pangkat_gol_terakhir',
+        'tmt_pangkat_gol_terakhir',
+        'sekolah_id',
     ];
 
     public function sekolah()
     {
-        return $this->belongsTo(Sekolah::class, 'id_sekolah');
+        return $this->belongsTo(Sekolah::class);
     }
 
-    protected $casts = [
-        'tgl_lahir' => 'date',
-        'tmt_pegawai' => 'date',
-        'tgl_penempatan_sk_terakhir' => 'date'
-    ];
-
-    public function riwayatPendidikan()
+    public function pendidikan()
     {
-        return $this->hasOne(GtkRiwayatPendidikan::class, 'id_gtk');
+        return $this->hasMany(GtkPendidikan::class);
+    }
+
+    public function keuangan()
+    {
+        return $this->hasOne(GtkKeuangan::class);
     }
 }

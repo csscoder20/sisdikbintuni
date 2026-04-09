@@ -28,7 +28,7 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Guru & Tenaga Kependidikan</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Gtk::where('id_sekolah', auth()->user()->sekolah?->id)->count() }}
+                        {{ \App\Models\Gtk::where('sekolah_id', auth()->user()->sekolah?->id)->count() }}
                     </p>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Peserta Didik Aktif</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Siswa::whereHas('rombel', fn($q) => $q->where('id_sekolah', auth()->user()->sekolah?->id))->count() }}
+                        {{ \App\Models\Siswa::where('sekolah_id', auth()->user()->sekolah?->id)->count() }}
                     </p>
                 </div>
             </div>
@@ -66,7 +66,7 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Kelompok Belajar</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Rombel::where('id_sekolah', auth()->user()->sekolah?->id)->count() }}
+                        {{ \App\Models\Rombel::where('sekolah_id', auth()->user()->sekolah?->id)->count() }}
                     </p>
                 </div>
             </div>
@@ -84,7 +84,9 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Sarana Prasarana</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Sarpras::where('id_sekolah', auth()->user()->sekolah?->id)->count() }}
+                        {{ \App\Models\LaporanGedung::whereHas('laporan', function ($query) {
+                            $query->where('sekolah_id', auth()->user()->sekolah?->id);
+                        })->count() }}
                     </p>
                 </div>
             </div>
