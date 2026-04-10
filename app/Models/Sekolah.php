@@ -64,4 +64,9 @@ class Sekolah extends Model
         }
         return 'sma'; // Default to sma
     }
+
+    public function getRouteKeyName()
+    {
+        return 'npsn';
+    }
 }

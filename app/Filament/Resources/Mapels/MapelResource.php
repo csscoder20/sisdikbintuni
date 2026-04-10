@@ -16,6 +16,8 @@ use Filament\Tables\Table;
 
 class MapelResource extends Resource
 {
+    protected static ?string $slug = 'mapel';
+
     protected static ?string $model = Mapel::class;
 
     protected static ?string $modelLabel = 'Mapel';
@@ -23,9 +25,11 @@ class MapelResource extends Resource
     protected static ?string $pluralModelLabel = 'Mapel';
 
     protected static ?int $navigationSort = 3;
+
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
-    protected static bool $isScopedToTenant = true;
+    // NON AKTIFKAN TENANCY
+    protected static bool $isScopedToTenant = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 

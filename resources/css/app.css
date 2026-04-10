@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../../resources/views/**/*.blade.php";
+@source "../../app/Filament/**/*.php";
+@source "../../vendor/filament/**/*.blade.php";
 
 @theme {
     --font-sans:

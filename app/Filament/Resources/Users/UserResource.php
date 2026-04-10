@@ -18,6 +18,8 @@ use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
+    protected static ?string $slug = 'user';
+
     protected static ?string $model = User::class;
 
     protected static ?string $modelLabel = 'User';

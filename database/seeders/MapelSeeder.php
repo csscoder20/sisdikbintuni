@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Mapel;
-use App\Models\Sekolah;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -21,13 +20,6 @@ class MapelSeeder extends Seeder
             return;
         }
 
-        $schools = Sekolah::all();
-        
-        if ($schools->isEmpty()) {
-            $this->command->warn("No schools found. Skipping Mapel seeding.");
-            return;
-        }
-
         $handle = fopen($csvFile, 'r');
         $header = fgetcsv($handle, 0, ';'); // Read header
 
@@ -36,33 +28,28 @@ class MapelSeeder extends Seeder
             if (count($row) < 5) continue;
             
             $mapelData[] = [
-                'kode' => $row[0],
-                'nama' => $row[1],
+                'kode_mapel' => $row[0],
+                'nama_mapel' => $row[1],
                 'jenjang' => $row[2],
                 'jjp' => str_replace(',', '.', $row[3]),
                 'tingkat' => $row[4],
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
         fclose($handle);
 
-        $this->command->info("Seeding subjects for " . $schools->count() . " schools...");
+        $this->command->info("Seeding " . count($mapelData) . " subjects...");
 
-        DB::transaction(function () use ($schools, $mapelData) {
-            foreach ($schools as $sekolah) {
-                foreach ($mapelData as $data) {
-                    Mapel::updateOrCreate(
-                        [
-                            'sekolah_id' => $sekolah->id,
-                            'kode_mapel' => $data['kode'],
-                        ],
-                        [
-                            'nama_mapel' => $data['nama'],
-                            'jjp' => $data['jjp'],
-                            'jenjang' => $data['jenjang'],
-                            'tingkat' => $data['tingkat'],
-                        ]
-                    );
-                }
+        DB::transaction(function () use ($mapelData) {
+            foreach ($mapelData as $data) {
+                Mapel::updateOrCreate(
+                    [
+                        'kode_mapel' => $data['kode_mapel'],
+                        'nama_mapel' => $data['nama_mapel'],
+                    ],
+                    $data
+                );
             }
         });
 

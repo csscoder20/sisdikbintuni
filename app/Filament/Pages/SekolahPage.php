@@ -38,6 +38,8 @@ class SekolahPage extends Page implements HasSchemas
     
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
+    protected static ?string $slug = 'profil';
+
     protected static ?string $title = 'PROFIL SEKOLAH';
 
     protected string $view = 'filament.pages.sekolah-page';

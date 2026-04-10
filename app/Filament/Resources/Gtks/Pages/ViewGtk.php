@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Gtks\Pages;
 
 use App\Filament\Resources\Gtks\GtkResource;
-use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewGtk extends ViewRecord
@@ -13,7 +12,6 @@ class ViewGtk extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
         ];
     }
 }

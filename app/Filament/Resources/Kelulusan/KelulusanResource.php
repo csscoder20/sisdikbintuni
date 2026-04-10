@@ -14,6 +14,8 @@ use Filament\Support\Icons\Heroicon;
 
 class KelulusanResource extends Resource
 {
+    protected static ?string $slug = 'kelulusan';
+
     protected static ?string $model = Kelulusan::class;
 
     protected static ?string $modelLabel = 'Kelulusan';

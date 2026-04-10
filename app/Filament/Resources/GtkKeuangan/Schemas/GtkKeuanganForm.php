@@ -15,40 +15,16 @@ class GtkKeuanganForm
                 Select::make('gtk_id')
                     ->relationship('gtk', 'nama')
                     ->required(),
-                TextInput::make('gapok')
-                    ->label('Gaji Pokok')
+                TextInput::make('nomor_rekening')
+                    ->label('Nomor Rekening')
                     ->numeric()
                     ->default(0),
-                TextInput::make('tunjangan_istri')
+                TextInput::make('nama_bank')
+                    ->label('Nama Bank'),
+                TextInput::make('npwp')
+                    ->label('NPWP')
                     ->numeric()
                     ->default(0),
-                TextInput::make('tunjangan_anak')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('tunjangan_fungsional')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('tunjangan_daerah')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('tunjangan_beras')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('pajak')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('bruto')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('iuran_pensiun')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('tabungan_perumahan')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('netto')
-                    ->numeric()
-                    ->default(0),
-            ]);
+            ])->columns(3);
     }
 }

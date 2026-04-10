@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Siswas\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -16,56 +17,58 @@ class SiswasTable
         return $table
             ->columns([
                 TextColumn::make('nama')
-                ->label('Nama Siswa')
+                    ->label('Nama Siswa')
                     ->searchable(),
                 TextColumn::make('nisn')
-                ->label('NISN')
+                    ->label('NISN')
                     ->searchable(),
                 TextColumn::make('nik')
-                ->label('NIK')
+                    ->label('NIK')
                     ->searchable(),
                 TextColumn::make('jenis_kelamin')
-                ->label('Jenis Kelamin')
+                    ->label('Jenis Kelamin')
                     ->searchable(),
                 TextColumn::make('rombel.nama')
                     ->label('Rombel')
                     ->sortable()
                     ->badge(),
-                TextColumn::make('status_siswa')
-                ->label('Status Siswa')
+                TextColumn::make('status')
+                    ->label('Status Siswa')
                     ->searchable()
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Aktif' => 'success',
-                        'Lulus' => 'info',
-                        'Pindah' => 'warning',
-                        'Drop Out' => 'danger',
+                    ->color(fn(string $state): string => match ($state) {
+                        'aktif' => 'success',
+                        'mutasi_masuk' => 'info',
+                        'mutasi_keluar' => 'warning',
+                        'lulus' => 'success',
+                        'putus_sekolah' => 'danger',
+                        'mengulang' => 'danger',
                         default => 'gray',
                     }),
-                TextColumn::make('tahun_masuk')
-                ->label('Tahun Masuk')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('tahun_masuk')
+                //     ->label('Tahun Masuk')
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tempat_lahir')
-                ->label('Tempat Lahir')
+                    ->label('Tempat Lahir')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tanggal_lahir')
-                ->label('Tanggal Lahir')
+                    ->label('Tanggal Lahir')
                     ->date()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('agama')
-                ->label('Agama')
+                    ->label('Agama')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                ->label('Dibuat Pada')
+                    ->label('Dibuat Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                ->label('Diperbarui Pada')
+                    ->label('Diperbarui Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -76,6 +79,7 @@ class SiswasTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

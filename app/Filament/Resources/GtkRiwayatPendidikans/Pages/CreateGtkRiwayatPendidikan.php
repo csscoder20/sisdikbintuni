@@ -7,5 +7,12 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateGtkRiwayatPendidikan extends CreateRecord
 {
+    protected static bool $canCreateAnother = false;
+
     protected static string $resource = GtkRiwayatPendidikanResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

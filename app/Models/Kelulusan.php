@@ -11,6 +11,7 @@ class Kelulusan extends Model
     protected $fillable = [
         'sekolah_id',
         'tahun',
+        'jumlah_peserta_ujian',
         'jumlah_lulus',
         'persentase_kelulusan',
         'jumlah_lanjut_pt',

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\GtkRiwayatPendidikans\Pages;
 
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
-use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewGtkRiwayatPendidikan extends ViewRecord
@@ -13,7 +12,6 @@ class ViewGtkRiwayatPendidikan extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
         ];
     }
 }

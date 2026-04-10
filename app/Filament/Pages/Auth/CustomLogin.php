@@ -72,25 +72,4 @@ class CustomLogin extends BaseLogin
 
         return null;
     }
-
-    public function content(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE),
-                $this->getFormContentComponent(),
-                $this->getMultiFactorChallengeFormContentComponent(),
-                RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER),
-            ]);
-    }
-
-    protected function getRegisterLinkComponent(): Component
-    {
-        return RenderHook::make('panels::auth.login.form.after')
-            ->content(
-                fn(): string => filament()->hasRegistration()
-                    ? '<div style="text-align: center; margin-top: 1.5rem;"><a href="' . filament()->getRegistrationUrl() . '" class="text-sm" style="color: inherit; text-decoration: none;"><span style="color: #f97316;">or</span> ' . __('filament-panels::auth/pages/login.actions.register.label') . '</a></div>'
-                    : ''
-            );
-    }
 }

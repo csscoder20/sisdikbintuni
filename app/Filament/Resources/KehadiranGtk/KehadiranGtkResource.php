@@ -11,9 +11,12 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 
 class KehadiranGtkResource extends Resource
 {
+    protected static ?string $slug = 'kehadiran-gtk';
+
     protected static ?string $model = KehadiranGtk::class;
 
 
@@ -28,7 +31,7 @@ class KehadiranGtkResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-    protected static bool $isScopedToTenant = true;
+    protected static bool $isScopedToTenant = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
@@ -42,6 +45,14 @@ class KehadiranGtkResource extends Resource
     public static function table(Table $table): Table
     {
         return KehadiranGtkTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('gtk', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
+            });
     }
 
     public static function getPages(): array

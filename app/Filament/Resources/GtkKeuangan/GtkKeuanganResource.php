@@ -11,9 +11,12 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 
 class GtkKeuanganResource extends Resource
 {
+    protected static ?string $slug = 'rekening-npwp-gtk';
+
     protected static ?string $model = GtkKeuangan::class;
 
     protected static ?int $navigationSort = 3;
@@ -27,7 +30,7 @@ class GtkKeuanganResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static bool $isScopedToTenant = true;
+    protected static bool $isScopedToTenant = false;
 
     protected static ?string $recordTitleAttribute = 'NOMINATIF GTK';
 
@@ -39,6 +42,14 @@ class GtkKeuanganResource extends Resource
     public static function table(Table $table): Table
     {
         return GtkKeuanganTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('gtk', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
+            });
     }
 
     public static function getPages(): array

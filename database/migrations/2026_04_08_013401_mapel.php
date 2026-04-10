@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('mapel', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sekolah_id')->constrained('sekolah')->cascadeOnDelete();
             $table->string('kode_mapel')->nullable();
             $table->string('nama_mapel');
             $table->decimal('jjp', 5, 2)->nullable();

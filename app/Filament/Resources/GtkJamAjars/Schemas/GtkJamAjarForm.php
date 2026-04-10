@@ -26,7 +26,14 @@ class GtkJamAjarForm
                     ->required(),
                 Select::make('mapel_id')
                     ->label('Mata Pelajaran')
-                    ->relationship('mapel', 'nama_mapel')
+                    ->relationship(
+                        name: 'mapel',
+                        titleAttribute: 'nama_mapel'
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn($record) =>
+                        "{$record->nama_mapel} - {$record->jenjang} Kelas {$record->tingkat}"
+                    )
                     ->searchable()
                     ->preload()
                     ->required(),

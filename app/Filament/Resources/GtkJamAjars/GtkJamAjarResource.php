@@ -19,6 +19,8 @@ use Filament\Tables\Table;
 
 class GtkJamAjarResource extends Resource
 {
+    protected static ?string $slug = 'sebaran-jam-ajar';
+
     protected static ?string $model = \App\Models\Mengajar::class;
 
     protected static ?string $modelLabel = 'Sebaran Jam Mengajar';
@@ -28,7 +30,7 @@ class GtkJamAjarResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
 
-    protected static bool $isScopedToTenant = true;
+    protected static bool $isScopedToTenant = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
@@ -54,6 +56,14 @@ class GtkJamAjarResource extends Resource
     public static function table(Table $table): Table
     {
         return GtkJamAjarsTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('gtk', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
+            });
     }
 
     public static function getRelations(): array

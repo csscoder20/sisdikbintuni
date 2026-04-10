@@ -14,6 +14,10 @@ class KelulusanForm
                 TextInput::make('tahun')
                     ->numeric()
                     ->required(),
+                TextInput::make('jumlah_peserta_ujian')
+                    ->label('Jumlah Peserta Ujian')
+                    ->numeric()
+                    ->required(),
                 TextInput::make('jumlah_lulus')
                     ->numeric()
                     ->required(),

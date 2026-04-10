@@ -19,6 +19,8 @@ use Filament\Tables\Table;
 
 class GtkRiwayatPendidikanResource extends Resource
 {
+    protected static ?string $slug = 'riwayat-pendidikan-gtk';
+
     protected static ?string $model = GtkPendidikan::class;
 
     protected static ?string $modelLabel = 'Riwayat Pendidikan GTK';
@@ -29,7 +31,7 @@ class GtkRiwayatPendidikanResource extends Resource
     
     protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 
-    protected static bool $isScopedToTenant = true;
+    protected static bool $isScopedToTenant = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
@@ -53,6 +55,14 @@ class GtkRiwayatPendidikanResource extends Resource
     public static function table(Table $table): Table
     {
         return GtkRiwayatPendidikansTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('gtk', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
+            });
     }
 
     public static function getRelations(): array

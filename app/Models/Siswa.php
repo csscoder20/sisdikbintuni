@@ -20,9 +20,9 @@ class Siswa extends Model
         'kecamatan',
         'kabupaten',
         'provinsi',
-        'tahun_masuk',
-        'tahun_keluar',
-        'status_siswa',
+        // 'tahun_masuk',
+        // 'tahun_keluar',
+        'status',
         'sekolah_id',
     ];
 

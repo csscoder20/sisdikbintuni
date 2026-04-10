@@ -14,14 +14,13 @@ return new class extends Migration
         Schema::create('laporan_siswa_rekap', function (Blueprint $table) {
             $table->id();
             $table->foreignId('laporan_siswa_id')->constrained('laporan_siswa')->cascadeOnDelete();
-            $table->enum('kategori', ['awal','mutasi','akhir','putus','mengulang']);
+            $table->enum('kategori', ['awal_bulan', 'mutasi_masuk', 'mutasi_keluar', 'putus_sekolah', 'mengulang', 'akhir_bulan',]);
             $table->integer('laki_laki');
             $table->integer('perempuan');
             $table->integer('total');
             $table->timestamps();
 
-            $table->unique(['laporan_siswa_id','kategori']);
-
+            $table->unique(['laporan_siswa_id', 'kategori']);
         });
     }
 

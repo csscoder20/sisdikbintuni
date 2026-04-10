@@ -23,6 +23,8 @@ class LaporanGedungResource extends Resource
     protected static ?string $modelLabel = 'Keadaan Gedung/Ruang';
     protected static ?string $pluralModelLabel = 'Keadaan Gedung/Ruang';
     
+    protected static ?string $slug = 'laporan-gedung';
+    
     protected static ?string $navigationLabel = 'Keadaan Gedung/Ruang';
     protected static ?int $navigationSort = 1;
     protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
@@ -31,7 +33,7 @@ class LaporanGedungResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nama_ruang';
 
-    protected static bool $isScopedToTenant = true;
+    protected static bool $isScopedToTenant = false;
 
     public static function canViewAny(): bool
     {
@@ -48,6 +50,14 @@ class LaporanGedungResource extends Resource
     public static function table(Table $table): Table
     {
         return LaporanGedungTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('laporan', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
+            });
     }
 
     public static function getRelations(): array

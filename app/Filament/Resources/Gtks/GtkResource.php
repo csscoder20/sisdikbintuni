@@ -19,6 +19,8 @@ use Filament\Tables\Table;
 
 class GtkResource extends Resource
 {
+    protected static ?string $slug = 'gtk';
+
     protected static ?string $model = Gtk::class;
 
     protected static ?string $modelLabel = 'Nominatif GTK';
@@ -26,6 +28,7 @@ class GtkResource extends Resource
     protected static ?string $navigationLabel = 'Nominatif GTK';
 
     protected static ?int $navigationSort = 1;
+    protected static ?string $pluralModelLabel = 'Nominatif GTK';
 
     protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 

@@ -76,136 +76,185 @@ class KeadaanGtk extends Page
         );
     }
 
-    /**
-     * Get data GTK berdasarkan agama, di-group per Jenis GTK
-     */
-    public function getTabelGtkAgama()
+
+    protected function getViewData(): array
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
 
-        $data = Gtk::where('sekolah_id', $tenantId)
+        // 1. GTK by Agama
+        $gtkAgamaFull = $this->getGtkAgamaCollection();
+        $totalGtkAgama = [];
+        foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $ag) {
+            $totalGtkAgama[$ag . '_l'] = $gtkAgamaFull->sum($ag . '_l');
+            $totalGtkAgama[$ag . '_p'] = $gtkAgamaFull->sum($ag . '_p');
+            $totalGtkAgama[$ag . '_jml'] = $gtkAgamaFull->sum($ag . '_jml');
+        }
+
+        // 2. GTK by Daerah
+        $gtkDaerahFull = $this->getGtkDaerahCollection();
+        $totalGtkDaerah = [
+            'papua_l' => $gtkDaerahFull->sum('papua_l'),
+            'papua_p' => $gtkDaerahFull->sum('papua_p'),
+            'papua_jml' => $gtkDaerahFull->sum('papua_jml'),
+            'non_papua_l' => $gtkDaerahFull->sum('non_papua_l'),
+            'non_papua_p' => $gtkDaerahFull->sum('non_papua_p'),
+            'non_papua_jml' => $gtkDaerahFull->sum('non_papua_jml'),
+        ];
+
+        // 3. Status Kepegawaian
+        $gtkStatusFull = $this->getGtkStatusCollection();
+        $totalGtkStatus = [
+            'pns' => $gtkStatusFull->sum('pns'),
+            'pppk' => $gtkStatusFull->sum('pppk'),
+            'honorer' => $gtkStatusFull->sum('honorer_sekolah'),
+        ];
+
+        // 4. Umur
+        $gtkUmurFull = $this->getGtkUmurCollection();
+        $totalGtkUmur = [];
+        for ($age = 13; $age <= 23; $age++) {
+            $px = 'umur_' . $age;
+            $totalGtkUmur[$px . '_l'] = $gtkUmurFull->sum($px . '_l');
+            $totalGtkUmur[$px . '_p'] = $gtkUmurFull->sum($px . '_p');
+            $totalGtkUmur[$px . '_jml'] = $gtkUmurFull->sum($px . '_jml');
+        }
+
+        // 5. Pendidikan
+        $gtkPendidikanFull = $this->getGtkPendidikanCollection();
+        $totalGtkPendidikan = [
+            'slta' => $gtkPendidikanFull->sum('slta'),
+            'di' => $gtkPendidikanFull->sum('di'),
+            'dii' => $gtkPendidikanFull->sum('dii'),
+            'diii' => $gtkPendidikanFull->sum('diii'),
+            's1' => $gtkPendidikanFull->sum('s1'),
+            's2' => $gtkPendidikanFull->sum('s2'),
+            's3' => $gtkPendidikanFull->sum('s3'),
+        ];
+
+        // 6. Jenis Kelamin (By Jenis)
+        $gtkByJenisFull = $this->getGtkByJenisCollection();
+        $totalGtkByJenis = [
+            'l' => $gtkByJenisFull->sum('laki_laki'),
+            'p' => $gtkByJenisFull->sum('perempuan'),
+            'total' => $gtkByJenisFull->sum('total'),
+        ];
+
+        return array_merge(parent::getViewData(), [
+            'gtkAgama' => $this->paginateCollection($gtkAgamaFull, $this->perPage, $this->pageAgama, ['pageName' => 'pageAgama']),
+            'gtkDaerah' => $this->paginateCollection($gtkDaerahFull, $this->perPage, $this->pageDaerah, ['pageName' => 'pageDaerah']),
+            'gtkStatusKepegawaian' => $this->paginateCollection($gtkStatusFull, $this->perPage, $this->pageStatus, ['pageName' => 'pageStatus']),
+            'gtkUmur' => $this->paginateCollection($gtkUmurFull, $this->perPage, $this->pageUmur, ['pageName' => 'pageUmur']),
+            'gtkPendidikan' => $this->paginateCollection($gtkPendidikanFull, $this->perPage, $this->pagePendidikan, ['pageName' => 'pagePendidikan']),
+            'gtkByJenis' => $this->paginateCollection($gtkByJenisFull, $this->perPage, $this->pageJenis, ['pageName' => 'pageJenis']),
+            'gtkByPangkat' => $this->getTabelGtkByPangkat(), // Pangkat is already small and sorted
+
+            'totalGtkAgama' => $totalGtkAgama,
+            'totalGtkDaerah' => $totalGtkDaerah,
+            'totalGtkStatus' => $totalGtkStatus,
+            'totalGtkUmur' => $totalGtkUmur,
+            'totalGtkPendidikan' => $totalGtkPendidikan,
+            'totalGtkByJenis' => $totalGtkByJenis,
+
+
+        ]);
+    }
+
+    public function getTabelGtkByPangkat()
+    {
+        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
+
+        return Gtk::where('sekolah_id', $tenantId)
+            ->select('pangkat_gol_terakhir', 
+                DB::raw('COUNT(*) as total'))
+            ->whereNotNull('pangkat_gol_terakhir')
+            ->groupBy('pangkat_gol_terakhir')
+            ->orderBy('pangkat_gol_terakhir')
+            ->get();
+    }
+
+    protected function getGtkAgamaCollection()
+    {
+        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
+        return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
                 DB::raw("SUM(CASE WHEN agama ILIKE '%islam%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as islam_l"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%islam%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as islam_p"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%islam%' THEN 1 ELSE 0 END) as islam_jml"),
-                
                 DB::raw("SUM(CASE WHEN (agama ILIKE '%kristen%' OR agama ILIKE '%protestan%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as kristen_protestan_l"),
                 DB::raw("SUM(CASE WHEN (agama ILIKE '%kristen%' OR agama ILIKE '%protestan%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as kristen_protestan_p"),
                 DB::raw("SUM(CASE WHEN (agama ILIKE '%kristen%' OR agama ILIKE '%protestan%') THEN 1 ELSE 0 END) as kristen_protestan_jml"),
-                
                 DB::raw("SUM(CASE WHEN agama ILIKE '%katolik%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as katolik_l"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%katolik%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as katolik_p"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%katolik%' THEN 1 ELSE 0 END) as katolik_jml"),
-                
                 DB::raw("SUM(CASE WHEN agama ILIKE '%hindu%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as hindu_l"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%hindu%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as hindu_p"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%hindu%' THEN 1 ELSE 0 END) as hindu_jml"),
-                
                 DB::raw("SUM(CASE WHEN agama ILIKE '%budha%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as budha_l"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%budha%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as budha_p"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%budha%' THEN 1 ELSE 0 END) as budha_jml"),
-                
                 DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as konghucu_l"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as konghucu_p"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' THEN 1 ELSE 0 END) as konghucu_jml")
-            )
-            ->groupBy('jenis_gtk')
-            ->get();
-
-        return $this->paginateCollection($data, $this->perPage, $this->pageAgama, ['pageName' => 'pageAgama']);
+            )->groupBy('jenis_gtk')->get();
     }
 
-    /**
-     * Get data GTK berdasarkan daerah asal, di-group per Jenis GTK
-     */
-    public function getTabelGtkDaerah()
+    protected function getGtkDaerahCollection()
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-
-        $data = Gtk::where('sekolah_id', $tenantId)
+        return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%papua%' AND daerah_asal NOT ILIKE '%non%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as papua_l"),
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%papua%' AND daerah_asal NOT ILIKE '%non%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as papua_p"),
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%papua%' AND daerah_asal NOT ILIKE '%non%') THEN 1 ELSE 0 END) as papua_jml"),
-                
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as non_papua_l"),
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as non_papua_p"),
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') THEN 1 ELSE 0 END) as non_papua_jml")
-            )
-            ->groupBy('jenis_gtk')
-            ->get();
-
-        return $this->paginateCollection($data, $this->perPage, $this->pageDaerah, ['pageName' => 'pageDaerah']);
+            )->groupBy('jenis_gtk')->get();
     }
 
-    /**
-     * Get data GTK berdasarkan status kepegawaian, di-group per Jenis GTK
-     */
-    public function getTabelGtkStatusKepegawaian()
+    protected function getGtkStatusCollection()
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-
-        $data = Gtk::where('sekolah_id', $tenantId)
+        return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
                 DB::raw("SUM(CASE WHEN (status_kepegawaian ILIKE '%pns%' AND status_kepegawaian NOT ILIKE '%pppk%') THEN 1 ELSE 0 END) as pns"),
                 DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pppk%' THEN 1 ELSE 0 END) as pppk"),
                 DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%honorer%' THEN 1 ELSE 0 END) as honorer_sekolah")
-            )
-            ->groupBy('jenis_gtk')
-            ->get();
-
-        return $this->paginateCollection($data, $this->perPage, $this->pageStatus, ['pageName' => 'pageStatus']);
+            )->groupBy('jenis_gtk')->get();
     }
 
-    /**
-     * Get data GTK berdasarkan umur, di-group per Jenis GTK (Sesuai loop view 13-23)
-     */
-    public function getTabelGtkUmur()
+    protected function getGtkUmurCollection()
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         $gtks = Gtk::where('sekolah_id', $tenantId)->get();
-        
         $dataByJenis = collect();
-
         foreach ($gtks as $g) {
             $jenis = $g->jenis_gtk ?? 'Lainnya';
             if (!$dataByJenis->has($jenis)) {
                 $item = (object)['jenis_gtk' => $jenis];
                 for ($age = 13; $age <= 23; $age++) {
                     $prefix = 'umur_' . $age;
-                    $item->{$prefix . '_l'} = 0;
-                    $item->{$prefix . '_p'} = 0;
-                    $item->{$prefix . '_jml'} = 0;
+                    $item->{$prefix . '_l'} = 0; $item->{$prefix . '_p'} = 0; $item->{$prefix . '_jml'} = 0;
                 }
                 $dataByJenis->put($jenis, $item);
             }
-
             if ($g->tanggal_lahir) {
                 $umur = \Carbon\Carbon::parse($g->tanggal_lahir)->age;
                 if ($umur >= 13 && $umur <= 23) {
-                    $prefix = 'umur_' . $umur;
-                    $row = $dataByJenis->get($jenis);
-                    if (str_contains(strtolower($g->jenis_kelamin), 'l')) {
-                        $row->{$prefix . '_l'}++;
-                    } else {
-                        $row->{$prefix . '_p'}++;
-                    }
+                    $prefix = 'umur_' . $umur; $row = $dataByJenis->get($jenis);
+                    if (str_contains(strtolower($g->jenis_kelamin), 'l')) $row->{$prefix . '_l'}++;
+                    else $row->{$prefix . '_p'}++;
                     $row->{$prefix . '_jml'}++;
                 }
             }
         }
-
-        return $this->paginateCollection($dataByJenis->values(), $this->perPage, $this->pageUmur, ['pageName' => 'pageUmur']);
+        return $dataByJenis->values();
     }
 
-    /**
-     * Get data GTK berdasarkan pendidikan terakhir, di-group per Jenis GTK
-     */
-    public function getTabelGtkPendidikan()
+    protected function getGtkPendidikanCollection()
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-
-        $data = Gtk::where('sekolah_id', $tenantId)
+        return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%slta%' OR pendidikan_terakhir ILIKE '%sma%' OR pendidikan_terakhir ILIKE '%smk%' THEN 1 ELSE 0 END) as slta"),
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir = 'D1' THEN 1 ELSE 0 END) as di"),
@@ -214,69 +263,29 @@ class KeadaanGtk extends Page
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s1%' OR pendidikan_terakhir ILIKE '%d4%' THEN 1 ELSE 0 END) as s1"),
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s2%' THEN 1 ELSE 0 END) as s2"),
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s3%' THEN 1 ELSE 0 END) as s3")
-            )
-            ->groupBy('jenis_gtk')
-            ->get();
-
-        return $this->paginateCollection($data, $this->perPage, $this->pagePendidikan, ['pageName' => 'pagePendidikan']);
+            )->groupBy('jenis_gtk')->get();
     }
 
-    /**
-     * Get data GTK berdasarkan jenis GTK
-     * Tambahan method untuk analisis berdasarkan jenis_gtk
-     */
-    public function getTabelGtkByJenis()
+    protected function getGtkByJenisCollection()
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        
-        $data = Gtk::where('sekolah_id', $tenantId)
+        return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
                 DB::raw('COUNT(*) as total'),
                 DB::raw("SUM(CASE WHEN jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as laki_laki"),
                 DB::raw("SUM(CASE WHEN jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as perempuan"))
-            ->whereNotNull('jenis_gtk')
-            ->groupBy('jenis_gtk')
-            ->get();
-            
-        return $this->paginateCollection($data, $this->perPage, $this->pageJenis, ['pageName' => 'pageJenis']);
+            ->whereNotNull('jenis_gtk')->groupBy('jenis_gtk')->get();
     }
 
     /**
-     * Get data GTK berdasarkan pangkat/golongan
-     * Tambahan method untuk analisis kepangkatan
+     * @deprecated Use Collection methods
      */
-    public function getTabelGtkByPangkat()
-    {
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-
-        $data = Gtk::where('sekolah_id', $tenantId)
-            ->select('pangkat_gol_terakhir', 
-                DB::raw('COUNT(*) as total'))
-            ->whereNotNull('pangkat_gol_terakhir')
-            ->groupBy('pangkat_gol_terakhir')
-            ->orderBy('pangkat_gol_terakhir')
-            ->get();
-
-        return $this->paginateCollection($data, $this->perPage, $this->pagePangkat, ['pageName' => 'pagePangkat']);
-    }
-
-    protected function getViewData(): array
-    {
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-
-        return array_merge(parent::getViewData(), [
-            'gtkAgama' => $this->getTabelGtkAgama(),
-            'gtkDaerah' => $this->getTabelGtkDaerah(),
-            'gtkStatusKepegawaian' => $this->getTabelGtkStatusKepegawaian(),
-            'gtkUmur' => $this->getTabelGtkUmur(),
-            'gtkPendidikan' => $this->getTabelGtkPendidikan(),
-            'totalGtk' => Gtk::where('sekolah_id', $tenantId)->count(),
-            'totalGtkLakiLaki' => Gtk::where('sekolah_id', $tenantId)->where('jenis_kelamin', 'LIKE', 'L%')->count(),
-            'totalGtkPerempuan' => Gtk::where('sekolah_id', $tenantId)->where('jenis_kelamin', 'LIKE', 'P%')->count(),
-            'gtkByJenis' => $this->getTabelGtkByJenis(),
-            'gtkByPangkat' => $this->getTabelGtkByPangkat(),
-        ]);
-    }
+    public function getTabelGtkAgama() {}
+    public function getTabelGtkDaerah() {}
+    public function getTabelGtkStatusKepegawaian() {}
+    public function getTabelGtkUmur() {}
+    public function getTabelGtkPendidikan() {}
+    public function getTabelGtkByJenis() {}
 
     public function changeTablePage(string $property, int $page): void
     {

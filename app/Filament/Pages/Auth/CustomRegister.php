@@ -29,7 +29,7 @@ class CustomRegister extends BaseRegister
                 Select::make('sekolah_id')
                     ->label('Asal Sekolah')
                     ->options(Sekolah::query()
-                        ->whereNull('user_id')
+                        ->whereNotIn('id', \App\Models\OperatorSekolah::pluck('sekolah_id'))
                         ->where(function ($query) {
                             $query->where('nama', 'ilike', '%sma%')
                                 ->orWhere('nama', 'ilike', '%smk%');
@@ -65,8 +65,11 @@ class CustomRegister extends BaseRegister
             'status' => 'pending',
         ]);
 
-        // Link user to school
-        Sekolah::find($sekolahId)?->update(['user_id' => $user->id]);
+        // Link user to school via operator_sekolah pivot table
+        \App\Models\OperatorSekolah::create([
+            'user_id'    => $user->id,
+            'sekolah_id' => $sekolahId,
+        ]);
 
         event(new Registered($user));
 
@@ -87,5 +90,10 @@ class CustomRegister extends BaseRegister
                 return redirect()->route('filament.dinas.auth.login');
             }
         };
+    }
+
+    public function getSubheading(): string | \Illuminate\Contracts\Support\Htmlable | null
+    {
+        return null;
     }
 }

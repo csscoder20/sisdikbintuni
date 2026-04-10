@@ -14,6 +14,8 @@ use Filament\Support\Icons\Heroicon;
 
 class LaporanResource extends Resource
 {
+    protected static ?string $slug = 'laporan';
+
     protected static ?string $model = Laporan::class;
 
 

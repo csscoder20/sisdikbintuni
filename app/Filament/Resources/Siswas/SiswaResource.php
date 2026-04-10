@@ -20,6 +20,8 @@ use UnitEnum; // Add this import
 
 class SiswaResource extends Resource
 {
+    protected static ?string $slug = 'siswa';
+
     protected static ?string $model = Siswa::class;
 
     protected static ?string $navigationLabel = 'Nominatif Siswa';

@@ -19,6 +19,8 @@ use Filament\Tables\Table;
 
 class RombelResource extends Resource
 {
+    protected static ?string $slug = 'rombel';
+
     protected static ?string $model = Rombel::class;
 
     protected static ?string $modelLabel = 'Rombel';

@@ -46,20 +46,24 @@ class SiswaForm
                 ->label('Kecamatan'),
                 TextInput::make('desa')
                 ->label('Desa'),
-                TextInput::make('tahun_masuk')
-                ->label('Tahun Masuk')
-                    ->numeric(),
-                TextInput::make('tahun_keluar')
-                ->label('Tahun Keluar')
-                    ->numeric(),
-                Select::make('status_siswa')
+                // TextInput::make('tahun_masuk')
+                // ->label('Tahun Masuk')
+                //     ->numeric(),
+                // TextInput::make('tahun_keluar')
+                // ->label('Tahun Keluar')
+                //     ->numeric(),
+                Select::make('status')
                 ->label('Status Siswa')
-                    ->options([
-                        'Aktif' => 'Aktif',
-                        'Lulus' => 'Lulus',
-                        'Pindah' => 'Pindah',
-                        'Drop Out' => 'Drop Out',
-                    ]),
+                ->options([
+                    'aktif' => 'Aktif',
+                    'mutasi_masuk' => 'Mutasi Masuk',
+                    'mutasi_keluar' => 'Mutasi Keluar',
+                    'lulus' => 'Lulus',
+                    'putus_sekolah' => 'Putus Sekolah',
+                    'mengulang' => 'Mengulang',
+                ])
+                ->default('aktif')
+                ->required(),
             ])->columns(3);
     }
 }

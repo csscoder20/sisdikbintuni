@@ -6,44 +6,57 @@ use Illuminate\Database\Seeder;
 use App\Models\Gtk;
 use App\Models\Rombel;
 use App\Models\Mengajar;
+use App\Models\Mapel;
 
 class MengajarSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        $mapelList = [
-            'Matematika',
-            'Bahasa Indonesia',
-            'Bahasa Inggris',
-            'Fisika',
-            'Kimia',
-            'Biologi',
-            'Sejarah',
-            'Geografi',
-            'Ekonomi',
-            'PKN'
-        ];
-
         // ambil hanya guru
         $gurus = Gtk::where('jenis_gtk', 'Guru')->get();
 
         foreach ($gurus as $guru) {
 
+            // rombel sesuai sekolah guru
             $rombels = Rombel::where('sekolah_id', $guru->sekolah_id)->get();
+
+            if ($rombels->isEmpty()) {
+                continue;
+            }
 
             // tiap guru mengajar 1–3 rombel
             $selectedRombels = $rombels->random(min(3, $rombels->count()));
 
             foreach ($selectedRombels as $rombel) {
 
+                // ambil mapel sesuai jenjang & tingkat rombel
+                $mapel = Mapel::where('jenjang', $rombel->jenjang)
+                    ->where('tingkat', $rombel->tingkat)
+                    ->inRandomOrder()
+                    ->first();
+
+                if (!$mapel) {
+                    continue;
+                }
+
+                // hindari duplicate karena ada unique constraint
+                $exists = Mengajar::where('gtk_id', $guru->id)
+                    ->where('rombel_id', $rombel->id)
+                    ->where('mapel_id', $mapel->id)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
                 Mengajar::create([
                     'gtk_id' => $guru->id,
                     'rombel_id' => $rombel->id,
-                    'mata_pelajaran' => $mapelList[array_rand($mapelList)],
+                    'mapel_id' => $mapel->id,
                     'jumlah_jam' => rand(2, 6),
-                    'laporan_id' => null, // operasional
-                    'semester' => ['ganjil', 'genap'][array_rand(['ganjil', 'genap'])],
-                    'tahun_ajaran' => now()->format('Y') . '/' . (now()->format('Y') + 1)
+                    'semester' => collect(['ganjil', 'genap'])->random(),
+                    'tahun_ajaran' => now()->year . '/' . (now()->year + 1),
+                    'laporan_id' => null,
                 ]);
             }
         }

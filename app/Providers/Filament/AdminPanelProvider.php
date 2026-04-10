@@ -53,6 +53,20 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->darkMode(false)
             ->brandName('ADMIN')
+            ->brandLogo(fn () => new \Illuminate\Support\HtmlString('
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #6366f1); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                            <path d="M2 12h20"/>
+                        </svg>
+                    </div>
+                    <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
+                        Sisdik<span style="color: #3b82f6;">Bintuni</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
+                    </span>
+                </div>
+            '))
             ->simpleProfilePage(true)
             ->profile()
             ->maxContentWidth(Width::Full)
@@ -73,8 +87,9 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Orange,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->resources([
+                \App\Filament\Resources\Users\UserResource::class,
+            ])
             ->pages([
                 DinasDashboard::class,
             ])
@@ -97,7 +112,29 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook(
+                'panels::auth.login.form.after',
+                fn (): string => filament()->hasRegistration()
+                    ? '<p style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:#6b7280;">
+                            Belum punya akun?
+                            <a href="' . filament()->getRegistrationUrl() . '"
+                               style="color:#f97316; font-weight:600; text-decoration:none;">
+                                Daftar Sekarang!
+                            </a>
+                       </p>'
+                    : ''
+            )
+            ->renderHook(
+                'panels::auth.register.form.after',
+                fn (): string => '<p style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:#6b7280;">
+                        Sudah punya akun?
+                        <a href="' . filament()->getLoginUrl() . '"
+                           style="color:#f97316; font-weight:600; text-decoration:none;">
+                            Login Sekarang!
+                        </a>
+                   </p>'
+            );
     }
 
     public function register(): void
@@ -126,10 +163,31 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
             ->profile()
-            ->breadcrumbs(false)
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Kunjungi Web')
+                    ->url('/')
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-globe-alt'),
+            ])
+            ->breadcrumbs()
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->brandName('OPERATOR ' . strtoupper($jenjang))
+            ->brandLogo(fn () => new \Illuminate\Support\HtmlString('
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                            <path d="M2 12h20"/>
+                        </svg>
+                    </div>
+                    <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
+                        Sisdik<span style="color: #10b981;">Bintuni</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
+                    </span>
+                </div>
+            '))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

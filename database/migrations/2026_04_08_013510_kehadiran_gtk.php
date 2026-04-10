@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('hari_kerja')->nullable();
             $table->timestamps();
 
-            $table->unique(['gtk_id','laporan_id']);
+            $table->unique(['gtk_id', 'laporan_id']);
         });
     }
 

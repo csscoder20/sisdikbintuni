@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LaporanSiswaResource extends Resource
 {
+    protected static ?string $slug = 'laporan-siswa';
+
     protected static ?string $model = LaporanSiswa::class;
 
     protected static ?string $modelLabel = 'Detail Laporan Siswa';
@@ -41,19 +43,10 @@ class LaporanSiswaResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
-
-        // Filter by user's school if user is operator
-        if (auth()->check() && auth()->user()->hasRole('operator')) {
-            $sekolahId = auth()->user()->sekolah?->id;
-
-            // Filter melalui relasi: LaporanSiswa -> Laporan -> Sekolah
-            return $query->whereHas('laporan', function ($q) use ($sekolahId) {
-                $q->where('sekolah_id', $sekolahId);
+        return parent::getEloquentQuery()
+            ->whereHas('laporan', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
             });
-        }
-
-        return $query;
     }
 
     public static function canViewAny(): bool

@@ -40,7 +40,7 @@ class RedirectIncorrectPanel
 
                 $sekolah = $user->sekolah;
                 $jenjang = $sekolah?->jenjang ?? 'sma';
-                $id = $sekolah?->id;
+                $id = $sekolah?->getRouteKey();
                 
                 if ($id) {
                     return redirect()->to("/admin/{$jenjang}/{$id}");
@@ -58,6 +58,26 @@ class RedirectIncorrectPanel
                 ->send();
 
             return redirect()->to('/admin/dinas');
+        }
+
+        // 3. If Operator tries to access a School panel that does NOT match their jenjang
+        if ($user->hasRole('operator') && in_array($panel->getId(), ['sma', 'smk'])) {
+            $expectedJenjang = $user->sekolah?->jenjang ?? 'sma';
+            
+            if ($panel->getId() !== $expectedJenjang) {
+                // Determine the correct redirect URL
+                $id = $user->sekolah?->getRouteKey();
+                
+                // Show notification to user that they were redirected
+                Notification::make()
+                    ->title('Maaf, Anda hanya bisa mengakses panel ' . strtoupper($expectedJenjang))
+                    ->warning()
+                    ->send();
+                    
+                if ($id) {
+                    return redirect()->to("/admin/{$expectedJenjang}/{$id}");
+                }
+            }
         }
 
         return $next($request);

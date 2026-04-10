@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 });
 
 Route::get('/admin', function () {
@@ -12,10 +12,14 @@ Route::get('/admin', function () {
         if ($user->hasRole('operator')) {
             $sekolah = $user->sekolah;
             if ($sekolah) {
-                return redirect()->to("/admin/{$sekolah->jenjang}/{$sekolah->id}");
+                return redirect()->to("/admin/{$sekolah->jenjang}/{$sekolah->getRouteKey()}");
             }
         }
         return redirect()->to('/admin/dinas');
     }
     return redirect()->to('/admin/login');
 });
+
+Route::get('/login', function () {
+    return redirect()->route('filament.dinas.auth.login');
+})->name('login');

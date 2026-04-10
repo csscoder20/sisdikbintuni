@@ -11,10 +11,14 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 
 class LaporanGtkResource extends Resource
 {
+    protected static ?string $slug = 'laporan-gtk';
+
     protected static ?string $model = LaporanGtk::class;
+    protected static bool $isScopedToTenant = false;
 
 
 
@@ -45,6 +49,14 @@ class LaporanGtkResource extends Resource
     public static function table(Table $table): Table
     {
         return LaporanGtkTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('laporan', function (Builder $query) {
+                $query->where('sekolah_id', filament()->getTenant()->id);
+            });
     }
 
     public static function getPages(): array
