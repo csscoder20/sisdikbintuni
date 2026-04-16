@@ -250,7 +250,7 @@
     $tenantName = \Filament\Facades\Filament::getTenant()?->nama ?? 'Sekolah';
 @endphp
 
-<div>
+<x-filament-panels::page>
     <div>
         @php
             $hasInvalidRows = false;
@@ -267,19 +267,14 @@
                 }
             }
         @endphp
-        {{-- Header Section --}}
-        <div style="margin: 2rem 0rem;">
-            <h1
-                style="font-size: 1.875rem; font-weight: 800; color: #1e293b; letter-spacing: -0.025em; margin-bottom: 0.5rem;">
-                Keadaan Siswa
-            </h1>
-        </div>
-    </div>
 
     <div class="ks-card" style="margin-bottom:1.25rem;">
 
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#dbeafe33,#93c5fd11); margin-bottom: 1rem;">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#dbeafe33,#93c5fd11); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#1d4ed8;">Jumlah Siswa Berdasarkan Kelas / Rombel</h2>
+            <div wire:key="wrapper-validateSiswaRombel">
+                {{ $this->validateSiswaRombelAction }}
+            </div>
         </div>
         @if ($hasInvalidRows)
             <div class="ks-alert ks-alert-warning m-8 text-xs p-4">
@@ -430,8 +425,11 @@
     {{-- Tabel 2: Siswa Menurut Umur --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11);">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#15803d;">Jumlah Siswa Menurut Umur</h2>
+            <div wire:key="wrapper-validateSiswaUmur">
+                {{ $this->validateSiswaUmurAction }}
+            </div>
         </div>
 
         <div class="ks-table-wrapper">
@@ -508,8 +506,11 @@
     {{-- Tabel 3: Siswa Menurut Agama --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11);">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#7c3aed;">Jumlah Siswa Menurut Agama</h2>
+            <div wire:key="wrapper-validateSiswaAgama">
+                {{ $this->validateSiswaAgamaAction }}
+            </div>
         </div>
 
         <div class="ks-table-wrapper">
@@ -601,8 +602,11 @@
     {{-- Tabel 4: Siswa Menurut Daerah Asal --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#fed7aa33,#fdba7411);">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#fed7aa33,#fdba7411); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#b45309;">Jumlah Siswa Menurut Daerah Asal</h2>
+            <div wire:key="wrapper-validateSiswaDaerah">
+                {{ $this->validateSiswaDaerahAction }}
+            </div>
         </div>
 
         <div class="ks-table-wrapper">
@@ -679,8 +683,11 @@
     {{-- Tabel 5: Siswa Disabilitas --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#fecaca33,#fca5a511);">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#fecaca33,#fca5a511); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#b91c1c;">Jumlah Siswa Disabilitas</h2>
+            <div wire:key="wrapper-validateSiswaDisabilitas">
+                {{ $this->validateSiswaDisabilitasAction }}
+            </div>
         </div>
 
         <div class="ks-table-wrapper">
@@ -727,9 +734,12 @@
     {{-- ================================================================ --}}
     {{-- Tabel 6: Siswa Penerima Beasiswa --}}
     {{-- ================================================================ --}}
-    <div class="ks-card">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#e0e7ff33,#c7d2fe11);">
+    <div class="ks-card" wire:key="siswa-beasiswa-card">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#e0e7ff33,#c7d2fe11); display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#4338ca;">Jumlah Siswa Penerima Beasiswa</h2>
+            <div wire:key="wrapper-validateSiswaBeasiswa">
+                {{ $this->validateSiswaBeasiswaAction }}
+            </div>
         </div>
 
         <div class="ks-table-wrapper">
@@ -774,4 +784,4 @@
             </table>
         </div>
     </div>
-</div>
+</x-filament-panels::page>

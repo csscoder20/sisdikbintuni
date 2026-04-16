@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mapel extends Model
 {
+    use \App\Traits\HasActivityLog;
         protected $table = 'mapel';
 
         protected $fillable = [

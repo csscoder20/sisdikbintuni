@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Actions\ValidateChecklistAction;
 use App\Models\Sekolah;
 use App\Models\WilayahKabBintuni;
 use BackedEnum;
@@ -101,7 +102,6 @@ class SekolahPage extends Page implements HasSchemas
 
             Section::make('Identitas Sekolah')
                 ->description('Informasi dasar identitas sekolah')
-                ->icon('heroicon-o-identification')
                 ->columns(3)
                 ->schema([
                     TextInput::make('nama')
@@ -127,13 +127,6 @@ class SekolahPage extends Page implements HasSchemas
                         ->email()
                         ->maxLength(255),
 
-                    Select::make('status_sekolah')
-                        ->label('Status Sekolah')
-                        ->options([
-                            'Negeri' => 'Negeri',
-                            'Swasta' => 'Swasta',
-                        ]),
-
                     Select::make('akreditasi')
                         ->label('Akreditasi')
                         ->options([
@@ -146,29 +139,62 @@ class SekolahPage extends Page implements HasSchemas
 
             Section::make('Alamat Sekolah')
                 ->description('Lokasi dan alamat lengkap sekolah')
-                ->icon('heroicon-o-map-pin')
-                ->columns(3)
+                ->columns(4)
                 ->schema([
-                    Textarea::make('alamat')
-                        ->label('Alamat')
-                        ->rows(3)
-                        ->columnSpanFull(),
-                    TextInput::make('desa')
-                        ->label('Desa / Kelurahan'),
-
-                    TextInput::make('kecamatan')
-                        ->label('Kecamatan'),
-
-                    TextInput::make('kabupaten')
-                        ->label('Kabupaten / Kota'),
+                    
 
                     TextInput::make('provinsi')
-                        ->label('Provinsi'),
+                        ->label('Provinsi')
+                        ->default('Papua Barat')
+                        ->disabled()
+                        ->dehydrated(true),
+
+                    TextInput::make('kabupaten')
+                        ->label('Kabupaten / Kota')
+                        ->default('Teluk Bintuni')
+                        ->disabled()
+                        ->dehydrated(true),
+
+                    Select::make('kecamatan')
+                        ->label('Kecamatan')
+                        ->options(function () {
+                            return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                                ->pluck('nama', 'nama');
+                        })
+                        ->live()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
+                        ->searchable(),
+
+                    Select::make('desa')
+                        ->label('Desa / Kelurahan')
+                        ->options(function (callable $get) {
+                            $kecamatan = $get('kecamatan');
+                            if (! $kecamatan) {
+                                return [];
+                            }
+                            
+                            $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
+                                ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                                ->first();
+
+                            if (!$kecamatanModel) {
+                                return [];
+                            }
+
+                            return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
+                                ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
+                                ->pluck('nama', 'nama');
+                        })
+                        ->searchable(),
+                    Textarea::make('alamat')
+                        ->label('Alamat')
+                        ->rows(2)
+                        ->columnSpanFull(),
+
                 ]),
 
             Section::make('Pendirian Sekolah')
                 ->description('Informasi pendirian dan legalitas sekolah')
-                ->icon('heroicon-o-document-text')
                 ->columns(3)
                 ->schema([
                     TextInput::make('tahun_berdiri')
@@ -180,31 +206,22 @@ class SekolahPage extends Page implements HasSchemas
                     TextInput::make('nomor_sk_pendirian')
                         ->label('Nomor SK Pendirian'),
 
-                    DatePicker::make('tgl_sk_pendirian')
+                    DatePicker::make('tanggal_sk_pendirian')
                         ->label('Tanggal SK Pendirian')
+                        ->native(false)
                         ->displayFormat('d/m/Y'),
                 ]),
 
             Section::make('Tanah & Gedung')
                 ->description('Informasi fisik bangunan dan lahan sekolah')
-                ->icon('heroicon-o-home-modern')
                 ->columns(3)
                 ->schema([
-                    Select::make('gedung_sekolah')
-                        ->label('Gedung Sekolah')
-                        ->options([
-                            'Milik Sendiri' => 'Milik Sendiri',
-                            'Sewa'          => 'Sewa',
-                            'Pinjam Pakai'  => 'Pinjam Pakai',
-                        ]),
-
                     Select::make('status_tanah')
                         ->label('Status Tanah')
                         ->options([
-                            'Milik Sendiri'     => 'Milik Sendiri',
-                            'Hak Guna Bangunan' => 'Hak Guna Bangunan',
-                            'Sewa'              => 'Sewa',
-                            'Pinjam Pakai'      => 'Pinjam Pakai',
+                            'shm'    => 'Milik Sendiri (SHM)',
+                            'hgb'    => 'Hak Guna Bangunan (HGB)',
+                            'ulayat' => 'Tanah Ulayat',
                         ]),
 
                     TextInput::make('luas_tanah')
@@ -215,7 +232,6 @@ class SekolahPage extends Page implements HasSchemas
 
             Section::make('Penyelenggara / Yayasan')
                 ->description('Informasi tentang yayasan atau penyelenggara sekolah')
-                ->icon('heroicon-o-briefcase')
                 ->columns(3)
                 ->schema([
                     TextInput::make('nama_yayasan')
@@ -224,7 +240,7 @@ class SekolahPage extends Page implements HasSchemas
                         ->label('SK Pendirian Yayasan'),
                     Textarea::make('alamat_yayasan')
                         ->label('Alamat Penyelenggara / Yayasan')
-                        ->rows(3)
+                        ->rows(2)
                         ->columnSpanFull(),
 
                 ]),
@@ -247,6 +263,7 @@ class SekolahPage extends Page implements HasSchemas
                 ]),
         ]);
     }
+
 
     /**
      * @return array<Action>

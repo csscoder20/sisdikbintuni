@@ -2,12 +2,8 @@
 
 namespace App\Filament\Resources\GtkJamAjars;
 
-use App\Filament\Resources\GtkJamAjars\Pages\CreateGtkJamAjar;
-use App\Filament\Resources\GtkJamAjars\Pages\EditGtkJamAjar;
 use App\Filament\Resources\GtkJamAjars\Pages\ListGtkJamAjars;
-use App\Filament\Resources\GtkJamAjars\Pages\ViewGtkJamAjar;
 use App\Filament\Resources\GtkJamAjars\Schemas\GtkJamAjarForm;
-use App\Filament\Resources\GtkJamAjars\Schemas\GtkJamAjarInfolist;
 use App\Filament\Resources\GtkJamAjars\Tables\GtkJamAjarsTable;
 use App\Models\GtkJamAjar;
 use BackedEnum;
@@ -48,10 +44,7 @@ class GtkJamAjarResource extends Resource
         return GtkJamAjarForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return GtkJamAjarInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -77,9 +70,6 @@ class GtkJamAjarResource extends Resource
     {
         return [
             'index' => ListGtkJamAjars::route('/'),
-            'create' => CreateGtkJamAjar::route('/create'),
-            'view' => ViewGtkJamAjar::route('/{record}'),
-            'edit' => EditGtkJamAjar::route('/{record}/edit'),
         ];
     }
 }

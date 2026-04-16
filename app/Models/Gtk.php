@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Gtk extends Model
 {
+    use \App\Traits\HasActivityLog;
     protected $table = 'gtk';
     protected $fillable = [
         'nama',

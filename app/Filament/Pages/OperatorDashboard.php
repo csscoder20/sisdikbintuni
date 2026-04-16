@@ -3,18 +3,18 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
-use Filament\Panel;
 use Illuminate\Contracts\Support\Htmlable;
 use App\Models\LaporanGedung;
 use App\Models\Gtk;
 use App\Models\Siswa;
 use App\Models\Rombel;
+use App\Models\Laporan;
 use App\Models\Sekolah;
 use Filament\Facades\Filament;
 
 class OperatorDashboard extends BaseDashboard
 {
-    protected static ?string $navigationLabel = 'Dashboard';
+    protected static ?string $navigationLabel = 'Dasbor';
     protected static ?int $navigationSort = 1;
     protected string $view = 'filament.pages.laporan-bulanan';
 
@@ -24,15 +24,30 @@ class OperatorDashboard extends BaseDashboard
     }
 
     public array $checklist = [
-        'identitas_sekolah' => 'Identitas Sekolah',
-        'nominatif_gtk' => 'Nominatif GTK',
-        'nominatif_siswa' => 'Nominatif Siswa',
+        'siswa_rombel' => 'Siswa per Rombel',
+        'siswa_umur' => 'Siswa per Umur',
+        'siswa_agama' => 'Siswa per Agama',
+        'siswa_daerah' => 'Siswa per Daerah',
+        'siswa_disabilitas' => 'Siswa Disabilitas',
+        'siswa_beasiswa' => 'Siswa Beasiswa',
+        'gtk_agama' => 'GTK per Agama',
+        'gtk_daerah' => 'GTK per Daerah',
+        'gtk_status' => 'GTK per Status',
+        'gtk_umur' => 'GTK per Umur',
+        'gtk_pendidikan' => 'GTK per Pendidikan',
         'kondisi_sarpras' => 'Kondisi Sarpras',
-        'kondisi_gtk' => 'Kondisi GTK',
-        'kondisi_siswa' => 'Kondisi Siswa',
         'sebaran_jam' => 'Sebaran Jam Mengajar',
         'rekap_kehadiran' => 'Rekap Kehadiran GTK',
         'kelulusan' => 'Data Kelulusan 5 Tahun Terakhir'
+    ];
+
+    public array $groups = [
+        'Keadaan Siswa' => ['siswa_rombel', 'siswa_umur', 'siswa_agama', 'siswa_daerah', 'siswa_disabilitas', 'siswa_beasiswa'],
+        'Keadaan GTK' => ['gtk_agama', 'gtk_daerah', 'gtk_status', 'gtk_umur', 'gtk_pendidikan'],
+        'Sarpras' => ['kondisi_sarpras'],
+        'Sebaran Jam' => ['sebaran_jam'],
+        'Kehadiran' => ['rekap_kehadiran'],
+        'Kelulusan' => ['kelulusan'],
     ];
 
     public array $checklistStatus = [];
@@ -55,36 +70,25 @@ class OperatorDashboard extends BaseDashboard
     public function mount()
     {
         $schoolId = auth()->user()->sekolah?->id;
+        $month = (int) date('m');
+        $year = (int) date('Y');
 
+        // Fetch the report for the current period
+        $laporan = Laporan::where('sekolah_id', $schoolId)
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        // Initialize status based on Laporan record columns
+        foreach ($this->checklist as $key => $label) {
+            $column = "is_{$key}_valid";
+            $this->checklistStatus[$key] = $laporan ? ($laporan->$column ?? false) : false;
+        }
+
+        // Automatic check for identitas_sekolah (as requested, no manual button)
         $this->checklistStatus['identitas_sekolah'] =
             auth()->user()->sekolah?->alamat != null &&
             auth()->user()->sekolah?->nama != null;
-
-        $this->checklistStatus['nominatif_gtk'] =
-            Gtk::where('sekolah_id', $schoolId)->count() > 0;
-
-        $this->checklistStatus['nominatif_siswa'] =
-            Siswa::where('sekolah_id', $schoolId)->count() > 0;
-
-        $this->checklistStatus['kondisi_sarpras'] =
-            LaporanGedung::whereHas('laporan', function ($q) use ($schoolId) {
-                $q->where('sekolah_id', $schoolId);
-            })->count() > 0;
-
-        $this->checklistStatus['kondisi_gtk'] =
-            $this->checklistStatus['nominatif_gtk'];
-
-        $this->checklistStatus['kondisi_siswa'] =
-            $this->checklistStatus['nominatif_siswa'];
-
-        $this->checklistStatus['sebaran_jam'] =
-            $this->checklistStatus['nominatif_gtk'];
-
-        $this->checklistStatus['rekap_kehadiran'] =
-            $this->checklistStatus['nominatif_gtk'];
-
-        $this->checklistStatus['kelulusan'] =
-            $this->checklistStatus['nominatif_siswa'];
     }
 
     public static function getNavigationIcon(): ?string
@@ -107,13 +111,18 @@ class OperatorDashboard extends BaseDashboard
     {
         $schoolId = auth()->user()->sekolah?->id;
 
+        // Group granular checklist items to their respective preview data fetchers
+        if (str_starts_with($type, 'siswa_')) {
+            return $this->getKondisiSiswaData($schoolId);
+        }
+
+        if (str_starts_with($type, 'gtk_')) {
+            return $this->getKondisiGtkData($schoolId);
+        }
+
         return match ($type) {
             'identitas_sekolah' => $this->getIdentitasSekolahData($schoolId),
-            'nominatif_gtk' => $this->getNominatifGtkData($schoolId),
-            'nominatif_siswa' => $this->getNominatifSiswaData($schoolId),
             'kondisi_sarpras' => $this->getKondisiSarprasData($schoolId),
-            'kondisi_gtk' => $this->getKondisiGtkData($schoolId),
-            'kondisi_siswa' => $this->getKondisiSiswaData($schoolId),
             'sebaran_jam' => $this->getSebaranJamData($schoolId),
             'rekap_kehadiran' => $this->getRekapKehadiranData($schoolId),
             'kelulusan' => $this->getKelulusanData($schoolId),

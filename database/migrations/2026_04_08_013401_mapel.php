@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('kode_mapel')->nullable();
             $table->string('nama_mapel');
-            $table->decimal('jjp', 5, 2)->nullable();
+            $table->integer('jjp')->nullable();
             $table->string('jenjang')->nullable();
             $table->string('tingkat')->nullable();
             $table->timestamps();

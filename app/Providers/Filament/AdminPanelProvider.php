@@ -15,6 +15,7 @@ use Filament\Widgets\FilamentInfoWidget;
 use App\Models\Sekolah;
 use App\Filament\Pages\OperatorDashboard;
 use App\Filament\Pages\DinasDashboard;
+use App\Filament\Pages\SuperAdminDashboard;
 use App\Filament\Pages\SekolahPage;
 use Filament\Facades\Filament;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -67,11 +68,9 @@ class AdminPanelProvider extends PanelProvider
                     </span>
                 </div>
             '))
-            ->simpleProfilePage(true)
-            ->profile()
+            ->profile(isSimple: false)
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
-            ->profile()
             ->breadcrumbs(false)
             ->globalSearch(false)
             ->sidebarWidth('16rem')
@@ -89,8 +88,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->resources([
                 \App\Filament\Resources\Users\UserResource::class,
+                \App\Filament\Resources\ActivityLog\ActivityLogResource::class,
             ])
             ->pages([
+                SuperAdminDashboard::class,
                 DinasDashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
@@ -158,8 +159,6 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Green,
             ])
-            ->simpleProfilePage(true)
-            ->profile()
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
             ->profile()
@@ -212,10 +211,11 @@ class AdminPanelProvider extends PanelProvider
                 'Laporan Bulanan',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 OperatorDashboard::class,
                 SekolahPage::class,
+                KeadaanGtk::class,
+                KeadaanSiswa::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

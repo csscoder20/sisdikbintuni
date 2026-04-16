@@ -49,8 +49,6 @@ class KelulusanResource extends Resource
     {
         return [
             'index' => Pages\ListKelulusan::route('/'),
-            'create' => Pages\CreateKelulusan::route('/create'),
-            'edit' => Pages\EditKelulusan::route('/{record}/edit'),
         ];
     }
 }

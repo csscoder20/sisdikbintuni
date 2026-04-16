@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Mapels;
 
-use App\Filament\Resources\Mapels\Pages\CreateMapel;
-use App\Filament\Resources\Mapels\Pages\EditMapel;
 use App\Filament\Resources\Mapels\Pages\ListMapels;
 use App\Filament\Resources\Mapels\Schemas\MapelForm;
 use App\Filament\Resources\Mapels\Tables\MapelsTable;
@@ -52,8 +50,6 @@ class MapelResource extends Resource
     {
         return [
             'index' => ListMapels::route('/'),
-            'create' => CreateMapel::route('/create'),
-            'edit' => EditMapel::route('/{record}/edit'),
         ];
     }
 }

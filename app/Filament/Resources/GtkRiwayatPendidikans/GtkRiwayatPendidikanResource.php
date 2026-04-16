@@ -2,12 +2,8 @@
 
 namespace App\Filament\Resources\GtkRiwayatPendidikans;
 
-use App\Filament\Resources\GtkRiwayatPendidikans\Pages\CreateGtkRiwayatPendidikan;
-use App\Filament\Resources\GtkRiwayatPendidikans\Pages\EditGtkRiwayatPendidikan;
 use App\Filament\Resources\GtkRiwayatPendidikans\Pages\ListGtkRiwayatPendidikans;
-use App\Filament\Resources\GtkRiwayatPendidikans\Pages\ViewGtkRiwayatPendidikan;
 use App\Filament\Resources\GtkRiwayatPendidikans\Schemas\GtkRiwayatPendidikanForm;
-use App\Filament\Resources\GtkRiwayatPendidikans\Schemas\GtkRiwayatPendidikanInfolist;
 use App\Filament\Resources\GtkRiwayatPendidikans\Tables\GtkRiwayatPendidikansTable;
 use App\Models\GtkPendidikan;
 use BackedEnum;
@@ -47,10 +43,7 @@ class GtkRiwayatPendidikanResource extends Resource
         return GtkRiwayatPendidikanForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return GtkRiwayatPendidikanInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -76,9 +69,6 @@ class GtkRiwayatPendidikanResource extends Resource
     {
         return [
             'index' => ListGtkRiwayatPendidikans::route('/'),
-            'create' => CreateGtkRiwayatPendidikan::route('/create'),
-            'view' => ViewGtkRiwayatPendidikan::route('/{record}'),
-            'edit' => EditGtkRiwayatPendidikan::route('/{record}/edit'),
         ];
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 class User extends Authenticatable implements HasTenants
 {
-    use HasRoles;
+    use HasRoles, \App\Traits\HasActivityLog;
 
     protected $fillable = [
         'name',

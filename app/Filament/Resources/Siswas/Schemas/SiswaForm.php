@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Siswas\Schemas;
 
+use App\Models\WilayahKabBintuni;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
@@ -22,36 +24,73 @@ class SiswaForm
                 TextInput::make('nik')
                 ->label('NIK')
                     ->required(),
-                Select::make('jenis_kelamin')
+                Radio::make('jenis_kelamin')
                 ->label('Jenis Kelamin')
                     ->options([
                         'Laki-laki' => 'Laki-laki',
                         'Perempuan' => 'Perempuan',
                     ])
+                    ->inline()
                     ->required(),
                 TextInput::make('tempat_lahir')
                 ->label('Tempat Lahir'),
                 DatePicker::make('tanggal_lahir')
-                ->label('Tanggal Lahir'),
-                TextInput::make('agama')
-                ->label('Agama'),
+                ->label('Tanggal Lahir')
+                ->native(false)
+                ->displayFormat('d/m/Y'),
+                Select::make('agama')
+                ->label('Agama')
+                ->options([
+                    'Islam' => 'Islam',
+                    'Kristen Protestan' => 'Kristen Protestan',
+                    'Katolik' => 'Katolik',
+                    'Hindu' => 'Hindu',
+                    'Buddha' => 'Buddha',
+                    'Konghucu' => 'Konghucu',
+                ]),
                 TextInput::make('alamat')
-                ->label('Alamat Lengkap')
+                ->label('Alamat Domisili')
                     ->columnSpanFull(),
                 TextInput::make('provinsi')
-                ->label('Provinsi'),
+                    ->label('Provinsi')
+                    ->default('Papua Barat')
+                    ->disabled()
+                    ->dehydrated(true),
                 TextInput::make('kabupaten')
-                ->label('Kabupaten'),
-                TextInput::make('kecamatan')
-                ->label('Kecamatan'),
-                TextInput::make('desa')
-                ->label('Desa'),
-                // TextInput::make('tahun_masuk')
-                // ->label('Tahun Masuk')
-                //     ->numeric(),
-                // TextInput::make('tahun_keluar')
-                // ->label('Tahun Keluar')
-                //     ->numeric(),
+                    ->label('Kabupaten')
+                    ->default('Teluk Bintuni')
+                    ->disabled()
+                    ->dehydrated(true),
+                Select::make('kecamatan')
+                    ->label('Kecamatan')
+                    ->options(function () {
+                        return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                            ->pluck('nama', 'nama');
+                    })
+                    ->live()
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
+                    ->searchable(),
+                Select::make('desa')
+                    ->label('Desa')
+                    ->options(function (callable $get) {
+                        $kecamatan = $get('kecamatan');
+                        if (! $kecamatan) {
+                            return [];
+                        }
+                        
+                        $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
+                            ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                            ->first();
+
+                        if (!$kecamatanModel) {
+                            return [];
+                        }
+
+                        return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
+                            ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
+                            ->pluck('nama', 'nama');
+                    })
+                    ->searchable(),
                 Select::make('status')
                 ->label('Status Siswa')
                 ->options([

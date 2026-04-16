@@ -57,7 +57,7 @@ class RedirectIncorrectPanel
                 ->info()
                 ->send();
 
-            return redirect()->to('/admin/dinas');
+            return redirect()->to($user->isSuperAdmin() ? '/admin/superadmin' : '/admin/dinas');
         }
 
         // 3. If Operator tries to access a School panel that does NOT match their jenjang

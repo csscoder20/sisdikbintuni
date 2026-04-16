@@ -1,0 +1,66 @@
+Master Data
+	Data Sekolah
+		- Profil
+		- Rombel
+		- Mapel
+	
+
+	Data Siswa
+		- Nominatif Siswa
+		- 
+
+	Data GTK
+		- Nominatif GTK
+		- Riwayat Pendidikan GTK
+		- Rekening & NPWP (ganti Keuangan GTK)
+	
+	
+Laporan Bulanan
+	Keadaan Gedung/Ruang (jangan pakai Keadaan Sarpras) crud
+	Keadaan Siswa
+		-Jumlah Siswa (awal bulan, mutase, dll)
+	Keadaan GTK
+		- Agama
+		- Daerah
+		- dll
+	Sebaran Jam Mengajar crud
+	Kehadiran GTK crud
+	Kelulusan crud
+	
+	
+	
+Data Transaksi
+
+
+
+Catatan:
+	- # Tambahkan table footer untuk jumlah data di menu lapaoran bulanan
+	- # Tambahkan kolom mutasi keluar di Keadaan Siswa
+		kondisi:
+			- jumlah awal bulan ini = jumlah akhir bulan sebelumnya
+			- jumlah akhir bulan ini = jumlah awal bulan ini + mutasi masuk - mutasi keluar - putus sekolah + mengulang (akhir bulan dipindahkan di bagian terakhir table)
+
+	- # Ubah Enum di resource untuk siswa
+	- tambahkan button di setiap header table apabila datanya sudah valid. Status = Valid misalnya 
+	- # disabilitas dan beasiswa ditampilkan semua datanya di table termasuk yang 0
+	- # Jenis kelamin di keadaan gtk tidak perlu
+	- # tambah agama di keadaan gtk by agama (konghucu) (jumlah pakai singkatan JML di semua tabel)
+	- # Status Kepegawaian per Jenis GTK diubah Status Kepegawaian
+	- # Untuk table Status Kepegawaian di Keadaan GTK, split PNS menjadi Gol IV, dll secara berurutan (Gol I/a, Gol II/b, Gol III, Gol IV)		
+	- # Jumlah GTK Berdasarkan Pendidikan diubah Jumlah GTK Berdasarkan Pendidikan Terakhir
+	- # Keadaan Sarpras (dihilangkan kolom tahun dan bulan)
+	- # tambah database table maple (id, kode_mapel, nama mapel, jjp, jenjang, timestamps) relasi ke table mengajar. Di table mengajar, field mapel diganti mapel id dari table mapel
+
+
+16 April 2026
+- Tipe untuk jp integer
+- jenjang di mapel dibuatkan opsi (SD, SMP, SMA, SMK)
+- rampilan view di semua resources dirapikan. Tambahkan menu untuk kembali. no timestamps
+- alamat domisili di nominatif siswa
+- tambahkan master wilayah. Untuk alamat domisili siswa menggunakan dropdown pilihan provinsi, kec. dll.
+- agam dropdown
+- jk radio button
+- import nomintif gtk dan nominatif siswa
+- kolom GTK - Diubah jadi nama - Riwayat Pendidikan GTK & Rekening & NPWP 
+- Keadaan Gedung/Ruang - tambahkan fitur import data
+- 

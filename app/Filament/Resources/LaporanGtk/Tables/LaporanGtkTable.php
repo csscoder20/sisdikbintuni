@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\LaporanGtk\Tables;
 
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -25,6 +27,10 @@ class LaporanGtkTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ]);
     }
 }

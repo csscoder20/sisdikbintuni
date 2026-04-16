@@ -7,6 +7,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ImportAction;
+use App\Filament\Imports\GtkPendidikanImporter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -17,7 +19,7 @@ class GtkRiwayatPendidikansTable
         return $table
             ->columns([
                 TextColumn::make('gtk.nama')
-                    ->label('GTK')
+                    ->label('Nama GTK')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('thn_tamat_sma')

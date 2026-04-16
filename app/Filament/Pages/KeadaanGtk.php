@@ -12,12 +12,51 @@ use BackedEnum;
 use Filament\Support\Icons\Heroicon;
 
 use Livewire\WithPagination;
+use App\Filament\Actions\ValidateChecklistAction;
 use Livewire\Attributes\Url;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class KeadaanGtk extends Page
 {
     use WithPagination;
+
+    public function getLaporanStatus(string $type): bool
+    {
+        $sekolahId = filament()->getTenant()?->id;
+        $laporan = \App\Models\Laporan::where([
+            'sekolah_id' => $sekolahId,
+            'bulan' => (int) date('m'),
+            'tahun' => (int) date('Y'),
+        ])->first();
+
+        $column = "is_{$type}_valid";
+        return $laporan ? (bool) $laporan->$column : false;
+    }
+
+    public function validateGtkAgamaAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkAgama', 'gtk_agama', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateGtkDaerahAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkDaerah', 'gtk_daerah', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateGtkStatusAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkStatus', 'gtk_status', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateGtkUmurAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkUmur', 'gtk_umur', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateGtkPendidikanAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkPendidikan', 'gtk_pendidikan', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
 
     protected static ?string $navigationLabel = 'Keadaan GTK';
     protected static ?int $navigationSort = 3;

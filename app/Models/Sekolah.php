@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sekolah extends Model
 {
+    use \App\Traits\HasActivityLog;
     protected $table = 'sekolah';
 
     protected $fillable = [

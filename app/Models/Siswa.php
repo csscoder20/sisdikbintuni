@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Siswa extends Model
 {
+    use \App\Traits\HasActivityLog;
     protected $table = 'siswa';
     protected $fillable = [
         'nama',

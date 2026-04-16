@@ -2,12 +2,8 @@
 
 namespace App\Filament\Resources\Siswas;
 
-use App\Filament\Resources\Siswas\Pages\CreateSiswa;
-use App\Filament\Resources\Siswas\Pages\EditSiswa;
 use App\Filament\Resources\Siswas\Pages\ListSiswas;
-use App\Filament\Resources\Siswas\Pages\ViewSiswa;
 use App\Filament\Resources\Siswas\Schemas\SiswaForm;
-use App\Filament\Resources\Siswas\Schemas\SiswaInfolist;
 use App\Filament\Resources\Siswas\Tables\SiswasTable;
 use App\Models\Siswa;
 use BackedEnum;
@@ -52,10 +48,7 @@ class SiswaResource extends Resource
         return SiswaForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return SiswaInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -73,9 +66,6 @@ class SiswaResource extends Resource
     {
         return [
             'index' => ListSiswas::route('/'),
-            'create' => CreateSiswa::route('/create'),
-            'view' => ViewSiswa::route('/{record}'),
-            'edit' => EditSiswa::route('/{record}/edit'),
         ];
     }
 }

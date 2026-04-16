@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kelulusan extends Model
 {
+    use \App\Traits\HasActivityLog;
     protected $table = 'kelulusan';
 
     protected $fillable = [

@@ -2,12 +2,8 @@
 
 namespace App\Filament\Resources\Gtks;
 
-use App\Filament\Resources\Gtks\Pages\CreateGtk;
-use App\Filament\Resources\Gtks\Pages\EditGtk;
 use App\Filament\Resources\Gtks\Pages\ListGtks;
-use App\Filament\Resources\Gtks\Pages\ViewGtk;
 use App\Filament\Resources\Gtks\Schemas\GtkForm;
-use App\Filament\Resources\Gtks\Schemas\GtkInfolist;
 use App\Filament\Resources\Gtks\Tables\GtksTable;
 use App\Models\Gtk;
 use BackedEnum;
@@ -50,10 +46,7 @@ class GtkResource extends Resource
         return GtkForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return GtkInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -71,9 +64,6 @@ class GtkResource extends Resource
     {
         return [
             'index' => ListGtks::route('/'),
-            'create' => CreateGtk::route('/create'),
-            'view' => ViewGtk::route('/{record}'),
-            'edit' => EditGtk::route('/{record}/edit'),
         ];
     }
 }

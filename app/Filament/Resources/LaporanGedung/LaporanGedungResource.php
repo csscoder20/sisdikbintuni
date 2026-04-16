@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\LaporanGedung;
 
-use App\Filament\Resources\LaporanGedung\Pages\CreateLaporanGedung;
-use App\Filament\Resources\LaporanGedung\Pages\EditLaporanGedung;
 use App\Filament\Resources\LaporanGedung\Pages\ListLaporanGedung;
 use App\Filament\Resources\LaporanGedung\Schemas\LaporanGedungForm;
 use App\Filament\Resources\LaporanGedung\Tables\LaporanGedungTable;
@@ -71,8 +69,6 @@ class LaporanGedungResource extends Resource
     {
         return [
             'index' => ListLaporanGedung::route('/'),
-            'create' => CreateLaporanGedung::route('/create'),
-            'edit' => EditLaporanGedung::route('/{record}/edit'),
         ];
     }
 }

@@ -5,6 +5,24 @@
         button {
             font-size: .875rem;
         }
+        
+        .checklist-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr;
+        }
+        
+        @media (min-width: 1024px) {
+            .checklist-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .card-siswa { grid-column: 1; grid-row: 1 / span 2; }
+            .card-gtk { grid-column: 2; grid-row: 1 / span 2; }
+            .card-sarpras { grid-column: 3; grid-row: 1; }
+            .card-sebaran { grid-column: 4; grid-row: 1; }
+            .card-kehadiran { grid-column: 3; grid-row: 2; }
+            .card-kelulusan { grid-column: 4; grid-row: 2; }
+        }
     </style>
     <!-- Dashboard Header -->
     <div style="margin-bottom: 0rem;">
@@ -112,31 +130,59 @@
         <h2 style="font-size: 1rem; font-weight: bold; margin-bottom: 1.5rem; color: #1f2937;">Checklist Pembaruan
             Laporan Bulanan</h2>
 
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0rem;">
+        <div class="checklist-grid">
+            @foreach ($this->groups as $groupLabel => $items)
+                @php
+                    $doneInGroup = collect($items)->filter(fn($key) => $this->checklistStatus[$key] ?? false)->count();
+                    $totalInGroup = count($items);
+                    $isGroupDone = $doneInGroup === $totalInGroup;
 
-            <!-- Checkbox Semua -->
-            <div
-                style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; grid-column: span 3; border-bottom:1px solid #e5e7eb; margin-bottom:0.5rem;">
-                <input type="checkbox" id="checkbox-all"
-                    style="width: 20px; height: 20px; cursor: pointer; accent-color: #10b981;">
-                <label for="checkbox-all"
-                    style="margin: 0; cursor: pointer; flex: 1; color: #1f2937; font-weight: 600;">
-                    Semua
-                </label>
-            </div>
+                    $cardClass = '';
+                    if ($groupLabel === 'Keadaan Siswa') $cardClass = 'card-siswa';
+                    elseif ($groupLabel === 'Keadaan GTK') $cardClass = 'card-gtk';
+                    elseif ($groupLabel === 'Sarpras') $cardClass = 'card-sarpras';
+                    elseif ($groupLabel === 'Sebaran Jam') $cardClass = 'card-sebaran';
+                    elseif ($groupLabel === 'Kehadiran') $cardClass = 'card-kehadiran';
+                    elseif ($groupLabel === 'Kelulusan') $cardClass = 'card-kelulusan';
+                @endphp
+                <div class="{{ $cardClass }}" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem;">
 
-            @foreach ($this->checklist as $key => $label)
-                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0;">
-                    <input type="checkbox" id="checkbox-{{ $key }}" name="report_items[]"
-                        value="{{ $key }}" class="report-checkbox"
-                        style="width: 20px; height: 20px; cursor: pointer; accent-color: #3b82f6;">
-                    <label for="checkbox-{{ $key }}"
-                        style="margin: 0; cursor: pointer; flex: 1; color: #1f2937; font-weight: 500;">
-                        {{ $label }}
-                    </label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid {{ $isGroupDone ? '#10b981' : '#e5e7eb' }}; padding-bottom: 0.5rem;">
+                        <h3 style="font-size: 0.9rem; font-weight: 700; color: #374151; margin: 0;">{{ $groupLabel }}</h3>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: {{ $isGroupDone ? '#059669' : '#6b7280' }};">
+                            {{ $doneInGroup }}/{{ $totalInGroup }} Valid
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        @foreach ($items as $key)
+                            @php
+                                $label = $this->checklist[$key] ?? $key;
+                                $isDone = $this->checklistStatus[$key] ?? false;
+                            @endphp
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.25rem 0;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="checkbox-{{ $key }}" 
+                                        {{ $isDone ? 'checked' : '' }}
+                                        disabled
+                                        value="{{ $key }}"
+                                        class="report-checkbox"
+                                        style="width: 16px; height: 16px; cursor: default; accent-color: #10b981;">
+                                    <label for="checkbox-{{ $key }}"
+                                        style="margin: 0; font-size: 0.8rem; color: {{ $isDone ? '#111827' : '#6b7280' }};">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                                @if($isDone)
+                                    <svg style="width: 16px; height: 16px; color: #10b981;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             @endforeach
-
         </div>
     </form>
 
@@ -186,41 +232,57 @@
                             </div>
                         @else
                             @if ($key === 'identitas_sekolah')
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                    @foreach ($previewData as $item)
-                                        <div
-                                            style="display: flex; justify-content: space-between; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.75rem;">
-                                            <p style="font-weight: 500; color: #4b5563; margin: 0;">
-                                                {{ $item['label'] }}</p>
-                                            <p style="color: #1f2937; margin: 0;">{{ $item['value'] }}</p>
-                                        </div>
-                                    @endforeach
+                                <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left;">
+                                        <tbody>
+                                            @foreach ($previewData as $item)
+                                                <tr style="border-bottom: 1px solid #e5e7eb; {{ $loop->even ? 'background-color: #f9fafb;' : 'background-color: white;' }}">
+                                                    <th style="padding: 0.75rem 1rem; font-weight: 600; color: #374151; width: 30%; border-right: 1px solid #e5e7eb;">
+                                                        {{ $item['label'] }}
+                                                    </th>
+                                                    <td style="padding: 0.75rem 1rem; color: #1f2937;">
+                                                        {{ $item['value'] }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             @else
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                    @foreach ($previewData as $index => $item)
-                                        <div style="border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem;">
-                                            <h4 style="font-weight: 600; color: #1f2937; margin: 0 0 0.5rem 0;">
-                                                {{ $index + 1 }}. {{ $item['label'] }}
-                                            </h4>
-                                            @if (is_array($item['details']))
-                                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                                    @foreach ($item['details'] as $detailKey => $detailValue)
-                                                        <div
-                                                            style="display: flex; justify-content: space-between; font-size: 0.875rem;">
-                                                            <span style="color: #6b7280;">{{ $detailKey }}</span>
-                                                            <span
-                                                                style="font-weight: 500; color: #1f2937;">{{ $detailValue }}</span>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <p style="color: #4b5563; margin: 0;">{{ $item['details'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                @php
+                                    $firstDetails = collect($previewData)->first()['details'] ?? [];
+                                    $headers = is_array($firstDetails) ? array_keys($firstDetails) : ['Keterangan'];
+                                @endphp
+                                <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left;">
+                                        <thead>
+                                            <tr style="background-color: #f3f4f6; border-bottom: 2px solid #d1d5db;">
+                                                <th style="padding: 0.75rem 1rem; font-weight: 600; color: #374151; border-right: 1px solid #e5e7eb; width: 50px; text-align: center;">No.</th>
+                                                <th style="padding: 0.75rem 1rem; font-weight: 600; color: #374151; border-right: 1px solid #e5e7eb;">Nama Lengkap / Rincian</th>
+                                                @foreach ($headers as $header)
+                                                    <th style="padding: 0.75rem 1rem; font-weight: 600; color: #374151; border-right: 1px solid #e5e7eb;">{{ $header }}</th>
+                                                @endforeach
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($previewData as $index => $item)
+                                                <tr style="border-bottom: 1px solid #e5e7eb; {{ $loop->even ? 'background-color: #f9fafb;' : 'background-color: white;' }} hover:background-color: #f3f4f6;">
+                                                    <td style="padding: 0.75rem 1rem; color: #6b7280; text-align: center; border-right: 1px solid #e5e7eb;">{{ $index + 1 }}</td>
+                                                    <td style="padding: 0.75rem 1rem; font-weight: 500; color: #1f2937; border-right: 1px solid #e5e7eb;">{{ $item['label'] }}</td>
+                                                    @if (is_array($item['details']))
+                                                        @foreach ($headers as $header)
+                                                            <td style="padding: 0.75rem 1rem; color: #4b5563; border-right: 1px solid #e5e7eb;">{{ $item['details'][$header] ?? '-' }}</td>
+                                                        @endforeach
+                                                    @else
+                                                        <td style="padding: 0.75rem 1rem; color: #4b5563;" colspan="{{ count($headers) }}">{{ $item['details'] }}</td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             @endif
+
                         @endif
                     </div>
 
@@ -254,9 +316,13 @@
             <div id="preview-modal-body" style="overflow:auto; padding:1.5rem;"></div>
 
             <!-- Footer -->
-            <div style="padding:1rem; border-top:1px solid #e5e7eb;">
-                <button id="preview-modal-close-2"
-                    style="width:100%; background:#e5e7eb; padding:0.75rem; border:none; border-radius:6px;">
+            <div style="padding:1rem; border-top:1px solid #e5e7eb; display:flex; gap:1rem;">
+                <button type="button" id="preview-modal-pdf"
+                    style="flex:1; background:#ef4444; color:white; padding:0.75rem; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:background-color 0.2s;">
+                    Unduh PDF
+                </button>
+                <button type="button" id="preview-modal-close-2"
+                    style="flex:1; background:#e5e7eb; padding:0.75rem; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:background-color 0.2s;">
                     Tutup
                 </button>
             </div>
@@ -266,12 +332,14 @@
 
 </x-filament-panels::page>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
         const totalItems = {{ count($this->checklist) }};
         const checkboxes = document.querySelectorAll('.report-checkbox');
-        const checkboxAll = document.getElementById('checkbox-all');
 
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
@@ -286,20 +354,9 @@
 
             progressBar.style.width = percentage + '%';
             progressText.textContent = percentage + '%';
-
-            checkboxAll.checked = checkedCount === checkboxes.length;
         }
 
-        // checkbox semua
-        checkboxAll.addEventListener('change', function() {
-            checkboxes.forEach(cb => cb.checked = checkboxAll.checked);
-            updateProgress();
-        });
-
-        // checkbox satuan
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateProgress);
-        });
+        // Remove manual change listeners as they are disabled
 
         // close modal lama
         modalCloseButtons.forEach(btn => {
@@ -376,11 +433,52 @@
             document.body.style.overflow = 'hidden';
         });
 
+        // download pdf
+        document.getElementById('preview-modal-pdf').addEventListener('click', function() {
+            const element = document.getElementById('preview-modal-body');
+            
+            // Setup PDF options - dioptimalkan untuk kecepatan
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     'Laporan_Bulanan_Review.pdf',
+                image:        { type: 'jpeg', quality: 0.85 }, // Sedikit diturunkan agar lebih cepat
+                html2canvas:  { scale: 1.5, useCORS: false, logging: false }, // Skala dikecilkan dari 2 ke 1.5 (menghemat waktu proses render 2x lipat)
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true } // Kompresi dinyalakan
+            };
+            
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            // Inject animated spinner SVG
+            const spinnerSvg = `<svg style="animation: spin 1s linear infinite; display: inline-block; width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            
+            // Ensure @keyframes spin is available for inline style
+            if (!document.getElementById('spin-keyframes')) {
+                const style = document.createElement('style');
+                style.id = 'spin-keyframes';
+                style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            }
+
+            btn.innerHTML = `<div style="display: flex; align-items: center; justify-content: center;">${spinnerSvg} Memproses Dokumen...</div>`;
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'not-allowed';
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
+        });
+
         // close preview modal
         document.getElementById('preview-modal-close').addEventListener('click', closePreview);
         document.getElementById('preview-modal-close-2').addEventListener('click', closePreview);
 
         function closePreview() {
+
             document.getElementById('preview-modal').style.display = 'none';
             document.body.style.overflow = 'auto';
         }

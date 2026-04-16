@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Mapels\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -21,9 +22,14 @@ class MapelForm
                 TextInput::make('jjp')
                     ->label('JJP (Jumlah Jam Pelajaran)')
                     ->numeric(),
-                TextInput::make('jenjang')
+                Select::make('jenjang')
                     ->label('Jenjang')
-                    ->maxLength(255),
+                    ->options([
+                        'SD' => 'SD',
+                        'SMP' => 'SMP',
+                        'SMA' => 'SMA',
+                        'SMK' => 'SMK',
+                    ]),
             ]);
     }
 }

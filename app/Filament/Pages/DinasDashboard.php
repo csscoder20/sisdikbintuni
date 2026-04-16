@@ -33,9 +33,11 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class DinasDashboard extends BaseDashboard
 {
+    protected static ?string $navigationLabel = 'Dasbor';
+
     public static function canAccess(): bool
     {
-        return auth()->check() && !auth()->user()->hasRole('operator');
+        return auth()->check() && auth()->user()->hasRole('admin_dinas');
     }
 
     public static function getNavigationIcon(): ?string

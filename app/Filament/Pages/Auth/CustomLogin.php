@@ -37,6 +37,20 @@ class CustomLogin extends BaseLogin
 
         $user = Filament::auth()->user();
 
+        // 1. Cek jika akun dinonaktifkan (Rejected) untuk semua role
+        if ($user && $user->status === 'rejected') {
+            Filament::auth()->logout();
+
+            Notification::make()
+                ->title('Akun Dinonaktifkan')
+                ->body('Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi Admin Dinas untuk informasi lebih lanjut.')
+                ->danger()
+                ->send();
+
+            return null;
+        }
+
+        // 2. Cek jika operator belum diverifikasi (Pending)
         if ($user && $user->hasRole('operator') && $user->status === 'pending') {
             Filament::auth()->logout();
 

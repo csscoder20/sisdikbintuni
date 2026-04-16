@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class LaporanSiswa extends Model
 {
+    use \App\Traits\HasActivityLog;
     protected $table = 'laporan_siswa';
     protected $fillable = [
         'laporan_id',

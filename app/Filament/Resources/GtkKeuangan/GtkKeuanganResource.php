@@ -56,8 +56,6 @@ class GtkKeuanganResource extends Resource
     {
         return [
             'index' => Pages\ListGtkKeuangan::route('/'),
-            'create' => Pages\CreateGtkKeuangan::route('/create'),
-            'edit' => Pages\EditGtkKeuangan::route('/{record}/edit'),
         ];
     }
 }

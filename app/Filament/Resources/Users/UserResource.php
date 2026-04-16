@@ -2,12 +2,8 @@
 
 namespace App\Filament\Resources\Users;
 
-use App\Filament\Resources\Users\Pages\CreateUser;
-use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
@@ -15,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
@@ -32,6 +29,19 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'user';
 
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (auth()->check() && auth()->user()->hasRole('admin_dinas')) {
+            $query->whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'super_admin');
+            });
+        }
+
+        return $query;
+    }
+
     public static function canViewAny(): bool
     {
         return auth()->check() && !auth()->user()->hasRole('operator');
@@ -42,10 +52,7 @@ class UserResource extends Resource
         return UserForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return UserInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -63,9 +70,6 @@ class UserResource extends Resource
     {
         return [
             'index' => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'view' => ViewUser::route('/{record}'),
-            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

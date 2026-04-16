@@ -43,7 +43,7 @@ class UsersTable
                     ->colors([
                         'success' => 'active',
                         'warning' => 'pending',
-                        'danger' => 'inactive',
+                        'danger' => 'rejected',
                     ]),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
@@ -83,6 +83,23 @@ class UsersTable
                             Notification::make()
                                 ->title('User Berhasil Diverifikasi')
                                 ->body('Status user telah diubah menjadi Aktif.')
+                                ->success()
+                                ->send();
+                        }),
+                    Action::make('deactivate')
+                        ->label('Nonaktifkan')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->hidden(fn ($record) => $record->status === 'rejected')
+                        ->requiresConfirmation()
+                        ->modalHeading('Nonaktifkan User')
+                        ->modalDescription('Apakah Anda yakin ingin menonaktifkan user ini? User yang dinonaktifkan tidak akan bisa login ke sistem.')
+                        ->action(function ($record) {
+                            $record->update(['status' => 'rejected']);
+
+                            Notification::make()
+                                ->title('User Dinonaktifkan')
+                                ->body("Status {$record->name} telah diubah menjadi Tidak Aktif.")
                                 ->success()
                                 ->send();
                         }),

@@ -181,23 +181,19 @@
     </style>
 @endpush
 
-<div class="keadaan-gtk-page">
-    <div>
-        {{-- Header Section --}}
-        <div style="margin: 2rem 0rem;">
-            <h1
-                style="font-size: 1.875rem; font-weight: 800; color: #1e293b; letter-spacing: -0.025em; margin-bottom: 0.5rem;">
-                Keadaan GTK
-            </h1>
-        </div>
+<x-filament-panels::page>
+    <div class="keadaan-gtk-page">
 
 
 
         <div style="display: grid; gap: .2rem;">
             {{-- Tabel 1: Agama --}}
             <div class="ks-card" wire:key="card-agama">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11);">
+                <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="color:#7c3aed;">Jumlah GTK Berdasarkan Agama</h2>
+                    <div wire:key="wrapper-validateGtkAgama">
+                        {{ $this->validateGtkAgamaAction }}
+                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
@@ -334,8 +330,11 @@
 
             {{-- Tabel 2: Daerah Asal --}}
             <div class="ks-card" wire:key="card-daerah">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11);">
+                <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="color:#15803d;">Jumlah GTK Berdasarkan Daerah Asal</h2>
+                    <div wire:key="wrapper-validateGtkDaerah">
+                        {{ $this->validateGtkDaerahAction }}
+                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
@@ -428,8 +427,11 @@
 
             {{-- Tabel 3: Status --}}
             <div class="ks-card" wire:key="card-status">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#faf5ff33,#f3e8ff11);">
+                <div class="ks-card-header" style="background:linear-gradient(135deg,#faf5ff33,#f3e8ff11); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="color:#7e22ce;">Status Kepegawaian</h2>
+                    <div wire:key="wrapper-validateGtkStatus">
+                        {{ $this->validateGtkStatusAction }}
+                    </div>
                 </div>
                 <div class="ks-table-wrapper" style="overflow-x: auto;">
                     <table class="ks-table" style="min-width: 1200px; border-collapse: collapse;">
@@ -570,8 +572,11 @@
 
             {{-- Tabel 4: Umur --}}
             <div class="ks-card" wire:key="card-umur">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#fff7ed33,#ffedd511);">
+                <div class="ks-card-header" style="background:linear-gradient(135deg,#fff7ed33,#ffedd511); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="color:#c2410c;">Jumlah GTK Berdasarkan Umur</h2>
+                    <div wire:key="wrapper-validateGtkUmur">
+                        {{ $this->validateGtkUmurAction }}
+                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
@@ -664,8 +669,11 @@
 
             {{-- Tabel 5: Pendidikan --}}
             <div class="ks-card" wire:key="card-pendidikan">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#fff1f233,#ffe4e611);">
+                <div class="ks-card-header" style="background:linear-gradient(135deg,#fff1f233,#ffe4e611); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="color:#be123c;">Jumlah GTK Berdasarkan Pendidikan Terakhir</h2>
+                    <div wire:key="wrapper-validateGtkPendidikan">
+                        {{ $this->validateGtkPendidikanAction }}
+                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
@@ -756,4 +764,4 @@
             </div>
         </div>
     </div>
-</div>
+</x-filament-panels::page>

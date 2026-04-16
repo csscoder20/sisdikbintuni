@@ -12,11 +12,55 @@ use BackedEnum;
 use Filament\Support\Icons\Heroicon;
 use Livewire\WithPagination;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Filament\Actions\ValidateChecklistAction;
 use Livewire\Attributes\Url;
 
 class KeadaanSiswa extends Page
 {
     use WithPagination;
+
+    public function getLaporanStatus(string $type): bool
+    {
+        $sekolahId = filament()->getTenant()?->id;
+        $laporan = \App\Models\Laporan::where([
+            'sekolah_id' => $sekolahId,
+            'bulan' => (int) date('m'),
+            'tahun' => (int) date('Y'),
+        ])->first();
+
+        $column = "is_{$type}_valid";
+        return $laporan ? (bool) $laporan->$column : false;
+    }
+
+    public function validateSiswaRombelAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaRombel', 'siswa_rombel', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateSiswaUmurAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaUmur', 'siswa_umur', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateSiswaAgamaAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaAgama', 'siswa_agama', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateSiswaDaerahAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaDaerah', 'siswa_daerah', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateSiswaDisabilitasAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaDisabilitas', 'siswa_disabilitas', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
+
+    public function validateSiswaBeasiswaAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaBeasiswa', 'siswa_beasiswa', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
+    }
 
     protected static ?string $navigationLabel = 'Keadaan Siswa';
     protected static ?int $navigationSort = 2;

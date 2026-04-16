@@ -59,8 +59,6 @@ class KehadiranGtkResource extends Resource
     {
         return [
             'index' => Pages\ListKehadiranGtk::route('/'),
-            'create' => Pages\CreateKehadiranGtk::route('/create'),
-            'edit' => Pages\EditKehadiranGtk::route('/{record}/edit'),
         ];
     }
 }

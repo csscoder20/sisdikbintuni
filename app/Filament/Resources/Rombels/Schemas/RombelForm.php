@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Rombels\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -13,9 +14,9 @@ class RombelForm
             ->components([
                 TextInput::make('nama')
                     ->required(),
-                TextInput::make('tingkat')
-                    ->required()
-                    ->numeric(),
+                Select::make('tingkat')
+                    ->options(array_combine(range(1, 12), range(1, 12)))
+                    ->required(),
             ]);
     }
 }

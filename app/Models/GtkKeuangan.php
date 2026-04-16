@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GtkKeuangan extends Model
 {
+    use \App\Traits\HasActivityLog;
     protected $table = 'gtk_keuangan';
     protected $fillable = [
         'gtk_id',

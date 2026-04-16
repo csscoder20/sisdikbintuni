@@ -63,8 +63,6 @@ class LaporanGtkResource extends Resource
     {
         return [
             'index' => Pages\ListLaporanGtk::route('/'),
-            'create' => Pages\CreateLaporanGtk::route('/create'),
-            'edit' => Pages\EditLaporanGtk::route('/{record}/edit'),
         ];
     }
 }

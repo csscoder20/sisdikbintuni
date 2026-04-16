@@ -33,7 +33,7 @@ class UserForm
                     ->options([
                         'active' => 'Aktif',
                         'pending' => 'Pending',
-                        'inactive' => 'Tidak Aktif',
+                        'rejected' => 'Tidak Aktif',
                     ])
                     ->required()
                     ->default('pending'),

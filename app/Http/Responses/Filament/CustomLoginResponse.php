@@ -13,7 +13,11 @@ class CustomLoginResponse implements LoginResponseContract
     {
         $user = Filament::auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->isSuperAdmin()) {
+            return redirect()->to('/admin/superadmin');
+        }
+
+        if ($user->isAdminDinas()) {
             return redirect()->to('/admin/dinas');
         }
 

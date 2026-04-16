@@ -316,7 +316,7 @@
             <!-- Actions -->
             <div class="nav-actions">
                 <a href="/admin/login" class="btn-login">Login</a>
-                <a href="/admin/login" class="btn-register">Register</a>
+                <a href="/admin/register" class="btn-register">Register</a>
             </div>
         </nav>
     </header>
