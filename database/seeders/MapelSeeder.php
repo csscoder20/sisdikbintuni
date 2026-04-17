@@ -21,7 +21,7 @@ class MapelSeeder extends Seeder
         }
 
         $handle = fopen($csvFile, 'r');
-        $header = fgetcsv($handle, 0, ';'); // Read header
+        fgetcsv($handle, 0, ';'); // Read header
 
         $mapelData = [];
         while (($row = fgetcsv($handle, 0, ';')) !== false) {
@@ -30,9 +30,9 @@ class MapelSeeder extends Seeder
             $mapelData[] = [
                 'kode_mapel' => $row[0],
                 'nama_mapel' => $row[1],
-                'jenjang' => $row[2],
-                'jjp' => str_replace(',', '.', $row[3]),
-                'tingkat' => $row[4],
+                'jenjang'    => $row[2],
+                'jjp'        => (float) str_replace(',', '.', $row[3]),
+                'tingkat'    => $row[4],
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -44,10 +44,7 @@ class MapelSeeder extends Seeder
         DB::transaction(function () use ($mapelData) {
             foreach ($mapelData as $data) {
                 Mapel::updateOrCreate(
-                    [
-                        'kode_mapel' => $data['kode_mapel'],
-                        'nama_mapel' => $data['nama_mapel'],
-                    ],
+                    ['kode_mapel' => $data['kode_mapel']],
                     $data
                 );
             }

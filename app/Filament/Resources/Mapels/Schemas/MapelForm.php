@@ -21,7 +21,8 @@ class MapelForm
                     ->maxLength(255),
                 TextInput::make('jjp')
                     ->label('JJP (Jumlah Jam Pelajaran)')
-                    ->numeric(),
+                    ->numeric()
+                    ->integer(),
                 Select::make('jenjang')
                     ->label('Jenjang')
                     ->options([

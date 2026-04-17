@@ -48,6 +48,44 @@ class SiswaForm
                     'Buddha' => 'Buddha',
                     'Konghucu' => 'Konghucu',
                 ]),
+                Select::make('rombel')
+                    ->label('Rombel/Kelas')
+                    ->relationship('rombel', 'nama')
+                    ->searchable()
+                    ->preload()
+                    ->saveRelationshipsUsing(function ($record, $state, $get) {
+                        $tahunAjaran = $get('tahun_ajaran');
+                        if ($state && $tahunAjaran) {
+                            $record->rombel()->sync([
+                                $state => ['tahun_ajaran' => $tahunAjaran]
+                            ]);
+                        } else {
+                            $record->rombel()->detach();
+                        }
+                    }),
+                Select::make('tahun_ajaran')
+                    ->label('Tahun Ajaran')
+                    ->options(function () {
+                        $currentYear = now()->year;
+                        $years = [];
+                        for ($i = -1; $i <= 1; $i++) {
+                            $year = $currentYear + $i;
+                            $label = $year . '/' . ($year + 1);
+                            $years[$label] = $label;
+                        }
+                        return $years;
+                    })
+                    ->default(function () {
+                        $year = now()->year;
+                        $month = now()->month;
+                        if ($month >= 7) {
+                            return $year . '/' . ($year + 1);
+                        }
+                        return ($year - 1) . '/' . $year;
+                    })
+                    ->required()
+                    ->dehydrated(false),
+
                 TextInput::make('alamat')
                 ->label('Alamat Domisili')
                     ->columnSpanFull(),

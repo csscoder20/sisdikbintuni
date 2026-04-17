@@ -259,8 +259,7 @@
                     ($item['awal_bulan_jml'] ?? 0) +
                     ($item['mutasi_jml'] ?? 0) -
                     ($item['mutasi_keluar_jml'] ?? 0) -
-                    ($item['putus_sekolah_jml'] ?? 0) +
-                    ($item['mengulang_jml'] ?? 0);
+                    ($item['putus_sekolah_jml'] ?? 0);
                 if ($expected != ($item['akhir_bulan_jml'] ?? 0)) {
                     $hasInvalidRows = true;
                     break;
@@ -272,8 +271,13 @@
 
         <div class="ks-card-header" style="background:linear-gradient(135deg,#dbeafe33,#93c5fd11); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
             <h2 style="color:#1d4ed8;">Jumlah Siswa Berdasarkan Kelas / Rombel</h2>
-            <div wire:key="wrapper-validateSiswaRombel">
-                {{ $this->validateSiswaRombelAction }}
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <div wire:key="wrapper-syncSiswaRombel">
+                    {{ $this->syncSiswaRombelAction }}
+                </div>
+                <div wire:key="wrapper-validateSiswaRombel">
+                    {{ $this->validateSiswaRombelAction }}
+                </div>
             </div>
         </div>
         @if ($hasInvalidRows)
@@ -329,8 +333,7 @@
                                 ($item['awal_bulan_jml'] ?? 0) +
                                 ($item['mutasi_jml'] ?? 0) -
                                 ($item['mutasi_keluar_jml'] ?? 0) -
-                                ($item['putus_sekolah_jml'] ?? 0) +
-                                ($item['mengulang_jml'] ?? 0);
+                                ($item['putus_sekolah_jml'] ?? 0);
                             $actual = $item['akhir_bulan_jml'] ?? 0;
                             $isInvalid = $expected != $actual;
                         @endphp

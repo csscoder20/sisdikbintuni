@@ -169,7 +169,7 @@ class AdminPanelProvider extends PanelProvider
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-globe-alt'),
             ])
-            ->breadcrumbs()
+            ->breadcrumbs(false)
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->brandName('OPERATOR ' . strtoupper($jenjang))

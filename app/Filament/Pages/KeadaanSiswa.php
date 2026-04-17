@@ -3,7 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Models\LaporanSiswa;
+use App\Models\LaporanSiswaRekap;
 use App\Models\LaporanSiswaKategori;
+use App\Models\Laporan;
+use App\Models\Rombel;
 use App\Models\Siswa;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
@@ -62,6 +65,66 @@ class KeadaanSiswa extends Page
         return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaBeasiswa', 'siswa_beasiswa', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
     }
 
+    public function syncSiswaRombelAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('syncSiswaRombel')
+            ->label('Sinkronkan Data')
+            ->icon('heroicon-m-arrow-path')
+            ->color('info')
+            ->requiresConfirmation()
+            ->modalHeading('Sinkronkan Data Real')
+            ->modalDescription('Tindakan ini akan memperbarui angka laporan berdasarkan data siswa real di rombel saat ini. Lanjutkan?')
+            ->action(function () {
+                $tenantId = filament()->getTenant()?->id;
+                $month = (int) date('m');
+                $year = (int) date('Y');
+
+                $laporan = Laporan::firstOrCreate([
+                    'sekolah_id' => $tenantId,
+                    'bulan' => $month,
+                    'tahun' => $year,
+                ]);
+
+                $rombels = Rombel::where('sekolah_id', $tenantId)->get();
+
+                foreach ($rombels as $rombel) {
+                    $laporanSiswa = LaporanSiswa::firstOrCreate([
+                        'laporan_id' => $laporan->id,
+                        'rombel_id' => $rombel->id,
+                    ]);
+
+                    // Count real students
+                    $laki = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'L%')->count();
+                    $perempuan = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'P%')->count();
+                    $total = $laki + $perempuan;
+
+                    // Update 'akhir_bulan' rekap
+                    LaporanSiswaRekap::updateOrCreate(
+                        ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'akhir_bulan'],
+                        ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
+                    );
+
+                    // If 'awal_bulan' is empty, fill it too
+                    $awalExists = LaporanSiswaRekap::where([
+                        'laporan_siswa_id' => $laporanSiswa->id,
+                        'kategori' => 'awal_bulan'
+                    ])->where('total', '>', 0)->exists();
+
+                    if (!$awalExists) {
+                        LaporanSiswaRekap::updateOrCreate(
+                            ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'awal_bulan'],
+                            ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
+                        );
+                    }
+                }
+
+                \Filament\Notifications\Notification::make()
+                    ->title('Data berhasil disinkronkan')
+                    ->success()
+                    ->send();
+            });
+    }
+
     protected static ?string $navigationLabel = 'Keadaan Siswa';
     protected static ?int $navigationSort = 2;
 
@@ -110,11 +173,6 @@ class KeadaanSiswa extends Page
     public function getHeading(): string|Htmlable
     {
         return 'Analisis Keadaan Siswa';
-    }
-
-    public function getSubheading(): string|Htmlable|null
-    {
-        return 'Menampilkan berbagai data siswa dari berbagai aspek';
     }
 
     /**
@@ -248,12 +306,12 @@ class KeadaanSiswa extends Page
                 $item = $rekaps->get($cat)?->first();
                 return ['l' => $item?->laki_laki ?? 0, 'p' => $item?->perempuan ?? 0, 'jml' => $item?->total ?? 0];
             };
-            $awal = $getRekap('awal');
-            $mutasi_masuk = $getRekap('mutasi');
+            $awal = $getRekap('awal_bulan');
+            $mutasi_masuk = $getRekap('mutasi_masuk');
             $mutasi_keluar = $getRekap('mutasi_keluar');
-            $putus = $getRekap('putus');
+            $putus = $getRekap('putus_sekolah');
             $mengulang = $getRekap('mengulang');
-            $akhir = $getRekap('akhir');
+            $akhir = $getRekap('akhir_bulan');
 
             return [
                 'rombel_id' => $ls->rombel_id,

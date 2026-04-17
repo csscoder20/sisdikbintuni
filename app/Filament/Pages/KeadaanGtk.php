@@ -143,10 +143,12 @@ class KeadaanGtk extends Page
         // 3. Status Kepegawaian
         $gtkStatusFull = $this->getGtkStatusCollection();
         $totalGtkStatus = [
-            'pns' => $gtkStatusFull->sum('pns'),
             'pppk' => $gtkStatusFull->sum('pppk'),
             'honorer' => $gtkStatusFull->sum('honorer_sekolah'),
         ];
+        foreach (['i_a', 'i_b', 'i_c', 'i_d', 'ii_a', 'ii_b', 'ii_c', 'ii_d', 'iii_a', 'iii_b', 'iii_c', 'iii_d', 'iv_a', 'iv_b', 'iv_c', 'iv_d', 'iv_e'] as $gol) {
+            $totalGtkStatus['gol_' . $gol] = $gtkStatusFull->sum('gol_' . $gol);
+        }
 
         // 4. Umur
         $gtkUmurFull = $this->getGtkUmurCollection();
@@ -256,9 +258,25 @@ class KeadaanGtk extends Page
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
-                DB::raw("SUM(CASE WHEN (status_kepegawaian ILIKE '%pns%' AND status_kepegawaian NOT ILIKE '%pppk%') THEN 1 ELSE 0 END) as pns"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/a' THEN 1 ELSE 0 END) as gol_i_a"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/b' THEN 1 ELSE 0 END) as gol_i_b"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/c' THEN 1 ELSE 0 END) as gol_i_c"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/d' THEN 1 ELSE 0 END) as gol_i_d"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/a' THEN 1 ELSE 0 END) as gol_ii_a"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/b' THEN 1 ELSE 0 END) as gol_ii_b"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/c' THEN 1 ELSE 0 END) as gol_ii_c"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/d' THEN 1 ELSE 0 END) as gol_ii_d"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/a' THEN 1 ELSE 0 END) as gol_iii_a"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/b' THEN 1 ELSE 0 END) as gol_iii_b"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/c' THEN 1 ELSE 0 END) as gol_iii_c"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/d' THEN 1 ELSE 0 END) as gol_iii_d"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/a' THEN 1 ELSE 0 END) as gol_iv_a"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/b' THEN 1 ELSE 0 END) as gol_iv_b"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/c' THEN 1 ELSE 0 END) as gol_iv_c"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/d' THEN 1 ELSE 0 END) as gol_iv_d"),
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/e' THEN 1 ELSE 0 END) as gol_iv_e"),
                 DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pppk%' THEN 1 ELSE 0 END) as pppk"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%honorer%' THEN 1 ELSE 0 END) as honorer_sekolah")
+                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%honorer%' OR status_kepegawaian ILIKE '%GTY%' OR status_kepegawaian ILIKE '%PTY%' THEN 1 ELSE 0 END) as honorer_sekolah")
             )->groupBy('jenis_gtk')->get();
     }
 
@@ -347,10 +365,5 @@ class KeadaanGtk extends Page
     public function getHeading(): string
     {
         return 'Keadaan GTK';
-    }
-
-    public function getSubheading(): ?string
-    {
-        return 'Menampilkan data mengenai Guru dan Tenaga Kependidikan';
     }
 }

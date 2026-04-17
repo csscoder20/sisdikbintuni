@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Siswas\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Actions\ImportAction;
 use App\Filament\Imports\SiswaImporter;
 use Filament\Tables\Columns\TextColumn;
@@ -57,7 +59,7 @@ class SiswasTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tanggal_lahir')
                     ->label('Tanggal Lahir')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('agama')
@@ -66,22 +68,26 @@ class SiswasTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Diperbarui Pada')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+            ->actions([
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->icon(Heroicon::OutlinedEye),
+                    EditAction::make()
+                        ->icon(Heroicon::OutlinedPencilSquare),
+                    DeleteAction::make()
+                        ->icon(Heroicon::OutlinedTrash),
+                ])
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

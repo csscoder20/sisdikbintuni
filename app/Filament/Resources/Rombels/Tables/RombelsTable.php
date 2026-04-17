@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Rombels\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\ImportAction;
-use App\Filament\Imports\RombelImporter;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -25,21 +25,25 @@ class RombelsTable
                 TextColumn::make('sekolah.nama')
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+            ->actions([
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->icon(Heroicon::OutlinedEye),
+                    EditAction::make()
+                        ->icon(Heroicon::OutlinedPencilSquare),
+                    DeleteAction::make()
+                        ->icon(Heroicon::OutlinedTrash),
+                ])
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -23,3 +23,5 @@ Route::get('/admin', function () {
 Route::get('/login', function () {
     return redirect()->route('filament.dinas.auth.login');
 })->name('login');
+
+Route::get('/import-template/{importer}', [\App\Http\Controllers\ImportTemplateController::class, 'download'])->name('import-template.download');

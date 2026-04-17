@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\LaporanSiswa\Tables;
 
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -24,13 +26,19 @@ class LaporanSiswaTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+            ->actions([
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->icon(Heroicon::OutlinedEye),
+                    EditAction::make()
+                        ->icon(Heroicon::OutlinedPencilSquare),
+                ])
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->color('primary')
             ]);
     }
 }

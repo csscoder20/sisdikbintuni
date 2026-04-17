@@ -16,15 +16,25 @@ class GtkKeuanganForm
                     ->relationship('gtk', 'nama')
                     ->required(),
                 TextInput::make('nomor_rekening')
-                    ->label('Nomor Rekening')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('nama_bank')
-                    ->label('Nama Bank'),
+                    ->label('Nomor Rekening'),
+                Select::make('nama_bank')
+                    ->label('Nama Bank')
+                    ->options([
+                        'BRI' => 'Bank Rakyat Indonesia',
+                        'BNI' => 'Bank Negara Indonesia',
+                        'MANDIRI' => 'Bank Mandiri',
+                        'BCA' => 'Bank Central Asia',
+                        'BTPN' => 'Bank Tabungan Pensiunan Nasional',
+                        'BTPN SYARIAH' => 'BTPN Syariah',
+                        'BANK PAPUA' => 'Bank Papua',
+                        'PERMATA' => 'Bank Permata',
+                        'LAINNYA' => 'Lainnya',
+                    ])
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 TextInput::make('npwp')
-                    ->label('NPWP')
-                    ->numeric()
-                    ->default(0),
+                    ->label('NPWP'),
             ])->columns(3);
     }
 }

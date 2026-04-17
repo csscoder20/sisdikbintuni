@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Gtks\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Actions\ImportAction;
 use App\Filament\Imports\GtkImporter;
 use Filament\Tables\Columns\TextColumn;
@@ -48,7 +50,7 @@ class GtksTable
                     ->searchable(),
                 TextColumn::make('tmt_pns')
                     ->label('TMT PNS')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('pendidikan_terakhir')
@@ -61,22 +63,26 @@ class GtksTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Diperbarui Pada')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+            ->actions([
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->icon(Heroicon::OutlinedEye),
+                    EditAction::make()
+                        ->icon(Heroicon::OutlinedPencilSquare),
+                    DeleteAction::make()
+                        ->icon(Heroicon::OutlinedTrash),
+                ])
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
