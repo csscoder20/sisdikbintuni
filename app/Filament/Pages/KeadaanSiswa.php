@@ -72,8 +72,8 @@ class KeadaanSiswa extends Page
             ->icon('heroicon-m-arrow-path')
             ->color('info')
             ->requiresConfirmation()
-            ->modalHeading('Sinkronkan Data Real')
-            ->modalDescription('Tindakan ini akan memperbarui angka laporan berdasarkan data siswa real di rombel saat ini. Lanjutkan?')
+            ->modalHeading('Sinkronkan Data Aktual')
+            ->modalDescription('Tindakan ini akan memperbarui angka laporan berdasarkan data siswa aktual pada rombel saat ini. Lanjutkan?')
             ->action(function () {
                 $tenantId = filament()->getTenant()?->id;
                 $month = (int) date('m');
@@ -465,7 +465,7 @@ class KeadaanSiswa extends Page
             'tidak' => 'Tidak', 
             'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat', 
             'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah', 
-            'beasisswa_swasta' => 'Beasisswa Swasta', 
+            'beasisswa_swasta' => 'Beasiswa Swasta', 
             'beasiswa_khusus' => 'Beasiswa Khusus', 
             'beasiswa_afirmasi' => 'Beasiswa Afirmasi', 
             'beasiswa_lainnya' => 'Beasiswa Lainnya'

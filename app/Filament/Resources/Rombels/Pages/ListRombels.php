@@ -20,8 +20,8 @@ class ListRombels extends ListRecords
         return [
             ImportAction::make()
                 ->importer(RombelImporter::class)
-                ->label('Import Data')
-                ->modalHeading('Import Data Rombel')
+                ->label('Impor Data Rombel')
+                ->modalHeading('Impor Data Rombel')
                 ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
@@ -33,12 +33,12 @@ class ListRombels extends ListRecords
                         BLADE
                     )
                 ))
-                ->modalSubmitActionLabel('Import Sekarang')
+                ->modalSubmitActionLabel('Impor Sekarang')
                 ->color('info'),
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Rombel')
                 ->modalHeading('Tambah Data Rombel')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Rombel')
                 ->createAnother(false),
         ];
     }

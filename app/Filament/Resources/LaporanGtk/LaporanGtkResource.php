@@ -6,7 +6,9 @@ use App\Filament\Resources\LaporanGtk\Pages;
 use App\Filament\Resources\LaporanGtk\Schemas\LaporanGtkForm;
 use App\Filament\Resources\LaporanGtk\Tables\LaporanGtkTable;
 use App\Models\LaporanGtk;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
@@ -44,6 +46,23 @@ class LaporanGtkResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return LaporanGtkForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                Section::make('Ringkasan Data')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
+                        TextEntry::make('periode_laporan')
+                            ->label('Periode Laporan')
+                            ->state(fn (LaporanGtk $record): ?string => $record->laporan ? "{$record->laporan->bulan}/{$record->laporan->tahun}" : null)
+                            ->placeholder('-'),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table

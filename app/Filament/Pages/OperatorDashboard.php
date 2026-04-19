@@ -27,17 +27,17 @@ class OperatorDashboard extends BaseDashboard
     }
 
     public array $checklist = [
-        'siswa_rombel' => 'Siswa by Rombel',
-        'siswa_umur' => 'Siswa by Umur',
-        'siswa_agama' => 'Siswa by Agama',
-        'siswa_daerah' => 'Siswa by Daerah',
-        'siswa_disabilitas' => 'Siswa Disabilitas',
-        'siswa_beasiswa' => 'Siswa Beasiswa',
-        'gtk_agama' => 'GTK by Agama',
-        'gtk_daerah' => 'GTK by Daerah',
-        'gtk_status' => 'GTK by Status',
-        'gtk_umur' => 'GTK by Umur',
-        'gtk_pendidikan' => 'GTK by Pendidikan Terakhir',
+        'siswa_rombel' => 'Siswa per Rombel',
+        'siswa_umur' => 'Siswa per Umur',
+        'siswa_agama' => 'Siswa per Agama',
+        'siswa_daerah' => 'Siswa per Daerah Asal',
+        'siswa_disabilitas' => 'Data Disabilitas Siswa',
+        'siswa_beasiswa' => 'Data Beasiswa Siswa',
+        'gtk_agama' => 'GTK per Agama',
+        'gtk_daerah' => 'GTK per Daerah Asal',
+        'gtk_status' => 'GTK per Status',
+        'gtk_umur' => 'GTK per Umur',
+        'gtk_pendidikan' => 'GTK per Pendidikan Terakhir',
         'kondisi_sarpras' => 'Kondisi Gedung/Ruang',
         'sebaran_jam' => 'Sebaran Jam Mengajar',
         'rekap_kehadiran' => 'Rekap Kehadiran GTK',
@@ -123,7 +123,7 @@ class OperatorDashboard extends BaseDashboard
             ],
             'Keadaan GTK' => [
                 'umur_pie' => $gtk->map(function($g) {
-                        if (!$g->tanggal_lahir) return 'Unknown';
+                        if (!$g->tanggal_lahir) return 'Tidak diketahui';
                         $age = \Carbon\Carbon::parse($g->tanggal_lahir)->age;
                         if ($age < 30) return '< 30';
                         if ($age < 40) return '30-39';
@@ -223,7 +223,7 @@ class OperatorDashboard extends BaseDashboard
 
         return $gtkList->map(function ($gtk) {
             return [
-                'label' => $gtk->nama ?? 'N/A',
+                'label' => $gtk->nama ?? 'Tidak tersedia',
                 'details' => [
                     'NIP'                     => $gtk->nip ?? '-',
                     'NIK'                     => $gtk->nik ?? '-',
@@ -255,7 +255,7 @@ class OperatorDashboard extends BaseDashboard
 
         return $siswaList->map(function ($siswa) {
             return [
-                'label' => $siswa->nama ?? 'N/A',
+                'label' => $siswa->nama ?? 'Tidak tersedia',
                 'details' => [
                     'NISN'          => $siswa->nisn ?? '-',
                     'NIK'           => $siswa->nik ?? '-',
@@ -282,7 +282,7 @@ class OperatorDashboard extends BaseDashboard
 
         return $sarpasList->map(function ($sarpras) {
             return [
-                'label' => $sarpras->nama_ruang ?? 'N/A',
+                'label' => $sarpras->nama_ruang ?? 'Tidak tersedia',
                 'details' => [
                     'Jumlah' => $sarpras->jumlah_total ?? 0,
                     'Kondisi Baik' => $sarpras->jumlah_baik ?? 0,
@@ -336,7 +336,7 @@ class OperatorDashboard extends BaseDashboard
             }
 
             return [
-                'label' => $gtk->nama ?? 'N/A',
+                'label' => $gtk->nama ?? 'Tidak tersedia',
                 'details' => $details
             ];
         })->toArray();
@@ -393,7 +393,7 @@ class OperatorDashboard extends BaseDashboard
             }
 
             return [
-                'label' => $siswa->nama ?? 'N/A',
+                'label' => $siswa->nama ?? 'Tidak tersedia',
                 'details' => $details
             ];
         })->toArray();
@@ -407,7 +407,7 @@ class OperatorDashboard extends BaseDashboard
 
         return $mengajars->map(function ($m) {
             return [
-                'label' => $m->gtk->nama ?? 'N/A',
+                'label' => $m->gtk->nama ?? 'Tidak tersedia',
                 'details' => [
                     'Rombel' => $m->rombel->nama ?? '-',
                     'Mata Pelajaran' => $m->mapel->nama_mapel ?? '-',
@@ -427,7 +427,7 @@ class OperatorDashboard extends BaseDashboard
 
         return $kehadiran->map(function ($k) {
             return [
-                'label' => $k->gtk->nama ?? 'N/A',
+                'label' => $k->gtk->nama ?? 'Tidak tersedia',
                 'details' => [
                     'Hari Kerja' => $k->hari_kerja ?? 0,
                     'Sakit' => $k->sakit ?? 0,

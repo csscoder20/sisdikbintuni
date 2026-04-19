@@ -17,7 +17,7 @@ class UserForm
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Alamat Surel')
                     ->email()
                     ->required(),
                 Select::make('sekolah')
@@ -26,18 +26,21 @@ class UserForm
                     ->searchable()
                     ->preload(),
                 Select::make('roles')
+                    ->label('Peran')
                     ->multiple()
                     ->relationship('roles', 'name')
                     ->preload(),
                 Select::make('status')
+                    ->label('Status')
                     ->options([
                         'active' => 'Aktif',
-                        'pending' => 'Pending',
+                        'pending' => 'Menunggu Verifikasi',
                         'rejected' => 'Tidak Aktif',
                     ])
                     ->required()
                     ->default('pending'),
                 TextInput::make('password')
+                    ->label('Kata Sandi')
                     ->password()
                     ->placeholder('Kosongkan jika tidak ingin mengubah')
                     ->required(fn (string $context): bool => $context === 'create')

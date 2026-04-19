@@ -23,10 +23,10 @@ class ActivityLogsTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 TextColumn::make('user.name')
-                    ->label('User')
+                    ->label('Pengguna')
                     ->searchable(),
                 TextColumn::make('event')
-                    ->label('Event')
+                    ->label('Aktivitas')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'login' => 'success',
@@ -43,17 +43,19 @@ class ActivityLogsTable
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('event')
+                    ->label('Aktivitas')
                     ->options([
                         'login' => 'Login',
                         'logout' => 'Logout',
-                        'created' => 'Created',
-                        'updated' => 'Updated',
-                        'deleted' => 'Deleted',
+                        'created' => 'Ditambahkan',
+                        'updated' => 'Diperbarui',
+                        'deleted' => 'Dihapus',
                     ]),
             ])
             ->actions([
                 ActionGroup::make([
                     ViewAction::make()
+                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                 ])
                 ->icon('heroicon-m-ellipsis-vertical')

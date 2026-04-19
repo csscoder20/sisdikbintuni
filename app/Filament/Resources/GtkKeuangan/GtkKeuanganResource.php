@@ -6,7 +6,9 @@ use App\Filament\Resources\GtkKeuangan\Pages;
 use App\Filament\Resources\GtkKeuangan\Schemas\GtkKeuanganForm;
 use App\Filament\Resources\GtkKeuangan\Tables\GtkKeuanganTable;
 use App\Models\GtkKeuangan;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
@@ -37,6 +39,18 @@ class GtkKeuanganResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return GtkKeuanganForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
+                TextEntry::make('nama_bank')->label('Nama Bank')->placeholder('-'),
+                TextEntry::make('nomor_rekening')->label('Nomor Rekening')->placeholder('-'),
+                TextEntry::make('npwp')->label('NPWP')->placeholder('-'),
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table

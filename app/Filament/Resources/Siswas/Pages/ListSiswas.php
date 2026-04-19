@@ -21,8 +21,8 @@ class ListSiswas extends ListRecords
         return [
             ImportAction::make()
                 ->importer(SiswaImporter::class)
-                ->label('Import Data')
-                ->modalHeading('Import Data Siswa')
+                ->label('Impor Data Siswa')
+                ->modalHeading('Impor Data Siswa')
                 ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
@@ -34,12 +34,12 @@ class ListSiswas extends ListRecords
                         BLADE
                     )
                 ))
-                ->modalSubmitActionLabel('Import Sekarang')
+                ->modalSubmitActionLabel('Impor Sekarang')
                 ->color('info'),
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Siswa')
                 ->modalHeading('Tambah Data Siswa')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Data Siswa')
                 ->modalFooterActions([])
                 ->createAnother(false),
         ];

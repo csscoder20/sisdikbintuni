@@ -14,9 +14,9 @@ class ListUsers extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Tambah Data')
-                ->modalHeading('Tambah Data User')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->label('Tambah Pengguna')
+                ->modalHeading('Tambah Pengguna')
+                ->modalSubmitActionLabel('Simpan Pengguna')
                 ->createAnother(false),
         ];
     }

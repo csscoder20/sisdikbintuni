@@ -14,8 +14,8 @@ class ListGtkKeuangan extends ListRecords {
         return [
             ImportAction::make()
                 ->importer(GtkKeuanganImporter::class)
-                ->label('Import Data')
-                ->modalHeading('Import Data Rekening & NPWP')
+                ->label('Impor Data Rekening dan NPWP')
+                ->modalHeading('Impor Data Rekening dan NPWP')
                 ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
@@ -27,12 +27,12 @@ class ListGtkKeuangan extends ListRecords {
                         BLADE
                     )
                 ))
-                ->modalSubmitActionLabel('Import Sekarang')
+                ->modalSubmitActionLabel('Impor Sekarang')
                 ->color('info'),
             CreateAction::make()
-                ->label('Tambah Data')
-                ->modalHeading('Tambah Rekening & NPWP')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->label('Tambah Data Rekening')
+                ->modalHeading('Tambah Data Rekening dan NPWP')
+                ->modalSubmitActionLabel('Simpan Data Rekening')
                 ->createAnother(false)
         ]; 
     }

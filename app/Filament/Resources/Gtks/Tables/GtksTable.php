@@ -115,6 +115,7 @@ class GtksTable
             ->actions([
                 ActionGroup::make([
                     ViewAction::make()
+                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),

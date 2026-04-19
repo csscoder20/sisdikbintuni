@@ -28,10 +28,10 @@ class UsersTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
+                    ->label('Alamat Surel')
                     ->searchable(),
                 TextColumn::make('roles.name')
-                    ->label('Role')
+                    ->label('Peran')
                     ->badge()
                     ->colors([
                         'primary' => 'operator',
@@ -64,6 +64,7 @@ class UsersTable
             ->actions([
                 ActionGroup::make([
                     ViewAction::make()
+                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),
@@ -76,7 +77,7 @@ class UsersTable
                         ->hidden(fn ($record) => $record->status === 'active' || $record->hasRole(['admin_dinas', 'super_admin']))
                         ->requiresConfirmation()
                         ->modalHeading('Verifikasi Operator')
-                        ->modalDescription('Dengan mengaktifkan user ini, yang bersangkutan akan mendapatkan notifikasi via email untuk dapat login ke system. Lanjutkan?')
+                        ->modalDescription('Dengan mengaktifkan pengguna ini, yang bersangkutan akan menerima notifikasi melalui email dan dapat masuk ke sistem. Lanjutkan?')
                         ->action(function ($record) {
                             $record->update(['status' => 'active']);
 
@@ -87,8 +88,8 @@ class UsersTable
                             }
 
                             Notification::make()
-                                ->title('User Berhasil Diverifikasi')
-                                ->body('Status user telah diubah menjadi Aktif.')
+                                ->title('Pengguna Berhasil Diverifikasi')
+                                ->body('Status pengguna telah diubah menjadi aktif.')
                                 ->success()
                                 ->send();
                         }),
@@ -98,13 +99,13 @@ class UsersTable
                         ->color('danger')
                         ->hidden(fn ($record) => $record->status === 'rejected')
                         ->requiresConfirmation()
-                        ->modalHeading('Nonaktifkan User')
-                        ->modalDescription('Apakah Anda yakin ingin menonaktifkan user ini? User yang dinonaktifkan tidak akan bisa login ke sistem.')
+                        ->modalHeading('Nonaktifkan Pengguna')
+                        ->modalDescription('Apakah Anda yakin ingin menonaktifkan pengguna ini? Pengguna yang dinonaktifkan tidak dapat masuk ke sistem.')
                         ->action(function ($record) {
                             $record->update(['status' => 'rejected']);
 
                             Notification::make()
-                                ->title('User Dinonaktifkan')
+                                ->title('Pengguna Dinonaktifkan')
                                 ->body("Status {$record->name} telah diubah menjadi Tidak Aktif.")
                                 ->success()
                                 ->send();

@@ -9,9 +9,9 @@ class ListLaporanGtk extends ListRecords {
     protected function getHeaderActions(): array {
         return [
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Laporan GTK')
                 ->modalHeading('Tambah Laporan GTK')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Laporan GTK')
                 ->createAnother(false),
         ];
     }

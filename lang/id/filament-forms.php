@@ -46,7 +46,7 @@ return [
 
                 'create_option' => [
                     'modal' => [
-                        'heading' => 'Tambah data',
+                        'heading' => 'Tambah Data',
                         'actions' => [
                             'create' => [
                                 'label' => 'Simpan',

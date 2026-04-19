@@ -6,7 +6,9 @@ use App\Filament\Resources\Kelulusan\Pages;
 use App\Filament\Resources\Kelulusan\Schemas\KelulusanForm;
 use App\Filament\Resources\Kelulusan\Tables\KelulusanTable;
 use App\Models\Kelulusan;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
@@ -38,6 +40,28 @@ class KelulusanResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return KelulusanForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('tahun')->label('Tahun')
+                    ->placeholder('-'),
+                TextEntry::make('jumlah_peserta_ujian')
+                    ->label('Jumlah Peserta Ujian')
+                    ->placeholder('-'),
+                TextEntry::make('jumlah_lulus')
+                    ->label('Jumlah Lulus')->placeholder('-'),
+                TextEntry::make('persentase_kelulusan')
+                    ->label('Persentase Kelulusan')
+                    ->suffix('%')
+                    ->placeholder('-'),
+                TextEntry::make('jumlah_lanjut_pt')
+                    ->label('Jumlah Lanjut ke Perguruan Tinggi')
+                    ->placeholder('-'),
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table

@@ -23,9 +23,9 @@ class ListKelulusan extends ListRecords {
     protected function getHeaderActions(): array {
         return [
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Data Kelulusan')
                 ->modalHeading('Tambah Data Kelulusan')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Data Kelulusan')
                 ->createAnother(false),
             ValidateChecklistAction::make('validateKelulusan', 'kelulusan', fn() => \App\Models\Kelulusan::where('sekolah_id', filament()->getTenant()?->id)->exists()),
         ];

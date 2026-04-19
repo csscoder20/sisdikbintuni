@@ -8,9 +8,9 @@ class ListLaporan extends ListRecords {
     protected function getHeaderActions(): array { 
         return [
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Laporan Bulanan')
                 ->modalHeading('Tambah Laporan Bulanan')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Laporan Bulanan')
                 ->createAnother(false)
         ]; 
     }

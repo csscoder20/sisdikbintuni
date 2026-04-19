@@ -134,6 +134,8 @@ class SiswasTable
             ->actions([
                 ActionGroup::make([
                     ViewAction::make()
+                        ->modalHeading(fn ($record): string => 'Lihat Data Siswa: ' . ($record->nama ?? '-'))
+                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),

@@ -7,8 +7,10 @@ use App\Filament\Resources\GtkJamAjars\Schemas\GtkJamAjarForm;
 use App\Filament\Resources\GtkJamAjars\Tables\GtkJamAjarsTable;
 use App\Models\GtkJamAjar;
 use BackedEnum;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -42,6 +44,20 @@ class GtkJamAjarResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return GtkJamAjarForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
+                TextEntry::make('rombel.nama')->label('Rombel')->placeholder('-'),
+                TextEntry::make('mapel.nama_mapel')->label('Mata Pelajaran')->placeholder('-'),
+                TextEntry::make('jumlah_jam')->label('Jumlah Jam')->placeholder('-'),
+                TextEntry::make('semester')->label('Semester')->placeholder('-'),
+                TextEntry::make('tahun_ajaran')->label('Tahun Ajaran')->placeholder('-'),
+            ])->columns(2);
     }
 
 

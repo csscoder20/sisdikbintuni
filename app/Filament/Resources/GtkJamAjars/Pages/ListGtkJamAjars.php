@@ -28,9 +28,9 @@ class ListGtkJamAjars extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Sebaran Jam Ajar')
                 ->modalHeading('Tambah Data Sebaran Jam Ajar')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Sebaran Jam Ajar')
                 ->createAnother(false),
             ValidateChecklistAction::make('validateSebaranJam', 'sebaran_jam', fn() => \App\Models\Mengajar::whereHas('gtk', fn($q) => $q->where('sekolah_id', filament()->getTenant()?->id))->exists()),
         ];

@@ -22,7 +22,7 @@ class CustomRegister extends BaseRegister
                 $this->getNameFormComponent(),
                 $this->getEmailFormComponent(),
                 TextInput::make('nohp')
-                    ->label('No. Handphone')
+                    ->label('Nomor Handphone')
                     ->required()
                     ->tel()
                     ->maxLength(255),

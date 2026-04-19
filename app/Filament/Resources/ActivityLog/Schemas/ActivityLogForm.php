@@ -21,25 +21,25 @@ class ActivityLogForm
                         DateTimePicker::make('created_at')
                             ->label('Waktu'),
                         TextInput::make('user.name')
-                            ->label('User'),
+                            ->label('Pengguna'),
                         TextInput::make('event')
-                            ->label('Event'),
+                            ->label('Aktivitas'),
                         TextInput::make('description')
                             ->label('Deskripsi'),
                         TextInput::make('subject_type')
                             ->label('Model')
-                            ->placeholder('N/A'),
+                            ->placeholder('Tidak tersedia'),
                         TextInput::make('subject_id')
                             ->label('ID Subjek')
-                            ->placeholder('N/A'),
+                            ->placeholder('Tidak tersedia'),
                     ]),
                 Section::make('Metadata')
                     ->columns(2)
                     ->schema([
                         TextInput::make('ip_address')
-                            ->label('IP Address'),
+                            ->label('Alamat IP'),
                         TextInput::make('user_agent')
-                            ->label('User Agent')
+                            ->label('Agen Pengguna')
                             ->columnSpanFull(),
                     ]),
                 Section::make('Detail Perubahan')

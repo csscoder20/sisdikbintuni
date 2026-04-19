@@ -7,8 +7,10 @@ use App\Filament\Resources\Rombels\Schemas\RombelForm;
 use App\Filament\Resources\Rombels\Tables\RombelsTable;
 use App\Models\Rombel;
 use BackedEnum;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -30,7 +32,7 @@ class RombelResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
-    protected static ?string $recordTitleAttribute = 'ROMBEL';
+    protected static ?string $recordTitleAttribute = 'nama';
 
     public static function canViewAny(): bool
     {
@@ -42,6 +44,17 @@ class RombelResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return RombelForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('nama')->label('Nama Rombel')->placeholder('-'),
+                TextEntry::make('tingkat')->label('Tingkat')->placeholder('-'),
+                TextEntry::make('sekolah.nama')->label('Sekolah')->placeholder('-'),
+            ])->columns(2);
     }
 
 

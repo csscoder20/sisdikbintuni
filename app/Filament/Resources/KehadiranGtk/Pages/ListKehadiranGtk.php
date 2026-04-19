@@ -23,9 +23,9 @@ class ListKehadiranGtk extends ListRecords {
     protected function getHeaderActions(): array {
         return [
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Rekap Kehadiran')
                 ->modalHeading('Tambah Rekap Kehadiran')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Rekap Kehadiran')
                 ->createAnother(false),
             ValidateChecklistAction::make('validateRekapKehadiran', 'rekap_kehadiran', fn() => \App\Models\KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', filament()->getTenant()?->id))->exists()),
         ];

@@ -20,8 +20,8 @@ class ListGtkRiwayatPendidikans extends ListRecords
         return [
             ImportAction::make()
                 ->importer(GtkPendidikanImporter::class)
-                ->label('Import Data')
-                ->modalHeading('Import Data Riwayat Pendidikan')
+                ->label('Impor Riwayat Pendidikan')
+                ->modalHeading('Impor Data Riwayat Pendidikan')
                 ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
@@ -33,12 +33,12 @@ class ListGtkRiwayatPendidikans extends ListRecords
                         BLADE
                     )
                 ))
-                ->modalSubmitActionLabel('Import Sekarang')
+                ->modalSubmitActionLabel('Impor Sekarang')
                 ->color('info'),
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah Riwayat Pendidikan')
                 ->modalHeading('Tambah Data Riwayat Pendidikan')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Riwayat Pendidikan')
                 ->createAnother(false),
         ];
     }

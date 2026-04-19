@@ -34,7 +34,7 @@ class ValidateChecklistAction
             })
             ->modalDescription(function () use ($hasDataChecker) {
                 $hasData = $hasDataChecker ? app()->call($hasDataChecker) : true;
-                return $hasData ? 'Apakah Anda yakin semua data sudah valid? Tindakan ini tidak dapat dibatalkan.' : '';
+                return $hasData ? 'Apakah Anda yakin seluruh data sudah benar? Tindakan ini tidak dapat dibatalkan.' : '';
             })
             ->action(function (Action $action) use ($type, $hasDataChecker) {
                 if ($hasDataChecker && !app()->call($hasDataChecker)) {
@@ -70,7 +70,7 @@ class ValidateChecklistAction
                 ]);
 
                 Notification::make()
-                    ->title('Data berhasil divalidasi untuk periode ' . $month . '/' . $year)
+                    ->title("Data berhasil divalidasi untuk periode {$month}/{$year}")
                     ->success()
                     ->send();
             });

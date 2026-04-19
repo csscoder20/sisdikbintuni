@@ -7,6 +7,8 @@ use App\Filament\Resources\KehadiranGtk\Schemas\KehadiranGtkForm;
 use App\Filament\Resources\KehadiranGtk\Tables\KehadiranGtkTable;
 use App\Models\KehadiranGtk;
 use Filament\Resources\Resource;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
@@ -40,6 +42,23 @@ class KehadiranGtkResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return KehadiranGtkForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
+                TextEntry::make('periode_laporan')
+                    ->label('Periode Laporan')
+                    ->state(fn(KehadiranGtk $record): ?string => $record->laporan ? "{$record->laporan->bulan}/{$record->laporan->tahun}" : null)
+                    ->placeholder('-'),
+                TextEntry::make('hari_kerja')->label('Hari Kerja')->placeholder('-'),
+                TextEntry::make('sakit')->label('Sakit')->placeholder('-'),
+                TextEntry::make('izin')->label('Izin')->placeholder('-'),
+                TextEntry::make('alfa')->label('Alpa')->placeholder('-'),
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table

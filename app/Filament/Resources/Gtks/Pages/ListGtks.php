@@ -22,8 +22,8 @@ class ListGtks extends ListRecords
         return [
             ImportAction::make()
                 ->importer(GtkImporter::class)
-                ->label('Import Data')
-                ->modalHeading('Import Data GTK')
+                ->label('Impor Data GTK')
+                ->modalHeading('Impor Data GTK')
                 ->modalDescription(fn (ImportAction $action) => new HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
@@ -35,12 +35,12 @@ class ListGtks extends ListRecords
                         BLADE
                     )
                 ))
-                ->modalSubmitActionLabel('Import Sekarang')
+                ->modalSubmitActionLabel('Impor Sekarang')
                 ->color('info'),
             CreateAction::make()
-                ->label('Tambah Data')
+                ->label('Tambah GTK')
                 ->modalHeading('Tambah Data GTK')
-                ->modalSubmitActionLabel('Tambah Data')
+                ->modalSubmitActionLabel('Simpan Data GTK')
                 ->createAnother(false),
         ];
     }

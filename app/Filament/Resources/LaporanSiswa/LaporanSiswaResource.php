@@ -6,7 +6,9 @@ use App\Filament\Resources\LaporanSiswa\Pages;
 use App\Filament\Resources\LaporanSiswa\Schemas\LaporanSiswaForm;
 use App\Filament\Resources\LaporanSiswa\Tables\LaporanSiswaTable;
 use App\Models\LaporanSiswa;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
@@ -57,6 +59,23 @@ class LaporanSiswaResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return LaporanSiswaForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                Section::make('Ringkasan Data')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('rombel.nama')->label('Rombel')->placeholder('-'),
+                        TextEntry::make('periode_laporan')
+                            ->label('Periode Laporan')
+                            ->state(fn (LaporanSiswa $record): ?string => $record->laporan ? "{$record->laporan->bulan}/{$record->laporan->tahun}" : null)
+                            ->placeholder('-'),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
