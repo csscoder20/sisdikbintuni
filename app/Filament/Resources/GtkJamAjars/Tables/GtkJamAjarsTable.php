@@ -17,6 +17,8 @@ class GtkJamAjarsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('GTK')
@@ -33,7 +35,8 @@ class GtkJamAjarsTable
                 TextColumn::make('jumlah_jam')
                     ->label('Jam')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('semester')
                     ->label('Semester')
                     ->formatStateUsing(fn(string $state): string => ucfirst($state)),

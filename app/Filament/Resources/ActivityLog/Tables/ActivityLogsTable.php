@@ -15,6 +15,8 @@ class ActivityLogsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Waktu')

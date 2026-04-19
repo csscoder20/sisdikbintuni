@@ -15,7 +15,11 @@ class RombelForm
                 TextInput::make('nama')
                     ->required(),
                 Select::make('tingkat')
-                    ->options(array_combine(range(1, 12), range(1, 12)))
+                    ->options([
+                        10 => '10',
+                        11 => '11',
+                        12 => '12',
+                    ])
                     ->required(),
             ]);
     }

@@ -27,6 +27,7 @@ class Sekolah extends Model
         'nomor_sk_yayasan',
         'tanggal_sk_yayasan',
         'akreditasi',
+        'jenjang',
         'status_tanah',
         'luas_tanah',
         'email',
@@ -55,15 +56,6 @@ class Sekolah extends Model
     public function operator()
     {
         return $this->hasMany(OperatorSekolah::class);
-    }
-
-    public function getJenjangAttribute()
-    {
-        $nama = strtoupper($this->nama);
-        if (str_contains($nama, 'SMK')) {
-            return 'smk';
-        }
-        return 'sma'; // Default to sma
     }
 
     public function getRouteKeyName()

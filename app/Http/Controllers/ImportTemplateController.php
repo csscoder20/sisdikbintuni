@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Style\Style;
 use Illuminate\Support\Str;
 
 class ImportTemplateController extends Controller
@@ -25,13 +26,16 @@ class ImportTemplateController extends Controller
             $writer = new Writer();
             $writer->openToFile('php://output');
 
+            // Set style for Text format
+            $textStyle = (new Style())->setFormat('@');
+
             // Get columns from importer
             $columns = $importerClass::getColumns();
             
             // Header Row
             $headerCells = [];
             foreach ($columns as $column) {
-                $headerCells[] = Cell::fromValue($column->getLabel() ?? Str::title($column->getName()));
+                $headerCells[] = Cell::fromValue($column->getLabel() ?? Str::title($column->getName()), $textStyle);
             }
             $writer->addRow(new Row($headerCells));
 
@@ -39,7 +43,10 @@ class ImportTemplateController extends Controller
             $exampleCells = [];
             foreach ($columns as $column) {
                 $examples = $column->getExamples();
-                $exampleCells[] = Cell::fromValue($examples[0] ?? '');
+                $val = $examples[0] ?? '';
+                
+                // Force string type and apply text style
+                $exampleCells[] = Cell::fromValue((string) $val, $textStyle);
             }
             if (collect($exampleCells)->filter(fn($c) => !empty($c->getValue()))->isNotEmpty()) {
                 $writer->addRow(new Row($exampleCells));

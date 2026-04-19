@@ -19,6 +19,8 @@ class SiswasTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('nama')
                     ->label('Nama Siswa')
@@ -66,6 +68,58 @@ class SiswasTable
                     ->label('Agama')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nokk')
+                    ->label('Nomor KK')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nobpjs')
+                    ->label('Nomor BPJS')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('daerah_asal')
+                    ->label('Daerah Asal')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('alamat')
+                    ->label('Alamat Domisili')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('provinsi')
+                    ->label('Provinsi')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('kabupaten')
+                    ->label('Kabupaten')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('kecamatan')
+                    ->label('Kecamatan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('desa')
+                    ->label('Desa/Kelurahan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nama_ayah')
+                    ->label('Nama Ayah')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nama_ibu')
+                    ->label('Nama Ibu')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nama_wali')
+                    ->label('Nama Wali')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('disabilitas')
+                    ->label('Jenis Disabilitas')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('beasiswa')
+                    ->label('Status Beasiswa')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime('d/m/Y H:i')
@@ -86,8 +140,8 @@ class SiswasTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -5,8 +5,8 @@
 @push('styles')
     <style>
         /* ================================================================
-                                           KEADAAN GTK — High Precision Fixed Layout
-                                           ================================================================ */
+                                               KEADAAN GTK — High Precision Fixed Layout
+                                               ================================================================ */
         :root {
             --ks-card-bg: #ffffff;
             --ks-card-border: #e5e7eb;
@@ -64,9 +64,8 @@
         }
 
         .keadaan-gtk-page .ks-table {
-            table-layout: fixed !important;
-            width: max-content !important;
-            min-width: 100% !important;
+            table-layout: auto !important;
+            width: 100% !important;
             border-collapse: collapse !important;
             font-size: .75rem;
             color: var(--ks-text);
@@ -77,27 +76,25 @@
             padding: 0.5rem 0.25rem !important;
             border: 1px solid var(--ks-td-border);
             white-space: nowrap !important;
-            overflow: hidden;
-            text-overflow: ellipsis;
             text-align: center;
             vertical-align: middle !important;
         }
 
         /* colgroup classes */
         .ksc-no {
-            width: 40px !important;
+            width: 40px;
         }
 
         .ksc-nama {
-            width: 250px !important;
+            min-width: 200px;
         }
 
         .ksc-num {
-            width: 50px !important;
+            min-width: 40px;
         }
 
         .ksc-jml {
-            width: 50px !important;
+            min-width: 40px;
         }
 
         /* Alignment for Jenis GTK */
@@ -189,8 +186,9 @@
         <div style="display: grid; gap: .2rem;">
             {{-- Tabel 1: Agama --}}
             <div class="ks-card" wire:key="card-agama">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="color:#7c3aed;">Jumlah GTK Berdasarkan Agama</h2>
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#7c3aed; flex-grow: 1;">Jumlah GTK Berdasarkan Agama</h2>
                     <div wire:key="wrapper-validateGtkAgama">
                         {{ $this->validateGtkAgamaAction }}
                     </div>
@@ -330,8 +328,9 @@
 
             {{-- Tabel 2: Daerah Asal --}}
             <div class="ks-card" wire:key="card-daerah">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="color:#15803d;">Jumlah GTK Berdasarkan Daerah Asal</h2>
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#15803d; flex-grow: 1;">Jumlah GTK Berdasarkan Daerah Asal</h2>
                     <div wire:key="wrapper-validateGtkDaerah">
                         {{ $this->validateGtkDaerahAction }}
                     </div>
@@ -427,8 +426,9 @@
 
             {{-- Tabel 3: Status --}}
             <div class="ks-card" wire:key="card-status">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#faf5ff33,#f3e8ff11); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="color:#7e22ce;">Status Kepegawaian</h2>
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#faf5ff33,#f3e8ff11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#7e22ce; flex-grow: 1;">Status Kepegawaian</h2>
                     <div wire:key="wrapper-validateGtkStatus">
                         {{ $this->validateGtkStatusAction }}
                     </div>
@@ -572,8 +572,9 @@
 
             {{-- Tabel 4: Umur --}}
             <div class="ks-card" wire:key="card-umur">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#fff7ed33,#ffedd511); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="color:#c2410c;">Jumlah GTK Berdasarkan Umur</h2>
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#fff7ed33,#ffedd511); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#c2410c; flex-grow: 1;">Jumlah GTK Berdasarkan Umur</h2>
                     <div wire:key="wrapper-validateGtkUmur">
                         {{ $this->validateGtkUmurAction }}
                     </div>
@@ -669,8 +670,9 @@
 
             {{-- Tabel 5: Pendidikan --}}
             <div class="ks-card" wire:key="card-pendidikan">
-                <div class="ks-card-header" style="background:linear-gradient(135deg,#fff1f233,#ffe4e611); display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="color:#be123c;">Jumlah GTK Berdasarkan Pendidikan Terakhir</h2>
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#fff1f233,#ffe4e611); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#be123c; flex-grow: 1;">Jumlah GTK Berdasarkan Pendidikan Terakhir</h2>
                     <div wire:key="wrapper-validateGtkPendidikan">
                         {{ $this->validateGtkPendidikanAction }}
                     </div>

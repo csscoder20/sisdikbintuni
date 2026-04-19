@@ -17,21 +17,28 @@ class KelulusanTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('tahun')
-                ->label('Tahun Lulus')
-                    ->sortable(),
+                    ->label('Tahun Lulus')
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('jumlah_peserta_ujian')
                     ->label('Peserta Ujian')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('jumlah_lulus')
                     ->label('Lulus')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('persentase_kelulusan')
-                ->label('Persentase Kelulusan')
-                    ->suffix('%'),
+                    ->label('Persentase Kelulusan')
+                    ->suffix('%')
+                    ->alignCenter(),
                 TextColumn::make('jumlah_lanjut_pt')
-                    ->label('Lanjut PT'),
+                    ->label('Lanjut PT')
+                    ->alignCenter(),
                 TextColumn::make('sekolah.nama')
                     ->sortable(),
             ])
@@ -45,8 +52,8 @@ class KelulusanTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

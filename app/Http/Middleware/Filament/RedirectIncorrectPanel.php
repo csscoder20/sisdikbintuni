@@ -39,7 +39,19 @@ class RedirectIncorrectPanel
                     ->send();
 
                 $sekolah = $user->sekolah;
-                $jenjang = $sekolah?->jenjang ?? 'sma';
+                $jenjangValue = $sekolah?->jenjang;
+
+                if (empty($jenjangValue)) {
+                    // Coba deteksi dari nama sekolah jika field jenjang kosong
+                    $namaUpper = strtoupper($sekolah?->nama ?? '');
+                    if (str_contains($namaUpper, 'SMK')) {
+                        $jenjangValue = 'smk';
+                    } else {
+                        $jenjangValue = 'sma'; // Default ke sma
+                    }
+                }
+
+                $jenjang = strtolower($jenjangValue);
                 $id = $sekolah?->getRouteKey();
                 
                 if ($id) {
@@ -62,7 +74,15 @@ class RedirectIncorrectPanel
 
         // 3. If Operator tries to access a School panel that does NOT match their jenjang
         if ($user->hasRole('operator') && in_array($panel->getId(), ['sma', 'smk'])) {
-            $expectedJenjang = $user->sekolah?->jenjang ?? 'sma';
+            $sekolah = $user->sekolah;
+            $jenjangValue = $sekolah?->jenjang;
+
+            if (empty($jenjangValue)) {
+                $namaUpper = strtoupper($sekolah?->nama ?? '');
+                $jenjangValue = str_contains($namaUpper, 'SMK') ? 'smk' : 'sma';
+            }
+
+            $expectedJenjang = strtolower($jenjangValue);
             
             if ($panel->getId() !== $expectedJenjang) {
                 // Determine the correct redirect URL

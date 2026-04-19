@@ -4,8 +4,11 @@ use App\Filament\Resources\GtkKeuangan\GtkKeuanganResource;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use App\Filament\Imports\GtkKeuanganImporter;
+use App\Filament\Traits\HasImportTemplate;
 use Filament\Resources\Pages\ListRecords;
 class ListGtkKeuangan extends ListRecords {
+    use HasImportTemplate;
+
     protected static string $resource = GtkKeuanganResource::class;
     protected function getHeaderActions(): array { 
         return [
@@ -16,15 +19,12 @@ class ListGtkKeuangan extends ListRecords {
                 ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
-                        <x-filament::link wire:click="mountAction('downloadExample')" tag="button" type="button" color="primary">
-                            {{ __('filament-actions::import.modal.actions.download_example.label') }}
-                        </x-filament::link>
-                        atau
-                        <x-filament::link href="{{ $url }}" tag="a" target="_blank" color="primary">
-                            Download Template Excel (.xlsx)
-                        </x-filament::link>
-                        BLADE,
-                        ['url' => route('import-template.download', ['importer' => 'GtkKeuangan'])]
+                        <div class="text-sm">
+                            <x-filament::link wire:click="mountAction('downloadExample')" tag="button" type="button" color="success" class="font-bold hover:underline">
+                                Unduh contoh berkas (.csv)
+                            </x-filament::link>
+                        </div>
+                        BLADE
                     )
                 ))
                 ->modalSubmitActionLabel('Import Sekarang')

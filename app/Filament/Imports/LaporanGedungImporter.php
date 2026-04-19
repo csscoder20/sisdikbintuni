@@ -18,24 +18,34 @@ class LaporanGedungImporter extends Importer
         return [
             ImportColumn::make('nama_ruang')
                 ->requiredMapping()
-                ->rules(['required', 'string', 'max:255']),
+                ->rules(['required', 'string', 'max:255'])
+                ->example('Ruang Kelas X-1'),
             ImportColumn::make('jumlah_total')
                 ->numeric()
-                ->rules(['required', 'integer', 'min:0']),
+                ->rules(['required', 'integer', 'min:0'])
+                ->example('1'),
             ImportColumn::make('jumlah_baik')
                 ->numeric()
-                ->rules(['required', 'integer', 'min:0']),
+                ->rules(['required', 'integer', 'min:0'])
+                ->example('1'),
             ImportColumn::make('jumlah_rusak')
                 ->numeric()
-                ->rules(['required', 'integer', 'min:0']),
+                ->rules(['required', 'integer', 'min:0'])
+                ->example('0'),
             ImportColumn::make('status_kepemilikan')
-                ->rules(['required', 'string', 'in:milik,pinjam']),
+                ->rules(['required', 'string', 'in:milik,pinjam'])
+                ->example('milik'),
         ];
     }
 
     public function resolveRecord(): LaporanGedung
     {
-        $sekolahId = filament()->getTenant()?->id;
+        $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
+
+        if (! $sekolahId) {
+            throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
+        }
+
         $month = (int) date('m');
         $year = (int) date('Y');
 
@@ -54,10 +64,10 @@ class LaporanGedungImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Impor data keadaan gedung telah selesai dan ' . Number::format($import->successful_rows) . ' ' . str('baris')->plural($import->successful_rows) . ' berhasil diimpor.';
+        $body = 'Impor data sarana/gedung selesai. ' . Number::format($import->successful_rows) . ' baris berhasil diimpor.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('baris')->plural($failedRowsCount) . ' gagal diimpor.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' baris gagal diimpor.';
         }
 
         return $body;

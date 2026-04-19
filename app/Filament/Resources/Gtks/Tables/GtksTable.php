@@ -19,6 +19,8 @@ class GtksTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('nama')
                     ->label('Nama GTK')
@@ -53,6 +55,15 @@ class GtksTable
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tempat_lahir')
+                    ->label('Tempat Lahir')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tanggal_lahir')
+                    ->label('Tanggal Lahir')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('pendidikan_terakhir')
                     ->label('Pendidikan Terakhir')
                     ->searchable()
@@ -60,6 +71,35 @@ class GtksTable
                 TextColumn::make('daerah_asal')
                     ->label('Daerah Asal')
                     ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('agama')
+                    ->label('Agama')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('alamat')
+                    ->label('Alamat')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('desa')
+                    ->label('Desa')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('kecamatan')
+                    ->label('Kecamatan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('kabupaten')
+                    ->label('Kabupaten')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('provinsi')
+                    ->label('Provinsi')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tmt_pangkat_gol_terakhir')
+                    ->label('TMT Pangkat Gol')
+                    ->date('d/m/Y')
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
@@ -81,8 +121,8 @@ class GtksTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

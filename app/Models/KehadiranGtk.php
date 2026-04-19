@@ -8,7 +8,7 @@ class KehadiranGtk extends Model
 {
     use \App\Traits\HasActivityLog;
     protected $table = 'kehadiran_gtk';
-    
+
     protected $fillable = [
         'gtk_id',
         'laporan_id',

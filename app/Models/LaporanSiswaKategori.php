@@ -23,7 +23,7 @@ class LaporanSiswaKategori extends Model
     {
         return $this->belongsTo(LaporanSiswa::class, 'laporan_siswa_id');
     }
-    
+
     // Alternatif: jika ingin menggunakan nama yang lebih pendek
     public function laporan(): BelongsTo
     {

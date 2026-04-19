@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class OperatorSekolah extends Model
 {
     protected $table = 'operator_sekolah';
-            protected $fillable = [
-                'user_id',
-                'sekolah_id',
-            ];
+    protected $fillable = [
+        'user_id',
+        'sekolah_id',
+    ];
 
     public function user()
     {

@@ -21,10 +21,10 @@ class CustomLoginResponse implements LoginResponseContract
             return redirect()->to('/admin/dinas');
         }
 
-        if ($user->role === 'operator' && $user->sekolah) {
-            $jenjang = $user->sekolah->jenjang;
-            $id = $user->sekolah->id;
-            return redirect()->to("/admin/{$jenjang}/{$id}/operator");
+        if ($user->hasRole('operator') && $user->sekolah) {
+            $jenjang = strtolower($user->sekolah->jenjang);
+            $id = $user->sekolah->getRouteKey();
+            return redirect()->to("/admin/{$jenjang}/{$id}");
         }
 
         return redirect()->to(Filament::getLoginUrl());

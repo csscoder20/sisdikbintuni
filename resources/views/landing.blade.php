@@ -315,8 +315,12 @@
 
             <!-- Actions -->
             <div class="nav-actions">
-                <a href="/admin/login" class="btn-login">Login</a>
-                <a href="/admin/register" class="btn-register">Register</a>
+                @auth
+                    <a href="/admin" class="btn-register">Panel</a>
+                @else
+                    <a href="/admin/login" class="btn-login">Login</a>
+                    <a href="/admin/register" class="btn-register">Register</a>
+                @endauth
             </div>
         </nav>
     </header>
@@ -339,8 +343,12 @@
             </p>
 
             <div class="hero-actions">
-                <a href="/admin/login" class="btn-primary">
-                    Mulai Sekarang
+                <a href="/admin" class="btn-primary">
+                    @auth
+                        Panel Admin
+                    @else
+                        Mulai Sekarang
+                    @endauth
                 </a>
                 <a href="#" class="btn-secondary">
                     Pelajari Fitur

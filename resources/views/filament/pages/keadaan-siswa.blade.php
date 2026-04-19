@@ -230,8 +230,7 @@
         .ks-table td {
             padding: 0.5rem;
             border: 1px solid var(--ks-td-border);
-            white-space: normal !important;
-            word-break: break-word;
+            white-space: nowrap !important;
         }
 
         .ks-table td {
@@ -269,9 +268,9 @@
 
     <div class="ks-card" style="margin-bottom:1.25rem;">
 
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#dbeafe33,#93c5fd11); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:#1d4ed8;">Jumlah Siswa Berdasarkan Kelas / Rombel</h2>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#dbeafe33,#93c5fd11); margin-bottom: 1rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <h2 style="color:#1d4ed8; flex-grow: 1;">Jumlah Siswa Berdasarkan Kelas / Rombel</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                 <div wire:key="wrapper-syncSiswaRombel">
                     {{ $this->syncSiswaRombelAction }}
                 </div>
@@ -428,8 +427,8 @@
     {{-- Tabel 2: Siswa Menurut Umur --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:#15803d;">Jumlah Siswa Menurut Umur</h2>
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <h2 style="color:#15803d; flex-grow: 1;">Jumlah Siswa Menurut Umur</h2>
             <div wire:key="wrapper-validateSiswaUmur">
                 {{ $this->validateSiswaUmurAction }}
             </div>
@@ -509,8 +508,8 @@
     {{-- Tabel 3: Siswa Menurut Agama --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:#7c3aed;">Jumlah Siswa Menurut Agama</h2>
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <h2 style="color:#7c3aed; flex-grow: 1;">Jumlah Siswa Menurut Agama</h2>
             <div wire:key="wrapper-validateSiswaAgama">
                 {{ $this->validateSiswaAgamaAction }}
             </div>
@@ -605,8 +604,8 @@
     {{-- Tabel 4: Siswa Menurut Daerah Asal --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#fed7aa33,#fdba7411); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:#b45309;">Jumlah Siswa Menurut Daerah Asal</h2>
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#fed7aa33,#fdba7411); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <h2 style="color:#b45309; flex-grow: 1;">Jumlah Siswa Menurut Daerah Asal</h2>
             <div wire:key="wrapper-validateSiswaDaerah">
                 {{ $this->validateSiswaDaerahAction }}
             </div>
@@ -686,8 +685,8 @@
     {{-- Tabel 5: Siswa Disabilitas --}}
     {{-- ================================================================ --}}
     <div class="ks-card" style="margin-bottom:1.25rem;">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#fecaca33,#fca5a511); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:#b91c1c;">Jumlah Siswa Disabilitas</h2>
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#fecaca33,#fca5a511); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <h2 style="color:#b91c1c; flex-grow: 1;">Jumlah Siswa Disabilitas</h2>
             <div wire:key="wrapper-validateSiswaDisabilitas">
                 {{ $this->validateSiswaDisabilitasAction }}
             </div>
@@ -738,8 +737,8 @@
     {{-- Tabel 6: Siswa Penerima Beasiswa --}}
     {{-- ================================================================ --}}
     <div class="ks-card" wire:key="siswa-beasiswa-card">
-        <div class="ks-card-header" style="background:linear-gradient(135deg,#e0e7ff33,#c7d2fe11); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:#4338ca;">Jumlah Siswa Penerima Beasiswa</h2>
+        <div class="ks-card-header" style="background:linear-gradient(135deg,#e0e7ff33,#c7d2fe11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+            <h2 style="color:#4338ca; flex-grow: 1;">Jumlah Siswa Penerima Beasiswa</h2>
             <div wire:key="wrapper-validateSiswaBeasiswa">
                 {{ $this->validateSiswaBeasiswaAction }}
             </div>

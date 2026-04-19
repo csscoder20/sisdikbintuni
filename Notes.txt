@@ -64,3 +64,54 @@ Catatan:
 - kolom GTK - Diubah jadi nama - Riwayat Pendidikan GTK & Rekening & NPWP 
 - Keadaan Gedung/Ruang - tambahkan fitur import data
 - 
+
+
+HASIL CEK (18/04/26)
+
+Update database:
+1. tambah field "jenjang" di table sekolah, pilihannnya : (SD, SMP, SMA, SMK), ini diperlukan nanti utk pemilihan Mapel agar yg tampil sesuai jenjang sekolahnya saja
+
+Koreksi fungsi dan tampilan dashboard:
+1. PROFIL
+- Kec dan Desa belum bs dipilih
+
+2. ROMBEL
+- menu tambah: pilihan tingkat cukup 10, 11 dan 12 (1-9 dihapus), karena ini utk SMA/SMK aja
+- import belum berhasil (hanya muncul notif berhasil tp data tidak masuk,
+
+3. MAPEL:
+- cukup tampilan mapel yg berlaku di sekolah itu, missal SMA atau SMK saja
+- menu Mapel ini tdk usah CRUD di operator, cukup liat list mapel aja, krna ini struktur kurikulum dari ppusat, harusnya sih tdk bisa diubah2 oleh operator, mungkin annti kita pindah kan ke menu nya admin dinas aja, fasilitas CRUD dan importnya jg tetap ada tp utk level dinas
+
+4. NOMINATIF SISWA:
+- tambah data : kec dan desa blm bisa dipilih, 
+- tambah data : alamat dikasih placeholder utk keterangan "Nama Jalan, Nomor Rumah/Blok, RT/RW, Kompleks", 
+- view data: cukup text disabled/readonly, tampilan field yg select/radio ganti ke text disabled/readonly
+
+5. NOMINATIF GTK: koreksinya sama dgn nominatif siswa
+
+6. RIWAYAT PENDIDIKAN GTK: 
+- Tabel: yg ditampilkan kolomnya: nama gtk, tahun tamat s1, jurusan s1, nama PT, gelar
+- tambah/edit/view data : di grouping ya sesuai berikut ini, layout bebas, bs 1 group 1 baris, 2 baris, sesuaikan aja
+grop1: tahun tamat sd, smp, sma
+group2: tahun tamat d1,jurusan,PT
+group3: d2
+group4: d3
+group5: s1
+group6: s2
+group7: s3
+group8: akta IV
+group9: gelar akademik
+
+7. REKENING NPWP: sementara aman
+
+8. MENU LAPORAN: keadaan geduung, siswa dan gtk, secara layout sdh oke, namun utk alur, data dan behaviour  nya nanti kita diskusi sama2.
+
+catatan tambahan:
+1. semua fasilitas impor, setelah impor lgsung refresh / soft load halaman sehingga data langsung terbaca 
+2. di saya ini blum bs menu importnya, apa mungkin ada yg perlu dilakukan secara teknikal di system atau apa, ini harus kita bahas samaa2.
+3. semua tombol (save-simpan, close-tutup), diksi (view-lihat, edit-ubah, delete-hapus) ganti jadi buat Bahasa Indonesia
+4. Notif "Import started, Your import has begun and 3 rows will be processed in the background", ini juga diganti Bahasa indonesia, 
+5. in kalau upload csv, tersimpanya dimana? klo bs saran, jgn tersimpannya ke folder sistem/app, tp ke publk/resource, dan pas upload itu dia create folder sesuai nama sekolah/usernya, biar enak trackingnya nanti klo ada salah/keliru data
+
+sementara begitu dulu pri, pelan2 yg bs dikerjakan, kita jadwal meetup hari minggu malam, jam nya bebas sa ikut jadwalmu, saran diatas jam 20.00, durasi maks jam 24.00 sdh end meet.

@@ -12,7 +12,7 @@ Route::get('/admin', function () {
         if ($user->hasRole('operator')) {
             $sekolah = $user->sekolah;
             if ($sekolah) {
-                return redirect()->to("/admin/{$sekolah->jenjang}/{$sekolah->getRouteKey()}");
+                return redirect()->to("/admin/" . strtolower($sekolah->jenjang) . "/{$sekolah->getRouteKey()}");
             }
         }
         return redirect()->to('/admin/dinas');

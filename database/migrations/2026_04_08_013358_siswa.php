@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('kecamatan')->nullable();
             $table->string('kabupaten')->nullable();
             $table->string('provinsi')->nullable();
-            $table->string('agama')->nullable();
+            $table->enum('agama', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'])->nullable();
             $table->enum('daerah_asal', ['Papua', 'Non Papua'])->nullable();
             $table->string('nama_ayah')->nullable();
             $table->string('nama_ibu')->nullable();

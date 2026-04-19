@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Models\GtkPendidikan;
+use App\Models\Gtk;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -17,20 +18,32 @@ class GtkPendidikanImporter extends Importer
         return [
             ImportColumn::make('nik_gtk')
                 ->requiredMapping()
-                ->label('NIK GTK'),
-            ImportColumn::make('gelar_akademik'),
-            ImportColumn::make('thn_tamat_sd'),
-            ImportColumn::make('thn_tamat_smp'),
-            ImportColumn::make('thn_tamat_sma'),
-            ImportColumn::make('thn_tamat_s1'),
-            ImportColumn::make('jurusan_s1'),
-            ImportColumn::make('perguruan_tinggi_s1'),
+                ->label('NIK GTK')
+                ->example('3201010101010005'),
+            ImportColumn::make('gelar_akademik')
+                ->example('S.Pd'),
+            ImportColumn::make('thn_tamat_sd')
+                ->example('1997'),
+            ImportColumn::make('thn_tamat_smp')
+                ->example('2000'),
+            ImportColumn::make('thn_tamat_sma')
+                ->example('2003'),
+            ImportColumn::make('thn_tamat_s1')
+                ->example('2007'),
+            ImportColumn::make('jurusan_s1')
+                ->example('Pendidikan Matematika'),
+            ImportColumn::make('perguruan_tinggi_s1')
+                ->example('Universitas Cenderawasih'),
         ];
     }
 
     public function resolveRecord(): ?GtkPendidikan
     {
-        $gtk = Gtk::where('nik', $this->data['nik_gtk'])->first();
+        $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
+
+        $gtk = Gtk::where('nik', $this->data['nik_gtk'])
+            ->where('sekolah_id', $sekolahId)
+            ->first();
         
         if (!$gtk) {
             return null;
@@ -43,10 +56,10 @@ class GtkPendidikanImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your gtk pendidikan import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Impor data pendidikan GTK selesai. ' . Number::format($import->successful_rows) . ' baris berhasil diimpor.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' ' . Number::format($failedRowsCount) . ' baris gagal diimpor.';
         }
 
         return $body;

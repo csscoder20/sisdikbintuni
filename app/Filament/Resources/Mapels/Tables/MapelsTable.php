@@ -19,6 +19,8 @@ class MapelsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('kode_mapel')
                     ->label('Kode')
@@ -30,10 +32,11 @@ class MapelsTable
                     ->sortable(),
                 TextColumn::make('jjp')
                     ->label('JJP')
-                    ->formatStateUsing(fn ($state) => $state !== null && $state !== '' ? (int) $state : '-')
+                    ->formatStateUsing(fn($state) => $state !== null && $state !== '' ? (int) $state : '-')
                     ->sortable(),
                 TextColumn::make('jenjang')
                     ->label('Jenjang')
+                    ->formatStateUsing(fn($state) => strtoupper($state))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('created_at')
@@ -49,23 +52,6 @@ class MapelsTable
             ])
             ->filters([
                 //
-            ])
-            ->actions([
-                ActionGroup::make([
-                    ViewAction::make()
-                        ->icon(Heroicon::OutlinedEye),
-                    EditAction::make()
-                        ->icon(Heroicon::OutlinedPencilSquare),
-                    DeleteAction::make()
-                        ->icon(Heroicon::OutlinedTrash),
-                ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

@@ -99,11 +99,6 @@ class SekolahPage extends Page implements HasSchemas
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-
-            Section::make('Identitas Sekolah')
-                ->description('Informasi dasar identitas sekolah')
-                ->columns(3)
-                ->schema([
                     TextInput::make('nama')
                         ->label('Nama Sekolah')
                         ->required()
@@ -120,12 +115,21 @@ class SekolahPage extends Page implements HasSchemas
 
                     TextInput::make('npwp')
                         ->label('NPWP')
-                        ->maxLength(30),
+                        ->maxLength(16),
 
                     TextInput::make('email')
                         ->label('Email Sekolah')
                         ->email()
                         ->maxLength(255),
+                    
+                    Select::make('jenjang')
+                        ->label('Jenjang')
+                        ->options([
+                            'sd'  => 'SD',
+                            'smp' => 'SMP',
+                            'sma' => 'SMA',
+                            'smk' => 'SMK',
+                        ]),
 
                     Select::make('akreditasi')
                         ->label('Akreditasi')
@@ -134,14 +138,7 @@ class SekolahPage extends Page implements HasSchemas
                             'B'     => 'B',
                             'C'     => 'C',
                             'Belum' => 'Belum Terakreditasi',
-                        ]),
-                ]),
-
-            Section::make('Alamat Sekolah')
-                ->description('Lokasi dan alamat lengkap sekolah')
-                ->columns(4)
-                ->schema([
-                    
+                        ]),          
 
                     TextInput::make('provinsi')
                         ->label('Provinsi')
@@ -188,19 +185,11 @@ class SekolahPage extends Page implements HasSchemas
                         ->searchable(),
                     Textarea::make('alamat')
                         ->label('Alamat')
-                        ->rows(2)
+                        ->rows(1)
                         ->columnSpanFull(),
 
-                ]),
-
-            Section::make('Pendirian Sekolah')
-                ->description('Informasi pendirian dan legalitas sekolah')
-                ->columns(3)
-                ->schema([
                     TextInput::make('tahun_berdiri')
                         ->label('Tahun Berdiri')
-                        ->numeric()
-                        ->minValue(1900)
                         ->maxValue((int) date('Y')),
 
                     TextInput::make('nomor_sk_pendirian')
@@ -210,12 +199,6 @@ class SekolahPage extends Page implements HasSchemas
                         ->label('Tanggal SK Pendirian')
                         ->native(false)
                         ->displayFormat('d/m/Y'),
-                ]),
-
-            Section::make('Tanah & Gedung')
-                ->description('Informasi fisik bangunan dan lahan sekolah')
-                ->columns(3)
-                ->schema([
                     Select::make('status_tanah')
                         ->label('Status Tanah')
                         ->options([
@@ -228,23 +211,15 @@ class SekolahPage extends Page implements HasSchemas
                         ->label('Luas Tanah')
                         ->numeric()
                         ->suffix('m²'),
-                ]),
-
-            Section::make('Penyelenggara / Yayasan')
-                ->description('Informasi tentang yayasan atau penyelenggara sekolah')
-                ->columns(3)
-                ->schema([
                     TextInput::make('nama_yayasan')
                         ->label('Nama Penyelenggara / Yayasan'),
                     TextInput::make('nomor_sk_yayasan')
                         ->label('SK Pendirian Yayasan'),
                     Textarea::make('alamat_yayasan')
                         ->label('Alamat Penyelenggara / Yayasan')
-                        ->rows(2)
+                        ->rows(1)
                         ->columnSpanFull(),
-
-                ]),
-        ]);
+        ])->columns(4);
     }
 
     /**
@@ -272,7 +247,7 @@ class SekolahPage extends Page implements HasSchemas
     {
         return [
             Action::make('save')
-                ->label('Simpan Perubahan')
+                ->label('Perbarui Data')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->submit('save'),
@@ -299,7 +274,7 @@ class SekolahPage extends Page implements HasSchemas
         $sekolah->update($data);
 
         Notification::make()
-            ->title('Data sekolah berhasil disimpan!')
+            ->title('Data sekolah berhasil diperbarui!')
             ->success()
             ->send();
     }

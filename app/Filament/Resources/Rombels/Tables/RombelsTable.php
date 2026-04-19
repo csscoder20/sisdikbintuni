@@ -17,6 +17,9 @@ class RombelsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
+            ->poll('5s')
             ->columns([
                 TextColumn::make('nama')
                     ->searchable(),
@@ -42,8 +45,8 @@ class RombelsTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

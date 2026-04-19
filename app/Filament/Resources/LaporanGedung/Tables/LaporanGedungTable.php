@@ -17,6 +17,8 @@ class LaporanGedungTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 // TextColumn::make('laporan.tahun')
                 //     ->label('Tahun')
@@ -25,30 +27,33 @@ class LaporanGedungTable
                 //     ->label('Bulan')
                 //     ->sortable(),
                 TextColumn::make('nama_ruang')
-                ->label('Nama Ruang')
+                    ->label('Nama Ruang')
                     ->searchable(),
                 TextColumn::make('jumlah_total')
-                ->label('Jumlah Total')
+                    ->label('Jumlah Total')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('jumlah_baik')
-                ->label('Jumlah Baik')
+                    ->label('Jumlah Baik')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('jumlah_rusak')
-                ->label('Jumlah Rusak')
+                    ->label('Jumlah Rusak')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('status_kepemilikan')
-                ->label('Status Kepemilikan')
+                    ->label('Status Kepemilikan')
                     ->searchable(),
                 TextColumn::make('created_at')
-                ->label('Dibuat Pada')
+                    ->label('Dibuat Pada')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                ->label('Diperbarui Pada')
+                    ->label('Diperbarui Pada')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -62,8 +67,8 @@ class LaporanGedungTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -15,11 +15,13 @@ class LaporanTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('tahun')
                     ->sortable(),
                 TextColumn::make('bulan')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         '1' => 'Januari',
                         '2' => 'Februari',
                         '3' => 'Maret',
@@ -51,8 +53,8 @@ class LaporanTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ]);
     }
 }

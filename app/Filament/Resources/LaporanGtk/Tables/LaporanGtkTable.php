@@ -14,6 +14,8 @@ class LaporanGtkTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('laporan.tahun')
                     ->label('Tahun')
@@ -37,8 +39,8 @@ class LaporanGtkTable
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ]);
     }
 }

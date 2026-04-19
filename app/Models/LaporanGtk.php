@@ -8,10 +8,10 @@ class LaporanGtk extends Model
 {
     use \App\Traits\HasActivityLog;
     protected $table = 'laporan_gtk';
-        protected $fillable = [
-            'laporan_id',
-            'gtk_id',
-        ];
+    protected $fillable = [
+        'laporan_id',
+        'gtk_id',
+    ];
 
     public function laporan()
     {

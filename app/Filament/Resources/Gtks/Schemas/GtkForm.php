@@ -41,15 +41,15 @@ class GtkForm
                     ->native(false)
                     ->displayFormat('d/m/Y'),
                 Select::make('agama')
-                ->label('Agama')
-                ->options([
-                    'Islam' => 'Islam',
-                    'Kristen Protestan' => 'Kristen Protestan',
-                    'Katolik' => 'Katolik',
-                    'Hindu' => 'Hindu',
-                    'Buddha' => 'Buddha',
-                    'Konghucu' => 'Konghucu',
-                ]),
+                    ->label('Agama')
+                    ->options([
+                        'Islam' => 'Islam',
+                        'Kristen Protestan' => 'Kristen Protestan',
+                        'Katolik' => 'Katolik',
+                        'Hindu' => 'Hindu',
+                        'Buddha' => 'Buddha',
+                        'Konghucu' => 'Konghucu',
+                    ]),
                 TextInput::make('pendidikan_terakhir')
                     ->label('Pendidikan Terakhir'),
                 Select::make('daerah_asal')
@@ -107,52 +107,53 @@ class GtkForm
                     ->native(false)
                     ->label('TMT Pangkat Gol Terakhir')
                     ->displayFormat('d/m/Y'),
-                
-                    TextInput::make('alamat')
-                        ->label('Alamat Domisili')
-                        ->columnSpanFull(),
-                    TextInput::make('provinsi')
-                        ->label('Provinsi')
-                        ->default('Papua Barat')
-                        ->formatStateUsing(fn ($state) => $state ?: 'Papua Barat')
-                        ->disabled()
-                        ->dehydrated(true),
-                    TextInput::make('kabupaten')
-                        ->label('Kabupaten')
-                        ->default('Teluk Bintuni')
-                        ->formatStateUsing(fn ($state) => $state ?: 'Teluk Bintuni')
-                        ->disabled()
-                        ->dehydrated(true),
-                    Select::make('kecamatan')
-                        ->label('Kecamatan')
-                        ->options(function () {
-                            return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
-                                ->pluck('nama', 'nama');
-                        })
-                        ->live()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
-                        ->searchable(),
-                    Select::make('desa')
-                        ->label('Desa')
-                        ->options(function (callable $get) {
-                            $kecamatan = $get('kecamatan');
-                            if (! $kecamatan) {
-                                return [];
-                            }
-                            
-                            $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
-                                ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
-                                ->first();
 
-                            if (!$kecamatanModel) {
-                                return [];
-                            }
+                TextInput::make('alamat')
+                    ->label('Alamat Domisili')
+                    ->placeholder('Nama Jalan, Nomor Rumah/Blok, RT/RW, Kompleks')
+                    ->columnSpanFull(),
+                TextInput::make('provinsi')
+                    ->label('Provinsi')
+                    ->default('Papua Barat')
+                    ->formatStateUsing(fn($state) => $state ?: 'Papua Barat')
+                    ->disabled()
+                    ->dehydrated(true),
+                TextInput::make('kabupaten')
+                    ->label('Kabupaten')
+                    ->default('Teluk Bintuni')
+                    ->formatStateUsing(fn($state) => $state ?: 'Teluk Bintuni')
+                    ->disabled()
+                    ->dehydrated(true),
+                Select::make('kecamatan')
+                    ->label('Kecamatan')
+                    ->options(function () {
+                        return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                            ->pluck('nama', 'nama');
+                    })
+                    ->live()
+                    ->afterStateUpdated(fn($state, callable $set) => $set('desa', null))
+                    ->searchable(),
+                Select::make('desa')
+                    ->label('Desa')
+                    ->options(function (callable $get) {
+                        $kecamatan = $get('kecamatan');
+                        if (! $kecamatan) {
+                            return [];
+                        }
 
-                            return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
-                                ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
-                                ->pluck('nama', 'nama');
-                        })
-                        ->searchable(),
+                        $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
+                            ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                            ->first();
+
+                        if (!$kecamatanModel) {
+                            return [];
+                        }
+
+                        return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
+                            ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
+                            ->pluck('nama', 'nama');
+                    })
+                    ->searchable(),
             ])->columns(3);
     }
 }

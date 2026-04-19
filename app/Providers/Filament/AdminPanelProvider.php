@@ -135,7 +135,22 @@ class AdminPanelProvider extends PanelProvider
                             Login Sekarang!
                         </a>
                    </p>'
-            );
+            )
+            ->renderHook('panels::body.end', function () {
+                return <<<'HTML'
+                    <style>
+                        .fi-ta-header-cell > * {
+                            padding: 4px !important;
+                        }
+                        .fi-ta-cell > * {
+                            padding: 4px !important;
+                        }
+                        .fi-ta-cell {
+                            height: auto !important;
+                        }
+                    </style>
+                HTML;
+            });
     }
 
     public function register(): void
@@ -234,12 +249,16 @@ class AdminPanelProvider extends PanelProvider
                             scrollbar-width: none;
                         }
                         
-                       .fi-main {
-                            min-width: 100rem !important;
-                        }
-
                         .max-w-7xl {
                             max-width: 100%;
+                        }
+
+                        /* Compact tables */
+                        .fi-ta-header-cell > * {
+                            padding: 4px !important;
+                        }
+                        .fi-ta-cell > * {
+                            padding: 4px !important;
                         }
                     </style>
                 HTML;

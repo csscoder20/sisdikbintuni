@@ -7,10 +7,14 @@ use App\Filament\Actions\ValidateChecklistAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use App\Filament\Imports\GtkImporter;
+use App\Filament\Traits\HasImportTemplate;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\HtmlString;
 
 class ListGtks extends ListRecords
 {
+    use HasImportTemplate;
+
     protected static string $resource = GtkResource::class;
 
     protected function getHeaderActions(): array
@@ -20,18 +24,15 @@ class ListGtks extends ListRecords
                 ->importer(GtkImporter::class)
                 ->label('Import Data')
                 ->modalHeading('Import Data GTK')
-                ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
+                ->modalDescription(fn (ImportAction $action) => new HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
-                        <x-filament::link wire:click="mountAction('downloadExample')" tag="button" type="button" color="primary">
-                            {{ __('filament-actions::import.modal.actions.download_example.label') }}
-                        </x-filament::link>
-                        atau
-                        <x-filament::link href="{{ $url }}" tag="a" target="_blank" color="primary">
-                            Download Template Excel (.xlsx)
-                        </x-filament::link>
-                        BLADE,
-                        ['url' => route('import-template.download', ['importer' => 'Gtk'])]
+                        <div class="text-sm">
+                            <x-filament::link wire:click="mountAction('downloadExample')" tag="button" type="button" color="success" class="font-bold hover:underline">
+                                Unduh contoh berkas (.csv)
+                            </x-filament::link>
+                        </div>
+                        BLADE
                     )
                 ))
                 ->modalSubmitActionLabel('Import Sekarang')

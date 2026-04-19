@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('npsn')->unique();
             $table->string('nss')->nullable();
             $table->string('npwp')->nullable();
+            $table->enum('jenjang', ['sma', 'smk'])->nullable();
             $table->text('alamat')->nullable();
             $table->string('desa')->nullable();
             $table->string('kecamatan')->nullable();

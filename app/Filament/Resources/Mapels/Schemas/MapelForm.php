@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Mapels\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Filament\Facades\Filament;
 
 class MapelForm
 {
@@ -26,11 +27,13 @@ class MapelForm
                 Select::make('jenjang')
                     ->label('Jenjang')
                     ->options([
-                        'SD' => 'SD',
-                        'SMP' => 'SMP',
-                        'SMA' => 'SMA',
-                        'SMK' => 'SMK',
-                    ]),
+                        'sd' => 'SD',
+                        'smp' => 'SMP',
+                        'sma' => 'SMA',
+                        'smk' => 'SMK',
+                    ])
+                    ->default(fn() => Filament::getTenant()?->jenjang ?: (Filament::getCurrentPanel() && in_array(Filament::getCurrentPanel()->getId(), ['sma', 'smk']) ? strtoupper(Filament::getCurrentPanel()->getId()) : null))
+                    ->required(),
             ]);
     }
 }

@@ -17,6 +17,8 @@ class KehadiranGtkTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
+            ->recordAction(null)
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')
@@ -24,16 +26,20 @@ class KehadiranGtkTable
                     ->searchable(),
                 TextColumn::make('hari_kerja')
                     ->label('Hari Kerja')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('sakit')
                     ->label('Sakit')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('izin')
                     ->label('Izin')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('alfa')
                     ->label('Alpa')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 // TextColumn::make('laporan.id')
                 //     ->label('ID Laporan')
                 //     ->sortable(),
