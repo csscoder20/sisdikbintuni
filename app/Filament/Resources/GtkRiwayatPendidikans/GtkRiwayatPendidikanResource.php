@@ -50,32 +50,114 @@ class GtkRiwayatPendidikanResource extends Resource
         return $schema
             ->inlineLabel()
             ->components([
-                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
-                TextEntry::make('gelar_akademik')->label('Gelar Akademik')->placeholder('-'),
-                TextEntry::make('thn_tamat_sd')->label('Tahun Tamat SD')->placeholder('-'),
-                TextEntry::make('thn_tamat_smp')->label('Tahun Tamat SMP')->placeholder('-'),
-                TextEntry::make('thn_tamat_sma')->label('Tahun Tamat SMA')->placeholder('-'),
-                TextEntry::make('thn_tamat_d1')->label('Tahun Tamat D1')->placeholder('-'),
-                TextEntry::make('jurusan_d1')->label('Jurusan D1')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_d1')->label('Perguruan Tinggi D1')->placeholder('-'),
-                TextEntry::make('thn_tamat_d2')->label('Tahun Tamat D2')->placeholder('-'),
-                TextEntry::make('jurusan_d2')->label('Jurusan D2')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_d2')->label('Perguruan Tinggi D2')->placeholder('-'),
-                TextEntry::make('thn_tamat_d3')->label('Tahun Tamat D3')->placeholder('-'),
-                TextEntry::make('jurusan_d3')->label('Jurusan D3')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_d3')->label('Perguruan Tinggi D3')->placeholder('-'),
-                TextEntry::make('thn_tamat_s1')->label('Tahun Tamat S1')->placeholder('-'),
-                TextEntry::make('jurusan_s1')->label('Jurusan S1')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_s1')->label('Perguruan Tinggi S1')->placeholder('-'),
-                TextEntry::make('thn_tamat_s2')->label('Tahun Tamat S2')->placeholder('-'),
-                TextEntry::make('jurusan_s2')->label('Jurusan S2')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_s2')->label('Perguruan Tinggi S2')->placeholder('-'),
-                TextEntry::make('thn_tamat_s3')->label('Tahun Tamat S3')->placeholder('-'),
-                TextEntry::make('jurusan_s3')->label('Jurusan S3')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_s3')->label('Perguruan Tinggi S3')->placeholder('-'),
-                TextEntry::make('thn_akta4')->label('Tahun Tamat Akta IV')->placeholder('-'),
-                TextEntry::make('jurusan_akta4')->label('Jurusan Akta IV')->placeholder('-'),
-                TextEntry::make('perguruan_tinggi_akta4')->label('Perguruan Tinggi Akta IV')->placeholder('-'),
+                TextEntry::make('gtk.nama')
+                ->label('Nama GTK')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('gelar_depan')
+                ->label('Gelar Depan')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('gelar_belakang')
+                ->label('Gelar Belakang')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_sd')
+                ->label('Tahun Tamat SD')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_smp')
+                ->label('Tahun Tamat SMP')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_sma')
+                ->label('Tahun Tamat SMA')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_d1')
+                ->label('Tahun Tamat D1')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_d1')
+                ->label('Jurusan D1')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_d1')
+                ->label('Perguruan Tinggi D1')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_d2')
+                ->label('Tahun Tamat D2')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_d2')
+                ->label('Jurusan D2')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_d2')
+                ->label('Perguruan Tinggi D2')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_d3')
+                ->label('Tahun Tamat D3')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_d3')
+                ->label('Jurusan D3')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_d3')
+                ->label('Perguruan Tinggi D3')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_s1')
+                ->label('Tahun Tamat S1')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_s1')
+                ->label('Jurusan S1')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_s1')
+                ->label('Perguruan Tinggi S1')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_s2')
+                ->label('Tahun Tamat S2')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_s2')
+                ->label('Jurusan S2')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_s2')
+                ->label('Perguruan Tinggi S2')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_tamat_s3')
+                ->label('Tahun Tamat S3')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_s3')
+                ->label('Jurusan S3')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_s3')
+                ->label('Perguruan Tinggi S3')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('thn_akta4')
+                ->label('Tahun Tamat Akta IV')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('jurusan_akta4')
+                ->label('Jurusan Akta IV')
+                ->prefix(': ')
+                ->placeholder('-'),
+                TextEntry::make('perguruan_tinggi_akta4')
+                ->label('Perguruan Tinggi Akta IV')
+                ->prefix(': ')
+                ->placeholder('-'),
             ])->columns(2);
     }
 

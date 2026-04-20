@@ -19,7 +19,7 @@ class GtkRiwayatPendidikanFactory extends Factory
             'thn_tamat_s1' => $this->faker->year(),
             'jurusan_s1' => $this->faker->randomElement(['Pendidikan Matematika', 'Pendidikan Bahasa Indonesia', 'Teknik Informatika']),
             'nama_perguruan_tinggi' => $this->faker->company() . ' University',
-            'gelar_akademik' => $this->faker->randomElement(['S.Pd', 'S.Kom', 'M.Pd']),
+            'gelar_belakang' => $this->faker->randomElement(['S.Pd', 'S.Kom', 'M.Pd']),
         ];
     }
 }

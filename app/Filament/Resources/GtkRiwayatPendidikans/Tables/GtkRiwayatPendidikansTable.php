@@ -111,7 +111,7 @@ class GtkRiwayatPendidikansTable
                     ->label('PT Akta IV')
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('gelar_akademik')
+                TextColumn::make('gelar_belakang')
                     ->label('Gelar Akademik'),
 
                 TextColumn::make('created_at')

@@ -47,7 +47,8 @@ return new class extends Migration
             $table->string('jurusan_akta4')->nullable();
             $table->string('perguruan_tinggi_akta4')->nullable();   
 
-            $table->string('gelar_akademik')->nullable();   
+            $table->string('gelar_depan')->nullable();   
+            $table->string('gelar_belakang')->nullable();   
 
             $table->timestamps();
         });

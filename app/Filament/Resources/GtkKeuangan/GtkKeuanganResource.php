@@ -46,10 +46,10 @@ class GtkKeuanganResource extends Resource
         return $schema
             ->inlineLabel()
             ->components([
-                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
-                TextEntry::make('nama_bank')->label('Nama Bank')->placeholder('-'),
-                TextEntry::make('nomor_rekening')->label('Nomor Rekening')->placeholder('-'),
-                TextEntry::make('npwp')->label('NPWP')->placeholder('-'),
+                TextEntry::make('gtk.nama')->label('Nama GTK')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_bank')->label('Nama Bank')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nomor_rekening')->label('Nomor Rekening')->prefix(': ')->placeholder('-'),
+                TextEntry::make('npwp')->label('NPWP')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
 

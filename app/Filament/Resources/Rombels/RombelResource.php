@@ -51,9 +51,9 @@ class RombelResource extends Resource
         return $schema
             ->inlineLabel()
             ->components([
-                TextEntry::make('nama')->label('Nama Rombel')->placeholder('-'),
-                TextEntry::make('tingkat')->label('Tingkat')->placeholder('-'),
-                TextEntry::make('sekolah.nama')->label('Sekolah')->placeholder('-'),
+                TextEntry::make('nama')->label('Nama Rombel')->prefix(': ')->placeholder('-'),
+                TextEntry::make('tingkat')->label('Tingkat')->prefix(': ')->placeholder('-'),
+                TextEntry::make('sekolah.nama')->label('Sekolah')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
 

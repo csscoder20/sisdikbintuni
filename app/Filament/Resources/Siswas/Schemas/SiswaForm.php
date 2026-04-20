@@ -34,6 +34,9 @@ class SiswaForm
                             TextInput::make('nik')
                                 ->label('NIK')
                                 ->maxLength(16),
+                            TextInput::make('nokk')
+                                ->label('Nomor KK')
+                                ->maxLength(16),
                             Radio::make('jenis_kelamin')
                                 ->label('Jenis Kelamin')
                                 ->options([
@@ -48,9 +51,7 @@ class SiswaForm
                                 ->label('Tanggal Lahir')
                                 ->native(false)
                                 ->displayFormat('d/m/Y'),
-                            TextInput::make('nokk')
-                                ->label('Nomor KK')
-                                ->maxLength(16),
+                            
                             TextInput::make('nobpjs')
                                 ->label('Nomor BPJS')
                                 ->maxLength(20),
@@ -184,7 +185,7 @@ class SiswaForm
                             Select::make('disabilitas')
                                 ->label('Jenis Disabilitas')
                                 ->options([
-                                    'tidak' => 'Tidak Ada',
+                                    'tidak' => 'Non Disabilitas',
                                     'tuna_netra' => 'Tuna Netra',
                                     'tuna_rungu' => 'Tuna Rungu',
                                     'tuna_wicara' => 'Tuna Wicara',

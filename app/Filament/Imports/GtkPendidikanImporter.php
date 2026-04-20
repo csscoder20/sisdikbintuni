@@ -20,7 +20,7 @@ class GtkPendidikanImporter extends Importer
                 ->requiredMapping()
                 ->label('NIK GTK')
                 ->example('3201010101010005'),
-            ImportColumn::make('gelar_akademik')
+            ImportColumn::make('gelar_belakang')
                 ->example('S.Pd'),
             ImportColumn::make('thn_tamat_sd')
                 ->example('1997'),

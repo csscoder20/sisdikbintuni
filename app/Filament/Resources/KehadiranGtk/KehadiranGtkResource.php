@@ -49,15 +49,16 @@ class KehadiranGtkResource extends Resource
         return $schema
             ->inlineLabel()
             ->components([
-                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
+                TextEntry::make('gtk.nama')->label('Nama GTK')->prefix(': ')->placeholder('-'),
                 TextEntry::make('periode_laporan')
                     ->label('Periode Laporan')
                     ->state(fn(KehadiranGtk $record): ?string => $record->laporan ? "{$record->laporan->bulan}/{$record->laporan->tahun}" : null)
+                    ->prefix(': ')
                     ->placeholder('-'),
-                TextEntry::make('hari_kerja')->label('Hari Kerja')->placeholder('-'),
-                TextEntry::make('sakit')->label('Sakit')->placeholder('-'),
-                TextEntry::make('izin')->label('Izin')->placeholder('-'),
-                TextEntry::make('alfa')->label('Alpa')->placeholder('-'),
+                TextEntry::make('hari_kerja')->label('Hari Kerja')->prefix(': ')->placeholder('-'),
+                TextEntry::make('sakit')->label('Sakit')->prefix(': ')->placeholder('-'),
+                TextEntry::make('izin')->label('Izin')->prefix(': ')->placeholder('-'),
+                TextEntry::make('alfa')->label('Alpa')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
 

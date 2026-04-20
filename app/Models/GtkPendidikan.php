@@ -35,7 +35,8 @@ class GtkPendidikan extends Model
         'thn_akta4',
         'jurusan_akta4',
         'perguruan_tinggi_akta4',
-        'gelar_akademik',
+        'gelar_depan',
+        'gelar_belakang',
     ];
 
     public function gtk()

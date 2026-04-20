@@ -71,9 +71,9 @@ class GtkPendidikanSeeder extends Seeder
 
             // gelar akademik
             if ($gtk->pendidikan_terakhir === 'S1') {
-                $data['gelar_akademik'] = 'S.Pd';
+                $data['gelar_belakang'] = 'S.Pd';
             } elseif ($gtk->pendidikan_terakhir === 'S2') {
-                $data['gelar_akademik'] = 'M.Pd';
+                $data['gelar_belakang'] = 'M.Pd';
             }
 
             GtkPendidikan::create($data);

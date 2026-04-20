@@ -115,3 +115,34 @@ catatan tambahan:
 5. in kalau upload csv, tersimpanya dimana? klo bs saran, jgn tersimpannya ke folder sistem/app, tp ke publk/resource, dan pas upload itu dia create folder sesuai nama sekolah/usernya, biar enak trackingnya nanti klo ada salah/keliru data
 
 sementara begitu dulu pri, pelan2 yg bs dikerjakan, kita jadwal meetup hari minggu malam, jam nya bebas sa ikut jadwalmu, saran diatas jam 20.00, durasi maks jam 24.00 sdh end meet.
+
+
+Perubahan 20 April 2026
+
+# tambahkan contoh file import dalam bentuk excel. Jadi nanti user ketika selesai entri data, di harus ubah format excelnya ke csv, lalu diupload. 
+# ganti Tulisan upload Unggh berkas CSV menjadi Klik atau seret file di sini untuk import file.
+# Perbaiki view dan add data di bagian rombel agar hanya berukuran kecil
+# Data rombel berhasil disimpan. ganti yang "Data berhasil dibuat" menjadi "Data berhasil disimpan"
+
+
+- Di icon user sebelah kanan atas. Ubah form profil menjadi email readonly, tambah form nomor HP/whatsapp, Anda terhubung dengan sekolah XXXX. Gimana menggunakan modal.
+- tambah change foto profil
+- validasi password ketika ganti password (password lama, password baru, konfirmasi password baru)
+- Kasih masuk 1 menu, 
+
+Tambahkan icon notifikasi di sambil icon user sebelah kanan atas. Tujuannya untuk notifikasi jika ada data yang perlu di perbaiki/diperbarui. (misal: data siswa ada yg tidak lengkap, data gtk tidak lengkap, dll)
+
+tambahkan gambar sekolah di profil sekolah. tambah 25%. di foto bisa klik untuk change foto profil
+
+
+- import siswa. Untuk bagian penambahan rombel ke siswa ketika import akan dilakukan valiasi dengan mencocokan nama rombel di tabel rombel. Apabila tidak ditemukan maka dikosongkan saja kolom rombelnya. Nanti akan diedit manual oleh operator sekolah.
+
+Di Nominatif Siswa, ketika sortir rombel, muncul eror relasi.
+ubah separator koma di file excel menjadi titik
+
+Untuk Nominatif GTK dan Pendidikan GTK digabung importnya menjadi 1 tabel. 
+
+Di rombel, tambahkan fitur untuk memungkinkan operator menambahkan siswa yang belum memiliki rombel 
+
+di halaman rombel tambahkan action tambah Anggota rombel yang ketika diklik akan memunculkan modal untuk menambahkan siswa ke dalam rombel tersebut. 
+gtk gabung semua data dan ketika

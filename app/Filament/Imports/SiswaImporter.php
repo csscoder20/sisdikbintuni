@@ -99,7 +99,7 @@ class SiswaImporter extends Importer
                 ->example('Siti Aminah'),
             ImportColumn::make('nama_wali')
                 ->rules(['string', 'max:255'])
-                ->example(''),
+                ->example('Paman Budi'),
             ImportColumn::make('status')
                 ->rules(['string', 'max:255'])
                 ->example('Aktif')

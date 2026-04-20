@@ -17,7 +17,7 @@ class GtkForm
         return $schema
             ->components([
                 TextInput::make('nama')
-                    ->label('Nama GTK')
+                    ->label('Nama GTK tanpa')
                     ->required(),
                 TextInput::make('nik')
                     ->label('NIK'),

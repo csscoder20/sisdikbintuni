@@ -51,12 +51,12 @@ class GtkJamAjarResource extends Resource
         return $schema
             ->inlineLabel()
             ->components([
-                TextEntry::make('gtk.nama')->label('Nama GTK')->placeholder('-'),
-                TextEntry::make('rombel.nama')->label('Rombel')->placeholder('-'),
-                TextEntry::make('mapel.nama_mapel')->label('Mata Pelajaran')->placeholder('-'),
-                TextEntry::make('jumlah_jam')->label('Jumlah Jam')->placeholder('-'),
-                TextEntry::make('semester')->label('Semester')->placeholder('-'),
-                TextEntry::make('tahun_ajaran')->label('Tahun Ajaran')->placeholder('-'),
+                TextEntry::make('gtk.nama')->label('Nama GTK')->prefix(': ')->placeholder('-'),
+                TextEntry::make('rombel.nama')->label('Rombel')->prefix(': ')->placeholder('-'),
+                TextEntry::make('mapel.nama_mapel')->label('Mata Pelajaran')->prefix(': ')->placeholder('-'),
+                TextEntry::make('jumlah_jam')->label('Jumlah Jam')->prefix(': ')->placeholder('-'),
+                TextEntry::make('semester')->label('Semester')->prefix(': ')->placeholder('-'),
+                TextEntry::make('tahun_ajaran')->label('Tahun Ajaran')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
 

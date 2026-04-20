@@ -31,7 +31,7 @@ class MapelsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jjp')
-                    ->label('JJP')
+                    ->label('Jumlah Jam Pelajaran')
                     ->formatStateUsing(fn($state) => $state !== null && $state !== '' ? (int) $state : '-')
                     ->sortable(),
                 TextColumn::make('jenjang')

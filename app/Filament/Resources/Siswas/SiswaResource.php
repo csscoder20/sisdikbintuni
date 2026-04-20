@@ -56,40 +56,45 @@ class SiswaResource extends Resource
         return $schema
             ->inlineLabel()
             ->components([
-                TextEntry::make('nama')->label('Nama Lengkap')->placeholder('-'),
+                TextEntry::make('nama')->label('Nama Lengkap')->prefix(': ')->placeholder('-'),
                 TextEntry::make('rombel_ringkas')
                     ->label('Rombel/Kelas')
                     ->state(fn(Siswa $record): ?string => $record->rombel->pluck('nama')->implode(', ') ?: null)
+                    ->prefix(': ')
                     ->placeholder('-'),
-                TextEntry::make('nisn')->label('NISN')->placeholder('-'),
-                TextEntry::make('nik')->label('NIK')->placeholder('-'),
-                TextEntry::make('jenis_kelamin')->label('Jenis Kelamin')->placeholder('-'),
+                TextEntry::make('nisn')->label('NISN')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nik')->label('NIK')->prefix(': ')->placeholder('-'),
+                TextEntry::make('jenis_kelamin')->label('Jenis Kelamin')->prefix(': ')->placeholder('-'),
                 TextEntry::make('status')
                     ->label('Status Siswa')
-                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-'),
-                TextEntry::make('tempat_lahir')->label('Tempat Lahir')->placeholder('-'),
-                TextEntry::make('tanggal_lahir')->label('Tanggal Lahir')->date('d/m/Y')->placeholder('-'),
-                TextEntry::make('agama')->label('Agama')->placeholder('-'),
-                TextEntry::make('daerah_asal')->label('Daerah Asal')->placeholder('-'),
+                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-')
+                    ->prefix(': '),
+                TextEntry::make('tempat_lahir')->label('Tempat Lahir')->prefix(': ')->placeholder('-'),
+                TextEntry::make('tanggal_lahir')->label('Tanggal Lahir')->date('d/m/Y')->prefix(': ')->placeholder('-'),
+                TextEntry::make('agama')->label('Agama')->prefix(': ')->placeholder('-'),
+                TextEntry::make('daerah_asal')->label('Daerah Asal')->prefix(': ')->placeholder('-'),
                 TextEntry::make('alamat')
                     ->label('Alamat Domisili')
                     ->placeholder('-')
+                    ->prefix(': ')
                     ->inlineLabel(),
-                TextEntry::make('desa')->label('Desa/Kelurahan')->placeholder('-'),
-                TextEntry::make('kecamatan')->label('Kecamatan')->placeholder('-'),
-                TextEntry::make('kabupaten')->label('Kabupaten')->placeholder('-'),
-                TextEntry::make('provinsi')->label('Provinsi')->placeholder('-'),
-                TextEntry::make('nama_ayah')->label('Nama Ayah')->placeholder('-'),
-                TextEntry::make('nama_ibu')->label('Nama Ibu')->placeholder('-'),
-                TextEntry::make('nama_wali')->label('Nama Wali')->placeholder('-'),
-                TextEntry::make('nokk')->label('Nomor KK')->placeholder('-'),
-                TextEntry::make('nobpjs')->label('Nomor BPJS')->placeholder('-'),
+                TextEntry::make('desa')->label('Desa/Kelurahan')->prefix(': ')->placeholder('-'),
+                TextEntry::make('kecamatan')->label('Kecamatan')->prefix(': ')->placeholder('-'),
+                TextEntry::make('kabupaten')->label('Kabupaten')->prefix(': ')->placeholder('-'),
+                TextEntry::make('provinsi')->label('Provinsi')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_ayah')->label('Nama Ayah')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_ibu')->label('Nama Ibu')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_wali')->label('Nama Wali')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nokk')->label('Nomor KK')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nobpjs')->label('Nomor BPJS')->prefix(': ')->placeholder('-'),
                 TextEntry::make('disabilitas')
                     ->label('Jenis Disabilitas')
-                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-'),
+                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-')
+                    ->prefix(': '),
                 TextEntry::make('beasiswa')
                     ->label('Status Beasiswa')
-                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-'),
+                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-')
+                    ->prefix(': '),
             ])->columns(2);
     }
 

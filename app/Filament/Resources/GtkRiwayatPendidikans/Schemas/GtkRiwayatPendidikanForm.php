@@ -102,7 +102,7 @@ class GtkRiwayatPendidikanForm
                 Section::make('Gelar')
                     ->columnSpanFull()
                     ->components([
-                        TextInput::make('gelar_akademik')->label('Gelar Akademik'),
+                        TextInput::make('gelar_belakang')->label('Gelar Akademik'),
                     ]),
             ]);
     }
