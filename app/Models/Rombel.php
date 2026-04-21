@@ -23,6 +23,8 @@ class Rombel extends Model
 
     public function siswa()
     {
-        return $this->belongsToMany(Siswa::class, 'siswa_rombel');
+        return $this->belongsToMany(Siswa::class, 'siswa_rombel')
+            ->withPivot('tahun_ajaran')
+            ->withTimestamps();
     }
 }

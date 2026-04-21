@@ -24,6 +24,10 @@ use Illuminate\Contracts\Support\Htmlable;
 
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Image;
+use Illuminate\Support\Facades\Storage;
 
 class SekolahPage extends Page implements HasSchemas
 {
@@ -99,128 +103,186 @@ class SekolahPage extends Page implements HasSchemas
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-                    TextInput::make('nama')
-                        ->label('Nama Sekolah')
-                        ->required()
-                        ->maxLength(255),
-                    // ->columnSpanFull(),
+            Grid::make(['md' => 3])
+                ->schema([
+                    Section::make('Identitas Sekolah')
+                        ->columnSpan(['md' => 2])
+                        ->schema($this->getIdentitasFormComponents())
+                        ->columns(3),
 
-                    TextInput::make('npsn')
-                        ->label('NPSN')
-                        ->maxLength(20),
+                    Section::make('Foto Sekolah')
+                        ->columnSpan(['md' => 1])
+                        ->schema($this->getFotoSchemaComponents()),
+                ]),
 
-                    TextInput::make('nss')
-                        ->label('NSS')
-                        ->maxLength(20),
+            Section::make('Alamat Sekolah')
+                ->schema($this->getAlamatFormComponents())
+                ->columns(4),
 
-                    TextInput::make('npwp')
-                        ->label('NPWP')
-                        ->maxLength(16),
-
-                    TextInput::make('email')
-                        ->label('Email Sekolah')
-                        ->email()
-                        ->maxLength(255),
-                    
-                    Select::make('jenjang')
-                        ->label('Jenjang')
-                        ->options([
-                            'sd'  => 'SD',
-                            'smp' => 'SMP',
-                            'sma' => 'SMA',
-                            'smk' => 'SMK',
-                        ]),
-
-                    Select::make('akreditasi')
-                        ->label('Akreditasi')
-                        ->options([
-                            'A'     => 'A',
-                            'B'     => 'B',
-                            'C'     => 'C',
-                            'Belum' => 'Belum Terakreditasi',
-                        ]),          
-
-                    TextInput::make('provinsi')
-                        ->label('Provinsi')
-                        ->default('Papua Barat')
-                        ->disabled()
-                        ->dehydrated(true),
-
-                    TextInput::make('kabupaten')
-                        ->label('Kabupaten / Kota')
-                        ->default('Teluk Bintuni')
-                        ->disabled()
-                        ->dehydrated(true),
-
-                    Select::make('kecamatan')
-                        ->label('Kecamatan')
-                        ->options(function () {
-                            return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
-                                ->pluck('nama', 'nama');
-                        })
-                        ->live()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
-                        ->searchable(),
-
-                    Select::make('desa')
-                        ->label('Desa / Kelurahan')
-                        ->options(function (callable $get) {
-                            $kecamatan = $get('kecamatan');
-                            if (! $kecamatan) {
-                                return [];
-                            }
-                            
-                            $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
-                                ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
-                                ->first();
-
-                            if (!$kecamatanModel) {
-                                return [];
-                            }
-
-                            return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
-                                ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
-                                ->pluck('nama', 'nama');
-                        })
-                        ->searchable(),
-                    Textarea::make('alamat')
-                        ->label('Alamat')
-                        ->rows(1)
-                        ->columnSpanFull(),
-
-                    TextInput::make('tahun_berdiri')
-                        ->label('Tahun Berdiri')
-                        ->maxValue((int) date('Y')),
-
-                    TextInput::make('nomor_sk_pendirian')
-                        ->label('Nomor SK Pendirian'),
-
-                    DatePicker::make('tanggal_sk_pendirian')
-                        ->label('Tanggal SK Pendirian')
-                        ->native(false)
-                        ->displayFormat('d/m/Y'),
-                    Select::make('status_tanah')
-                        ->label('Status Tanah')
-                        ->options([
-                            'shm'    => 'Milik Sendiri (SHM)',
-                            'hgb'    => 'Hak Guna Bangunan (HGB)',
-                            'ulayat' => 'Tanah Ulayat',
-                        ]),
-
-                    TextInput::make('luas_tanah')
-                        ->label('Luas Tanah')
-                        ->numeric()
-                        ->suffix('m²'),
-                    TextInput::make('nama_yayasan')
-                        ->label('Nama Penyelenggara / Yayasan'),
-                    TextInput::make('nomor_sk_yayasan')
-                        ->label('SK Pendirian Yayasan'),
-                    Textarea::make('alamat_yayasan')
-                        ->label('Alamat Penyelenggara / Yayasan')
-                        ->rows(1)
-                        ->columnSpanFull(),
-        ])->columns(4);
+            Section::make('Data Pendukung')
+                ->schema($this->getSupportingFormComponents())
+                ->columns(3),
+        ]);
     }
+
+    protected function getIdentitasFormComponents(): array
+    {
+        return [
+            TextInput::make('nama')
+                ->label('Nama Sekolah')
+                ->required()
+                ->maxLength(255),
+
+            TextInput::make('npsn')
+                ->label('NPSN')
+                ->maxLength(20),
+
+            TextInput::make('nss')
+                ->label('NSS')
+                ->maxLength(20),
+
+            TextInput::make('npwp')
+                ->label('NPWP')
+                ->maxLength(16),
+
+            TextInput::make('email')
+                ->label('Email Sekolah')
+                ->email()
+                ->maxLength(255),
+
+            Select::make('jenjang')
+                ->label('Jenjang')
+                ->options([
+                    'sd'  => 'SD',
+                    'smp' => 'SMP',
+                    'sma' => 'SMA',
+                    'smk' => 'SMK',
+                ]),
+
+            Select::make('akreditasi')
+                ->label('Akreditasi')
+                ->options([
+                    'A'     => 'A',
+                    'B'     => 'B',
+                    'C'     => 'C',
+                    'Belum' => 'Belum Terakreditasi',
+                ]),
+
+            TextInput::make('tahun_berdiri')
+                ->label('Tahun Berdiri')
+                ->maxValue((int) date('Y')),
+
+            TextInput::make('nomor_sk_pendirian')
+                ->label('Nomor SK Pendirian'),
+
+            DatePicker::make('tanggal_sk_pendirian')
+                ->label('Tanggal SK Pendirian')
+                ->native(false)
+                ->displayFormat('d/m/Y'),
+        ];
+    }
+
+    protected function getAlamatFormComponents(): array
+    {
+        return [
+            TextInput::make('provinsi')
+                ->label('Provinsi')
+                ->default('Papua Barat')
+                ->disabled()
+                ->dehydrated(true),
+
+            TextInput::make('kabupaten')
+                ->label('Kabupaten / Kota')
+                ->default('Teluk Bintuni')
+                ->disabled()
+                ->dehydrated(true),
+
+            Select::make('kecamatan')
+                ->label('Kecamatan')
+                ->options(function () {
+                    return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                        ->pluck('nama', 'nama');
+                })
+                ->live()
+                ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
+                ->searchable(),
+
+            Select::make('desa')
+                ->label('Desa / Kelurahan')
+                ->options(function (callable $get) {
+                    $kecamatan = $get('kecamatan');
+                    if (! $kecamatan) {
+                        return [];
+                    }
+
+                    $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
+                        ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                        ->first();
+
+                    if (!$kecamatanModel) {
+                        return [];
+                    }
+
+                    return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
+                        ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
+                        ->pluck('nama', 'nama');
+                })
+                ->searchable(),
+
+            Textarea::make('alamat')
+                ->label('Alamat')
+                ->rows(2)
+                ->columnSpan(2),
+        ];
+    }
+
+    protected function getSupportingFormComponents(): array
+    {
+        return [
+            Select::make('status_tanah')
+                ->label('Status Tanah')
+                ->options([
+                    'shm'    => 'Milik Sendiri (SHM)',
+                    'hgb'    => 'Hak Guna Bangunan (HGB)',
+                    'ulayat' => 'Tanah Ulayat',
+                ]),
+
+            TextInput::make('luas_tanah')
+                ->label('Luas Tanah')
+                ->numeric()
+                ->suffix('m²'),
+
+            TextInput::make('nama_yayasan')
+                ->label('Nama Penyelenggara / Yayasan'),
+
+            TextInput::make('nomor_sk_yayasan')
+                ->label('SK Pendirian Yayasan'),
+
+            Textarea::make('alamat_yayasan')
+                ->label('Alamat Penyelenggara / Yayasan')
+                ->rows(2)
+                ->columnSpan(2),
+        ];
+    }
+
+    protected function getFotoSchemaComponents(): array
+    {
+        return [
+            Image::make(
+                url: fn () => $this->getSekolah()?->foto 
+                    ? Storage::disk('public')->url($this->getSekolah()->foto) 
+                    : 'https://placehold.co/600x400?text=Foto+Sekolah',
+                alt: 'Foto Sekolah'
+            )
+            ->imageHeight('auto')
+            ->imageWidth('100%')
+            ->extraAttributes([
+                'class' => 'cursor-pointer hover:opacity-80 transition-opacity rounded-xl shadow-md border-4 border-white',
+                'wire:click' => "\$wire.mountAction('updateFoto')",
+            ]),
+        ];
+    }
+
 
     /**
      * Mengatur tata letak konten halaman: form + tombol simpan
@@ -277,5 +339,32 @@ class SekolahPage extends Page implements HasSchemas
             ->title('Data sekolah berhasil diperbarui!')
             ->success()
             ->send();
+    }
+
+    public function updateFotoAction(): Action
+    {
+        return Action::make('updateFoto')
+            ->label('Perbarui Foto Sekolah')
+            ->modalHeading('Unggah Foto Sekolah')
+            ->modalSubmitActionLabel('Simpan')
+            ->form([
+                FileUpload::make('foto')
+                    ->label('Pilih Foto')
+                    ->image()
+                    ->disk('public')
+                    ->directory('sekolah-foto')
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                $sekolah = $this->getSekolah();
+                if ($sekolah) {
+                    $sekolah->update(['foto' => $data['foto']]);
+                    
+                    Notification::make()
+                        ->title('Foto sekolah berhasil diperbarui!')
+                        ->success()
+                        ->send();
+                }
+            });
     }
 }

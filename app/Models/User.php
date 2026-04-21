@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 
 class User extends Authenticatable implements HasTenants
 {
-    use HasRoles, \App\Traits\HasActivityLog;
+    use HasRoles, \App\Traits\HasActivityLog, Notifiable;
 
     protected $fillable = [
         'name',

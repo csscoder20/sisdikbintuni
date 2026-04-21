@@ -6,10 +6,13 @@ use App\Filament\Resources\Mapels\MapelResource;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use App\Filament\Imports\MapelImporter;
+use App\Filament\Traits\HasImportTemplate;
 use Filament\Resources\Pages\ListRecords;
 
 class ListMapels extends ListRecords
 {
+    use HasImportTemplate;
+
     protected static string $resource = MapelResource::class;
 
     protected function getHeaderActions(): array

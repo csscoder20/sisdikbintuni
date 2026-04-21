@@ -20,17 +20,22 @@ class ListGtks extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            ImportAction::make()
+            \App\Filament\Actions\ExcelImportAction::make()
                 ->importer(GtkImporter::class)
                 ->label('Impor Data GTK')
-                ->modalHeading('Impor Data GTK')
-                ->modalDescription(fn (ImportAction $action) => new HtmlString(
+                ->modalHeading('Impor Data Guru & Tenaga Kependidikan')
+                ->modalDescription(fn () => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
-                        <div class="text-sm">
-                            <x-filament::link wire:click="mountAction('downloadExample')" tag="button" type="button" color="success" class="font-bold hover:underline">
-                                Unduh contoh berkas (.csv)
-                            </x-filament::link>
+                        <div class="text-sm space-y-2">
+                            <div>
+                                <x-filament::link href="{{ route('import-template.download', ['importer' => 'gtk']) }}" tag="a" color="success" class="font-bold hover:underline">
+                                    Unduh contoh berkas (.xlsx)
+                                </x-filament::link>
+                            </div>
+                            <div class="text-gray-600 dark:text-gray-400">
+                                Silakan isi data di Excel, lalu unggah berkas tersebut langsung ke sini.
+                            </div>
                         </div>
                         BLADE
                     )

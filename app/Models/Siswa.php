@@ -31,6 +31,7 @@ class Siswa extends Model
         'beasiswa',
         'status',
         'sekolah_id',
+        'kelas_rombel',
     ];
 
     public function sekolah()

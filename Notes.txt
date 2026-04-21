@@ -122,7 +122,7 @@ Perubahan 20 April 2026
 # tambahkan contoh file import dalam bentuk excel. Jadi nanti user ketika selesai entri data, di harus ubah format excelnya ke csv, lalu diupload. 
 # ganti Tulisan upload Unggh berkas CSV menjadi Klik atau seret file di sini untuk import file.
 # Perbaiki view dan add data di bagian rombel agar hanya berukuran kecil
-# Data rombel berhasil disimpan. ganti yang "Data berhasil dibuat" menjadi "Data berhasil disimpan"
+# Data rombel berhasil disimpan. ganti pesan "Data berhasil dibuat" menjadi "Data berhasil disimpan"
 
 
 - Di icon user sebelah kanan atas. Ubah form profil menjadi email readonly, tambah form nomor HP/whatsapp, Anda terhubung dengan sekolah XXXX. Gimana menggunakan modal.

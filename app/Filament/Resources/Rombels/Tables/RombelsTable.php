@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Rombels\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -38,10 +39,19 @@ class RombelsTable
             ])
             ->actions([
                 ActionGroup::make([
+                    Action::make('assignSiswa')
+                        ->label('Tambah Siswa')
+                        ->icon('heroicon-o-user-plus')
+                        ->color('success')
+                        ->url(fn (\App\Models\Rombel $record): string => 
+                            \App\Filament\Resources\Rombels\RombelResource::getUrl('assign-siswa', ['record' => $record])
+                        ),
                     ViewAction::make()
-                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
+                        ->modalWidth(\Filament\Support\Enums\Width::Medium)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
+                        ->modalWidth(\Filament\Support\Enums\Width::Medium)
+                        ->successNotificationTitle('Data berhasil disimpan')
                         ->icon(Heroicon::OutlinedPencilSquare),
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),

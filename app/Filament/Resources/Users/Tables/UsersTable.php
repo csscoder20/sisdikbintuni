@@ -2,16 +2,18 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Textarea;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Mail\OperatorVerified;
 use Illuminate\Support\Facades\Mail;

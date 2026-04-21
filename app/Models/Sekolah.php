@@ -31,6 +31,7 @@ class Sekolah extends Model
         'status_tanah',
         'luas_tanah',
         'email',
+        'foto',
     ];
 
     public function laporan()

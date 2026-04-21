@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Filament\Resources\Notifikasis\Pages;
+
+use App\Filament\Resources\Notifikasis\NotifikasiResource;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
+
+class ListNotifikasis extends ListRecords
+{
+    protected static string $resource = NotifikasiResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->label('Kirim Pemberitahuan Baru'),
+        ];
+    }
+}

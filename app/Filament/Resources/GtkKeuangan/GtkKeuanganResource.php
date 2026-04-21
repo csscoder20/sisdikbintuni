@@ -36,6 +36,11 @@ class GtkKeuanganResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'NOMINATIF GTK';
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return GtkKeuanganForm::configure($schema);

@@ -43,16 +43,16 @@ class GtkKeuanganTable
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),
-                    DeleteAction::make()
-                        ->icon(Heroicon::OutlinedTrash),
+                    // DeleteAction::make()
+                    //     ->icon(Heroicon::OutlinedTrash),
                 ])
                 ->icon('heroicon-m-ellipsis-vertical')
                 ->color('primary')
             ])
-            ->toolbarActions([
+            /* ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ]) */;
     }
 }

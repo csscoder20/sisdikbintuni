@@ -54,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->darkMode(false)
             ->brandName('ADMIN')
+            ->databaseNotifications()
             ->brandLogo(fn () => new \Illuminate\Support\HtmlString('
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #6366f1); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);">
@@ -89,6 +90,7 @@ class AdminPanelProvider extends PanelProvider
             ->resources([
                 \App\Filament\Resources\Users\UserResource::class,
                 \App\Filament\Resources\ActivityLog\ActivityLogResource::class,
+                \App\Filament\Resources\Notifikasis\NotifikasiResource::class,
             ])
             ->pages([
                 SuperAdminDashboard::class,
@@ -136,6 +138,7 @@ class AdminPanelProvider extends PanelProvider
                         </a>
                    </p>'
             )
+            ->renderHook('panels::head.done', fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])"))
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>
@@ -176,6 +179,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
+            ->databaseNotifications()
             ->profile()
             ->userMenuItems([
                 MenuItem::make()
@@ -237,6 +241,7 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+            ->renderHook('panels::head.done', fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])"))
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>

@@ -75,6 +75,7 @@ class RombelResource extends Resource
     {
         return [
             'index' => ListRombels::route('/'),
+            'assign-siswa' => \App\Filament\Resources\Rombels\Pages\AssignSiswa::route('/{record}/assign-siswa'),
         ];
     }
 }

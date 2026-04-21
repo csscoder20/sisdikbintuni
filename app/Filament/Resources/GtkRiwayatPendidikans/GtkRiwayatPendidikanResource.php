@@ -40,6 +40,11 @@ class GtkRiwayatPendidikanResource extends Resource
         return auth()->check() && auth()->user()->hasRole('operator');
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return GtkRiwayatPendidikanForm::configure($schema);

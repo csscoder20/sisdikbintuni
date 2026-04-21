@@ -34,6 +34,7 @@ return new class extends Migration
             $table->enum('status_tanah', ['shm','hgb','ulayat'])->nullable();
             $table->integer('luas_tanah')->nullable();
             $table->string('email')->nullable();
+            $table->string('foto')->nullable();
             $table->timestamps();
         });
     }

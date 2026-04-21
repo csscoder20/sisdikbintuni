@@ -16,7 +16,7 @@ trait HasImportTemplate
 
                 // Try to find the importer from header actions
                 foreach ($this->getCachedHeaderActions() as $action) {
-                    if ($action instanceof ImportAction) {
+                    if ($action instanceof ImportAction || $action instanceof \App\Filament\Actions\ExcelImportAction) {
                         $importerClass = $action->getImporter();
                         break;
                     }

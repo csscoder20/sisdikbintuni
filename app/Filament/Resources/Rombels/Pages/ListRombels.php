@@ -18,17 +18,22 @@ class ListRombels extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            ImportAction::make()
+            \App\Filament\Actions\ExcelImportAction::make()
                 ->importer(RombelImporter::class)
                 ->label('Impor Data Rombel')
-                ->modalHeading('Impor Data Rombel')
-                ->modalDescription(fn (ImportAction $action) => new \Illuminate\Support\HtmlString(
+                ->modalHeading('Impor Data Rombongan Belajar')
+                ->modalDescription(fn () => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
-                        <div class="text-sm">
-                            <x-filament::link wire:click="mountAction('downloadExample')" tag="button" type="button" color="success" class="font-bold hover:underline">
-                                Unduh contoh berkas (.csv)
-                            </x-filament::link>
+                        <div class="text-sm space-y-2">
+                            <div>
+                                <x-filament::link href="{{ route('import-template.download', ['importer' => 'rombel']) }}" tag="a" color="success" class="font-bold hover:underline">
+                                    Unduh contoh berkas (.xlsx)
+                                </x-filament::link>
+                            </div>
+                            <div class="text-gray-600 dark:text-gray-400">
+                                Silakan isi data di Excel, lalu unggah berkas tersebut langsung ke sini.
+                            </div>
                         </div>
                         BLADE
                     )
@@ -39,6 +44,8 @@ class ListRombels extends ListRecords
                 ->label('Tambah Rombel')
                 ->modalHeading('Tambah Data Rombel')
                 ->modalSubmitActionLabel('Simpan Rombel')
+                ->modalWidth('md')
+                ->successNotificationTitle('Data berhasil disimpan')
                 ->createAnother(false),
         ];
     }
