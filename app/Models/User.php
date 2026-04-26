@@ -75,4 +75,23 @@ class User extends Authenticatable implements HasTenants
 
         return $this->sekolah?->id === $tenant->id;
     }
+
+    public function canAccessPanel(Panel $panel): bool
+        {
+            // OPSI 1: Izinkan SEMUA user yang berhasil login (untuk testing)
+            return true;
+            
+            // OPSI 2: Izinkan user dengan email domain tertentu (RECOMMENDED untuk keamanan)
+            // Ganti 'gmail.com' dengan domain email Anda
+            // return str_ends_with($this->email, '@gmail.com') && $this->hasVerifiedEmail();
+            
+            // OPSI 3: Jika Anda punya kolom 'is_admin' di tabel users
+            // return $this->is_admin === 1;
+            
+            // OPSI 4: Izinkan user tertentu berdasarkan email
+            // return in_array($this->email, [
+            //     'admin@gmail.com',
+            //     'operator@gmail.com',
+            // ]);
+        }
 }
