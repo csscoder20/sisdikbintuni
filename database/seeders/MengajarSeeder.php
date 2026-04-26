@@ -13,7 +13,7 @@ class MengajarSeeder extends Seeder
     public function run(): void
     {
         // ambil hanya guru
-        $gurus = Gtk::where('jenis_gtk', 'Guru')->get();
+        $gurus = Gtk::with('sekolah')->where('jenis_gtk', 'Guru')->get();
 
         foreach ($gurus as $guru) {
 
@@ -29,8 +29,8 @@ class MengajarSeeder extends Seeder
 
             foreach ($selectedRombels as $rombel) {
 
-                // ambil mapel sesuai jenjang & tingkat rombel
-                $mapel = Mapel::where('jenjang', $rombel->jenjang)
+                // ambil mapel sesuai jenjang sekolah & tingkat rombel
+                $mapel = Mapel::where('jenjang', $guru->sekolah->jenjang)
                     ->where('tingkat', $rombel->tingkat)
                     ->inRandomOrder()
                     ->first();

@@ -24,24 +24,20 @@ class GtkJamAjarsTable
                     ->label('GTK')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('rombel.nama')
-                    ->label('Rombel')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('mapel.nama_mapel')
-                    ->label('Mata Pelajaran')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('jumlah_jam')
-                    ->label('Jam')
+                    ->label('Jumlah Jam Mengajar')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('jumlah_tugas_tambahan')
+                    ->label('Jumlah Jam Tugas Tambahan')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('total_jam')
+                    ->label('Total Jam')
                     ->numeric()
-                    ->sortable()
                     ->alignCenter(),
-                TextColumn::make('semester')
-                    ->label('Semester')
-                    ->formatStateUsing(fn(string $state): string => ucfirst($state)),
-                TextColumn::make('tahun_ajaran')
-                    ->label('Tahun Ajaran'),
+                TextColumn::make('keterangan')
+                    ->label('Keterangan'),
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
@@ -59,6 +55,7 @@ class GtkJamAjarsTable
                         ->icon(Heroicon::OutlinedPencilSquare),
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
+                        // tambahkan Action dengan nama Tambah Jam Mengajar
                 ])
                 ->icon('heroicon-m-ellipsis-vertical')
                 ->color('primary')

@@ -27,4 +27,9 @@ class Rombel extends Model
             ->withPivot('tahun_ajaran')
             ->withTimestamps();
     }
+
+    public function mengajar()
+    {
+        return $this->hasMany(Mengajar::class);
+    }
 }

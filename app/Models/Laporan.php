@@ -78,4 +78,9 @@ class Laporan extends Model
     {
         return $this->hasMany(LaporanGtk::class);
     }
+
+    public function keuangan()
+    {
+        return $this->hasMany(LaporanKeuangan::class);
+    }
 }

@@ -11,30 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mengajar', function (Blueprint $table) {
+        Schema::create('gtk_tugas_tambahan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('gtk_id')->constrained('gtk')->cascadeOnDelete();
-            $table->foreignId('rombel_id')->constrained('rombel')->cascadeOnDelete();
-            $table->foreignId('mapel_id')->constrained('mapel')->cascadeOnDelete();
+            $table->string('tugas_tambahan');
             $table->integer('jumlah_jam');
-            $table->enum('semester', ['ganjil','genap'])->nullable();
-            $table->string('tahun_ajaran')->nullable();
-            $table->foreignId('laporan_id')->nullable()->constrained('laporan')->nullOnDelete();
             $table->timestamps();
 
             $table->unique([
-                'gtk_id',
-                'rombel_id',
-                'mapel_id'
+                'gtk_id'
             ]);
         });
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('mengajar');
+        Schema::dropIfExists('gtk_tugas_tambahan');
     }
 };

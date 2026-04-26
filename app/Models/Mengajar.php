@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mengajar extends Model
 {
-    protected $table = 'mengajar';
+    protected $table = 'gtk_mengajar';
 
     protected $fillable = [
         'gtk_id',

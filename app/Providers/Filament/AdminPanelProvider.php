@@ -72,7 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
-            ->breadcrumbs(false)
+            ->breadcrumbs(true)
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->userMenuItems([
@@ -193,7 +193,7 @@ class AdminPanelProvider extends PanelProvider
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-globe-alt'),
             ])
-            ->breadcrumbs(false)
+            ->breadcrumbs()
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->brandName('OPERATOR ' . strtoupper($jenjang))

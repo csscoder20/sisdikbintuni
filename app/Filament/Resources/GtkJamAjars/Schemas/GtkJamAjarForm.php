@@ -19,34 +19,28 @@ class GtkJamAjarForm
                     ->searchable()
                     ->preload()
                     ->required(),
-                Select::make('rombel_id')
-                    ->label('Rombel')
-                    ->relationship('rombel', 'nama')
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-                Select::make('mapel_id')
-                    ->label('Mata Pelajaran')
-                    ->relationship(
-                        name: 'mapel',
-                        titleAttribute: 'nama_mapel'
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn($record) =>
-                        "{$record->nama_mapel} - {$record->jenjang} Kelas {$record->tingkat}"
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                
                 TextInput::make('jumlah_jam')
+                    ->label('Jumlah Jam Mengajar')
                     ->numeric()
                     ->required(),
+                TextInput::make('jumlah_tugas_tambahan')
+                    ->label('Jumlah Jam Tugas Tambahan')
+                    ->numeric()
+                    ->required(),
+                TextInput::make('total_jam')
+                    ->label('Total Jam')
+                    ->numeric()
+                    ->required()
+                    ->disabled(),
                 Select::make('semester')
+                    ->label('Semester')
                     ->options([
                         'ganjil' => 'Ganjil',
                         'genap' => 'Genap',
                     ]),
-                TextInput::make('tahun_ajaran'),
+                TextInput::make('tahun_ajaran')
+                    ->label('Tahun Ajaran'),
             ]);
     }
 }

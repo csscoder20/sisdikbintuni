@@ -40,7 +40,7 @@ class RombelsTable
             ->actions([
                 ActionGroup::make([
                     Action::make('assignSiswa')
-                        ->label('Tambah Siswa')
+                        ->label('Kelola Rombel')
                         ->icon('heroicon-o-user-plus')
                         ->color('success')
                         ->url(fn (\App\Models\Rombel $record): string => 

@@ -47,4 +47,9 @@ class Gtk extends Model
     {
         return $this->hasOne(GtkKeuangan::class);
     }
+
+    public function mengajar()
+    {
+        return $this->hasMany(Mengajar::class);
+    }
 }
