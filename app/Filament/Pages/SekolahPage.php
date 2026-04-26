@@ -108,11 +108,20 @@ class SekolahPage extends Page implements HasSchemas
                     Section::make('Identitas Sekolah')
                         ->columnSpan(['md' => 2])
                         ->schema($this->getIdentitasFormComponents())
-                        ->columns(3),
+                        ->columns(3)
+                        ->extraAttributes([
+                            'class' => 'h-full',
+                        ]),
 
                     Section::make('Foto Sekolah')
                         ->columnSpan(['md' => 1])
-                        ->schema($this->getFotoSchemaComponents()),
+                        ->schema($this->getFotoSchemaComponents())
+                        ->extraAttributes([
+                            'class' => 'h-full flex flex-col justify-center',
+                        ]),
+                ])
+                ->extraAttributes([
+                    'class' => 'flex flex-col-reverse md:grid',
                 ]),
 
             Section::make('Alamat Sekolah')

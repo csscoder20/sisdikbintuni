@@ -13,6 +13,7 @@ use Filament\Actions\ImportAction;
 use App\Filament\Imports\SiswaImporter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SiswasTable
 {
@@ -36,7 +37,15 @@ class SiswasTable
                     ->searchable(),
                 TextColumn::make('rombel.nama')
                     ->label('Rombel')
-                    ->sortable()
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->orderBy(
+                            \App\Models\Rombel::select('nama')
+                                ->join('siswa_rombel', 'rombel.id', '=', 'siswa_rombel.rombel_id')
+                                ->whereColumn('siswa_rombel.siswa_id', 'siswa.id')
+                                ->limit(1),
+                            $direction
+                        );
+                    })
                     ->badge(),
                 TextColumn::make('status')
                     ->label('Status Siswa')

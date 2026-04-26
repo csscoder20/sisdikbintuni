@@ -151,6 +151,11 @@ class AdminPanelProvider extends PanelProvider
                         .fi-ta-cell {
                             height: auto !important;
                         }
+                        .fi-modal-actions,
+                        .fi-modal-footer-actions,
+                        .fi-fo-modal-actions {
+                            justify-content: flex-end !important;
+                        }
                     </style>
                 HTML;
             });
@@ -264,6 +269,11 @@ class AdminPanelProvider extends PanelProvider
                         }
                         .fi-ta-cell > * {
                             padding: 4px !important;
+                        }
+                        .fi-modal-actions,
+                        .fi-modal-footer-actions,
+                        .fi-fo-modal-actions {
+                            justify-content: flex-end !important;
                         }
                     </style>
                 HTML;

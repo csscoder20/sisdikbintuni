@@ -27,3 +27,10 @@
     content: ":";
     flex-shrink: 0;
 }
+
+/* Align modal buttons to the right */
+.fi-modal-actions,
+.fi-modal-footer-actions,
+.fi-fo-modal-actions {
+    justify-content: flex-end !important;
+}

@@ -1,116 +1,41 @@
-Master Data
-	Data Sekolah
-		- Profil
-		- Rombel
-		- Mapel
-	
-
-	Data Siswa
-		- Nominatif Siswa
-		- 
-
-	Data GTK
-		- Nominatif GTK
-		- Riwayat Pendidikan GTK
-		- Rekening & NPWP (ganti Keuangan GTK)
-	
-	
-Laporan Bulanan
-	Keadaan Gedung/Ruang (jangan pakai Keadaan Sarpras) crud
-	Keadaan Siswa
-		-Jumlah Siswa (awal bulan, mutase, dll)
-	Keadaan GTK
-		- Agama
-		- Daerah
-		- dll
-	Sebaran Jam Mengajar crud
-	Kehadiran GTK crud
-	Kelulusan crud
-	
-	
-	
-Data Transaksi
-
-
-
-Catatan:
-	- # Tambahkan table footer untuk jumlah data di menu lapaoran bulanan
-	- # Tambahkan kolom mutasi keluar di Keadaan Siswa
-		kondisi:
-			- jumlah awal bulan ini = jumlah akhir bulan sebelumnya
-			- jumlah akhir bulan ini = jumlah awal bulan ini + mutasi masuk - mutasi keluar - putus sekolah + mengulang (akhir bulan dipindahkan di bagian terakhir table)
-
-	- # Ubah Enum di resource untuk siswa
-	- tambahkan button di setiap header table apabila datanya sudah valid. Status = Valid misalnya 
-	- # disabilitas dan beasiswa ditampilkan semua datanya di table termasuk yang 0
-	- # Jenis kelamin di keadaan gtk tidak perlu
-	- # tambah agama di keadaan gtk by agama (konghucu) (jumlah pakai singkatan JML di semua tabel)
-	- # Status Kepegawaian per Jenis GTK diubah Status Kepegawaian
-	- # Untuk table Status Kepegawaian di Keadaan GTK, split PNS menjadi Gol IV, dll secara berurutan (Gol I/a, Gol II/b, Gol III, Gol IV)		
-	- # Jumlah GTK Berdasarkan Pendidikan diubah Jumlah GTK Berdasarkan Pendidikan Terakhir
-	- # Keadaan Sarpras (dihilangkan kolom tahun dan bulan)
-	- # tambah database table maple (id, kode_mapel, nama mapel, jjp, jenjang, timestamps) relasi ke table mengajar. Di table mengajar, field mapel diganti mapel id dari table mapel
-
-
-16 April 2026
-- Tipe untuk jp integer
-- jenjang di mapel dibuatkan opsi (SD, SMP, SMA, SMK)
-- rampilan view di semua resources dirapikan. Tambahkan menu untuk kembali. no timestamps
-- alamat domisili di nominatif siswa
-- tambahkan master wilayah. Untuk alamat domisili siswa menggunakan dropdown pilihan provinsi, kec. dll.
-- agam dropdown
-- jk radio button
-- import nomintif gtk dan nominatif siswa
-- kolom GTK - Diubah jadi nama - Riwayat Pendidikan GTK & Rekening & NPWP 
-- Keadaan Gedung/Ruang - tambahkan fitur import data
-- 
-
-
 HASIL CEK (18/04/26)
 
 Update database:
 1. tambah field "jenjang" di table sekolah, pilihannnya : (SD, SMP, SMA, SMK), ini diperlukan nanti utk pemilihan Mapel agar yg tampil sesuai jenjang sekolahnya saja
+1. # tambah field "jenjang" di table sekolah, pilihannnya : (SD, SMP, SMA, SMK), ini diperlukan nanti utk pemilihan Mapel agar yg tampil sesuai jenjang sekolahnya saja
 
 Koreksi fungsi dan tampilan dashboard:
 1. PROFIL
 - Kec dan Desa belum bs dipilih
+- # Kec dan Desa belum bs dipilih
 
 2. ROMBEL
 - menu tambah: pilihan tingkat cukup 10, 11 dan 12 (1-9 dihapus), karena ini utk SMA/SMK aja
 - import belum berhasil (hanya muncul notif berhasil tp data tidak masuk,
+- #menu tambah: pilihan tingkat cukup 10, 11 dan 12 (1-9 dihapus), karena ini utk SMA/SMK aja
+- #import belum berhasil (hanya muncul notif berhasil tp data tidak masuk,
 
 3. MAPEL:
 - cukup tampilan mapel yg berlaku di sekolah itu, missal SMA atau SMK saja
 - menu Mapel ini tdk usah CRUD di operator, cukup liat list mapel aja, krna ini struktur kurikulum dari ppusat, harusnya sih tdk bisa diubah2 oleh operator, mungkin annti kita pindah kan ke menu nya admin dinas aja, fasilitas CRUD dan importnya jg tetap ada tp utk level dinas
+- #cukup tampilan mapel yg berlaku di sekolah itu, missal SMA atau SMK saja
+- #menu Mapel ini tdk usah CRUD di operator, cukup liat list mapel aja, krna ini struktur kurikulum dari ppusat, harusnya sih tdk bisa diubah2 oleh operator, mungkin annti kita pindah kan ke menu nya admin dinas aja, fasilitas CRUD dan importnya jg tetap ada tp utk level dinas
 
 4. NOMINATIF SISWA:
 - tambah data : kec dan desa blm bisa dipilih, 
 - tambah data : alamat dikasih placeholder utk keterangan "Nama Jalan, Nomor Rumah/Blok, RT/RW, Kompleks", 
 - view data: cukup text disabled/readonly, tampilan field yg select/radio ganti ke text disabled/readonly
+- # tambah data : kec dan desa blm bisa dipilih, 
+- # tambah data : alamat dikasih placeholder utk keterangan "Nama Jalan, Nomor Rumah/Blok, RT/RW, Kompleks", 
+- # view data: cukup text disabled/readonly, tampilan field yg select/radio ganti ke text disabled/readonly
 
 5. NOMINATIF GTK: koreksinya sama dgn nominatif siswa
+5. NOMINATIF GTK: # koreksinya sama dgn nominatif siswa
 
 6. RIWAYAT PENDIDIKAN GTK: 
 - Tabel: yg ditampilkan kolomnya: nama gtk, tahun tamat s1, jurusan s1, nama PT, gelar
-- tambah/edit/view data : di grouping ya sesuai berikut ini, layout bebas, bs 1 group 1 baris, 2 baris, sesuaikan aja
-grop1: tahun tamat sd, smp, sma
-group2: tahun tamat d1,jurusan,PT
-group3: d2
-group4: d3
-group5: s1
-group6: s2
-group7: s3
-group8: akta IV
-group9: gelar akademik
 
-7. REKENING NPWP: sementara aman
-
-8. MENU LAPORAN: keadaan geduung, siswa dan gtk, secara layout sdh oke, namun utk alur, data dan behaviour  nya nanti kita diskusi sama2.
-
-catatan tambahan:
-1. semua fasilitas impor, setelah impor lgsung refresh / soft load halaman sehingga data langsung terbaca 
-2. di saya ini blum bs menu importnya, apa mungkin ada yg perlu dilakukan secara teknikal di system atau apa, ini harus kita bahas samaa2.
-3. semua tombol (save-simpan, close-tutup), diksi (view-lihat, edit-ubah, delete-hapus) ganti jadi buat Bahasa Indonesia
+@@ -114,35 +114,4 @@ catatan tambahan:
 4. Notif "Import started, Your import has begun and 3 rows will be processed in the background", ini juga diganti Bahasa indonesia, 
 5. in kalau upload csv, tersimpanya dimana? klo bs saran, jgn tersimpannya ke folder sistem/app, tp ke publk/resource, dan pas upload itu dia create folder sesuai nama sekolah/usernya, biar enak trackingnya nanti klo ada salah/keliru data
 
@@ -130,6 +55,7 @@ Perubahan 20 April 2026
 - validasi password ketika ganti password (password lama, password baru, konfirmasi password baru)
 - Kasih masuk 1 menu, 
 
+
 Tambahkan icon notifikasi di sambil icon user sebelah kanan atas. Tujuannya untuk notifikasi jika ada data yang perlu di perbaiki/diperbarui. (misal: data siswa ada yg tidak lengkap, data gtk tidak lengkap, dll)
 
 tambahkan gambar sekolah di profil sekolah. tambah 25%. di foto bisa klik untuk change foto profil
@@ -146,3 +72,4 @@ Di rombel, tambahkan fitur untuk memungkinkan operator menambahkan siswa yang be
 
 di halaman rombel tambahkan action tambah Anggota rombel yang ketika diklik akan memunculkan modal untuk menambahkan siswa ke dalam rombel tersebut. 
 gtk gabung semua data dan ketika
+sementara begitu dulu pri, pelan2 yg bs dikerjakan, kita jadwal meetup hari minggu malam, jam nya bebas sa ikut jadwalmu, saran diatas jam 20.00, durasi maks jam 24.00 sdh end meet.

@@ -23,6 +23,11 @@ class ImportTemplateController extends Controller
         $fileName = Str::kebab($importerName) . '-template.xlsx';
         
         $spreadsheet = new Spreadsheet();
+        
+        // Set default alignment to center for the entire spreadsheet
+        $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
         $sheet = $spreadsheet->getActiveSheet();
 
         // Get columns from importer
@@ -85,8 +90,14 @@ class ImportTemplateController extends Controller
                 \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
             );
 
-            // Force the entire column (up to 1000 rows) to Text format
-            $sheet->getStyle($colLetter . $headerRow . ':' . $colLetter . '1000')
+            // Force the entire column (up to 1000 rows) to Text format and Center Alignment
+            $sheet->getStyle($colLetter . '1:' . $colLetter . '1000')->applyFromArray([
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ]);
+            $sheet->getStyle($colLetter . '1:' . $colLetter . '1000')
                 ->getNumberFormat()
                 ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
 

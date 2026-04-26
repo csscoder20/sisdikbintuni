@@ -54,7 +54,7 @@ class RombelResource extends Resource
                 TextEntry::make('nama')->label('Nama Rombel')->prefix(': ')->placeholder('-'),
                 TextEntry::make('tingkat')->label('Tingkat')->prefix(': ')->placeholder('-'),
                 TextEntry::make('sekolah.nama')->label('Sekolah')->prefix(': ')->placeholder('-'),
-            ])->columns(2);
+            ])->columns(1);
     }
 
 
