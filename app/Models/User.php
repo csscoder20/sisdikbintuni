@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 
-class User extends Authenticatable implements HasTenants
+
+class User extends Authenticatable implements HasTenants, FilamentUser
 {
     use HasRoles, \App\Traits\HasActivityLog, Notifiable;
 
