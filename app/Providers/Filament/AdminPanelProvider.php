@@ -138,7 +138,12 @@ class AdminPanelProvider extends PanelProvider
                         </a>
                    </p>'
             )
-            ->renderHook('panels::head.done', fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])"))
+            ->renderHook('panels::head.done', fn (): string =>
+                \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])") .
+                '<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">' .
+                '<link rel="icon" type="image/x-icon" href="/favicon.ico">' .
+                '<link rel="apple-touch-icon" href="/favicon.png">'
+            )
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>
@@ -246,7 +251,12 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
-            ->renderHook('panels::head.done', fn (): string => \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])"))
+            ->renderHook('panels::head.done', fn (): string =>
+                \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])") .
+                '<link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">' .
+                '<link rel="icon" type="image/x-icon" href="/favicon.ico">' .
+                '<link rel="apple-touch-icon" href="/favicon.png">'
+            )
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>
