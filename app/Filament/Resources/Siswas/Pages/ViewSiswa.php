@@ -4,6 +4,10 @@ namespace App\Filament\Resources\Siswas\Pages;
 
 use App\Filament\Resources\Siswas\SiswaResource;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+
 
 class ViewSiswa extends ViewRecord
 {
@@ -12,6 +16,9 @@ class ViewSiswa extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            RestoreAction::make(),
+            EditAction::make(),
+            ForceDeleteAction::make(),
         ];
     }
 }

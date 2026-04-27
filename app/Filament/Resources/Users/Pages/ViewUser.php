@@ -4,6 +4,10 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+
 
 class ViewUser extends ViewRecord
 {
@@ -12,6 +16,9 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            RestoreAction::make(),
+            EditAction::make(),
+            ForceDeleteAction::make(),
         ];
     }
 }

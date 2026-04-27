@@ -4,6 +4,9 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+
 
 class EditUser extends EditRecord
 {
@@ -17,6 +20,8 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            RestoreAction::make(),
+            ForceDeleteAction::make(),
         ];
     }
 }

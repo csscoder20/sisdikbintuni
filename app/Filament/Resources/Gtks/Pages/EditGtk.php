@@ -4,6 +4,9 @@ namespace App\Filament\Resources\Gtks\Pages;
 
 use App\Filament\Resources\Gtks\GtkResource;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+
 
 class EditGtk extends EditRecord
 {
@@ -17,6 +20,8 @@ class EditGtk extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            RestoreAction::make(),
+            ForceDeleteAction::make(),
         ];
     }
 }

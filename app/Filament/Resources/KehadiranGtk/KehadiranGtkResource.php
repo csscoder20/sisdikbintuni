@@ -7,6 +7,7 @@ use App\Filament\Resources\KehadiranGtk\Schemas\KehadiranGtkForm;
 use App\Filament\Resources\KehadiranGtk\Tables\KehadiranGtkTable;
 use App\Models\KehadiranGtk;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -74,7 +75,13 @@ class KehadiranGtkResource extends Resource
                 $query->where('sekolah_id', filament()->getTenant()->id);
             });
     }
-
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
     public static function getPages(): array
     {
         return [

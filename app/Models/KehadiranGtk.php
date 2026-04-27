@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class KehadiranGtk extends Model
 {
+    use SoftDeletes;
     use \App\Traits\HasActivityLog;
     protected $table = 'kehadiran_gtk';
 

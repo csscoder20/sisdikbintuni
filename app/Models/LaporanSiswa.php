@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class LaporanSiswa extends Model
 {
+    use SoftDeletes;
     use \App\Traits\HasActivityLog;
     protected $table = 'laporan_siswa';
     protected $fillable = [

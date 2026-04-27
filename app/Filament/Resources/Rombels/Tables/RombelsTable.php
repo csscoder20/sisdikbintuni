@@ -12,6 +12,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 
 class RombelsTable
 {
@@ -37,15 +43,18 @@ class RombelsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
                 ActionGroup::make([
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
                     Action::make('assignSiswa')
                         ->label('Kelola Rombel')
                         ->icon('heroicon-o-user-plus')
                         ->color('success')
-                        ->url(fn (\App\Models\Rombel $record): string => 
-                            \App\Filament\Resources\Rombels\RombelResource::getUrl('assign-siswa', ['record' => $record])
-                        ),
+                        ->url(fn (\App\Models\Rombel $record): string => \App\Filament\Resources\Rombels\RombelResource::getUrl('assign-siswa', ['record' => $record])),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::Medium)
                         ->icon(Heroicon::OutlinedEye),
@@ -57,12 +66,14 @@ class RombelsTable
                         ->icon(Heroicon::OutlinedTrash),
                 ])
                     ->icon('heroicon-m-ellipsis-vertical')
-                    ->color('primary')
+                    ->color('primary'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                     DeleteBulkAction::make(),
-                ]),
+                ])
             ]);
     }
 }

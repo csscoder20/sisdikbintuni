@@ -9,6 +9,7 @@ use App\Models\GtkJamAjar;
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -70,6 +71,10 @@ class GtkJamAjarResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with(['gtk.tugasTambahan'])
+            ->withSum('teachingEntries as total_jam_mengajar', 'jumlah_jam')
+            ->whereNull('rombel_id')
+            ->whereNull('mapel_id')
             ->whereHas('gtk', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()->id);
             });
@@ -80,6 +85,14 @@ class GtkJamAjarResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     public static function getPages(): array

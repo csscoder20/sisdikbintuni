@@ -4,6 +4,9 @@ namespace App\Filament\Resources\LaporanGedung\Pages;
 
 use App\Filament\Resources\LaporanGedung\LaporanGedungResource;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+
 
 class EditLaporanGedung extends EditRecord
 {
@@ -17,6 +20,8 @@ class EditLaporanGedung extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            RestoreAction::make(),
+            ForceDeleteAction::make(),
         ];
     }
 }

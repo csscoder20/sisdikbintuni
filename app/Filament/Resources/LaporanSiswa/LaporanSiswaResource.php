@@ -8,6 +8,7 @@ use App\Filament\Resources\LaporanSiswa\Tables\LaporanSiswaTable;
 use App\Models\LaporanSiswa;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -82,7 +83,13 @@ class LaporanSiswaResource extends Resource
     {
         return LaporanSiswaTable::configure($table);
     }
-
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
     public static function getPages(): array
     {
         return [

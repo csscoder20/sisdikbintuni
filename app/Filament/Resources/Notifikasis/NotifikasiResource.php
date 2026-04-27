@@ -7,6 +7,7 @@ use App\Filament\Resources\Notifikasis\Schemas\NotifikasiForm;
 use App\Filament\Resources\Notifikasis\Tables\NotifikasisTable;
 use App\Models\Notifikasi;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
@@ -67,6 +68,14 @@ class NotifikasiResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     public static function getPages(): array

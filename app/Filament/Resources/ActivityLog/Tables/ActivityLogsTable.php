@@ -52,7 +52,7 @@ class ActivityLogsTable
                         'deleted' => 'Dihapus',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
@@ -61,6 +61,6 @@ class ActivityLogsTable
                 ->icon('heroicon-m-ellipsis-vertical')
                 ->color('primary')
             ])
-            ->bulkActions([]);
+            ->toolbarActions([]);
     }
 }

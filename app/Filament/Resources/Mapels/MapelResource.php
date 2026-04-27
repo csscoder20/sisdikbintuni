@@ -8,6 +8,7 @@ use App\Filament\Resources\Mapels\Tables\MapelsTable;
 use App\Models\Mapel;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -85,7 +86,13 @@ class MapelResource extends Resource
 
         return $query;
     }
-
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
     public static function getPages(): array
     {
         return [

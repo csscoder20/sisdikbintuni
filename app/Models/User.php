@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\HasTenants;
@@ -14,6 +15,7 @@ use Illuminate\Support\Collection;
 
 class User extends Authenticatable implements HasTenants, FilamentUser
 {
+    use SoftDeletes;
     use HasRoles, \App\Traits\HasActivityLog, Notifiable;
 
     protected $fillable = [

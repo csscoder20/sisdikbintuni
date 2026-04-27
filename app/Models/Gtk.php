@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Gtk extends Model
 {
+    use SoftDeletes;
     use \App\Traits\HasActivityLog;
     protected $table = 'gtk';
     protected $fillable = [
@@ -51,5 +53,10 @@ class Gtk extends Model
     public function mengajar()
     {
         return $this->hasMany(Mengajar::class);
+    }
+
+    public function tugasTambahan()
+    {
+        return $this->hasOne(GtkTugasTambahan::class);
     }
 }

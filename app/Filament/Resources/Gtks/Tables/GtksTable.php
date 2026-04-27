@@ -13,6 +13,12 @@ use Filament\Actions\ImportAction;
 use App\Filament\Imports\GtkImporter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 
 class GtksTable
 {
@@ -112,8 +118,13 @@ class GtksTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
                 ActionGroup::make([
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
@@ -123,12 +134,15 @@ class GtksTable
                         ->icon(Heroicon::OutlinedTrash),
                 ])
                     ->icon('heroicon-m-ellipsis-vertical')
-                    ->color('primary')
+                    ->color('primary'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ;
     }
 }

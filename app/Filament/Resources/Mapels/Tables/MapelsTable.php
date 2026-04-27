@@ -13,6 +13,12 @@ use Filament\Actions\ImportAction;
 use App\Filament\Imports\MapelImporter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 
 class MapelsTable
 {
@@ -51,7 +57,26 @@ class MapelsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
+                    EditAction::make()
+                        ->icon(Heroicon::OutlinedPencilSquare),
+                    DeleteAction::make()
+                        ->icon(Heroicon::OutlinedTrash),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary'),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

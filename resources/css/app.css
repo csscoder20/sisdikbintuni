@@ -28,9 +28,67 @@
     flex-shrink: 0;
 }
 
-/* Align modal buttons to the right */
-.fi-modal-actions,
-.fi-modal-footer-actions,
-.fi-fo-modal-actions {
+/* Scoped Modal Footer Alignment */
+.modal-batal-kanan .fi-modal-footer-actions {
     justify-content: flex-end !important;
+    gap: 0.75rem !important;
+}
+
+.modal-batal-kanan .fi-modal-footer-actions > :first-child {
+    margin-inline-end: 0 !important;
+}
+
+}
+
+/* Table Style Repeater */
+.table-style-repeater, 
+.table-style-repeater > div {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.table-style-repeater .fi-fo-repeater-item {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.table-style-repeater .fi-fo-repeater-item > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.table-style-repeater .fi-fo-repeater-item-header {
+    display: none !important;
+}
+
+.table-style-repeater .fi-fo-repeater-item-content {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.table-style-repeater .fi-fo-repeater-item:last-child .fi-fo-repeater-item-content {
+    border-bottom: none !important;
+}
+
+/* Move Add Button to Top */
+.table-style-repeater {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.table-style-repeater > .fi-fo-repeater-add-action-ctn {
+    order: -1 !important;
+    margin-bottom: 1rem !important;
+    margin-top: 0 !important;
+}
+
+.table-style-repeater > .fi-fo-repeater-add-action-ctn > button {
+    width: auto !important;
 }

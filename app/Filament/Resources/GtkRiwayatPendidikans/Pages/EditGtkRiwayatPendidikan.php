@@ -4,6 +4,9 @@ namespace App\Filament\Resources\GtkRiwayatPendidikans\Pages;
 
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+
 
 class EditGtkRiwayatPendidikan extends EditRecord
 {
@@ -17,6 +20,8 @@ class EditGtkRiwayatPendidikan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            RestoreAction::make(),
+            ForceDeleteAction::make(),
         ];
     }
 }

@@ -51,7 +51,7 @@ class SiswaForm
                                 ->label('Tanggal Lahir')
                                 ->native(false)
                                 ->displayFormat('d/m/Y'),
-                            
+
                             TextInput::make('nobpjs')
                                 ->label('Nomor BPJS')
                                 ->maxLength(20),
@@ -209,7 +209,9 @@ class SiswaForm
                                 ->default('tidak')
                                 ->required(),
                         ])->columns(2),
-                ])->submitAction(new HtmlString(Blade::render(<<<BLADE
+                ])
+                    ->skippable()
+                    ->submitAction(new HtmlString(Blade::render(<<<BLADE
                     <x-filament::button type="submit" size="sm" color="success">
                         Simpan Data
                     </x-filament::button>

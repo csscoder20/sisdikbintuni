@@ -2,8 +2,17 @@
 
 namespace App\Filament\Resources\Notifikasis\Tables;
 
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 
 class NotifikasisTable
 {
@@ -31,11 +40,20 @@ class NotifikasisTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
-            ->actions([
-                // Read-only history
+            ->filters([
+                TrashedFilter::make(),
             ])
-            ->bulkActions([
-                //
+            ->recordActions([
+                ActionGroup::make([
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
+                    DeleteAction::make(),
+                ]),
+            ])
+            ->toolbarActions([
+                DeleteBulkAction::make(),
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
             ]);
     }
 }

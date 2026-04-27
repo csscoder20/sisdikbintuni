@@ -11,6 +11,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 
 class KelulusanTable
 {
@@ -42,9 +48,14 @@ class KelulusanTable
                 TextColumn::make('sekolah.nama')
                     ->sortable(),
             ])
-
-            ->actions([
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
                 ActionGroup::make([
+
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
@@ -54,12 +65,15 @@ class KelulusanTable
                         ->icon(Heroicon::OutlinedTrash),
                 ])
                     ->icon('heroicon-m-ellipsis-vertical')
-                    ->color('primary')
+                    ->color('primary'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ;
     }
 }

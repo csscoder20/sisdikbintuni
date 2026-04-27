@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mengajar extends Model
 {
+    use SoftDeletes;
     protected $table = 'gtk_mengajar';
 
     protected $fillable = [
@@ -36,6 +38,16 @@ class Mengajar extends Model
     public function laporan()
     {
         return $this->belongsTo(Laporan::class);
+    }
+
+    public function teachingEntries()
+    {
+        return $this->hasMany(self::class, 'gtk_id', 'gtk_id')
+            ->where(function ($query) {
+                $query
+                    ->whereNotNull('rombel_id')
+                    ->orWhereNotNull('mapel_id');
+            });
     }
 
     /**

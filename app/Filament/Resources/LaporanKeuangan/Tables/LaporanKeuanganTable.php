@@ -9,6 +9,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 
 class LaporanKeuanganTable
 {
@@ -42,11 +48,14 @@ class LaporanKeuanganTable
                     ->sortable(),
             ])
             ->filters([
+                TrashedFilter::make(),
                 //
             ])
 
-             ->actions([
+             ->recordActions([
                 ActionGroup::make([
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
@@ -58,7 +67,9 @@ class LaporanKeuanganTable
                     ->icon('heroicon-m-ellipsis-vertical')
                     ->color('primary')
             ])
-            ->bulkActions([
+            ->toolbarActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
                 //
             ]);
     }

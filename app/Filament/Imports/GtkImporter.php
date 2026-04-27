@@ -3,6 +3,8 @@
 namespace App\Filament\Imports;
 
 use App\Models\Gtk;
+use App\Models\Mengajar;
+use App\Models\GtkTugasTambahan;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -241,6 +243,31 @@ class GtkImporter extends Importer
         if (!empty($keuanganData)) {
             $gtk->keuangan()->updateOrCreate(['gtk_id' => $gtk->id], $keuanganData);
         }
+
+        // Auto-create placeholder Sebaran Jam Mengajar record so the GTK name appears in the list.
+        Mengajar::query()
+            ->where('gtk_id', $gtk->id)
+            ->whereNull('rombel_id')
+            ->whereNull('mapel_id')
+            ->first()
+            ?? Mengajar::create([
+                'gtk_id' => $gtk->id,
+                'rombel_id' => null,
+                'mapel_id' => null,
+                'jumlah_jam' => null,
+                'semester' => null,
+                'tahun_ajaran' => null,
+                'laporan_id' => null,
+            ]);
+
+        // Auto-create Tugas Tambahan record
+        GtkTugasTambahan::query()->firstOrCreate(
+            ['gtk_id' => $gtk->id],
+            [
+                'tugas_tambahan' => null,
+                'jumlah_jam' => null,
+            ],
+        );
     }
 
     public function getValidationMessages(): array

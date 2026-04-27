@@ -15,6 +15,12 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+
 use App\Mail\OperatorVerified;
 use Illuminate\Support\Facades\Mail;
 use Filament\Notifications\Notification;
@@ -63,8 +69,14 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
                 ActionGroup::make([
+
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
@@ -116,8 +128,11 @@ class UsersTable
                 ->icon('heroicon-m-ellipsis-vertical')
                 ->color('primary')
             ])
-            ->bulkActions([
+            ->toolbarActions([
+
                 BulkActionGroup::make([
+                RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
             ]);

@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Laporan extends Model
 {
+    use SoftDeletes;
     use \App\Traits\HasActivityLog;
     protected $table = 'laporan';
     protected $fillable = [

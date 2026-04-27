@@ -11,15 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gtk_tugas_tambahan', function (Blueprint $table) {
+        Schema::create('gtk_mengajar', function (Blueprint $table) {
             $table->id();
             $table->foreignId('gtk_id')->constrained('gtk')->cascadeOnDelete();
-            $table->string('tugas_tambahan');
-            $table->integer('jumlah_jam');
+            $table->foreignId('rombel_id')->nullable()->constrained('rombel')->cascadeOnDelete();
+            $table->foreignId('mapel_id')->nullable()->constrained('mapel')->cascadeOnDelete();
+            $table->integer('jumlah_jam')->nullable();
+            $table->enum('semester', ['ganjil','genap'])->nullable();
+            $table->string('tahun_ajaran')->nullable();
+            $table->foreignId('laporan_id')->nullable()->constrained('laporan')->nullOnDelete();
             $table->timestamps();
 
             $table->unique([
-                'gtk_id'
+                'gtk_id',
+                'rombel_id',
+                'mapel_id'
             ]);
         });
     }
@@ -30,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('gtk_tugas_tambahan');
+        Schema::dropIfExists('gtk_mengajar');
     }
 };

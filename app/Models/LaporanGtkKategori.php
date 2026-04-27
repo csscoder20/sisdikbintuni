@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LaporanGtkKategori extends Model
 {
+    use SoftDeletes;
     protected $table = 'laporan_gtk_kategori';
 
     protected $fillable = [
