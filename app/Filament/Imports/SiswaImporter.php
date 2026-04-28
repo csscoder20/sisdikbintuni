@@ -136,9 +136,6 @@ class SiswaImporter extends Importer
                     if ($state === 'ya' || $state === 'yes') return 'beasiswa_pemerintah_pusat';
                     return $state;
                 }),
-            ImportColumn::make('kelas_rombel')
-                ->rules(['string', 'max:255'])
-                ->example('Kelas 10-A'),
         ];
     }
 

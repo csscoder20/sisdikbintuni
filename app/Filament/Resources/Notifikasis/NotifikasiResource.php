@@ -34,7 +34,10 @@ class NotifikasiResource extends Resource
 
         public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
 
         if (auth()->check() && auth()->user()->hasRole('admin_dinas')) {
             $query->whereHas('sender', function ($q) {

@@ -71,10 +71,14 @@ class KehadiranGtkResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
             ->whereHas('gtk', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()->id);
             });
     }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
@@ -82,6 +86,7 @@ class KehadiranGtkResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
     public static function getPages(): array
     {
         return [

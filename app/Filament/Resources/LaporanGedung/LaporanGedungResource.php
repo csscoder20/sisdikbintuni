@@ -74,6 +74,9 @@ class LaporanGedungResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
             ->whereHas('laporan', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()->id);
             });

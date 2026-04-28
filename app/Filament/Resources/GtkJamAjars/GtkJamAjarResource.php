@@ -71,6 +71,9 @@ class GtkJamAjarResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
             ->with(['gtk.tugasTambahan'])
             ->withSum('teachingEntries as total_jam_mengajar', 'jumlah_jam')
             ->whereNull('rombel_id')

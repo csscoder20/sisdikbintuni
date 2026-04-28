@@ -72,7 +72,10 @@ class MapelResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
 
         if ($tenant = Filament::getTenant()) {
             $panel = Filament::getCurrentPanel();
@@ -93,6 +96,7 @@ class MapelResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
     public static function getPages(): array
     {
         return [

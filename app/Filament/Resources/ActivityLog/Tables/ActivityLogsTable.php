@@ -9,6 +9,14 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Support\Enums\Size;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
 
 class ActivityLogsTable
 {
@@ -42,6 +50,7 @@ class ActivityLogsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                TrashedFilter::make(),
                 SelectFilter::make('event')
                     ->label('Aktivitas')
                     ->options([
@@ -54,13 +63,23 @@ class ActivityLogsTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    RestoreAction::make(),
+                    ForceDeleteAction::make(),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
+                    DeleteAction::make()
+                        ->icon(Heroicon::OutlinedTrash),
                 ])
                 ->icon('heroicon-m-ellipsis-vertical')
                 ->color('primary')
             ])
-            ->toolbarActions([]);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }

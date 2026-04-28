@@ -22,7 +22,7 @@ class ListSiswas extends ListRecords
                 ->importer(SiswaImporter::class)
                 ->label('Impor Data Siswa')
                 ->modalHeading('Impor Data Siswa')
-                ->modalDescription(fn () => new \Illuminate\Support\HtmlString(
+                ->modalDescription(fn() => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
                         <div class="text-sm space-y-2">
@@ -46,6 +46,7 @@ class ListSiswas extends ListRecords
                 ->modalSubmitActionLabel('Simpan Data Siswa')
                 ->modalFooterActions([])
                 ->createAnother(false),
+            \App\Filament\Actions\ValidateChecklistAction::make('validateNominatif', 'nominatif_siswa', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists())
         ];
     }
 }

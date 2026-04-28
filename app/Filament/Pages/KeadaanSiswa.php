@@ -22,6 +22,9 @@ class KeadaanSiswa extends Page
 {
     use WithPagination;
 
+    #[Url]
+    public $selectedLaporanId;
+    protected $listeners = ['laporanUpdated' => 'handleLaporanUpdated'];
     public function getLaporanStatus(string $type): bool
     {
         $sekolahId = filament()->getTenant()?->id;
@@ -35,95 +38,6 @@ class KeadaanSiswa extends Page
         return $laporan ? (bool) $laporan->$column : false;
     }
 
-    public function validateSiswaRombelAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaRombel', 'siswa_rombel', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateSiswaUmurAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaUmur', 'siswa_umur', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateSiswaAgamaAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaAgama', 'siswa_agama', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateSiswaDaerahAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaDaerah', 'siswa_daerah', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateSiswaDisabilitasAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaDisabilitas', 'siswa_disabilitas', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateSiswaBeasiswaAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateSiswaBeasiswa', 'siswa_beasiswa', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function syncSiswaRombelAction(): \Filament\Actions\Action
-    {
-        return \Filament\Actions\Action::make('syncSiswaRombel')
-            ->label('Sinkronkan Data')
-            ->icon('heroicon-m-arrow-path')
-            ->color('info')
-            ->requiresConfirmation()
-            ->modalHeading('Sinkronkan Data Aktual')
-            ->modalDescription('Tindakan ini akan memperbarui angka laporan berdasarkan data siswa aktual pada rombel saat ini. Lanjutkan?')
-            ->action(function () {
-                $tenantId = filament()->getTenant()?->id;
-                $month = (int) date('m');
-                $year = (int) date('Y');
-
-                $laporan = Laporan::firstOrCreate([
-                    'sekolah_id' => $tenantId,
-                    'bulan' => $month,
-                    'tahun' => $year,
-                ]);
-
-                $rombels = Rombel::where('sekolah_id', $tenantId)->get();
-
-                foreach ($rombels as $rombel) {
-                    $laporanSiswa = LaporanSiswa::firstOrCreate([
-                        'laporan_id' => $laporan->id,
-                        'rombel_id' => $rombel->id,
-                    ]);
-
-                    // Count real students
-                    $laki = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'L%')->count();
-                    $perempuan = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'P%')->count();
-                    $total = $laki + $perempuan;
-
-                    // Update 'akhir_bulan' rekap
-                    LaporanSiswaRekap::updateOrCreate(
-                        ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'akhir_bulan'],
-                        ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
-                    );
-
-                    // If 'awal_bulan' is empty, fill it too
-                    $awalExists = LaporanSiswaRekap::where([
-                        'laporan_siswa_id' => $laporanSiswa->id,
-                        'kategori' => 'awal_bulan'
-                    ])->where('total', '>', 0)->exists();
-
-                    if (!$awalExists) {
-                        LaporanSiswaRekap::updateOrCreate(
-                            ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'awal_bulan'],
-                            ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
-                        );
-                    }
-                }
-
-                \Filament\Notifications\Notification::make()
-                    ->title('Data berhasil disinkronkan')
-                    ->success()
-                    ->send();
-            });
-    }
 
     protected static ?string $navigationLabel = 'Keadaan Siswa';
     protected static ?int $navigationSort = 2;
@@ -196,12 +110,41 @@ class KeadaanSiswa extends Page
         );
     }
 
-    protected function getViewData(): array
+    protected function getActiveLaporanId()
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
 
+        // If explicitly set to empty string (Sekarang)
+        if ($this->selectedLaporanId === "") {
+            return null;
+        }
+
+        if ($this->selectedLaporanId) {
+            return $this->selectedLaporanId;
+        }
+
+        // Default behavior: if no selection, show the latest report if it exists
+        $lap = Laporan::where('sekolah_id', $tenantId)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->first();
+
+        return $lap?->id;
+    }
+
+    protected function getViewData(): array
+    {
+        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
+        $laporanId = $this->getActiveLaporanId();
+
+        $periodes = \App\Models\Laporan::where('sekolah_id', $tenantId)
+            ->whereHas('siswa.kategori') // Only show periods that have been validated (have kategori data)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
+
         // 1. Siswa per Kelas
-        $siswaPerKelasFull = $this->getSiswaPerKelasCollection();
+        $siswaPerKelasFull = $this->getSiswaPerKelasCollection($laporanId);
         $totalSiswaPerKelas = [
             'awal_l' => $siswaPerKelasFull->sum('awal_bulan_l'),
             'awal_p' => $siswaPerKelasFull->sum('awal_bulan_p'),
@@ -214,7 +157,7 @@ class KeadaanSiswa extends Page
             'mutasi_keluar_jml' => $siswaPerKelasFull->sum('mutasi_keluar_jml'),
             'putus_l' => $siswaPerKelasFull->sum('putus_sekolah_l'),
             'putus_p' => $siswaPerKelasFull->sum('putus_sekolah_p'),
-            'putus_jml' => $siswaPerKelasFull->sum('putus_sekolah_jml'),
+            'putus_jml' => $siswaPerKelasFull->sum('putus_jml'),
             'mengulang_l' => $siswaPerKelasFull->sum('mengulang_l'),
             'mengulang_p' => $siswaPerKelasFull->sum('mengulang_p'),
             'mengulang_jml' => $siswaPerKelasFull->sum('mengulang_jml'),
@@ -224,7 +167,7 @@ class KeadaanSiswa extends Page
         ];
 
         // 2. Siswa per Umur
-        $siswaPerUmurFull = $this->getSiswaPerUmurCollection();
+        $siswaPerUmurFull = $this->getSiswaPerUmurCollection($laporanId);
         $totalSiswaPerUmur = [];
         for ($age = 13; $age <= 23; $age++) {
             $px = 'umur_' . $age;
@@ -234,16 +177,16 @@ class KeadaanSiswa extends Page
         }
 
         // 3. Siswa per Agama
-        $siswaPerAgamaFull = $this->getSiswaPerAgamaCollection();
+        $siswaPerAgamaFull = $this->getSiswaPerAgamaCollection($laporanId);
         $totalSiswaPerAgama = [];
-        foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $ag) {
+        foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) {
             $totalSiswaPerAgama[$ag . '_l'] = $siswaPerAgamaFull->sum($ag . '_l');
             $totalSiswaPerAgama[$ag . '_p'] = $siswaPerAgamaFull->sum($ag . '_p');
             $totalSiswaPerAgama[$ag . '_jml'] = $siswaPerAgamaFull->sum($ag . '_jml');
         }
 
         // 4. Siswa per Daerah
-        $siswaPDaerahFull = $this->getSiswaPDaerahCollection();
+        $siswaPDaerahFull = $this->getSiswaPDaerahCollection($laporanId);
         $totalSiswaPDaerah = [
             'papua_l' => $siswaPDaerahFull->sum('papua_l'),
             'papua_p' => $siswaPDaerahFull->sum('papua_p'),
@@ -254,7 +197,7 @@ class KeadaanSiswa extends Page
         ];
 
         // 5. Siswa Disabilitas
-        $siswaDisabilitasFull = $this->getSiswaDisabilitasCollection();
+        $siswaDisabilitasFull = $this->getSiswaDisabilitasCollection($laporanId);
         $totalSiswaDisabilitas = [
             'l' => $siswaDisabilitasFull->sum('laki_laki'),
             'p' => $siswaDisabilitasFull->sum('perempuan'),
@@ -262,7 +205,7 @@ class KeadaanSiswa extends Page
         ];
 
         // 6. Siswa Beasiswa
-        $siswaBeasiswaFull = $this->getSiswaBeasiswaCollection();
+        $siswaBeasiswaFull = $this->getSiswaBeasiswaCollection($laporanId);
         $totalSiswaBeasiswa = [
             'l' => $siswaBeasiswaFull->sum('penerima_l'),
             'p' => $siswaBeasiswaFull->sum('penerima_p'),
@@ -270,13 +213,15 @@ class KeadaanSiswa extends Page
         ];
 
         return array_merge(parent::getViewData(), [
+            'periodes' => $periodes,
+            'selectedLaporanId' => $laporanId,
             'siswaPerKelas' => $this->paginateCollection($siswaPerKelasFull, $this->perPage, $this->pagePerKelas, ['pageName' => 'pagePerKelas']),
             'siswaPerUmur' => $this->paginateCollection($siswaPerUmurFull, $this->perPage, $this->pagePerUmur, ['pageName' => 'pagePerUmur']),
             'siswaPerAgama' => $this->paginateCollection($siswaPerAgamaFull, $this->perPage, $this->pagePerAgama, ['pageName' => 'pagePerAgama']),
             'siswaPDaerah' => $this->paginateCollection($siswaPDaerahFull, $this->perPage, $this->pagePerDaerah, ['pageName' => 'pagePerDaerah']),
             'siswaDisabilitas' => $siswaDisabilitasFull,
             'siswaBeasiswa' => $siswaBeasiswaFull,
-            
+
             'totalSiswaPerKelas' => $totalSiswaPerKelas,
             'totalSiswaPerUmur' => $totalSiswaPerUmur,
             'totalSiswaPerAgama' => $totalSiswaPerAgama,
@@ -284,9 +229,9 @@ class KeadaanSiswa extends Page
             'totalSiswaDisabilitas' => $totalSiswaDisabilitas,
             'totalSiswaBeasiswa' => $totalSiswaBeasiswa,
 
-            'totalSiswa' => Siswa::where('sekolah_id', $tenantId)->count(),
-            'totalLakiLaki' => Siswa::where('sekolah_id', $tenantId)->where('jenis_kelamin', 'LIKE', 'L%')->count(),
-            'totalPerempuan' => Siswa::where('sekolah_id', $tenantId)->where('jenis_kelamin', 'LIKE', 'P%')->count(),
+            'totalSiswa' => $laporanId ? $totalSiswaPerKelas['akhir_jml'] : Siswa::where('sekolah_id', $tenantId)->count(),
+            'totalLakiLaki' => $laporanId ? $totalSiswaPerKelas['akhir_l'] : Siswa::where('sekolah_id', $tenantId)->where('jenis_kelamin', 'LIKE', 'L%')->count(),
+            'totalPerempuan' => $laporanId ? $totalSiswaPerKelas['akhir_p'] : Siswa::where('sekolah_id', $tenantId)->where('jenis_kelamin', 'LIKE', 'P%')->count(),
             'perPage' => $this->perPage,
         ]);
     }
@@ -294,194 +239,440 @@ class KeadaanSiswa extends Page
     /**
      * Get data collections for calculations
      */
-    protected function getSiswaPerKelasCollection()
+    protected function getSiswaPerKelasCollection($laporanId = null)
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        $rombelIds = \App\Models\Rombel::where('sekolah_id', $tenantId)->pluck('id');
-        $laporanSiswas = LaporanSiswa::whereIn('rombel_id', $rombelIds)->with(['rombel', 'rekap'])->get();
+        $rombels = \App\Models\Rombel::where('sekolah_id', $tenantId)->get();
 
-        return $laporanSiswas->map(function ($ls) {
-            $rekaps = $ls->rekap->groupBy('kategori');
-            $getRekap = function($cat) use ($rekaps) {
-                $item = $rekaps->get($cat)?->first();
-                return ['l' => $item?->laki_laki ?? 0, 'p' => $item?->perempuan ?? 0, 'jml' => $item?->total ?? 0];
-            };
-            $awal = $getRekap('awal_bulan');
-            $mutasi_masuk = $getRekap('mutasi_masuk');
-            $mutasi_keluar = $getRekap('mutasi_keluar');
-            $putus = $getRekap('putus_sekolah');
-            $mengulang = $getRekap('mengulang');
-            $akhir = $getRekap('akhir_bulan');
+        if ($laporanId) {
+            $query = LaporanSiswa::with(['rombel', 'rekap'])
+                ->where('laporan_id', $laporanId);
+            $laporanSiswas = $query->get();
 
+            return $laporanSiswas->map(function ($ls) {
+                $rekaps = $ls->rekap->groupBy('kategori');
+                $getRekap = function ($cat) use ($rekaps) {
+                    $item = $rekaps->get($cat)?->first();
+                    return ['l' => $item?->laki_laki ?? 0, 'p' => $item?->perempuan ?? 0, 'jml' => $item?->total ?? 0];
+                };
+                $awal = $getRekap('awal_bulan');
+                $mutasi_masuk = $getRekap('mutasi_masuk');
+                $mutasi_keluar = $getRekap('mutasi_keluar');
+                $putus = $getRekap('putus_sekolah');
+                $mengulang = $getRekap('mengulang');
+                $akhir = $getRekap('akhir_bulan');
+
+                return [
+                    'rombel_id' => $ls->rombel_id,
+                    'nama_rombel' => $ls->rombel?->nama ?? 'Tidak Diketahui',
+                    'awal_bulan_l' => $awal['l'],
+                    'awal_bulan_p' => $awal['p'],
+                    'awal_bulan_jml' => $awal['jml'],
+                    'mutasi_l' => $mutasi_masuk['l'],
+                    'mutasi_p' => $mutasi_masuk['p'],
+                    'mutasi_jml' => $mutasi_masuk['jml'],
+                    'mutasi_keluar_l' => $mutasi_keluar['l'],
+                    'mutasi_keluar_p' => $mutasi_keluar['p'],
+                    'mutasi_keluar_jml' => $mutasi_keluar['jml'],
+                    'putus_sekolah_l' => $putus['l'],
+                    'putus_sekolah_p' => $putus['p'],
+                    'putus_sekolah_jml' => $putus['jml'],
+                    'mengulang_l' => $mengulang['l'],
+                    'mengulang_p' => $mengulang['p'],
+                    'mengulang_jml' => $mengulang['jml'],
+                    'akhir_bulan_l' => $akhir['l'],
+                    'akhir_bulan_p' => $akhir['p'],
+                    'akhir_bulan_jml' => $akhir['jml'],
+                ];
+            });
+        }
+
+        // LIVE DATA
+        $data = $rombels->map(function ($rombel) {
+            $laki = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'L%')->count();
+            $perempuan = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'P%')->count();
             return [
-                'rombel_id' => $ls->rombel_id,
-                'nama_rombel' => $ls->rombel?->nama ?? 'Tidak Diketahui',
-                'awal_bulan_l' => $awal['l'],
-                'awal_bulan_p' => $awal['p'],
-                'awal_bulan_jml' => $awal['jml'],
-                'mutasi_l' => $mutasi_masuk['l'],
-                'mutasi_p' => $mutasi_masuk['p'],
-                'mutasi_jml' => $mutasi_masuk['jml'],
-                'mutasi_keluar_l' => $mutasi_keluar['l'],
-                'mutasi_keluar_p' => $mutasi_keluar['p'],
-                'mutasi_keluar_jml' => $mutasi_keluar['jml'],
-                'putus_sekolah_l' => $putus['l'],
-                'putus_sekolah_p' => $putus['p'],
-                'putus_sekolah_jml' => $putus['jml'],
-                'mengulang_l' => $mengulang['l'],
-                'mengulang_p' => $mengulang['p'],
-                'mengulang_jml' => $mengulang['jml'],
-                'akhir_bulan_l' => $akhir['l'],
-                'akhir_bulan_p' => $akhir['p'],
-                'akhir_bulan_jml' => $akhir['jml'],
+                'rombel_id' => $rombel->id,
+                'nama_rombel' => $rombel->nama,
+                'awal_bulan_l' => 0,
+                'awal_bulan_p' => 0,
+                'awal_bulan_jml' => 0,
+                'mutasi_l' => 0,
+                'mutasi_p' => 0,
+                'mutasi_jml' => 0,
+                'mutasi_keluar_l' => 0,
+                'mutasi_keluar_p' => 0,
+                'mutasi_keluar_jml' => 0,
+                'putus_sekolah_l' => 0,
+                'putus_sekolah_p' => 0,
+                'putus_sekolah_jml' => 0,
+                'mengulang_l' => 0,
+                'mengulang_p' => 0,
+                'mengulang_jml' => 0,
+                'akhir_bulan_l' => $laki,
+                'akhir_bulan_p' => $perempuan,
+                'akhir_bulan_jml' => $laki + $perempuan,
             ];
         });
+
+        // Add students without rombel
+        $noRombelL = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->where('jenis_kelamin', 'LIKE', 'L%')->count();
+        $noRombelP = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->where('jenis_kelamin', 'LIKE', 'P%')->count();
+
+        if ($noRombelL + $noRombelP > 0) {
+            $data->push([
+                'rombel_id' => 'none',
+                'nama_rombel' => 'TANPA ROMBEL',
+                'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0,
+                'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0,
+                'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0,
+                'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0,
+                'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0,
+                'akhir_bulan_l' => $noRombelL,
+                'akhir_bulan_p' => $noRombelP,
+                'akhir_bulan_jml' => $noRombelL + $noRombelP,
+            ]);
+        }
+
+        return $data;
     }
 
-    protected function getSiswaPerUmurCollection()
+    protected function getSiswaPerUmurCollection($laporanId = null)
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         $rombels = \App\Models\Rombel::where('sekolah_id', $tenantId)->get();
         $dataByRombel = collect();
 
+        if ($laporanId) {
+            $laporanSiswas = LaporanSiswa::where('laporan_id', $laporanId)->with('kategori', 'rombel')->get()->keyBy('rombel_id');
+
+            foreach ($rombels as $rombel) {
+                $item = ['rombel_id' => $rombel->id, 'nama_rombel' => $rombel->nama];
+                for ($age = 13; $age <= 23; $age++) {
+                    $prefix = 'umur_' . $age;
+                    $item[$prefix . '_l'] = 0; $item[$prefix . '_p'] = 0; $item[$prefix . '_jml'] = 0;
+                }
+
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $umurKats = $ls->kategori->where('jenis_kategori', 'umur')->groupBy('sub_kategori');
+                    foreach ($umurKats as $sub => $group) {
+                        $age = (int) $sub;
+                        if ($age >= 13 && $age <= 23) {
+                            $prefix = 'umur_' . $age;
+                            $item[$prefix . '_l'] = $group->sum('laki_laki');
+                            $item[$prefix . '_p'] = $group->sum('perempuan');
+                            $item[$prefix . '_jml'] = $group->sum('total');
+                        }
+                    }
+                }
+                $dataByRombel->push($item);
+            }
+            return $dataByRombel;
+        }
+
+        // LIVE DATA
         foreach ($rombels as $rombel) {
             $item = ['rombel_id' => $rombel->id, 'nama_rombel' => $rombel->nama];
             for ($age = 13; $age <= 23; $age++) {
                 $prefix = 'umur_' . $age;
                 $item[$prefix . '_l'] = 0; $item[$prefix . '_p'] = 0; $item[$prefix . '_jml'] = 0;
             }
+
             $siswas = $rombel->siswa()->whereNotNull('tanggal_lahir')->get();
             foreach ($siswas as $s) {
-                $umur = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
-                if ($umur >= 13 && $umur <= 23) {
-                    $prefix = 'umur_' . $umur;
-                    if (str_contains(strtolower($s->jenis_kelamin), 'l')) $item[$prefix . '_l']++;
+                $age = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
+                if ($age >= 13 && $age <= 23) {
+                    $prefix = 'umur_' . $age;
+                    if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$prefix . '_l']++;
                     else $item[$prefix . '_p']++;
                     $item[$prefix . '_jml']++;
                 }
             }
             $dataByRombel->push($item);
         }
+
+        // Students without rombel
+        $siswasNoR = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->whereNotNull('tanggal_lahir')->get();
+        if ($siswasNoR->count() > 0) {
+            $item = ['rombel_id' => 'none', 'nama_rombel' => 'TANPA ROMBEL'];
+            for ($age = 13; $age <= 23; $age++) { $prefix = 'umur_' . $age; $item[$prefix . '_l'] = 0; $item[$prefix . '_p'] = 0; $item[$prefix . '_jml'] = 0; }
+            foreach ($siswasNoR as $s) {
+                $age = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
+                if ($age >= 13 && $age <= 23) {
+                    $prefix = 'umur_' . $age;
+                    if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$prefix . '_l']++;
+                    else $item[$prefix . '_p']++;
+                    $item[$prefix . '_jml']++;
+                }
+            }
+            $dataByRombel->push($item);
+        }
+
         return $dataByRombel;
     }
 
-    protected function getSiswaPerAgamaCollection()
+    protected function getSiswaPerAgamaCollection($laporanId = null)
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         $rombels = \App\Models\Rombel::where('sekolah_id', $tenantId)->get();
         $dataByRombel = collect();
 
+        if ($laporanId) {
+            $laporanSiswas = LaporanSiswa::where('laporan_id', $laporanId)->with('kategori', 'rombel')->get()->keyBy('rombel_id');
+
+            foreach ($rombels as $rombel) {
+                $item = [
+                    'rombel_id' => $rombel->id,
+                    'nama_rombel' => $rombel->nama,
+                    'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0,
+                    'kristen_l' => 0, 'kristen_p' => 0, 'kristen_jml' => 0,
+                    'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0,
+                    'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0,
+                    'buddha_l' => 0, 'buddha_p' => 0, 'buddha_jml' => 0,
+                    'khonghucu_l' => 0, 'khonghucu_p' => 0, 'khonghucu_jml' => 0,
+                ];
+
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $agamaKats = $ls->kategori->where('jenis_kategori', 'agama')->groupBy('sub_kategori');
+                    foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) {
+                        $group = $agamaKats->get($ag);
+                        if ($group) {
+                            $item[$ag . '_l'] = $group->sum('laki_laki');
+                            $item[$ag . '_p'] = $group->sum('perempuan');
+                            $item[$ag . '_jml'] = $group->sum('total');
+                        }
+                    }
+                }
+                $dataByRombel->push($item);
+            }
+            return $dataByRombel;
+        }
+
+        // LIVE DATA
         foreach ($rombels as $rombel) {
             $item = [
-                'rombel_id' => $rombel->id, 'nama_rombel' => $rombel->nama,
+                'rombel_id' => $rombel->id,
+                'nama_rombel' => $rombel->nama,
                 'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0,
-                'kristen_protestan_l' => 0, 'kristen_protestan_p' => 0, 'kristen_protestan_jml' => 0,
+                'kristen_l' => 0, 'kristen_p' => 0, 'kristen_jml' => 0,
                 'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0,
                 'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0,
-                'budha_l' => 0, 'budha_p' => 0, 'budha_jml' => 0,
-                'konghucu_l' => 0, 'konghucu_p' => 0, 'konghucu_jml' => 0,
+                'buddha_l' => 0, 'buddha_p' => 0, 'buddha_jml' => 0,
+                'khonghucu_l' => 0, 'khonghucu_p' => 0, 'khonghucu_jml' => 0,
             ];
+
             $siswas = $rombel->siswa()->get();
             foreach ($siswas as $s) {
-                $agama = strtolower($s->agama);
-                $field = '';
+                $agama = strtolower($s->agama ?? '');
+                $field = null;
                 if (str_contains($agama, 'islam')) $field = 'islam';
-                elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $field = 'kristen_protestan';
+                elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $field = 'kristen';
                 elseif (str_contains($agama, 'katolik')) $field = 'katolik';
                 elseif (str_contains($agama, 'hindu')) $field = 'hindu';
-                elseif (str_contains($agama, 'budha')) $field = 'budha';
-                elseif (str_contains($agama, 'konghucu')) $field = 'konghucu';
+                elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $field = 'buddha';
+                elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $field = 'khonghucu';
 
                 if ($field) {
-                    if (str_contains(strtolower($s->jenis_kelamin), 'l')) $item[$field . '_l']++;
+                    if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$field . '_l']++;
                     else $item[$field . '_p']++;
                     $item[$field . '_jml']++;
                 }
             }
             $dataByRombel->push($item);
         }
+
+        // Students without rombel
+        $siswasNoR = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->get();
+        if ($siswasNoR->count() > 0) {
+            $item = [
+                'rombel_id' => 'none', 'nama_rombel' => 'TANPA ROMBEL',
+                'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0,
+                'kristen_l' => 0, 'kristen_p' => 0, 'kristen_jml' => 0,
+                'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0,
+                'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0,
+                'buddha_l' => 0, 'buddha_p' => 0, 'buddha_jml' => 0,
+                'khonghucu_l' => 0, 'khonghucu_p' => 0, 'khonghucu_jml' => 0,
+            ];
+            foreach ($siswasNoR as $s) {
+                $agama = strtolower($s->agama ?? '');
+                $field = null;
+                if (str_contains($agama, 'islam')) $field = 'islam';
+                elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $field = 'kristen';
+                elseif (str_contains($agama, 'katolik')) $field = 'katolik';
+                elseif (str_contains($agama, 'hindu')) $field = 'hindu';
+                elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $field = 'buddha';
+                elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $field = 'khonghucu';
+
+                if ($field) {
+                    if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$field . '_l']++;
+                    else $item[$field . '_p']++;
+                    $item[$field . '_jml']++;
+                }
+            }
+            $dataByRombel->push($item);
+        }
+
         return $dataByRombel;
     }
 
-    protected function getSiswaPDaerahCollection()
+    protected function getSiswaPDaerahCollection($laporanId = null)
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         $rombels = \App\Models\Rombel::where('sekolah_id', $tenantId)->get();
         $dataByRombel = collect();
 
+        if ($laporanId) {
+            $laporanSiswas = LaporanSiswa::where('laporan_id', $laporanId)->with('kategori', 'rombel')->get()->keyBy('rombel_id');
+
+            foreach ($rombels as $rombel) {
+                $item = [
+                    'rombel_id' => $rombel->id,
+                    'nama_rombel' => $rombel->nama,
+                    'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0,
+                    'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0,
+                ];
+
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $daerahKats = $ls->kategori->where('jenis_kategori', 'asal_daerah')->groupBy('sub_kategori');
+                    foreach (['papua', 'non_papua'] as $sub) {
+                        $group = $daerahKats->get($sub);
+                        if ($group) {
+                            $item[$sub . '_l'] = $group->sum('laki_laki');
+                            $item[$sub . '_p'] = $group->sum('perempuan');
+                            $item[$sub . '_jml'] = $group->sum('total');
+                        }
+                    }
+                }
+                $dataByRombel->push($item);
+            }
+            return $dataByRombel;
+        }
+
+        // LIVE DATA
         foreach ($rombels as $rombel) {
             $item = [
-                'rombel_id' => $rombel->id, 'nama_rombel' => $rombel->nama,
+                'rombel_id' => $rombel->id,
+                'nama_rombel' => $rombel->nama,
                 'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0,
                 'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0,
             ];
+
             $siswas = $rombel->siswa()->get();
             foreach ($siswas as $s) {
-                $isPapua = str_contains(strtolower($s->daerah_asal ?? ''), 'papua') && !str_contains(strtolower($s->daerah_asal ?? ''), 'non');
-                $prefix = $isPapua ? 'papua' : 'non_papua';
-                if (str_contains(strtolower($s->jenis_kelamin), 'l')) $item[$prefix . '_l']++;
-                else $item[$prefix . '_p']++;
-                $item[$prefix . '_jml']++;
+                $daerah = strtolower($s->daerah_asal ?? '');
+                $cat = (str_contains($daerah, 'papua') && !str_contains($daerah, 'non')) ? 'papua' : 'non_papua';
+                if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$cat . '_l']++;
+                else $item[$cat . '_p']++;
+                $item[$cat . '_jml']++;
             }
             $dataByRombel->push($item);
         }
+
+        // Students without rombel
+        $siswasNoR = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->get();
+        if ($siswasNoR->count() > 0) {
+            $item = [
+                'rombel_id' => 'none', 'nama_rombel' => 'TANPA ROMBEL',
+                'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0,
+                'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0,
+            ];
+            foreach ($siswasNoR as $s) {
+                $daerah = strtolower($s->daerah_asal ?? '');
+                $cat = (str_contains($daerah, 'papua') && !str_contains($daerah, 'non')) ? 'papua' : 'non_papua';
+                if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$cat . '_l']++;
+                else $item[$cat . '_p']++;
+                $item[$cat . '_jml']++;
+            }
+            $dataByRombel->push($item);
+        }
+
         return $dataByRombel;
     }
 
-    protected function getSiswaDisabilitasCollection()
+    protected function getSiswaDisabilitasCollection($laporanId = null)
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        
         $categories = [
-            'tidak' => 'Tidak', 
-            'tuna_netra' => 'Tuna Netra', 
-            'tuna_rungu' => 'Tuna Rungu', 
-            'tuna_wicara' => 'Tuna Wicara', 
-            'tuna_daksa' => 'Tuna Daksa', 
-            'tuna_grahita' => 'Tuna Grahita', 
+            'tidak' => 'Tidak',
+            'tuna_netra' => 'Tuna Netra',
+            'tuna_rungu' => 'Tuna Rungu',
+            'tuna_wicara' => 'Tuna Wicara',
+            'tuna_daksa' => 'Tuna Daksa',
+            'tuna_grahita' => 'Tuna Grahita',
             'tuna_lainnya' => 'Tuna Lainnya'
         ];
 
-        $counts = LaporanSiswaKategori::where('jenis_kategori', 'disabilitas')
-            ->whereHas('laporanSiswa.laporan', fn($q) => $q->where('sekolah_id', $tenantId))
-            ->get()->groupBy('sub_kategori');
+        if ($laporanId) {
+            $counts = LaporanSiswaKategori::where('jenis_kategori', 'disabilitas')
+                ->whereHas('laporanSiswa', fn($q) => $q->where('laporan_id', $laporanId))
+                ->get()->groupBy('sub_kategori');
 
-        return collect($categories)->map(function ($label, $key) use ($counts) {
-            $items = $counts->get($key) ?: collect();
+            return collect($categories)->map(function ($label, $key) use ($counts) {
+                $items = $counts->get($key) ?: collect();
+                return [
+                    'jenis_disabilitas' => $label,
+                    'laki_laki' => $items->sum('laki_laki'),
+                    'perempuan' => $items->sum('perempuan'),
+                    'total' => $items->sum('total'),
+                ];
+            })->values();
+        }
+
+        // LIVE DATA
+        return collect($categories)->map(function ($label, $key) use ($tenantId) {
+            $l = Siswa::where('sekolah_id', $tenantId)->where('disabilitas', $key)->where('jenis_kelamin', 'LIKE', 'L%')->count();
+            $p = Siswa::where('sekolah_id', $tenantId)->where('disabilitas', $key)->where('jenis_kelamin', 'LIKE', 'P%')->count();
             return [
                 'jenis_disabilitas' => $label,
-                'laki_laki' => $items->sum('laki_laki'),
-                'perempuan' => $items->sum('perempuan'),
-                'total' => $items->sum('total'),
+                'laki_laki' => $l,
+                'perempuan' => $p,
+                'total' => $l + $p,
             ];
         })->values();
     }
 
-    protected function getSiswaBeasiswaCollection()
+    protected function getSiswaBeasiswaCollection($laporanId = null)
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        
         $categories = [
-            'tidak' => 'Tidak', 
-            'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat', 
-            'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah', 
-            'beasisswa_swasta' => 'Beasiswa Swasta', 
-            'beasiswa_khusus' => 'Beasiswa Khusus', 
-            'beasiswa_afirmasi' => 'Beasiswa Afirmasi', 
+            'tidak' => 'Tidak',
+            'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat',
+            'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah',
+            'beasisswa_swasta' => 'Beasiswa Swasta',
+            'beasiswa_khusus' => 'Beasiswa Khusus',
+            'beasiswa_afirmasi' => 'Beasiswa Afirmasi',
             'beasiswa_lainnya' => 'Beasiswa Lainnya'
         ];
 
-        $counts = LaporanSiswaKategori::where('jenis_kategori', 'beasiswa')
-            ->whereHas('laporanSiswa.laporan', fn($q) => $q->where('sekolah_id', $tenantId))
-            ->get()->groupBy('sub_kategori');
+        if ($laporanId) {
+            $counts = LaporanSiswaKategori::where('jenis_kategori', 'beasiswa')
+                ->whereHas('laporanSiswa', fn($q) => $q->where('laporan_id', $laporanId))
+                ->get()->groupBy('sub_kategori');
 
-        return collect($categories)->map(function ($label, $key) use ($counts) {
-            $items = $counts->get($key) ?: collect();
+            return collect($categories)->map(function ($label, $key) use ($counts) {
+                $items = $counts->get($key) ?: collect();
+                return [
+                    'jenis_beasiswa' => $label,
+                    'penerima_l' => $items->sum('laki_laki'),
+                    'penerima_p' => $items->sum('perempuan'),
+                    'penerima_jml' => $items->sum('total'),
+                    'keterangan' => '',
+                ];
+            })->values();
+        }
+
+        // LIVE DATA
+        return collect($categories)->map(function ($label, $key) use ($tenantId) {
+            $l = Siswa::where('sekolah_id', $tenantId)->where('beasiswa', $key)->where('jenis_kelamin', 'LIKE', 'L%')->count();
+            $p = Siswa::where('sekolah_id', $tenantId)->where('beasiswa', $key)->where('jenis_kelamin', 'LIKE', 'P%')->count();
             return [
                 'jenis_beasiswa' => $label,
-                'penerima_l' => $items->sum('laki_laki'),
-                'penerima_p' => $items->sum('perempuan'),
-                'penerima_jml' => $items->sum('total'),
+                'penerima_l' => $l,
+                'penerima_p' => $p,
+                'penerima_jml' => $l + $p,
                 'keterangan' => '',
             ];
         })->values();
@@ -511,6 +702,17 @@ class KeadaanSiswa extends Page
     public function incrementTest(): void
     {
         $this->testCounter++;
+    }
+
+    public function updatedSelectedLaporanId()
+    {
+        $this->resetPage();
+    }
+
+    public function handleLaporanUpdated($laporanId)
+    {
+        $this->selectedLaporanId = $laporanId;
+        $this->resetPage();
     }
 
     // Method untuk mengubah jumlah item per halaman

@@ -211,11 +211,17 @@ class SiswaForm
                         ])->columns(2),
                 ])
                     ->skippable()
-                    ->submitAction(new HtmlString(Blade::render(<<<BLADE
-                    <x-filament::button type="submit" size="sm" color="success">
-                        Simpan Data
-                    </x-filament::button>
-                BLADE))),
+                    ->submitAction(new HtmlString(Blade::render(
+                        <<<'BLADE'
+                        <x-filament::button
+                            type="submit"
+                            size="sm"
+                            color="success"
+                        >
+                            Simpan Data
+                        </x-filament::button>
+                    BLADE
+                    ))),
             ]);
     }
 }

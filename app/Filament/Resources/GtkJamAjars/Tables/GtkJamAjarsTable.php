@@ -61,7 +61,16 @@ class GtkJamAjarsTable
                     ->alignCenter(),
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
-                    ->state(fn (Mengajar $record): string => $record->gtk?->tugasTambahan?->tugas_tambahan ?: '-'),
+                    ->state(function (Mengajar $record): string {
+                        $total = (int) ($record->total_jam_mengajar ?? 0) + (int) ($record->gtk?->tugasTambahan?->jumlah_jam ?? 0);
+                        return $total >= 24 ? 'Terpenuhi' : 'Belum Terpenuhi';
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Terpenuhi' => 'success',
+                        'Belum Terpenuhi' => 'danger',
+                        default => 'gray',
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
@@ -73,13 +82,13 @@ class GtkJamAjarsTable
             ->recordActions([
                 ActionGroup::make([
                     Action::make('tambahJamMengajar')
-                        ->label('Tambah Jam Mengajar')
+                        ->label('Kelola Jam Mengajar')
                         ->icon(Heroicon::OutlinedPlusCircle)
                         ->modalWidth(Width::FiveExtraLarge)
                         ->modalHeading(fn (Mengajar $record): string => 'Tambah Jam Mengajar: ' . ($record->gtk?->nama ?? '-'))
                         ->modalSubmitActionLabel('Simpan Jam Mengajar')
-                        ->extraModalWindowAttributes(['class' => 'modal-batal-kanan'])
-                        ->modalCancelAction(fn ($action) => $action->label('Batal')->color('gray'))
+                        ->modalCancelAction(false)
+                        ->skippableSteps()
                         ->fillForm(fn (Mengajar $record): array => [
                             'tugas_utama' => $record->teachingEntries()
                                 ->orderBy('rombel_id')
@@ -98,7 +107,24 @@ class GtkJamAjarsTable
                         ->steps([
                             Step::make('Tugas Utama')
                                 ->schema([
+                                    Grid::make(12)
+                                        ->schema([
+                                            Placeholder::make('head_rombel')
+                                                ->hiddenLabel()
+                                                ->content(new \Illuminate\Support\HtmlString('<span class="font-medium text-sm text-gray-700 dark:text-gray-300">Nama Rombel</span>'))
+                                                ->columnSpan(4),
+                                            Placeholder::make('head_mapel')
+                                                ->hiddenLabel()
+                                                ->content(new \Illuminate\Support\HtmlString('<span class="font-medium text-sm text-gray-700 dark:text-gray-300">Mata Pelajaran</span>'))
+                                                ->columnSpan(5),
+                                            Placeholder::make('head_jjp')
+                                                ->hiddenLabel()
+                                                ->content(new \Illuminate\Support\HtmlString('<span class="font-medium text-sm text-gray-700 dark:text-gray-300 block text-center">JJP</span>'))
+                                                ->columnSpan(2),
+                                        ])
+                                        ->extraAttributes(['class' => 'hidden md:grid px-4']),
                                     Repeater::make('tugas_utama')
+                                        ->live()
                                     ->hiddenLabel()
                                     ->addActionLabel('Tambah Tugas Utama')
                                     ->addActionAlignment(Alignment::Start)
@@ -118,12 +144,17 @@ class GtkJamAjarsTable
                                                         ->placeholder('Pilih Kelas')
                                                         ->options(fn (): array => self::getRombelOptions())
                                                         ->searchable()
+                                                        ->live()
+                                                        ->afterStateUpdated(function (callable $set): void {
+                                                            $set('mapel_id', null);
+                                                            $set('jumlah_jam', null);
+                                                        })
                                                         ->required()
                                                         ->columnSpan(4),
                                                     Select::make('mapel_id')
                                                         ->hiddenLabel()
                                                         ->placeholder('Pilih Mapel')
-                                                        ->options(fn (): array => self::getMapelOptions())
+                                                        ->options(fn (callable $get): array => self::getMapelOptions($get('rombel_id')))
                                                         ->searchable()
                                                         ->live()
                                                         ->required()
@@ -169,6 +200,13 @@ class GtkJamAjarsTable
                                         ->extraAttributes(['class' => 'table-style-repeater'])
                                         ->deleteAction(fn (Action $action) => $action->hidden())
                                         ->columnSpanFull(),
+                                    Placeholder::make('summary_total_jam_utama')
+                                        ->hiddenLabel()
+                                        ->content(function (callable $get, Mengajar $record): \Illuminate\Support\HtmlString {
+                                            $total = self::sumTeachingHours($get('tugas_utama') ?? []);
+                                            $nama = $record->gtk?->nama ?? '-';
+                                            return new \Illuminate\Support\HtmlString("Jumlah Jam Mengajar dari {$nama} adalah sebanyak <strong>{$total}</strong> jam.");
+                                        }),
                                 ]),
                             Step::make('Tugas Tambahan')
                                 ->schema([
@@ -178,12 +216,18 @@ class GtkJamAjarsTable
                                     TextInput::make('jumlah_jam_tugas_tambahan')
                                         ->label('Jumlah Jam')
                                         ->numeric()
+                                        ->live()
                                         ->default(0),
-                                    Placeholder::make('summary_total_semua_jam')
-                                        ->label('Summary (Total Seluruh Jam)')
-                                        ->content(function (callable $get): int {
-                                            return self::sumTeachingHours($get('tugas_utama') ?? []) + (int) ($get('jumlah_jam_tugas_tambahan') ?? 0);
-                                        }),
+                                    Placeholder::make('summary_total_jam_tambahan')
+                                        ->hiddenLabel()
+                                        ->content(function (callable $get, Mengajar $record): \Illuminate\Support\HtmlString {
+                                            $totalUtama = self::sumTeachingHours($get('tugas_utama') ?? []);
+                                            $totalTambahan = (int) ($get('jumlah_jam_tugas_tambahan') ?? 0);
+                                            $total = $totalUtama + $totalTambahan;
+                                            $nama = $record->gtk?->nama ?? '-';
+                                            return new \Illuminate\Support\HtmlString("Total Seluruh Jam Mengajar + Tugas Tambahan dari {$nama} adalah sebanyak <strong>{$total}</strong> jam.");
+                                        })
+                                        ->columnSpanFull(),
                                 ])
                                 ->columns(2),
                         ])
@@ -269,14 +313,28 @@ class GtkJamAjarsTable
             ->all();
     }
 
-    protected static function getMapelOptions(): array
+    protected static function getMapelOptions($rombelId = null): array
     {
         $jenjang = filament()->getTenant()?->jenjang;
+        $tingkat = null;
+
+        if ($rombelId) {
+            $tingkat = Rombel::query()->find($rombelId)?->tingkat;
+        }
 
         return Mapel::query()
             ->when($jenjang, fn ($query) => $query->where('jenjang', $jenjang))
+            ->when($tingkat, fn ($query) => $query->where('tingkat', $tingkat))
             ->orderBy('nama_mapel')
-            ->pluck('nama_mapel', 'id')
+            ->orderBy('tingkat')
+            ->get()
+            ->mapWithKeys(function (Mapel $mapel) {
+                $label = $mapel->nama_mapel;
+                if ($mapel->tingkat) {
+                    $label .= " (Kls {$mapel->tingkat})";
+                }
+                return [$mapel->id => $label];
+            })
             ->all();
     }
 

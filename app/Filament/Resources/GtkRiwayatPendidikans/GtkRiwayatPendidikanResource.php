@@ -177,6 +177,9 @@ class GtkRiwayatPendidikanResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
             ->whereHas('gtk', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()->id);
             });

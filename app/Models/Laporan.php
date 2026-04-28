@@ -71,9 +71,19 @@ class Laporan extends Model
         return $this->hasMany(LaporanGedung::class);
     }
 
+    public function laporanGedung()
+    {
+        return $this->gedung();
+    }
+
     public function siswa()
     {
         return $this->hasMany(LaporanSiswa::class);
+    }
+
+    public function laporanSiswa()
+    {
+        return $this->siswa();
     }
 
     public function gtk()
@@ -81,8 +91,18 @@ class Laporan extends Model
         return $this->hasMany(LaporanGtk::class);
     }
 
+    public function laporanGtk()
+    {
+        return $this->gtk();
+    }
+
     public function keuangan()
     {
         return $this->hasMany(LaporanKeuangan::class);
+    }
+
+    public function laporanKeuangan()
+    {
+        return $this->keuangan();
     }
 }

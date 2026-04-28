@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('sekolah_id')->constrained('sekolah')->cascadeOnDelete();
             $table->string('nama');
             $table->string('nisn')->nullable();
-            $table->string('kelas_rombel')->nullable();
             $table->string('nokk')->nullable();
             $table->string('nik')->nullable();
             $table->string('nobpjs')->nullable();

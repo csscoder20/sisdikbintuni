@@ -24,4 +24,15 @@ class EditSiswa extends EditRecord
             ForceDeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $rombel = $this->record->rombel()->first();
+        if ($rombel) {
+            $data['rombel'] = $rombel->id;
+            $data['tahun_ajaran'] = $rombel->pivot->tahun_ajaran;
+        }
+
+        return $data;
+    }
 }

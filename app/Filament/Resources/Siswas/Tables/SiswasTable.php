@@ -18,6 +18,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Forms\Form;
 
 use Illuminate\Database\Eloquent\Builder;
 
@@ -155,13 +156,34 @@ class SiswasTable
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                     ViewAction::make()
-                        ->modalHeading(fn ($record): string => 'Lihat Data Siswa: ' . ($record->nama ?? '-'))
+                        ->modalHeading(fn($record): string => 'Lihat Data Siswa: ' . ($record->nama ?? '-'))
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
-                        ->icon(Heroicon::OutlinedEye),
+                        ->icon(Heroicon::OutlinedEye)
+                        ->mutateRecordDataUsing(function (array $data, \App\Models\Siswa $record): array {
+                            $rombel = $record->rombel()->first();
+                            if ($rombel) {
+                                $data['rombel'] = $rombel->id;
+                                $data['tahun_ajaran'] = $rombel->pivot->tahun_ajaran;
+                            }
+                            return $data;
+                        }),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare)
-                        ->modalSubmitAction(false)
-                        ->modalCancelAction(false),
+                        ->mutateRecordDataUsing(function (array $data, \App\Models\Siswa $record): array {
+                            $rombel = $record->rombel()->first();
+                            if ($rombel) {
+                                $data['rombel'] = $rombel->id;
+                                $data['tahun_ajaran'] = $rombel->pivot->tahun_ajaran;
+                            }
+                            return $data;
+                        })
+                        ->modalCancelActionLabel(null)
+                        ->modalSubmitActionLabel(null)
+                        ->modalFooterActions([])
+                        ->form(function (): array {
+                            return \App\Filament\Resources\Siswas\Schemas\SiswaForm::configure(\Filament\Schemas\Schema::make())
+                                ->getComponents();
+                        }),
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])

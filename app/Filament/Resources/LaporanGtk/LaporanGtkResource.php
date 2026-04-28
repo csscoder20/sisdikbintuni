@@ -75,6 +75,9 @@ class LaporanGtkResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
             ->whereHas('laporan', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()->id);
             });
@@ -86,6 +89,7 @@ class LaporanGtkResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
     public static function getPages(): array
     {
         return [
