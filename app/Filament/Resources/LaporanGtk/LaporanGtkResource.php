@@ -57,7 +57,16 @@ class LaporanGtkResource extends Resource
                 Section::make('Ringkasan Data')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('gtk.nama')->label('Nama GTK')->prefix(': ')->placeholder('-'),
+                        TextEntry::make('jenis_gtk')
+                            ->label('Jenis GTK')
+                            ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                'kepala_sekolah' => 'Kepala Sekolah',
+                                'tenaga_administrasi' => 'Tenaga Administrasi',
+                                'guru' => 'Guru',
+                                default => $state ?: '-',
+                            })
+                            ->prefix(': ')
+                            ->placeholder('-'),
                         TextEntry::make('periode_laporan')
                             ->label('Periode Laporan')
                             ->state(fn (LaporanGtk $record): ?string => $record->laporan ? "{$record->laporan->bulan}/{$record->laporan->tahun}" : null)

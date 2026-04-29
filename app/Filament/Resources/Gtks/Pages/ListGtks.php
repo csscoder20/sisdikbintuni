@@ -47,6 +47,7 @@ class ListGtks extends ListRecords
                 ->modalHeading('Tambah Data GTK')
                 ->modalSubmitActionLabel('Simpan Data GTK')
                 ->createAnother(false),
+            ValidateChecklistAction::make('validateNominatif', 'nominatif_gtk', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists()),
         ];
     }
 }

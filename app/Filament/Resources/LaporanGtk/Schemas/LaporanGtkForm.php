@@ -14,8 +14,13 @@ class LaporanGtkForm
                 Select::make('laporan_id')
                     ->relationship('laporan', 'id')
                     ->required(),
-                Select::make('gtk_id')
-                    ->relationship('gtk', 'nama')
+                Select::make('jenis_gtk')
+                    ->label('Jenis GTK')
+                    ->options([
+                        'kepala_sekolah' => 'Kepala Sekolah',
+                        'guru' => 'Guru',
+                        'tenaga_administrasi' => 'Tenaga Administrasi',
+                    ])
                     ->required(),
             ]);
     }

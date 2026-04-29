@@ -32,8 +32,14 @@ class LaporanGtkTable
                 TextColumn::make('laporan.bulan')
                     ->label('Bulan')
                     ->sortable(),
-                TextColumn::make('gtk.nama')
-                    ->label('Nama GTK')
+                TextColumn::make('jenis_gtk')
+                    ->label('Jenis GTK')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'kepala_sekolah' => 'Kepala Sekolah',
+                        'tenaga_administrasi' => 'Tenaga Administrasi',
+                        'guru' => 'Guru',
+                        default => $state ?: '-',
+                    })
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('created_at')

@@ -10,7 +10,13 @@ use Illuminate\Support\Str;
 
 class ValidateChecklistAction
 {
-    public static function make(string $name, string $type, ?\Closure $hasDataChecker = null): Action
+    public static function make(
+        string $name,
+        string $type,
+        ?\Closure $hasDataChecker = null,
+        string $missingDataTitle = 'Data Belum Ada',
+        string $missingDataBody = 'Belum ada data pada tabel ini. Silakan tambahkan data terlebih dahulu sebelum melakukan validasi.',
+    ): Action
     {
         $statusResolver = function ($livewire) use ($type) {
             // Prefer page-provided helper when available
@@ -56,11 +62,11 @@ class ValidateChecklistAction
                 $hasData = $hasDataChecker ? app()->call($hasDataChecker) : true;
                 return $hasData ? 'Apakah Anda yakin seluruh data sudah benar? Tindakan ini tidak dapat dibatalkan.' : '';
             })
-            ->action(function (Action $action) use ($type, $hasDataChecker) {
+            ->action(function (Action $action) use ($type, $hasDataChecker, $missingDataTitle, $missingDataBody) {
                 if ($hasDataChecker && !app()->call($hasDataChecker)) {
                     Notification::make()
-                        ->title('Data Belum Ada')
-                        ->body('Belum ada data pada tabel ini. Silakan tambahkan data terlebih dahulu sebelum melakukan validasi.')
+                        ->title($missingDataTitle)
+                        ->body($missingDataBody)
                         ->warning()
                         ->send();
 
@@ -260,6 +266,164 @@ class ValidateChecklistAction
                                 'perempuan' => $cnt['p'],
                                 'total' => $cnt['t'],
                             ]);
+                        }
+                    }
+                }
+
+                if ($type === 'nominatif_gtk') {
+                    $normalizeJenisGtk = function (?string $value): string {
+                        $value = strtolower(trim((string) $value));
+
+                        return match (true) {
+                            str_contains($value, 'kepala') => 'kepala_sekolah',
+                            str_contains($value, 'administrasi') || str_contains($value, 'tenaga') => 'tenaga_administrasi',
+                            default => 'guru',
+                        };
+                    };
+
+                    $gtkGroups = \App\Models\Gtk::where('sekolah_id', $sekolahId)
+                        ->get()
+                        ->groupBy(fn ($gtk) => $normalizeJenisGtk($gtk->jenis_gtk));
+
+                    $periodEndDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth();
+                    $jenisGtkKeys = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
+                    $gtkAgeRanges = [
+                        'umur_20_29' => ['min' => 20, 'max' => 29],
+                        'umur_30_39' => ['min' => 30, 'max' => 39],
+                        'umur_40_49' => ['min' => 40, 'max' => 49],
+                        'umur_50_59' => ['min' => 50, 'max' => 59],
+                        'umur_60_ke_atas' => ['min' => 60, 'max' => null],
+                    ];
+                    $getGtkAgeRangeKey = function (int $age) use ($gtkAgeRanges): ?string {
+                        foreach ($gtkAgeRanges as $key => $range) {
+                            if ($age >= $range['min'] && ($range['max'] === null || $age <= $range['max'])) {
+                                return $key;
+                            }
+                        }
+
+                        return null;
+                    };
+
+                    foreach ($jenisGtkKeys as $jenisGtk) {
+                        $gtks = $gtkGroups->get($jenisGtk, collect());
+
+                        $laporanGtk = \App\Models\LaporanGtk::firstOrCreate([
+                            'laporan_id' => $laporan->id,
+                            'jenis_gtk' => $jenisGtk,
+                        ]);
+
+                        $writeCategory = function (string $jenisKategori, string $subKategori, int $jumlah) use ($laporanGtk): void {
+                            \App\Models\LaporanGtkKategori::updateOrCreate(
+                                [
+                                    'laporan_gtk_id' => $laporanGtk->id,
+                                    'jenis_kategori' => $jenisKategori,
+                                    'sub_kategori' => $subKategori,
+                                ],
+                                ['jumlah' => $jumlah]
+                            );
+                        };
+
+                        $genderSuffix = function ($gtk): string {
+                            return str_starts_with(strtoupper((string) $gtk->jenis_kelamin), 'L') ? 'l' : 'p';
+                        };
+
+                        $agamaCounts = [];
+                        foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $agama) {
+                            $agamaCounts[$agama] = ['l' => 0, 'p' => 0];
+                        }
+
+                        $daerahCounts = [
+                            'papua' => ['l' => 0, 'p' => 0],
+                            'non_papua' => ['l' => 0, 'p' => 0],
+                        ];
+
+                        $ageCounts = [];
+                        foreach (array_keys($gtkAgeRanges) as $ageKey) {
+                            $ageCounts[$ageKey] = ['l' => 0, 'p' => 0];
+                        }
+
+                        $statusCounts = array_fill_keys([
+                            'gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d',
+                            'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d',
+                            'gol_iii_a', 'gol_iii_b', 'gol_iii_c', 'gol_iii_d',
+                            'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e',
+                            'pppk', 'honorer_sekolah',
+                        ], 0);
+
+                        $pendidikanCounts = array_fill_keys(['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'], 0);
+
+                        foreach ($gtks as $gtk) {
+                            $gender = $genderSuffix($gtk);
+
+                            $agama = strtolower((string) $gtk->agama);
+                            $agamaKey = null;
+                            if (str_contains($agama, 'islam')) $agamaKey = 'islam';
+                            elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $agamaKey = 'kristen_protestan';
+                            elseif (str_contains($agama, 'katolik')) $agamaKey = 'katolik';
+                            elseif (str_contains($agama, 'hindu')) $agamaKey = 'hindu';
+                            elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $agamaKey = 'budha';
+                            elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $agamaKey = 'konghucu';
+
+                            if ($agamaKey) {
+                                $agamaCounts[$agamaKey][$gender]++;
+                            }
+
+                            $daerah = strtolower((string) $gtk->daerah_asal);
+                            $daerahKey = (str_contains($daerah, 'papua') && ! str_contains($daerah, 'non')) ? 'papua' : 'non_papua';
+                            $daerahCounts[$daerahKey][$gender]++;
+
+                            if ($gtk->tanggal_lahir) {
+                                $umur = \Carbon\Carbon::parse($gtk->tanggal_lahir)->diffInYears($periodEndDate);
+                                $ageKey = $getGtkAgeRangeKey($umur);
+                                if ($ageKey) {
+                                    $ageCounts[$ageKey][$gender]++;
+                                }
+                            }
+
+                            $status = strtolower((string) $gtk->status_kepegawaian);
+                            $golongan = strtolower(str_replace('/', '_', (string) $gtk->pangkat_gol_terakhir));
+                            if (str_contains($status, 'pns') && array_key_exists('gol_' . $golongan, $statusCounts)) {
+                                $statusCounts['gol_' . $golongan]++;
+                            } elseif (str_contains($status, 'pppk')) {
+                                $statusCounts['pppk']++;
+                            } elseif (str_contains($status, 'honorer') || str_contains($status, 'gty') || str_contains($status, 'pty')) {
+                                $statusCounts['honorer_sekolah']++;
+                            }
+
+                            $pendidikan = strtolower((string) $gtk->pendidikan_terakhir);
+                            if (str_contains($pendidikan, 'slta') || str_contains($pendidikan, 'sma') || str_contains($pendidikan, 'smk')) $pendidikanCounts['slta']++;
+                            elseif ($pendidikan === 'd1') $pendidikanCounts['di']++;
+                            elseif ($pendidikan === 'd2') $pendidikanCounts['dii']++;
+                            elseif ($pendidikan === 'd3' || $pendidikan === 'diii') $pendidikanCounts['diii']++;
+                            elseif (str_contains($pendidikan, 's1') || str_contains($pendidikan, 'd4')) $pendidikanCounts['s1']++;
+                            elseif (str_contains($pendidikan, 's2')) $pendidikanCounts['s2']++;
+                            elseif (str_contains($pendidikan, 's3')) $pendidikanCounts['s3']++;
+                        }
+
+                        foreach ($agamaCounts as $agama => $count) {
+                            $writeCategory('agama', "{$agama}_l", $count['l']);
+                            $writeCategory('agama', "{$agama}_p", $count['p']);
+                            $writeCategory('agama', "{$agama}_jml", $count['l'] + $count['p']);
+                        }
+
+                        foreach ($daerahCounts as $daerah => $count) {
+                            $writeCategory('daerah', "{$daerah}_l", $count['l']);
+                            $writeCategory('daerah', "{$daerah}_p", $count['p']);
+                            $writeCategory('daerah', "{$daerah}_jml", $count['l'] + $count['p']);
+                        }
+
+                        foreach ($ageCounts as $ageKey => $count) {
+                            $writeCategory('umur', "{$ageKey}_l", $count['l']);
+                            $writeCategory('umur', "{$ageKey}_p", $count['p']);
+                            $writeCategory('umur', "{$ageKey}_jml", $count['l'] + $count['p']);
+                        }
+
+                        foreach ($statusCounts as $subKategori => $jumlah) {
+                            $writeCategory('status_kepegawaian', $subKategori, $jumlah);
+                        }
+
+                        foreach ($pendidikanCounts as $subKategori => $jumlah) {
+                            $writeCategory('pendidikan', $subKategori, $jumlah);
                         }
                     }
                 }

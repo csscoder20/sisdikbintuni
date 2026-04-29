@@ -45,14 +45,15 @@ class LaporanKeuanganTable
                 TextColumn::make('updated_at')
                     ->label('Terakhir Diupdate')
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TrashedFilter::make(),
                 //
             ])
 
-             ->recordActions([
+            ->recordActions([
                 ActionGroup::make([
                     RestoreAction::make(),
                     ForceDeleteAction::make(),

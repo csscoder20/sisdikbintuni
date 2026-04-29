@@ -181,6 +181,18 @@
 <x-filament-panels::page>
     <div class="keadaan-gtk-page">
 
+        <div style="margin:0 0 1rem 0; display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+            <label style="font-weight:600; color:var(--ks-text-muted); margin-right:0.5rem;">Periode</label>
+            <select wire:model.live="selectedLaporanId"
+                style="padding:.25rem .5rem; border-radius:.375rem; border:1px solid var(--ks-select-border); background:var(--ks-select-bg); color:var(--ks-text);">
+                <option value="">Sekarang</option>
+                @foreach ($periodes ?? [] as $p)
+                    <option value="{{ $p->id }}">
+                        {{ \Carbon\Carbon::createFromDate($p->tahun, $p->bulan, 1)->translatedFormat('F Y') }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
 
         <div style="display: grid; gap: .2rem;">
@@ -189,9 +201,6 @@
                 <div class="ks-card-header"
                     style="background:linear-gradient(135deg,#e9d5ff33,#d8b4fe11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                     <h2 style="color:#7c3aed; flex-grow: 1;">Jumlah GTK Berdasarkan Agama</h2>
-                    <div wire:key="wrapper-validateGtkAgama">
-                        {{ $this->validateGtkAgamaAction }}
-                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
@@ -331,9 +340,6 @@
                 <div class="ks-card-header"
                     style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                     <h2 style="color:#15803d; flex-grow: 1;">Jumlah GTK Berdasarkan Daerah Asal</h2>
-                    <div wire:key="wrapper-validateGtkDaerah">
-                        {{ $this->validateGtkDaerahAction }}
-                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
@@ -429,9 +435,6 @@
                 <div class="ks-card-header"
                     style="background:linear-gradient(135deg,#faf5ff33,#f3e8ff11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                     <h2 style="color:#7e22ce; flex-grow: 1;">Status Kepegawaian</h2>
-                    <div wire:key="wrapper-validateGtkStatus">
-                        {{ $this->validateGtkStatusAction }}
-                    </div>
                 </div>
                 <div class="ks-table-wrapper" style="overflow-x: auto;">
                     <table class="ks-table" style="min-width: 1200px; border-collapse: collapse;">
@@ -575,33 +578,32 @@
                 <div class="ks-card-header"
                     style="background:linear-gradient(135deg,#fff7ed33,#ffedd511); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                     <h2 style="color:#c2410c; flex-grow: 1;">Jumlah GTK Berdasarkan Umur</h2>
-                    <div wire:key="wrapper-validateGtkUmur">
-                        {{ $this->validateGtkUmurAction }}
-                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">
                         <colgroup>
                             <col class="ksc-no">
                             <col class="ksc-nama">
-                            @for ($i = 0; $i < 33; $i++)
+                            @foreach (($gtkAgeRanges ?? []) as $range)
                                 <col class="ksc-num">
-                            @endfor
+                                <col class="ksc-num">
+                                <col class="ksc-num">
+                            @endforeach
                         </colgroup>
                         <thead>
                             <tr>
                                 <th rowspan="2" style="width: 30px;">NO</th>
                                 <th rowspan="2" class="ks-w-nama">JENIS GTK</th>
-                                @for ($age = 13; $age <= 23; $age++)
-                                    <th colspan="3">{{ $age }} Thn</th>
-                                @endfor
+                                @foreach (($gtkAgeRanges ?? []) as $range)
+                                    <th colspan="3">{{ $range['label'] }}</th>
+                                @endforeach
                             </tr>
                             <tr>
-                                @for ($age = 13; $age <= 23; $age++)
+                                @foreach (($gtkAgeRanges ?? []) as $range)
                                     <th class="ks-w-lp" style="font-size: 0.65rem;">L</th>
                                     <th class="ks-w-lp" style="font-size: 0.65rem;">P</th>
                                     <th class="ks-w-jml ks-col-jml" style="font-size: 0.65rem;">JML</th>
-                                @endfor
+                                @endforeach
                             </tr>
                         </thead>
                         <tbody>
@@ -611,16 +613,15 @@
                                         {{ ($gtkUmur->currentPage() - 1) * $gtkUmur->perPage() + $loop->iteration }}
                                     </td>
                                     <td class="ks-w-nama">{{ $item->jenis_gtk }}</td>
-                                    @for ($age = 13; $age <= 23; $age++)
-                                        @php $prefix = 'umur_' . $age; @endphp
+                                    @foreach (($gtkAgeRanges ?? []) as $prefix => $range)
                                         <td>{{ $item->{$prefix . '_l'} }}</td>
                                         <td>{{ $item->{$prefix . '_p'} }}</td>
                                         <td class="ks-col-jml">{{ $item->{$prefix . '_jml'} }}</td>
-                                    @endfor
+                                    @endforeach
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="35" style="text-align:center;padding:2rem;">Data tidak tersedia
+                                    <td colspan="{{ 2 + (count($gtkAgeRanges ?? []) * 3) }}" style="text-align:center;padding:2rem;">Data tidak tersedia
                                     </td>
                                 </tr>
                             @endforelse
@@ -628,12 +629,11 @@
                         <tfoot>
                             <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
                                 <td colspan="2" style="text-align: center">TOTAL KESELURUHAN</td>
-                                @for ($age = 13; $age <= 23; $age++)
-                                    @php $prefix = 'umur_' . $age; @endphp
+                                @foreach (($gtkAgeRanges ?? []) as $prefix => $range)
                                     <td>{{ $totalGtkUmur[$prefix . '_l'] ?? 0 }}</td>
                                     <td>{{ $totalGtkUmur[$prefix . '_p'] ?? 0 }}</td>
                                     <td class="ks-col-jml">{{ $totalGtkUmur[$prefix . '_jml'] ?? 0 }}</td>
-                                @endfor
+                                @endforeach
                             </tr>
                         </tfoot>
                     </table>
@@ -673,9 +673,6 @@
                 <div class="ks-card-header"
                     style="background:linear-gradient(135deg,#fff1f233,#ffe4e611); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                     <h2 style="color:#be123c; flex-grow: 1;">Jumlah GTK Berdasarkan Pendidikan Terakhir</h2>
-                    <div wire:key="wrapper-validateGtkPendidikan">
-                        {{ $this->validateGtkPendidikanAction }}
-                    </div>
                 </div>
                 <div class="ks-table-wrapper">
                     <table class="ks-table">

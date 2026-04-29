@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('laporan_keuangans', function (Blueprint $table) {
+        Schema::create('laporan_keuangan', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('laporan_id')->constrained('laporan')->cascadeOnDelete();
+            $table->string('sumber_dana');
+            $table->decimal('penerimaan', 15, 2)->default(0);
+            $table->decimal('pengeluaran', 15, 2)->default(0);
+            $table->decimal('saldo', 15, 2)->default(0);
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
@@ -22,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('laporan_keuangans');
+        Schema::dropIfExists('laporan_keuangan');
     }
 };

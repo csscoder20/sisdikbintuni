@@ -12,7 +12,7 @@ class LaporanGtk extends Model
     protected $table = 'laporan_gtk';
     protected $fillable = [
         'laporan_id',
-        'gtk_id',
+        'jenis_gtk',
     ];
 
     public function laporan()

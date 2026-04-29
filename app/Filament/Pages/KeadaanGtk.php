@@ -12,13 +12,18 @@ use BackedEnum;
 use Filament\Support\Icons\Heroicon;
 
 use Livewire\WithPagination;
-use App\Filament\Actions\ValidateChecklistAction;
 use Livewire\Attributes\Url;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Laporan;
 
 class KeadaanGtk extends Page
 {
     use WithPagination;
+
+    #[Url]
+    public $selectedLaporanId;
+
+    protected $listeners = ['laporanUpdated' => 'handleLaporanUpdated'];
 
     public function getLaporanStatus(string $type): bool
     {
@@ -31,31 +36,6 @@ class KeadaanGtk extends Page
 
         $column = "is_{$type}_valid";
         return $laporan ? (bool) $laporan->$column : false;
-    }
-
-    public function validateGtkAgamaAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkAgama', 'gtk_agama', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateGtkDaerahAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkDaerah', 'gtk_daerah', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateGtkStatusAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkStatus', 'gtk_status', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateGtkUmurAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkUmur', 'gtk_umur', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
-    }
-
-    public function validateGtkPendidikanAction(): \Filament\Actions\Action
-    {
-        return \App\Filament\Actions\ValidateChecklistAction::make('validateGtkPendidikan', 'gtk_pendidikan', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists());
     }
 
     protected static ?string $navigationLabel = 'Keadaan GTK';
@@ -115,13 +95,90 @@ class KeadaanGtk extends Page
         );
     }
 
+    protected function getActiveLaporanId(): ?int
+    {
+        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
+
+        if ($this->selectedLaporanId === '') {
+            return null;
+        }
+
+        if ($this->selectedLaporanId) {
+            return (int) $this->selectedLaporanId;
+        }
+
+        return Laporan::where('sekolah_id', $tenantId)
+            ->whereHas('gtk.kategori')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->value('id');
+    }
+
+    protected function getLaporanGtkRows(int $laporanId)
+    {
+        return LaporanGtk::with('kategori')
+            ->where('laporan_id', $laporanId)
+            ->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")
+            ->get();
+    }
+
+    protected function getKategoriJumlah(LaporanGtk $laporanGtk, string $jenisKategori, string $subKategori): int
+    {
+        return (int) ($laporanGtk->kategori
+            ->first(fn ($kategori) => $kategori->jenis_kategori === $jenisKategori && $kategori->sub_kategori === $subKategori)
+            ?->jumlah ?? 0);
+    }
+
+    protected function getJenisGtkLabel(?string $jenisGtk): string
+    {
+        return match ($jenisGtk) {
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'tenaga_administrasi' => 'Tenaga Administrasi',
+            'guru' => 'Guru',
+            default => $jenisGtk ?: 'Lainnya',
+        };
+    }
+
+    protected function getGtkAgeRanges(): array
+    {
+        return [
+            'umur_20_29' => ['label' => '20-29 Thn', 'min' => 20, 'max' => 29],
+            'umur_30_39' => ['label' => '30-39 Thn', 'min' => 30, 'max' => 39],
+            'umur_40_49' => ['label' => '40-49 Thn', 'min' => 40, 'max' => 49],
+            'umur_50_59' => ['label' => '50-59 Thn', 'min' => 50, 'max' => 59],
+            'umur_60_ke_atas' => ['label' => '60+ Thn', 'min' => 60, 'max' => null],
+        ];
+    }
+
+    protected function getAgeRangeKey(int $age): ?string
+    {
+        foreach ($this->getGtkAgeRanges() as $key => $range) {
+            if ($age >= $range['min'] && ($range['max'] === null || $age <= $range['max'])) {
+                return $key;
+            }
+        }
+
+        return null;
+    }
+
+    protected function getCurrentPeriodEndDate(): \Carbon\Carbon
+    {
+        return now()->endOfMonth();
+    }
 
     protected function getViewData(): array
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
+        $laporanId = $this->getActiveLaporanId();
+
+        $periodes = Laporan::where('sekolah_id', $tenantId)
+            ->whereHas('gtk.kategori')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
 
         // 1. GTK by Agama
-        $gtkAgamaFull = $this->getGtkAgamaCollection();
+        $gtkAgamaFull = $this->getGtkAgamaCollection($laporanId);
         $totalGtkAgama = [];
         foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $ag) {
             $totalGtkAgama[$ag . '_l'] = $gtkAgamaFull->sum($ag . '_l');
@@ -130,7 +187,7 @@ class KeadaanGtk extends Page
         }
 
         // 2. GTK by Daerah
-        $gtkDaerahFull = $this->getGtkDaerahCollection();
+        $gtkDaerahFull = $this->getGtkDaerahCollection($laporanId);
         $totalGtkDaerah = [
             'papua_l' => $gtkDaerahFull->sum('papua_l'),
             'papua_p' => $gtkDaerahFull->sum('papua_p'),
@@ -141,7 +198,7 @@ class KeadaanGtk extends Page
         ];
 
         // 3. Status Kepegawaian
-        $gtkStatusFull = $this->getGtkStatusCollection();
+        $gtkStatusFull = $this->getGtkStatusCollection($laporanId);
         $totalGtkStatus = [
             'pppk' => $gtkStatusFull->sum('pppk'),
             'honorer' => $gtkStatusFull->sum('honorer_sekolah'),
@@ -151,17 +208,16 @@ class KeadaanGtk extends Page
         }
 
         // 4. Umur
-        $gtkUmurFull = $this->getGtkUmurCollection();
+        $gtkUmurFull = $this->getGtkUmurCollection($laporanId);
         $totalGtkUmur = [];
-        for ($age = 13; $age <= 23; $age++) {
-            $px = 'umur_' . $age;
+        foreach (array_keys($this->getGtkAgeRanges()) as $px) {
             $totalGtkUmur[$px . '_l'] = $gtkUmurFull->sum($px . '_l');
             $totalGtkUmur[$px . '_p'] = $gtkUmurFull->sum($px . '_p');
             $totalGtkUmur[$px . '_jml'] = $gtkUmurFull->sum($px . '_jml');
         }
 
         // 5. Pendidikan
-        $gtkPendidikanFull = $this->getGtkPendidikanCollection();
+        $gtkPendidikanFull = $this->getGtkPendidikanCollection($laporanId);
         $totalGtkPendidikan = [
             'slta' => $gtkPendidikanFull->sum('slta'),
             'di' => $gtkPendidikanFull->sum('di'),
@@ -173,7 +229,7 @@ class KeadaanGtk extends Page
         ];
 
         // 6. Jenis Kelamin (By Jenis)
-        $gtkByJenisFull = $this->getGtkByJenisCollection();
+        $gtkByJenisFull = $this->getGtkByJenisCollection($laporanId);
         $totalGtkByJenis = [
             'l' => $gtkByJenisFull->sum('laki_laki'),
             'p' => $gtkByJenisFull->sum('perempuan'),
@@ -181,6 +237,8 @@ class KeadaanGtk extends Page
         ];
 
         return array_merge(parent::getViewData(), [
+            'periodes' => $periodes,
+            'selectedLaporanId' => $laporanId,
             'gtkAgama' => $this->paginateCollection($gtkAgamaFull, $this->perPage, $this->pageAgama, ['pageName' => 'pageAgama']),
             'gtkDaerah' => $this->paginateCollection($gtkDaerahFull, $this->perPage, $this->pageDaerah, ['pageName' => 'pageDaerah']),
             'gtkStatusKepegawaian' => $this->paginateCollection($gtkStatusFull, $this->perPage, $this->pageStatus, ['pageName' => 'pageStatus']),
@@ -195,6 +253,8 @@ class KeadaanGtk extends Page
             'totalGtkUmur' => $totalGtkUmur,
             'totalGtkPendidikan' => $totalGtkPendidikan,
             'totalGtkByJenis' => $totalGtkByJenis,
+            'gtkAgeRanges' => $this->getGtkAgeRanges(),
+            'perPage' => $this->perPage,
 
 
         ]);
@@ -213,8 +273,23 @@ class KeadaanGtk extends Page
             ->get();
     }
 
-    protected function getGtkAgamaCollection()
+    protected function getGtkAgamaCollection(?int $laporanId = null)
     {
+        if ($laporanId) {
+            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+                foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $agama) {
+                    $row->{$agama . '_l'} = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_l");
+                    $row->{$agama . '_p'} = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_p");
+                    $storedTotal = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_jml");
+                    $row->{$agama . '_jml'} = $storedTotal ?: $row->{$agama . '_l'} + $row->{$agama . '_p'};
+                }
+
+                return $row;
+            });
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
@@ -239,8 +314,23 @@ class KeadaanGtk extends Page
             )->groupBy('jenis_gtk')->get();
     }
 
-    protected function getGtkDaerahCollection()
+    protected function getGtkDaerahCollection(?int $laporanId = null)
     {
+        if ($laporanId) {
+            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+                foreach (['papua', 'non_papua'] as $daerah) {
+                    $row->{$daerah . '_l'} = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_l");
+                    $row->{$daerah . '_p'} = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_p");
+                    $storedTotal = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_jml");
+                    $row->{$daerah . '_jml'} = $storedTotal ?: $row->{$daerah . '_l'} + $row->{$daerah . '_p'};
+                }
+
+                return $row;
+            });
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
@@ -253,8 +343,26 @@ class KeadaanGtk extends Page
             )->groupBy('jenis_gtk')->get();
     }
 
-    protected function getGtkStatusCollection()
+    protected function getGtkStatusCollection(?int $laporanId = null)
     {
+        if ($laporanId) {
+            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+                foreach ([
+                    'gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d',
+                    'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d',
+                    'gol_iii_a', 'gol_iii_b', 'gol_iii_c', 'gol_iii_d',
+                    'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e',
+                    'pppk', 'honorer_sekolah',
+                ] as $status) {
+                    $row->{$status} = $this->getKategoriJumlah($laporanGtk, 'status_kepegawaian', $status);
+                }
+
+                return $row;
+            });
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
@@ -280,25 +388,41 @@ class KeadaanGtk extends Page
             )->groupBy('jenis_gtk')->get();
     }
 
-    protected function getGtkUmurCollection()
+    protected function getGtkUmurCollection(?int $laporanId = null)
     {
+        if ($laporanId) {
+            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+                foreach (array_keys($this->getGtkAgeRanges()) as $prefix) {
+                    $row->{$prefix . '_l'} = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_l");
+                    $row->{$prefix . '_p'} = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_p");
+                    $storedTotal = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_jml");
+                    $row->{$prefix . '_jml'} = $storedTotal ?: $row->{$prefix . '_l'} + $row->{$prefix . '_p'};
+                }
+
+                return $row;
+            });
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         $gtks = Gtk::where('sekolah_id', $tenantId)->get();
+        $periodEndDate = $this->getCurrentPeriodEndDate();
         $dataByJenis = collect();
         foreach ($gtks as $g) {
             $jenis = $g->jenis_gtk ?? 'Lainnya';
             if (!$dataByJenis->has($jenis)) {
                 $item = (object)['jenis_gtk' => $jenis];
-                for ($age = 13; $age <= 23; $age++) {
-                    $prefix = 'umur_' . $age;
+                foreach (array_keys($this->getGtkAgeRanges()) as $prefix) {
                     $item->{$prefix . '_l'} = 0; $item->{$prefix . '_p'} = 0; $item->{$prefix . '_jml'} = 0;
                 }
                 $dataByJenis->put($jenis, $item);
             }
             if ($g->tanggal_lahir) {
-                $umur = \Carbon\Carbon::parse($g->tanggal_lahir)->age;
-                if ($umur >= 13 && $umur <= 23) {
-                    $prefix = 'umur_' . $umur; $row = $dataByJenis->get($jenis);
+                $umur = \Carbon\Carbon::parse($g->tanggal_lahir)->diffInYears($periodEndDate);
+                $prefix = $this->getAgeRangeKey($umur);
+                if ($prefix) {
+                    $row = $dataByJenis->get($jenis);
                     if (str_contains(strtolower($g->jenis_kelamin), 'l')) $row->{$prefix . '_l'}++;
                     else $row->{$prefix . '_p'}++;
                     $row->{$prefix . '_jml'}++;
@@ -308,8 +432,20 @@ class KeadaanGtk extends Page
         return $dataByJenis->values();
     }
 
-    protected function getGtkPendidikanCollection()
+    protected function getGtkPendidikanCollection(?int $laporanId = null)
     {
+        if ($laporanId) {
+            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+                foreach (['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'] as $pendidikan) {
+                    $row->{$pendidikan} = $this->getKategoriJumlah($laporanGtk, 'pendidikan', $pendidikan);
+                }
+
+                return $row;
+            });
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
@@ -323,8 +459,32 @@ class KeadaanGtk extends Page
             )->groupBy('jenis_gtk')->get();
     }
 
-    protected function getGtkByJenisCollection()
+    protected function getGtkByJenisCollection(?int $laporanId = null)
     {
+        if ($laporanId) {
+            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+                $laki = $this->getKategoriJumlah($laporanGtk, 'agama', 'islam_l')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'kristen_protestan_l')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'katolik_l')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'hindu_l')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'budha_l')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'konghucu_l');
+                $perempuan = $this->getKategoriJumlah($laporanGtk, 'agama', 'islam_p')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'kristen_protestan_p')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'katolik_p')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'hindu_p')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'budha_p')
+                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'konghucu_p');
+
+                return (object) [
+                    'jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk),
+                    'laki_laki' => $laki,
+                    'perempuan' => $perempuan,
+                    'total' => $laki + $perempuan,
+                ];
+            });
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
         return Gtk::where('sekolah_id', $tenantId)
             ->select('jenis_gtk', 
@@ -350,6 +510,33 @@ class KeadaanGtk extends Page
         if (in_array($property, $allowed)) {
             $this->$property = max(1, $page);
         }
+    }
+
+    public function updatedSelectedLaporanId(): void
+    {
+        $this->resetTablePages();
+    }
+
+    public function handleLaporanUpdated($laporanId): void
+    {
+        $this->selectedLaporanId = $laporanId;
+        $this->resetTablePages();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetTablePages();
+    }
+
+    protected function resetTablePages(): void
+    {
+        $this->pageAgama = 1;
+        $this->pageDaerah = 1;
+        $this->pageStatus = 1;
+        $this->pageUmur = 1;
+        $this->pagePendidikan = 1;
+        $this->pageJenis = 1;
+        $this->pagePangkat = 1;
     }
 
     public function getView(): string

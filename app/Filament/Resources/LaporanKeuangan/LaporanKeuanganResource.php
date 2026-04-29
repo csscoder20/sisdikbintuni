@@ -52,10 +52,15 @@ class LaporanKeuanganResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return static::scopeQueryToCurrentTenant(parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ])
+            ]));
+    }
+
+    protected static function scopeQueryToCurrentTenant(Builder $query): Builder
+    {
+        return $query
             ->whereHas('laporan', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()?->id);
             });
@@ -63,10 +68,10 @@ class LaporanKeuanganResource extends Resource
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
-        return parent::getRecordRouteBindingEloquentQuery()
+        return static::scopeQueryToCurrentTenant(parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ]);
+            ]));
     }
 
     public static function getPages(): array

@@ -70,7 +70,11 @@ class GtkResource extends Resource
                 TextEntry::make('pangkat_gol_terakhir')->label('Pangkat/Golongan Terakhir')->prefix(': ')->placeholder('-'),
                 TextEntry::make('tmt_pns')->label('TMT PNS')->date('d/m/Y')->prefix(': ')->placeholder('-'),
                 TextEntry::make('tmt_pangkat_gol_terakhir')->label('TMT Pangkat/Golongan')->date('d/m/Y')->prefix(': ')->placeholder('-'),
-                TextEntry::make('alamat')->label('Alamat')->prefix(': ')->placeholder('-')->columnSpanFull(),
+                TextEntry::make('alamat')
+                    ->label('Alamat')
+                    ->prefix(': ')
+                    ->placeholder('-')
+                    ->inlineLabel(),
                 TextEntry::make('desa')->label('Desa/Kelurahan')->prefix(': ')->placeholder('-'),
                 TextEntry::make('kecamatan')->label('Kecamatan')->prefix(': ')->placeholder('-'),
                 TextEntry::make('kabupaten')->label('Kabupaten')->prefix(': ')->placeholder('-'),
