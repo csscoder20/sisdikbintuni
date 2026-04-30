@@ -76,7 +76,8 @@ class KehadiranGtkResource extends Resource
             ])
             ->whereHas('gtk', function (Builder $query) {
                 $query->where('sekolah_id', filament()->getTenant()->id);
-            });
+            })
+            ->whereNull('laporan_id');
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

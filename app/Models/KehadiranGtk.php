@@ -18,6 +18,14 @@ class KehadiranGtk extends Model
         'izin',
         'alfa',
         'hari_kerja',
+        'hadir',
+        'bulan',
+        'tahun',
+        'data_harian',
+    ];
+
+    protected $casts = [
+        'data_harian' => 'array',
     ];
 
     public function gtk()

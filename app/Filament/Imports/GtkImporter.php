@@ -245,20 +245,22 @@ class GtkImporter extends Importer
         }
 
         // Auto-create placeholder Sebaran Jam Mengajar record so the GTK name appears in the list.
-        Mengajar::query()
-            ->where('gtk_id', $gtk->id)
-            ->whereNull('rombel_id')
-            ->whereNull('mapel_id')
-            ->first()
-            ?? Mengajar::create([
-                'gtk_id' => $gtk->id,
-                'rombel_id' => null,
-                'mapel_id' => null,
-                'jumlah_jam' => null,
-                'semester' => null,
-                'tahun_ajaran' => null,
-                'laporan_id' => null,
-            ]);
+        if (in_array($gtk->jenis_gtk, ['Kepala Sekolah', 'Guru'])) {
+            Mengajar::query()
+                ->where('gtk_id', $gtk->id)
+                ->whereNull('rombel_id')
+                ->whereNull('mapel_id')
+                ->first()
+                ?? Mengajar::create([
+                    'gtk_id' => $gtk->id,
+                    'rombel_id' => null,
+                    'mapel_id' => null,
+                    'jumlah_jam' => null,
+                    'semester' => null,
+                    'tahun_ajaran' => null,
+                    'laporan_id' => null,
+                ]);
+        }
 
         // Auto-create Tugas Tambahan record
         GtkTugasTambahan::query()->firstOrCreate(
@@ -268,6 +270,20 @@ class GtkImporter extends Importer
                 'jumlah_jam' => null,
             ],
         );
+
+        // Auto-create placeholder Kehadiran GTK record
+        \App\Models\KehadiranGtk::query()
+            ->where('gtk_id', $gtk->id)
+            ->whereNull('laporan_id')
+            ->first()
+            ?? \App\Models\KehadiranGtk::create([
+                'gtk_id' => $gtk->id,
+                'laporan_id' => null,
+                'sakit' => 0,
+                'izin' => 0,
+                'alfa' => 0,
+                'hari_kerja' => 0,
+            ]);
     }
 
     public function getValidationMessages(): array

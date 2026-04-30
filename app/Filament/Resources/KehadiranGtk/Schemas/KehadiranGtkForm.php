@@ -15,11 +15,8 @@ class KehadiranGtkForm
                 Select::make('gtk_id')
                     ->label('Nama GTK')
                     ->relationship('gtk', 'nama')
-                    ->required(),
-                Select::make('laporan_id')
-                    ->label('Laporan Bulanan')
-                    ->relationship('laporan', 'id') // Ideally show month/year
-                    ->required(),
+                    ->required()
+                    ->disabled(fn ($context) => $context === 'edit'),
                 TextInput::make('hari_kerja')
                     ->label('Hari Kerja')
                     ->numeric()

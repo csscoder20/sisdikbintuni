@@ -79,7 +79,8 @@ class GtkJamAjarResource extends Resource
             ->whereNull('rombel_id')
             ->whereNull('mapel_id')
             ->whereHas('gtk', function (Builder $query) {
-                $query->where('sekolah_id', filament()->getTenant()->id);
+                $query->where('sekolah_id', filament()->getTenant()->id)
+                    ->whereIn('jenis_gtk', ['Kepala Sekolah', 'Guru']);
             });
     }
 

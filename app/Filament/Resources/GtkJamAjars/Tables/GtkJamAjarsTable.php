@@ -124,6 +124,7 @@ class GtkJamAjarsTable
                                         ])
                                         ->extraAttributes(['class' => 'hidden md:grid px-4']),
                                     Repeater::make('tugas_utama')
+                                        ->key('tugas_utama')
                                         ->live()
                                     ->hiddenLabel()
                                     ->addActionLabel('Tambah Tugas Utama')
@@ -154,7 +155,36 @@ class GtkJamAjarsTable
                                                     Select::make('mapel_id')
                                                         ->hiddenLabel()
                                                         ->placeholder('Pilih Mapel')
-                                                        ->options(fn (callable $get): array => self::getMapelOptions($get('rombel_id')))
+                                                        ->options(function ($component, callable $get): array {
+                                                                $rombelId       = $get('rombel_id');
+                                                                $currentMapelId = $get('mapel_id');
+
+                                                                // Naik ke Repeater lewat pohon komponen
+                                                                try {
+                                                                    $container  = $component->getContainer();
+                                                                    $grid       = $container->getParentComponent();
+                                                                    $itemSchema = $grid->getContainer();
+                                                                    $repeater   = $itemSchema->getParentComponent();
+                                                                    $allItems   = $repeater->getRawState() ?? [];
+                                                                } catch (\Throwable) {
+                                                                    $allItems = [];
+                                                                }
+
+                                                                // Kumpulkan mapel yang sudah dipakai di rombel yang sama (kecuali baris ini sendiri)
+                                                                $usedMapelIds = collect($allItems)
+                                                                    ->filter(fn ($item) =>
+                                                                        filled($item['rombel_id'] ?? null) &&
+                                                                        filled($item['mapel_id'] ?? null) &&
+                                                                        (string) ($item['rombel_id']) === (string) $rombelId
+                                                                    )
+                                                                    ->pluck('mapel_id')
+                                                                    ->filter()
+                                                                    ->reject(fn ($id) => (string) $id === (string) $currentMapelId)
+                                                                    ->values()
+                                                                    ->all();
+
+                                                                return self::getMapelOptions($rombelId, $usedMapelIds);
+                                                            })
                                                         ->searchable()
                                                         ->live()
                                                         ->required()
@@ -186,8 +216,18 @@ class GtkJamAjarsTable
                                                             ->button()
                                                             ->size('sm')
                                                             ->action(function ($component) {
-                                                                $container = $component->getComponent()->getContainer();
-                                                                $container->getParentComponent()->removeItem($container->getUuid());
+                                                                $container = $component->getContainer();
+                                                                $grid = $container->getParentComponent();
+                                                                $itemSchema = $grid->getContainer();
+                                                                $repeater = $itemSchema->getParentComponent();
+                                                                $key = $itemSchema->getKey(isAbsolute: false);
+
+                                                                $items = $repeater->getRawState();
+                                                                unset($items[$key]);
+
+                                                                $repeater->rawState($items);
+                                                                $repeater->callAfterStateUpdated();
+                                                                $repeater->partiallyRender();
                                                             })
                                                     ])
                                                     ->verticalAlignment('center')
@@ -285,7 +325,110 @@ class GtkJamAjarsTable
                     ForceDeleteAction::make(),
                     ViewAction::make()
                         ->modalWidth(Width::FiveExtraLarge)
-                        ->icon(Heroicon::OutlinedEye),
+                        ->icon(Heroicon::OutlinedEye)
+                        ->form([
+                            Placeholder::make('nama_gtk')
+                                ->hiddenLabel()
+                                ->content(fn (Mengajar $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('Nama GTK : <strong>' . e($record->gtk?->nama ?? '-') . '</strong>')),
+                            Placeholder::make('pivot_table')
+                                ->hiddenLabel()
+                                ->content(function (Mengajar $record): \Illuminate\Support\HtmlString {
+                                    $gtk = $record->gtk;
+                                    if (! $gtk) return new \Illuminate\Support\HtmlString('Data GTK tidak ditemukan.');
+
+                                    $entries = $record->teachingEntries()
+                                        ->with('mapel', 'rombel')
+                                        ->get();
+
+                                    $usedRombelIds = $entries->pluck('rombel_id')->unique();
+
+                                    $rombols = Rombel::query()
+                                        ->whereIn('id', $usedRombelIds)
+                                        ->orderBy('tingkat')
+                                        ->orderBy('nama')
+                                        ->get();
+
+                                    $tugasTambahan = $gtk->tugasTambahan;
+
+                                    // Group entries by Mapel
+                                    $mapels = $entries->groupBy('mapel_id');
+
+                                    $styleTable = 'width: 100%; border-collapse: collapse; border: 1px solid #ccc; font-size: 0.875rem;';
+                                    $styleTh = 'border: 1px solid #ccc; padding: 8px; background-color: #f9fafb; font-weight: bold; text-align: center;';
+                                    $styleTd = 'border: 1px solid #ccc; padding: 8px;';
+                                    $styleTdCenter = 'border: 1px solid #ccc; padding: 8px; text-align: center;';
+
+                                    $html = '<div style="overflow-x: auto; margin-top: 0;">';
+                                    $html .= '<table style="' . $styleTable . '">';
+                                    
+                                    // Header
+                                    $html .= '<thead>';
+                                    $html .= '<tr>';
+                                    $html .= '<th rowspan="2" style="' . $styleTh . ' width: 50px;">NO</th>';
+                                    $html .= '<th rowspan="2" style="' . $styleTh . ' text-align: left;">Nama Mapel</th>';
+                                    $html .= '<th colspan="' . $rombols->count() . '" style="' . $styleTh . '">Kelas</th>';
+                                    $html .= '<th rowspan="2" style="' . $styleTh . ' width: 80px;">Total</th>';
+                                    $html .= '</tr><tr>';
+                                    foreach ($rombols as $rombel) {
+                                        $rombelName = str_replace('Kelas ', '', $rombel->nama);
+                                        $html .= '<th style="' . $styleTh . ' min-width: 100px;">' . e($rombelName) . '</th>';
+                                    }
+                                    $html .= '</tr></thead>';
+
+                                    $html .= '<tbody>';
+                                    
+                                    $grandTotal = 0;
+                                    $no = 1;
+
+                                    // Mapel Rows
+                                    foreach ($mapels as $mapelId => $mapelEntries) {
+                                        $mapelName = $mapelEntries->first()?->mapel?->nama_mapel ?? '-';
+                                        if ($tingkat = $mapelEntries->first()?->mapel?->tingkat) {
+                                            $mapelName .= " (Kls {$tingkat})";
+                                        }
+
+                                        $html .= '<tr>';
+                                        $html .= '<td style="' . $styleTdCenter . '">' . $no++ . '</td>';
+                                        $html .= '<td style="' . $styleTd . '">' . e($mapelName) . '</td>';
+                                        
+                                        $rowTotal = 0;
+                                        foreach ($rombols as $rombel) {
+                                            $entry = $mapelEntries->firstWhere('rombel_id', $rombel->id);
+                                            $val = $entry ? (int)$entry->jumlah_jam : 0;
+                                            $html .= '<td style="' . $styleTdCenter . '">' . ($val ?: '') . '</td>';
+                                            $rowTotal += $val;
+                                        }
+                                        $html .= '<td style="' . $styleTdCenter . ' font-weight: bold; background-color: #f9fafb;">' . $rowTotal . '</td>';
+                                        $grandTotal += $rowTotal;
+                                        $html .= '</tr>';
+                                    }
+
+                                    // Tugas Tambahan Row
+                                    if ($tugasTambahan && filled($tugasTambahan->tugas_tambahan)) {
+                                        $html .= '<tr>';
+                                        $html .= '<td style="' . $styleTdCenter . '">' . $no++ . '</td>';
+                                        $html .= '<td style="' . $styleTd . '">' . e($tugasTambahan->tugas_tambahan) . ' (tugas tambahan)</td>';
+                                        
+                                        $valTambahan = (int)($tugasTambahan->jumlah_jam ?? 0);
+                                        foreach ($rombols as $rombel) {
+                                            $html .= '<td style="' . $styleTdCenter . '"></td>';
+                                        }
+                                        $html .= '<td style="' . $styleTdCenter . ' font-weight: bold; background-color: #f9fafb;">' . $valTambahan . '</td>';
+                                        $grandTotal += $valTambahan;
+                                        $html .= '</tr>';
+                                    }
+
+                                    // Grand Total Footer
+                                    $html .= '<tr style="font-weight: bold; background-color: #f3f4f6; color: #2563eb;">';
+                                    $html .= '<td colspan="' . ($rombols->count() + 2) . '" style="' . $styleTd . ' text-align: center;">Grand Total</td>';
+                                    $html .= '<td style="' . $styleTdCenter . '">' . $grandTotal . '</td>';
+                                    $html .= '</tr>';
+
+                                    $html .= '</tbody></table></div>';
+
+                                    return new \Illuminate\Support\HtmlString($html);
+                                }),
+                        ]),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),
                     DeleteAction::make()
@@ -313,7 +456,7 @@ class GtkJamAjarsTable
             ->all();
     }
 
-    protected static function getMapelOptions($rombelId = null): array
+    protected static function getMapelOptions($rombelId = null, array $excludeMapelIds = []): array
     {
         $jenjang = filament()->getTenant()?->jenjang;
         $tingkat = null;
@@ -325,6 +468,7 @@ class GtkJamAjarsTable
         return Mapel::query()
             ->when($jenjang, fn ($query) => $query->where('jenjang', $jenjang))
             ->when($tingkat, fn ($query) => $query->where('tingkat', $tingkat))
+            ->when(filled($excludeMapelIds), fn ($query) => $query->whereNotIn('id', $excludeMapelIds))
             ->orderBy('nama_mapel')
             ->orderBy('tingkat')
             ->get()
