@@ -45,8 +45,8 @@ class UserSeeder extends Seeder
 
         // 🔹 OPERATOR 2
         $op2 = User::create([
-            'name' => 'Operator Sekolah 2',
-            'email' => 'operator2@sisdik.com',
+            'name' => 'Operator SMK Negeri 1 Bintuni',
+            'email' => 'smknegeri1bintuni@gmail.com',
             'password' => Hash::make('password'),
             'status' => 'active',
             'email_verified_at' => now(),
@@ -65,15 +65,6 @@ class UserSeeder extends Seeder
 
         $op3->assignRole('operator');
 
-         // 🔹 OPERATOR SMK 1 BINTUNI ini coba saja ubah utk tes script auto deploy
-        $op4 = User::create([
-            'name' => 'Operator SMK Negeri 1 Bintuni',
-            'email' => 'smknegeri1bintuni@gmail.com',
-            'password' => Hash::make('password'),
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
-
-        $op4->assignRole('operator');
+         
     }
 }
