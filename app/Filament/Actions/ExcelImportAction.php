@@ -52,6 +52,80 @@ class ExcelImportAction extends Action
             });
     }
 
+    protected function mergeSheets(Collection $sheets): Collection
+    {
+        $primarySheet = $sheets->shift();
+        
+        // Find header row in primary sheet (could be index 0 or 1)
+        $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-0]/', '', (string)$s));
+        $primaryHeaderIndex = 0;
+        $keyIndex = false;
+        
+        foreach ($primarySheet->take(2) as $idx => $row) {
+            $foundKey = $row->search(fn($h) => in_array($normalize($h), ['no', 'nourut', 'nik', 'nip']));
+            if ($foundKey !== false) {
+                $primaryHeaderIndex = $idx;
+                $keyIndex = $foundKey;
+                break;
+            }
+        }
+
+        if ($keyIndex === false) {
+            return $primarySheet;
+        }
+
+        $primaryHeaders = $primarySheet[$primaryHeaderIndex];
+        $mergedData = [];
+        $headerMap = $primaryHeaders->toArray();
+        
+        foreach ($primarySheet->slice($primaryHeaderIndex + 1) as $row) {
+            $key = (string) ($row[$keyIndex] ?? '');
+            if ($key !== '') {
+                $mergedData[$key] = $row->toArray();
+            }
+        }
+
+        foreach ($sheets as $sheet) {
+            // Find header row in this sheet
+            $headerIndex = 0;
+            $sheetKeyIndex = false;
+            foreach ($sheet->take(2) as $idx => $row) {
+                $foundKey = $row->search(fn($h) => in_array($normalize($h), ['no', 'nourut', 'nik', 'nip']));
+                if ($foundKey !== false) {
+                    $headerIndex = $idx;
+                    $sheetKeyIndex = $foundKey;
+                    break;
+                }
+            }
+            
+            if ($sheetKeyIndex === false) continue;
+
+            $headers = $sheet[$headerIndex];
+            $newColumns = [];
+            foreach ($headers as $idx => $header) {
+                if ($idx === $sheetKeyIndex) continue;
+                // If header already exists in primary sheet, we don't need to add it as a "new column" 
+                // but we might want to update the data if it's different.
+                // For simplicity, we only add columns that were NOT in the primary sheet.
+                if (!in_array($header, $headerMap)) {
+                    $newColumns[$idx] = count($headerMap);
+                    $headerMap[] = $header;
+                }
+            }
+
+            foreach ($sheet->slice($headerIndex + 1) as $row) {
+                $key = (string) ($row[$sheetKeyIndex] ?? '');
+                if (isset($mergedData[$key])) {
+                    foreach ($newColumns as $oldIdx => $newIdx) {
+                        $mergedData[$key][$newIdx] = $row[$oldIdx] ?? null;
+                    }
+                }
+            }
+        }
+
+        return collect([collect($headerMap)])->concat(collect(array_values($mergedData))->map(fn($r) => collect($r)));
+    }
+
     public function importer(string $importerClass): static
     {
         $this->importerClass = $importerClass;
@@ -66,15 +140,32 @@ class ExcelImportAction extends Action
 
     protected function processImport(string $filePath): void
     {
-        $rows = Excel::toCollection(new class implements \Maatwebsite\Excel\Concerns\ToCollection {
+        $sheets = Excel::toCollection(new class implements \Maatwebsite\Excel\Concerns\ToCollection {
             public function collection(Collection $rows) {}
-        }, $filePath)->first();
+        }, $filePath);
 
-        if (!$rows || $rows->isEmpty()) {
+        if ($sheets->isEmpty()) {
             throw new \Exception('Berkas Excel kosong atau tidak terbaca.');
         }
 
-        $headerRow = $rows->shift(); // Initial assumption: Row 1 is header
+        // If multiple sheets are present, merge them by NIK/NIP
+        if ($sheets->count() > 1) {
+            $rows = $this->mergeSheets($sheets);
+        } else {
+            $rows = $sheets->first();
+        }
+
+        if (!$rows || $rows->isEmpty()) {
+            throw new \Exception('Tidak ada data yang terbaca dari berkas Excel.');
+        }
+
+        $headerRow = $rows->shift(); // Row 1: Header
+        
+        $isGtkImport = str_contains($this->importerClass, 'GtkImporter');
+        if ($isGtkImport && $rows->isNotEmpty()) {
+            $rows->shift();
+        }
+
         $columns = $this->importerClass::getColumns();
         
         // Try to map headers from Row 1
@@ -170,18 +261,21 @@ class ExcelImportAction extends Action
                 $errors = collect($e->errors())->flatten()->toArray();
                 $errorMsg = implode(', ', $errors);
                 
+                $rowOffset = str_contains($this->importerClass, 'GtkImporter') ? 3 : 2;
+                
                 if (count($failureDetails) < 10) {
-                    $failureDetails[] = "Baris " . ($rowIndex + 2) . ": " . $errorMsg;
+                    $failureDetails[] = "Baris " . ($rowIndex + $rowOffset) . ": " . $errorMsg;
                 }
                 
-                \Log::error("Validation error at row " . ($rowIndex + 2) . ": " . $errorMsg);
+                \Log::error("Validation error at row " . ($rowIndex + $rowOffset) . ": " . $errorMsg);
             } catch (\Exception $e) {
                 $errorCount++;
                 $msg = $e->getMessage();
+                $rowOffset = str_contains($this->importerClass, 'GtkImporter') ? 3 : 2;
                 if (count($failureDetails) < 10) {
-                    $failureDetails[] = "Baris " . ($rowIndex + 2) . ": " . $msg;
+                    $failureDetails[] = "Baris " . ($rowIndex + $rowOffset) . ": " . $msg;
                 }
-                \Log::error("Import error at row " . ($rowIndex + 2) . ": " . $msg);
+                \Log::error("Import error at row " . ($rowIndex + $rowOffset) . ": " . $msg);
             }
         }
 

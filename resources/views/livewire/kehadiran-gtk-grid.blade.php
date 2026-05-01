@@ -127,9 +127,10 @@
             border: none;
             text-align: center;
             background: transparent;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             outline: none;
             cursor: pointer;
+            text-transform: uppercase;
         }
         .att-input:focus {
             background: #dbeafe;
@@ -153,6 +154,7 @@
             font-size: 0.75rem;
             color: #6b7280;
             align-items: center;
+            flex-wrap: wrap;
         }
         .legend-item {
             display: flex;
@@ -160,17 +162,53 @@
             gap: 6px;
         }
         .badge {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 4px;
             font-weight: 700;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
         }
-        .badge-present { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-        .badge-absent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-h { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-i { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-s { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-a { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        /* Icon styling for inputs */
+        .att-input {
+            transition: all 0.2s;
+        }
+        
+        .att-input:not(:focus) {
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 20px;
+        }
+
+        .att-input.status-h:not(:focus) {
+            color: transparent;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%2322c55e'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E");
+        }
+        .att-input.status-i:not(:focus) {
+            color: transparent;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75' /%3E%3C/svg%3E");
+        }
+        .att-input.status-s:not(:focus) {
+            color: transparent;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%23f59e0b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E");
+        }
+        .att-input.status-a:not(:focus) {
+            color: transparent;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='%23ef4444'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E");
+        }
+
+        .color-h { color: #16a34a; font-weight: 800; }
+        .color-i { color: #2563eb; font-weight: 800; }
+        .color-s { color: #d97706; font-weight: 800; }
+        .color-a { color: #dc2626; font-weight: 800; }
+
         .icon-placeholder {
             width: 32px;
             height: 32px;
@@ -236,18 +274,25 @@
                         @php $rowTotal = 0; @endphp
                         @foreach($days as $d)
                             @php 
-                                $val = $attendanceData[$gtk->id][$d['day']] ?? null; 
-                                if ($val === 1) $rowTotal++;
+                                $val = $attendanceData[$gtk->id][$d['day']] ?? ''; 
+                                if ($val === 'H') $rowTotal++;
+                                
+                                $statusClass = match($val) {
+                                    'H' => 'status-h color-h',
+                                    'I' => 'status-i color-i',
+                                    'S' => 'status-s color-s',
+                                    'A' => 'status-a color-a',
+                                    default => ''
+                                };
                             @endphp
                             <td class="day-header {{ $d['is_sunday'] ? 'sunday-cell' : '' }}">
                                 <input 
                                     type="text" 
-                                    value="{{ $val === 1 ? '1' : ($val === 0 ? '0' : '') }}"
-                                    class="att-input"
-                                    style="{{ $val === 1 ? 'color: #2563eb; font-weight: 800;' : ($val === 0 ? 'color: #dc2626; font-weight: 800;' : '') }}"
+                                    value="{{ $val }}"
+                                    class="att-input {{ $statusClass }}"
                                     maxlength="1"
                                     @if($d['is_sunday']) disabled placeholder=" " @endif
-                                    oninput="this.value = this.value.replace(/[^0-1]/g, '')"
+                                    oninput="this.value = this.value.toUpperCase().replace(/[^HISA]/g, '')"
                                     onchange="@this.updateAttendance({{ $gtk->id }}, {{ $d['day'] }}, this.value)"
                                 >
                             </td>
@@ -263,16 +308,40 @@
 
     <div class="legend">
         <div class="legend-item">
-            <div class="badge badge-present">1</div>
+            <div class="badge badge-h">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
             <span>Hadir (H)</span>
         </div>
         <div class="legend-item">
-            <div class="badge badge-absent">0</div>
-            <span>Tidak Hadir (A)</span>
+            <div class="badge badge-i">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+            </div>
+            <span>Izin (I)</span>
+        </div>
+        <div class="legend-item">
+            <div class="badge badge-s">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <span>Sakit (S)</span>
+        </div>
+        <div class="legend-item">
+            <div class="badge badge-a">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <span>Alpa (A)</span>
         </div>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span style="font-style: italic;">Data tersimpan otomatis saat Anda mengisi angka.</span>
+            <span style="font-style: italic;">Data tersimpan otomatis saat Anda mengisi kode kehadiran.</span>
         </div>
     </div>
 </div>

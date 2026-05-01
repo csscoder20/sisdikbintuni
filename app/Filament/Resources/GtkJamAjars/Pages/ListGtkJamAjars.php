@@ -28,11 +28,6 @@ class ListGtkJamAjars extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Tambah Sebaran Jam Ajar')
-                ->modalHeading('Tambah Data Sebaran Jam Ajar')
-                ->modalSubmitActionLabel('Simpan Sebaran Jam Ajar')
-                ->createAnother(false),
             ValidateChecklistAction::make(
                 'validateSebaranJam',
                 'sebaran_jam',

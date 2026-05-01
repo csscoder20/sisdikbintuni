@@ -27,6 +27,7 @@ class GtksTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->defaultSort('id', 'asc')
             ->columns([
                 TextColumn::make('nama')
                     ->label('Nama GTK')

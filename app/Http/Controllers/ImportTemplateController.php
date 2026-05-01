@@ -28,60 +28,111 @@ class ImportTemplateController extends Controller
         $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
-        $sheet = $spreadsheet->getActiveSheet();
-
         // Get columns from importer
         $columns = $importerClass::getColumns();
         
-        if ($importerName === 'gtk') {
-            // Group indices based on the expanded GtkImporter
-            // Identity: 0-20
-            // Education: 21-46
-            // Finance: 47-49
-            
-            // Row 1: Groups
-            $sheet->setCellValue('A1', 'IDENTITAS GTK');
-            $sheet->mergeCells('A1:U1');
-            
-            $sheet->setCellValue('V1', 'PENDIDIKAN GTK');
-            $sheet->mergeCells('V1:AU1');
-            
-            $sheet->setCellValue('AV1', 'REKENING DAN NPWP GTK');
-            $sheet->mergeCells('AV1:AX1');
+        if (\Illuminate\Support\Str::contains(strtolower($importerName), 'gtk')) {
+            // Internal No column as primary joining key
+            $noColumn = \Filament\Actions\Imports\ImportColumn::make('no')
+                ->label('No')
+                ->example('1');
 
-            // Styling Row 1
-            $sheet->getStyle('A1:U1')->applyFromArray([
-                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '3C8DBC']], // Blue
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            ]);
-            $sheet->getStyle('V1:AU1')->applyFromArray([
-                'font' => ['bold' => true, 'color' => ['rgb' => '000000']],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFCE44']], // Yellow
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            ]);
-            $sheet->getStyle('AV1:AX1')->applyFromArray([
-                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '28A745']], // Green
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            ]);
+            $instructions = [
+                'no' => 'cukup jelas',
+                'nama' => 'diisi nama lengkap GTK, tanpa gelar depan dan belakang',
+                'nik' => 'cukup jelas',
+                'nip' => 'cukup jelas',
+                'nokarpeg' => 'cukup jelas',
+                'nuptk' => 'cukup jelas',
+                'jenis_kelamin' => 'diisi L atau P',
+                'tempat_lahir' => 'cukup jelas',
+                'tanggal_lahir' => 'diisi dengan format dd/mm/yyyy, contoh 2 maret 1990, maka ditulis 02/03/1990',
+                'alamat' => 'nama jalan, nomor rumah, RT, RW',
+                'desa' => 'nama desa/kampung/kelurahan',
+                'kecamatan' => 'nama distrik/kecamatan',
+                'kabupaten' => 'cukup jelas',
+                'provinsi' => 'cukup jelas',
+                'agama' => 'pilihan: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu',
+                'pendidikan_terakhir' => 'diisi dengan strata pendidikan dan jurusannya, contoh: S1 Pendidikan Bahasa Indonesia, D3 Teknik Informatika',
+                'daerah_asal' => 'pilihan: Papua / Non Papua',
+                'jenis_gtk' => 'diisi dengan pilihan: Kepala Sekolah / Guru / Tenaga Administrasi',
+                'status_kepegawaian' => 'diisi dengan CPNS, PNS, PPPK, GTY/PTY, Kontrak, Honorer Sekolah',
+                'tmt_pns' => 'cukup jelas',
+                'pangkat_gol_terakhir' => 'diisi dengan pangkat golongan dan ruang. Contoh: III/a',
+                'tmt_pangkat_gol_terakhir' => 'cukup jelas',
+            ];
 
-            $headerRow = 2;
-            $exampleRow = 3;
+            // Sheet 1: IDENTITAS
+            $sheet1 = $spreadsheet->getActiveSheet();
+            $sheet1->setTitle('IDENTITAS');
+            $identityColumns = array_merge([$noColumn], array_slice($columns, 0, 21));
+            $this->setupSheet($sheet1, null, $identityColumns, '3C8DBC', 'FFFFFF', $instructions);
+
+            // Sheet 2: PENDIDIKAN
+            $sheet2 = $spreadsheet->createSheet();
+            $sheet2->setTitle('PENDIDIKAN');
+            $educationColumns = array_merge([$noColumn], array_slice($columns, 21, 26));
+            $this->setupSheet($sheet2, null, $educationColumns, 'FFCE44', '000000', [], 'cukup jelas, kosongkan jika tidak ada');
+
+            // Sheet 3: REKENING
+            $sheet3 = $spreadsheet->createSheet();
+            $sheet3->setTitle('REKENING');
+            $financeColumns = array_merge([$noColumn], array_slice($columns, 47, 3));
+            $this->setupSheet($sheet3, null, $financeColumns, '28A745', 'FFFFFF', [], 'cukup jelas');
+
+            $spreadsheet->setActiveSheetIndex(0);
         } else {
-            $headerRow = 1;
-            $exampleRow = 2;
+            $sheet = $spreadsheet->getActiveSheet();
+            $this->setupSheet($sheet, null, $columns);
         }
 
-        // Header and Example Rows
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'import_template');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ])->deleteFileAfterSend(true);
+    }
+
+    private function setupSheet($sheet, $groupTitle, $columns, $color = '3C8DBC', $fontColor = 'FFFFFF', $instructions = [], $defaultInstruction = '')
+    {
+        $headerRow = 1;
+        $instructionRow = 2;
+        $exampleRow = 3;
+
+        if ($groupTitle) {
+            $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($columns));
+            $sheet->setCellValue('A1', $groupTitle);
+            $sheet->mergeCells("A1:{$lastCol}1");
+            $sheet->getStyle("A1:{$lastCol}1")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => $fontColor]],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $color]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ]);
+            $headerRow = 2;
+            $instructionRow = 3;
+            $exampleRow = 4;
+        }
+
         $colIndex = 1;
         foreach ($columns as $column) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
             
-            // Set Header
-            $sheet->setCellValue($colLetter . $headerRow, $column->getLabel() ?? Str::title($column->getName()));
+            // Header
+            $label = $column->getLabel() ?? Str::title($column->getName());
+            $sheet->setCellValue($colLetter . $headerRow, Str::upper($label));
             
-            // Set Example as EXPLICIT STRING to prevent scientific notation
+            // Instruction
+            $instruction = $instructions[$column->getName()] ?? $defaultInstruction;
+            $sheet->setCellValue($colLetter . $instructionRow, $instruction);
+            $sheet->getStyle($colLetter . $instructionRow)->applyFromArray([
+                'font' => ['italic' => true, 'color' => ['rgb' => 'FF0000'], 'size' => 9],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ]);
+
+            // Example
             $examples = $column->getExamples();
             $exampleVal = $examples[0] ?? '';
             $sheet->setCellValueExplicit(
@@ -90,7 +141,7 @@ class ImportTemplateController extends Controller
                 \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
             );
 
-            // Force the entire column (up to 1000 rows) to Text format and Center Alignment
+            // Styling
             $sheet->getStyle($colLetter . '1:' . $colLetter . '1000')->applyFromArray([
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -101,26 +152,22 @@ class ImportTemplateController extends Controller
                 ->getNumberFormat()
                 ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
 
-            // Auto-size columns
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
-            
             $colIndex++;
         }
 
-        // Styling Header Row
-        $sheet->getStyle('A' . $headerRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex-1) . $headerRow)->applyFromArray([
-            'font' => ['bold' => true],
+        // Header Styling
+        $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex-1);
+        $sheet->getStyle('A' . $headerRow . ':' . $lastColLetter . $headerRow)->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => $fontColor]],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $color]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
         ]);
 
-        $writer = new Xlsx($spreadsheet);
-        $tempFile = tempnam(sys_get_temp_dir(), 'import_template');
-        $writer->save($tempFile);
-
-        return response()->download($tempFile, $fileName, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Cache-Control' => 'max-age=0',
-        ])->deleteFileAfterSend(true);
+        // Instruction Styling Borders
+        $sheet->getStyle('A' . $instructionRow . ':' . $lastColLetter . $instructionRow)->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+        ]);
     }
 }

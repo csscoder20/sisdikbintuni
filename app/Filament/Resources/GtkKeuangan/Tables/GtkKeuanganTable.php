@@ -27,6 +27,7 @@ class GtkKeuanganTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->defaultSort('id', 'asc')
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')

@@ -25,11 +25,16 @@ class KehadiranGtkTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->defaultSort('id', 'asc')
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('hadir')
+                    ->label('Hadir')
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('hari_kerja')
                     ->label('Hari Kerja')
                     ->sortable()

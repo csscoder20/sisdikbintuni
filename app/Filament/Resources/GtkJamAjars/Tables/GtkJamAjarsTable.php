@@ -42,6 +42,7 @@ class GtkJamAjarsTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->defaultSort('id', 'asc')
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('GTK')
@@ -429,10 +430,10 @@ class GtkJamAjarsTable
                                     return new \Illuminate\Support\HtmlString($html);
                                 }),
                         ]),
-                    EditAction::make()
-                        ->icon(Heroicon::OutlinedPencilSquare),
-                    DeleteAction::make()
-                        ->icon(Heroicon::OutlinedTrash),
+                    // EditAction::make()
+                    //     ->icon(Heroicon::OutlinedPencilSquare),
+                    // DeleteAction::make()
+                    //     ->icon(Heroicon::OutlinedTrash),
                 ])
                     ->icon('heroicon-m-ellipsis-vertical')
                     ->color('primary'),

@@ -3,211 +3,257 @@
 namespace App\Filament\Imports;
 
 use App\Models\Gtk;
+use App\Models\GtkPendidikan;
+use App\Models\GtkKeuangan;
 use App\Models\Mengajar;
-use App\Models\GtkTugasTambahan;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Number;
+use Illuminate\Support\Collection;
 
 class GtkImporter extends Importer
 {
     protected static ?string $model = Gtk::class;
 
+    public static function parseIndoDate($state): ?string
+    {
+        if (blank($state)) return null;
+        if ($state instanceof \DateTimeInterface) {
+            return $state->format('Y-m-d');
+        }
+
+        try {
+            $stateString = (string) $state;
+            
+            // Map Indonesian months
+            $months = [
+                'januari' => 'January', 'februari' => 'February', 'maret' => 'March',
+                'april' => 'April', 'mei' => 'May', 'juni' => 'June',
+                'juli' => 'July', 'agustus' => 'August', 'september' => 'September',
+                'oktober' => 'October', 'november' => 'November', 'desember' => 'December'
+            ];
+
+            $normalizedState = strtolower($stateString);
+            foreach ($months as $indo => $eng) {
+                if (str_contains($normalizedState, $indo)) {
+                    $normalizedState = str_replace($indo, $eng, $normalizedState);
+                    break;
+                }
+            }
+
+            // Try standard numeric formats like dd/mm/yyyy or dd-mm-yyyy
+            if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/', $normalizedState, $matches)) {
+                $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+                $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+                $year = $matches[3];
+                if (strlen($year) === 2) $year = '20' . $year;
+                return "{$year}-{$month}-{$day}";
+            }
+
+            return \Illuminate\Support\Carbon::parse($normalizedState)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null; 
+        }
+    }
+
     public static function getColumns(): array
     {
         return [
             ImportColumn::make('nama')
+                ->label('NAMA LENGKAP')
                 ->requiredMapping()
                 ->rules(['required', 'string', 'max:255'])
                 ->example('Siti Maimunah, S.Pd'),
             ImportColumn::make('nik')
-                ->rules(['string', 'max:255', 'unique:gtk,nik'])
+                ->label('NIK')
+                ->rules(['nullable', 'max:255', 'unique:gtk,nik'])
                 ->example('3201010101010005'),
             ImportColumn::make('nip')
-                ->rules(['string', 'max:255', 'unique:gtk,nip'])
+                ->label('NIP')
+                ->rules(['nullable', 'max:255', 'unique:gtk,nip'])
                 ->example('198501012010012001'),
             ImportColumn::make('nokarpeg')
-                ->rules(['string', 'max:255'])
+                ->label('NO. KARPEG')
+                ->rules(['nullable', 'max:255'])
                 ->example('K012345'),
             ImportColumn::make('nuptk')
-                ->rules(['string', 'max:255', 'unique:gtk,nuptk'])
+                ->rules(['nullable', 'max:255'])
                 ->example('1234567890123456'),
             ImportColumn::make('jenis_kelamin')
-                ->rules(['string', 'max:255'])
-                ->example('Perempuan')
-                ->castStateUsing(function (string $state): ?string {
+                ->label('JENIS KELAMIN')
+                ->rules(['nullable', 'max:255'])
+                ->example('Laki-laki')
+                ->castStateUsing(function (?string $state): ?string {
+                    if (blank($state)) return null;
                     $state = strtolower($state);
                     if ($state === 'l' || str_contains($state, 'laki')) return 'Laki-laki';
                     if ($state === 'p' || str_contains($state, 'perempuan')) return 'Perempuan';
                     return null;
                 }),
             ImportColumn::make('tempat_lahir')
-                ->rules(['string', 'max:255'])
+                ->label('TEMPAT LAHIR')
+                ->rules(['nullable', 'max:255'])
                 ->example('Sorong'),
             ImportColumn::make('tanggal_lahir')
-                ->rules(['date'])
+                ->label('TANGGAL LAHIR')
+                ->rules(['nullable'])
                 ->example('15/05/1985')
-                ->castStateUsing(function ($state): ?string {
-                    if (blank($state)) return null;
-                    if ($state instanceof \DateTimeInterface) {
-                        return $state->format('Y-m-d');
-                    }
-                    try {
-                        $stateString = (string) $state;
-                        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/', $stateString, $matches)) {
-                            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-                            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-                            $year = $matches[3];
-                            if (strlen($year) === 2) $year = '20' . $year;
-                            return "{$year}-{$month}-{$day}";
-                        }
-                        return \Illuminate\Support\Carbon::parse($stateString)->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        return (string) $state;
-                    }
-                }),
+                ->castStateUsing(fn ($state) => static::parseIndoDate($state)),
             ImportColumn::make('alamat')
-                ->rules(['string'])
+                ->label('ALAMAT')
+                ->rules(['nullable'])
                 ->example('Jl. Pendidikan No. 45'),
             ImportColumn::make('desa')
-                ->rules(['string', 'max:255'])
+                ->label('DESA')
+                ->rules(['nullable', 'max:255'])
                 ->example('Bintuni Barat'),
             ImportColumn::make('kecamatan')
-                ->rules(['string', 'max:255'])
+                ->label('KECAMATAN')
+                ->rules(['nullable', 'max:255'])
                 ->example('Bintuni'),
             ImportColumn::make('kabupaten')
-                ->rules(['string', 'max:255'])
+                ->label('KABUPATEN')
+                ->rules(['nullable', 'max:255'])
                 ->example('Teluk Bintuni'),
             ImportColumn::make('provinsi')
-                ->rules(['string', 'max:255'])
+                ->label('PROVINSI')
+                ->rules(['nullable', 'max:255'])
                 ->example('Papua Barat'),
             ImportColumn::make('agama')
-                ->rules(['string', 'max:255'])
+                ->label('AGAMA')
+                ->rules(['nullable', 'max:255'])
                 ->example('Islam'),
             ImportColumn::make('pendidikan_terakhir')
-                ->rules(['string', 'max:255'])
+                ->label('PENDIDIKAN TERAKHIR')
+                ->rules(['nullable', 'max:255'])
                 ->example('S1 Pendidikan Bahasa'),
             ImportColumn::make('daerah_asal')
-                ->rules(['string', 'max:255'])
+                ->label('STATUS OAP')
+                ->rules(['nullable', 'max:255'])
                 ->example('Papua')
-                ->castStateUsing(fn(string $state): string => 
-                    stripos($state, 'papua') !== false && stripos($state, 'non') === false ? 'Papua' : 'Non Papua'
+                ->castStateUsing(fn(?string $state): string => 
+                    blank($state) ? 'Non Papua' : (stripos($state, 'papua') !== false && stripos($state, 'non') === false ? 'Papua' : 'Non Papua')
                 ),
             ImportColumn::make('jenis_gtk')
-                ->rules(['string', 'max:255'])
-                ->example('Guru'),
-            ImportColumn::make('status_kepegawaian')
-                ->rules(['string', 'max:255'])
-                ->example('PNS'),
-            ImportColumn::make('tmt_pns')
-                ->rules(['date'])
-                ->example('01/01/2010')
-                ->castStateUsing(function ($state): ?string {
-                    if (blank($state)) return null;
-                    if ($state instanceof \DateTimeInterface) {
-                        return $state->format('Y-m-d');
-                    }
-                    try {
-                        $stateString = (string) $state;
-                        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/', $stateString, $matches)) {
-                            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-                            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-                            $year = $matches[3];
-                            if (strlen($year) === 2) $year = '20' . $year;
-                            return "{$year}-{$month}-{$day}";
-                        }
-                        return \Illuminate\Support\Carbon::parse($stateString)->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        return (string) $state;
-                    }
+                ->label('JENIS GTK')
+                ->rules(['nullable', 'max:255'])
+                ->example('Guru')
+                ->castStateUsing(function (?string $state): ?string {
+                    if (blank($state)) return 'Guru'; // Default ke Guru jika kosong
+                    $state = strtolower($state);
+                    if (str_contains($state, 'kepala')) return 'Kepala Sekolah';
+                    if (str_contains($state, 'guru')) return 'Guru';
+                    if (str_contains($state, 'admin') || str_contains($state, 'tata usaha')) return 'Tenaga Administrasi';
+                    return 'Guru'; // Default jika tidak dikenal
                 }),
+            ImportColumn::make('status_kepegawaian')
+                ->label('STATUS KEPEGAWAIAN')
+                ->rules(['nullable', 'max:255'])
+                ->example('PNS')
+                ->castStateUsing(function (?string $state): ?string {
+                    if (blank($state)) return null;
+                    if (stripos($state, 'honorer') !== false) return 'Honorer Sekolah';
+                    return $state;
+                }),
+            ImportColumn::make('tmt_pns')
+                ->label('TMT PNS')
+                ->rules(['nullable'])
+                ->example('01/01/2010')
+                ->castStateUsing(fn ($state) => static::parseIndoDate($state)),
             ImportColumn::make('pangkat_gol_terakhir')
-                ->rules(['string', 'max:255'])
+                ->label('PANGKAT GOLONGAN TERAKHIR')
+                ->rules(['nullable', 'max:255'])
                 ->example('III/b'),
             ImportColumn::make('tmt_pangkat_gol_terakhir')
-                ->rules(['date'])
+                ->label('TMT PANGKAT GOLONGAN TERAKHIR')
+                ->rules(['nullable'])
                 ->example('01/01/2022')
-                ->castStateUsing(function ($state): ?string {
-                    if (blank($state)) return null;
-                    if ($state instanceof \DateTimeInterface) {
-                        return $state->format('Y-m-d');
-                    }
-                    try {
-                        $stateString = (string) $state;
-                        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/', $stateString, $matches)) {
-                            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-                            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-                            $year = $matches[3];
-                            if (strlen($year) === 2) $year = '20' . $year;
-                            return "{$year}-{$month}-{$day}";
-                        }
-                        return \Illuminate\Support\Carbon::parse($stateString)->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        return (string) $state;
-                    }
-                }),
+                ->castStateUsing(fn ($state) => static::parseIndoDate($state)),
 
-            // Data Pendidikan
-            ImportColumn::make('thn_tamat_sd')->label('Thn Tamat SD')->example('1997')->fillRecordUsing(fn () => null),
-            ImportColumn::make('thn_tamat_smp')->label('Thn Tamat SMP')->example('2000')->fillRecordUsing(fn () => null),
-            ImportColumn::make('thn_tamat_sma')->label('Thn Tamat SMA')->example('2003')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_tamat_d1')->label('Thn Tamat D1')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_d1')->label('Jurusan D1')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_d1')->label('PT D1')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_tamat_d2')->label('Thn Tamat D2')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_d2')->label('Jurusan D2')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_d2')->label('PT D2')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_tamat_d3')->label('Thn Tamat D3')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_d3')->label('Jurusan D3')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_d3')->label('PT D3')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_tamat_s1')->label('Thn Tamat S1')->example('2007')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_s1')->label('Jurusan S1')->example('Pendidikan Matematika')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_s1')->label('PT S1')->example('UNIPA')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_tamat_s2')->label('Thn Tamat S2')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_s2')->label('Jurusan S2')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_s2')->label('PT S2')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_tamat_s3')->label('Thn Tamat S3')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_s3')->label('Jurusan S3')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_s3')->label('PT S3')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('thn_akta4')->label('Thn Akta IV')->fillRecordUsing(fn () => null),
-            ImportColumn::make('jurusan_akta4')->label('Jurusan Akta IV')->fillRecordUsing(fn () => null),
-            ImportColumn::make('perguruan_tinggi_akta4')->label('PT Akta IV')->fillRecordUsing(fn () => null),
-            
-            ImportColumn::make('gelar_depan')->label('Gelar Depan')->fillRecordUsing(fn () => null),
-            ImportColumn::make('gelar_belakang')->label('Gelar Belakang')->example('S.Pd')->fillRecordUsing(fn () => null),
+            // Data Pendidikan (Will be saved in afterSave to GtkPendidikan model)
+            ImportColumn::make('thn_tamat_sd')->label('TAHUN TAMAT SD')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_smp')->label('TAHUN TAMAT SMP')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_sma')->label('TAHUN TAMAT SMA')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_d1')->label('TAHUN TAMAT D1')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_d1')->label('JURUSAN D1')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_d1')->label('PERGURUAN TINGGI D1')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_d2')->label('TAHUN TAMAT D2')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_d2')->label('JURUSAN D2')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_d2')->label('PERGURUAN TINGGI D2')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_d3')->label('TAHUN TAMAT D3')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_d3')->label('JURUSAN D3')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_d3')->label('PERGURUAN TINGGI D3')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_s1')->label('TAHUN TAMAT S1')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_s1')->label('JURUSAN S1')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_s1')->label('PERGURUAN TINGGI S1')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_s2')->label('TAHUN TAMAT S2')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_s2')->label('JURUSAN S2')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_s2')->label('PERGURUAN TINGGI S2')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_tamat_s3')->label('TAHUN TAMAT S3')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_s3')->label('JURUSAN S3')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_s3')->label('PERGURUAN TINGGI S3')->fillRecordUsing(fn () => null),
+            ImportColumn::make('thn_akta4')->label('TAHUN TAMAT AKTA IV')->fillRecordUsing(fn () => null),
+            ImportColumn::make('jurusan_akta4')->label('JURUSAN AKTA IV')->fillRecordUsing(fn () => null),
+            ImportColumn::make('perguruan_tinggi_akta4')->label('PERGURUAN TINGGI AKTA IV')->fillRecordUsing(fn () => null),
+            ImportColumn::make('gelar_depan')->label('GELAR DEPAN')->fillRecordUsing(fn () => null),
+            ImportColumn::make('gelar_belakang')->label('GELAR BELAKANG')->fillRecordUsing(fn () => null),
 
-            // Data Keuangan
-            ImportColumn::make('nomor_rekening')->label('No Rekening')->example('1234567890')->fillRecordUsing(fn () => null),
-            ImportColumn::make('nama_bank')->label('Nama Bank')->example('Bank Papua')->fillRecordUsing(fn () => null),
-            ImportColumn::make('npwp')->label('NPWP')->example('12.345.678.9-123.000')->fillRecordUsing(fn () => null),
+            // Data Keuangan (Will be saved in afterSave to GtkKeuangan model)
+            ImportColumn::make('nomor_rekening')->label('NO. REKENING')->fillRecordUsing(fn () => null),
+            ImportColumn::make('nama_bank')->label('NAMA BANK')->fillRecordUsing(fn () => null),
+            ImportColumn::make('npwp')->label('NPWP')->fillRecordUsing(fn () => null),
         ];
     }
 
-    public function resolveRecord(): Gtk
+    public function resolveRecord(): ?Gtk
     {
-        $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
-
-        if (! $sekolahId) {
-            throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
+        $sekolahId = filament()->getTenant()->id;
+        
+        if (!empty($this->data['nik'])) {
+            $record = Gtk::where('sekolah_id', $sekolahId)
+                ->where('nik', $this->data['nik'])
+                ->first();
+            if ($record) return $record;
         }
 
-        // Return new instance to trigger unique validation instead of updating
-        return new Gtk(['sekolah_id' => $sekolahId]);
+        if (!empty($this->data['nip'])) {
+            $record = Gtk::where('sekolah_id', $sekolahId)
+                ->where('nip', $this->data['nip'])
+                ->first();
+            if ($record) return $record;
+        }
+
+        $record = new Gtk();
+        $record->sekolah_id = $sekolahId;
+        
+        return $record;
     }
 
-    public function afterSave(): void
+    public static function getCompletedNotificationBody(Import $import): string
+    {
+        $body = 'Berhasil mengimpor ' . number_format($import->successful_rows) . ' baris.';
+
+        if ($failedRowsCount = $import->getFailedRowsCount()) {
+            $body .= ' Gagal mengimpor ' . number_format($failedRowsCount) . ' baris.';
+        }
+
+        return $body;
+    }
+
+    protected function afterSave(): void
     {
         $gtk = $this->record;
 
-        // Sync Data Pendidikan
+        // 1. Sync to Sebaran Jam Mengajar (Principals and Teachers only)
+        if ($gtk->jenis_gtk !== 'Tenaga Administrasi') {
+            Mengajar::firstOrCreate([
+                'gtk_id' => $gtk->id,
+                'rombel_id' => null,
+                'mapel_id' => null,
+            ]);
+        }
+
+        // 2. Sync to GtkPendidikan
         $pendidikanFields = [
             'thn_tamat_sd', 'thn_tamat_smp', 'thn_tamat_sma',
             'thn_tamat_d1', 'jurusan_d1', 'perguruan_tinggi_d1',
@@ -217,92 +263,37 @@ class GtkImporter extends Importer
             'thn_tamat_s2', 'jurusan_s2', 'perguruan_tinggi_s2',
             'thn_tamat_s3', 'jurusan_s3', 'perguruan_tinggi_s3',
             'thn_akta4', 'jurusan_akta4', 'perguruan_tinggi_akta4',
-            'gelar_depan', 'gelar_belakang',
+            'gelar_depan', 'gelar_belakang'
         ];
-
+        
         $pendidikanData = [];
         foreach ($pendidikanFields as $field) {
-            if (isset($this->data[$field])) {
+            if (array_key_exists($field, $this->data)) {
                 $pendidikanData[$field] = $this->data[$field];
             }
         }
-
+        
         if (!empty($pendidikanData)) {
-            $gtk->pendidikan()->updateOrCreate(['gtk_id' => $gtk->id], $pendidikanData);
+            GtkPendidikan::updateOrCreate(
+                ['gtk_id' => $gtk->id],
+                $pendidikanData
+            );
         }
 
-        // Sync Data Keuangan
+        // 3. Sync to GtkKeuangan
         $keuanganFields = ['nomor_rekening', 'nama_bank', 'npwp'];
         $keuanganData = [];
         foreach ($keuanganFields as $field) {
-            if (isset($this->data[$field])) {
+            if (array_key_exists($field, $this->data)) {
                 $keuanganData[$field] = $this->data[$field];
             }
         }
 
         if (!empty($keuanganData)) {
-            $gtk->keuangan()->updateOrCreate(['gtk_id' => $gtk->id], $keuanganData);
+            GtkKeuangan::updateOrCreate(
+                ['gtk_id' => $gtk->id],
+                $keuanganData
+            );
         }
-
-        // Auto-create placeholder Sebaran Jam Mengajar record so the GTK name appears in the list.
-        if (in_array($gtk->jenis_gtk, ['Kepala Sekolah', 'Guru'])) {
-            Mengajar::query()
-                ->where('gtk_id', $gtk->id)
-                ->whereNull('rombel_id')
-                ->whereNull('mapel_id')
-                ->first()
-                ?? Mengajar::create([
-                    'gtk_id' => $gtk->id,
-                    'rombel_id' => null,
-                    'mapel_id' => null,
-                    'jumlah_jam' => null,
-                    'semester' => null,
-                    'tahun_ajaran' => null,
-                    'laporan_id' => null,
-                ]);
-        }
-
-        // Auto-create Tugas Tambahan record
-        GtkTugasTambahan::query()->firstOrCreate(
-            ['gtk_id' => $gtk->id],
-            [
-                'tugas_tambahan' => null,
-                'jumlah_jam' => null,
-            ],
-        );
-
-        // Auto-create placeholder Kehadiran GTK record
-        \App\Models\KehadiranGtk::query()
-            ->where('gtk_id', $gtk->id)
-            ->whereNull('laporan_id')
-            ->first()
-            ?? \App\Models\KehadiranGtk::create([
-                'gtk_id' => $gtk->id,
-                'laporan_id' => null,
-                'sakit' => 0,
-                'izin' => 0,
-                'alfa' => 0,
-                'hari_kerja' => 0,
-            ]);
-    }
-
-    public function getValidationMessages(): array
-    {
-        return [
-            'nik.unique' => 'NIK :input sudah terdaftar di database.',
-            'nip.unique' => 'NIP :input sudah terdaftar di database.',
-            'nuptk.unique' => 'NUPTK :input sudah terdaftar di database.',
-        ];
-    }
-
-    public static function getCompletedNotificationBody(Import $import): string
-    {
-        $body = 'Impor GTK selesai. ' . Number::format($import->successful_rows) . ' baris berhasil diimpor.';
-
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' baris gagal diimpor.';
-        }
-
-        return $body;
     }
 }
