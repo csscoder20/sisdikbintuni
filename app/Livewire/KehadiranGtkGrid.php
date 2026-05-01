@@ -6,33 +6,36 @@ use App\Models\Gtk;
 use App\Models\GtkKehadiran;
 use App\Models\KehadiranGtk;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Carbon;
 
 class KehadiranGtkGrid extends Component
 {
+    use WithPagination;
+
     public $bulan;
     public $tahun;
     public $days = [];
     public $attendanceData = []; // [gtk_id][day] => value (H, I, S, A)
+    public $perPage = 10;
 
     public function mount()
     {
         $this->bulan = (int) date('m');
         $this->tahun = (int) date('Y');
         $this->loadDays();
-        $this->loadAttendance();
     }
 
     public function updatedBulan()
     {
+        $this->resetPage();
         $this->loadDays();
-        $this->loadAttendance();
     }
 
     public function updatedTahun()
     {
+        $this->resetPage();
         $this->loadDays();
-        $this->loadAttendance();
     }
 
     public function loadDays()
@@ -50,10 +53,8 @@ class KehadiranGtkGrid extends Component
         }
     }
 
-    public function loadAttendance()
+    protected function loadAttendance($gtks)
     {
-        $gtks = Gtk::where('sekolah_id', filament()->getTenant()?->id)->orderBy('id')->get();
-        
         $records = GtkKehadiran::whereYear('tgl_presensi', $this->tahun)
             ->whereMonth('tgl_presensi', $this->bulan)
             ->whereIn('gtk_id', $gtks->pluck('id'))
@@ -94,7 +95,6 @@ class KehadiranGtkGrid extends Component
                 ],
                 [
                     'presensi' => $value,
-                    // laporan_id can be added here if we have a way to find the active report
                     'laporan_id' => $this->getActiveLaporanId(),
                 ]
             );
@@ -148,8 +148,14 @@ class KehadiranGtkGrid extends Component
 
     public function render()
     {
+        $gtks = Gtk::where('sekolah_id', filament()->getTenant()?->id)
+            ->orderBy('id')
+            ->paginate($this->perPage);
+        
+        $this->loadAttendance($gtks->getCollection());
+
         return view('livewire.kehadiran-gtk-grid', [
-            'gtks' => Gtk::where('sekolah_id', filament()->getTenant()?->id)->orderBy('id')->get(),
+            'gtks' => $gtks,
         ]);
     }
 }
