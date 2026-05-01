@@ -64,5 +64,16 @@ class UserSeeder extends Seeder
         ]);
 
         $op3->assignRole('operator');
+
+         // 🔹 OPERATOR SMK 1 BINTUNI
+        $op4 = User::create([
+            'name' => 'Operator SMK Negeri 1 Bintuni',
+            'email' => 'smknegeri1bintuni@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+
+        $op4->assignRole('operator');
     }
 }
