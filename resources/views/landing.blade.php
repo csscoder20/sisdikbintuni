@@ -333,7 +333,7 @@
         <section class="hero">
             <div class="badge">
                 <span class="badge-dot"></span>
-                Sistem Informasi Terpadu
+                Sistem Pelaporan Bulanan SMA/SMK Kabupaten Teluk Bintuni
             </div>
 
             <h1 class="hero-title">
