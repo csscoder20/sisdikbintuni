@@ -311,7 +311,9 @@ class KeadaanGtk extends Page
                 DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as konghucu_l"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as konghucu_p"),
                 DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' THEN 1 ELSE 0 END) as konghucu_jml")
-            )->groupBy('jenis_gtk')->get();
+            )->groupBy('jenis_gtk')
+            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
+            ->get();
     }
 
     protected function getGtkDaerahCollection(?int $laporanId = null)
@@ -340,7 +342,9 @@ class KeadaanGtk extends Page
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as non_papua_l"),
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as non_papua_p"),
                 DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') THEN 1 ELSE 0 END) as non_papua_jml")
-            )->groupBy('jenis_gtk')->get();
+            )->groupBy('jenis_gtk')
+            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
+            ->get();
     }
 
     protected function getGtkStatusCollection(?int $laporanId = null)
@@ -385,7 +389,9 @@ class KeadaanGtk extends Page
                 DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/e' THEN 1 ELSE 0 END) as gol_iv_e"),
                 DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pppk%' THEN 1 ELSE 0 END) as pppk"),
                 DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%honorer%' OR status_kepegawaian ILIKE '%GTY%' OR status_kepegawaian ILIKE '%PTY%' THEN 1 ELSE 0 END) as honorer_sekolah")
-            )->groupBy('jenis_gtk')->get();
+            )->groupBy('jenis_gtk')
+            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
+            ->get();
     }
 
     protected function getGtkUmurCollection(?int $laporanId = null)
@@ -406,7 +412,9 @@ class KeadaanGtk extends Page
         }
 
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        $gtks = Gtk::where('sekolah_id', $tenantId)->get();
+        $gtks = Gtk::where('sekolah_id', $tenantId)
+            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
+            ->get();
         $periodEndDate = $this->getCurrentPeriodEndDate();
         $dataByJenis = collect();
         foreach ($gtks as $g) {
@@ -456,7 +464,9 @@ class KeadaanGtk extends Page
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s1%' OR pendidikan_terakhir ILIKE '%d4%' THEN 1 ELSE 0 END) as s1"),
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s2%' THEN 1 ELSE 0 END) as s2"),
                 DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s3%' THEN 1 ELSE 0 END) as s3")
-            )->groupBy('jenis_gtk')->get();
+            )->groupBy('jenis_gtk')
+            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
+            ->get();
     }
 
     protected function getGtkByJenisCollection(?int $laporanId = null)
@@ -491,7 +501,10 @@ class KeadaanGtk extends Page
                 DB::raw('COUNT(*) as total'),
                 DB::raw("SUM(CASE WHEN jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as laki_laki"),
                 DB::raw("SUM(CASE WHEN jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as perempuan"))
-            ->whereNotNull('jenis_gtk')->groupBy('jenis_gtk')->get();
+            ->whereNotNull('jenis_gtk')
+            ->groupBy('jenis_gtk')
+            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
+            ->get();
     }
 
     /**

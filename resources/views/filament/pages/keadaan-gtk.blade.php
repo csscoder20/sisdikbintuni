@@ -101,6 +101,9 @@
         .ks-w-nama {
             text-align: left !important;
             padding-left: 1rem !important;
+            width: 250px !important;
+            min-width: 250px !important;
+            max-width: 250px !important;
             /* Give it some breathing room */
         }
 
@@ -214,7 +217,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" style="width: 30px;">NO</th>
-                                <th rowspan="2" class="ks-w-nama">JENIS GTK</th>
+                                <th rowspan="2" class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
                                 <th colspan="3">ISLAM</th>
                                 <th colspan="3">PROTESTAN</th>
                                 <th colspan="3">KATOLIK</th>
@@ -353,7 +356,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" style="width: 30px;">NO</th>
-                                <th rowspan="2" class="ks-w-nama">JENIS GTK</th>
+                                <th rowspan="2" class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
                                 <th colspan="3">PAPUA</th>
                                 <th colspan="3">NON PAPUA</th>
                             </tr>
@@ -593,7 +596,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" style="width: 30px;">NO</th>
-                                <th rowspan="2" class="ks-w-nama">JENIS GTK</th>
+                                <th rowspan="2" class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
                                 @foreach (($gtkAgeRanges ?? []) as $range)
                                     <th colspan="3">{{ $range['label'] }}</th>
                                 @endforeach
@@ -686,7 +689,7 @@
                         <thead>
                             <tr>
                                 <th style="width:30px;">NO</th>
-                                <th class="ks-w-nama">JENIS GTK</th>
+                                <th class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
                                 <th class="ks-w-jml">SLTA</th>
                                 <th class="ks-w-jml">DI</th>
                                 <th class="ks-w-jml">DII</th>
