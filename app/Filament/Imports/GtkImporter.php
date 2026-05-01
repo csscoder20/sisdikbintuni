@@ -86,8 +86,8 @@ class GtkImporter extends Importer
                 ->castStateUsing(function (?string $state): ?string {
                     if (blank($state)) return null;
                     $state = strtolower($state);
-                    if ($state === 'l' || str_contains($state, 'laki')) return 'Laki-laki';
-                    if ($state === 'p' || str_contains($state, 'perempuan')) return 'Perempuan';
+                    if ($state === 'l' || str_contains($state, 'laki')) return 'L';
+                    if ($state === 'p' || str_contains($state, 'perempuan')) return 'P';
                     return null;
                 }),
             ImportColumn::make('tempat_lahir')
