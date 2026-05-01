@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
 
         $op3->assignRole('operator');
 
-         // 🔹 OPERATOR SMK 1 BINTUNI
+         // 🔹 OPERATOR SMK 1 BINTUNI ini coba saja ubah utk tes script auto deploy
         $op4 = User::create([
             'name' => 'Operator SMK Negeri 1 Bintuni',
             'email' => 'smknegeri1bintuni@gmail.com',
