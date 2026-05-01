@@ -179,10 +179,10 @@ class SiswasTable
                         })
                         ->modalCancelActionLabel(null)
                         ->modalSubmitActionLabel(null)
-                        ->modalFooterActions([])
-                        ->form(function (): array {
-                            return \App\Filament\Resources\Siswas\Schemas\SiswaForm::configure(\Filament\Schemas\Schema::make())
-                                ->getComponents();
+                        ->form(function (): \Filament\Schemas\Schema {
+                            return \App\Filament\Resources\Siswas\Schemas\SiswaForm::configure(
+                                \Filament\Schemas\Schema::make()
+                            );
                         }),
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
