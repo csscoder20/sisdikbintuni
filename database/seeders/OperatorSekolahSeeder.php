@@ -13,7 +13,7 @@ class OperatorSekolahSeeder extends Seeder
     {
         // Ambil user operator
         $op1 = User::where('email', 'operator1@sisdik.com')->first();
-        $op2 = User::where('email', 'operator2@sisdik.com')->first();
+        $op2 = User::where('email', 'smknegeri1bintuni@gmail.com')->first();
         $op3 = User::where('email', 'operator3@sisdik.com')->first();
 
         // Ambil sekolah (berdasarkan urutan)
