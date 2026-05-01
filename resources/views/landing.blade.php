@@ -342,7 +342,7 @@
             </h1>
 
             <p class="hero-desc">
-                Platform modern untuk manajemen data sekolah, siswa, dan tenaga kependidikan secara efisien, akurat, dan transparan dalam satu ekosistem digital.
+                Platform pelaporan untuk apa saja lah, ini masih coba2 juga
             </p>
 
             <div class="hero-actions">
