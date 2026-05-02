@@ -129,6 +129,53 @@
             position: relative;
         }
 
+        @media print {
+            @page {
+                margin: 5mm;
+            }
+            @page portrait {
+                size: portrait;
+            }
+            @page landscape {
+                size: landscape;
+            }
+            .portrait {
+                page: portrait;
+            }
+            .landscape {
+                page: landscape;
+                zoom: 0.85; /* Shrink to fit wider tables */
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .print-page {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Zoom for landscape tables to ensure they fit */
+            .landscape table {
+                font-size: 7pt !important;
+            }
+            
+            /* Fix table layout for print */
+            table {
+                width: 100% !important;
+                table-layout: auto !important;
+                border-collapse: collapse !important;
+                border: 1px solid #000 !important;
+            }
+            
+            th, td {
+                word-wrap: break-word !important;
+                padding: 2px !important; /* Tighten padding */
+                border: 1px solid #000 !important;
+            }
+        }
     </style>
     <!-- Dashboard Header -->
 
@@ -331,18 +378,78 @@
                                 <p style="color: #6b7280;">Tidak ada data untuk ditampilkan</p>
                             </div>
                         @else
-                            @if ($key === 'identitas_sekolah')
-                                <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+                            @if (isset($previewData['type']) && $previewData['type'] === 'rekap_summary')
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                    @foreach ($previewData['sections'] as $sectionTitle => $data)
+                                        <div style="border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.5rem; background: #fff;">
+                                            <h4 style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 2px;">{{ $sectionTitle }}</h4>
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+                                                <tbody>
+                                                    @foreach ($data as $label => $value)
+                                                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                                                            <td style="padding: 2px 0; color: #4b5563;">{{ $label }}</td>
+                                                            <td style="padding: 2px 0; text-align: right; font-weight: 600; color: #111827;">{{ $value }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @elseif ($key === 'identitas_sekolah')
+                                <div style="overflow-x: auto;">
                                     <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left;">
                                         <tbody>
-                                            @foreach ($previewData as $item)
-                                                <tr style="border-bottom: 1px solid #e5e7eb; {{ $loop->even ? 'background-color: #f9fafb;' : 'background-color: white;' }}">
-                                                    <th style="padding: 0.75rem 1rem; font-weight: 600; color: #374151; width: 30%; border-right: 1px solid #e5e7eb;">
-                                                        {{ $item['label'] }}
-                                                    </th>
-                                                    <td style="padding: 0.75rem 1rem; color: #1f2937;">
-                                                        {{ $item['value'] }}
-                                                    </td>
+                                            @foreach ($previewData as $index => $item)
+                                                @if(isset($item['is_header']))
+                                                    <tr>
+                                                        <td colspan="3" style="padding: 0.5rem 0 0.25rem 0; font-weight: 700; color: #111827;">
+                                                            {{ $index + 1 }}. {{ $item['label'] }}
+                                                        </td>
+                                                    </tr>
+                                                @else
+                                                    <tr style="border-bottom: 1px dashed #e5e7eb;">
+                                                        <td style="padding: 0.25rem 0; color: #4b5563; width: 45%; {{ isset($item['is_sub']) ? 'padding-left: 1.5rem;' : '' }}">
+                                                            {{ isset($item['is_sub']) ? $item['label'] : ($index + 1) . ' ' . $item['label'] }}
+                                                        </td>
+                                                        <td style="padding: 0.25rem 0; color: #4b5563; width: 10px;">:</td>
+                                                        <td style="padding: 0.25rem 0; font-weight: 600; color: #111827;">
+                                                            {{ $item['value'] }}
+                                                        </td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @elseif ($key === 'kondisi_sarpras')
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; border: 1px solid #333;">
+                                        <thead>
+                                            <tr style="background-color: #f3f4f6;">
+                                                <th rowspan="2" style="border: 1px solid #333; padding: 4px; text-align: center; width: 40px;">No</th>
+                                                <th rowspan="2" style="border: 1px solid #333; padding: 4px; text-align: center;">Keadaan Fisik</th>
+                                                <th rowspan="2" style="border: 1px solid #333; padding: 4px; text-align: center; width: 60px;">Jumlah</th>
+                                                <th colspan="2" style="border: 1px solid #333; padding: 4px; text-align: center;">Tingkat Kerusakan</th>
+                                                <th colspan="2" style="border: 1px solid #333; padding: 4px; text-align: center;">Status Kepemilikan</th>
+                                            </tr>
+                                            <tr style="background-color: #f3f4f6;">
+                                                <th style="border: 1px solid #333; padding: 4px; text-align: center; width: 60px;">Baik</th>
+                                                <th style="border: 1px solid #333; padding: 4px; text-align: center; width: 60px;">Rusak</th>
+                                                <th style="border: 1px solid #333; padding: 4px; text-align: center; width: 80px;">Milik</th>
+                                                <th style="border: 1px solid #333; padding: 4px; text-align: center; width: 80px;">Bukan Milik</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($previewData as $index => $item)
+                                                <tr>
+                                                    <td style="border: 1px solid #333; padding: 4px; text-align: center;">{{ $index + 1 }}</td>
+                                                    <td style="border: 1px solid #333; padding: 4px;">{{ $item['label'] }}</td>
+                                                    <td style="border: 1px solid #333; padding: 4px; text-align: center;">{{ $item['details']['Jumlah'] }}</td>
+                                                    <td style="border: 1px solid #333; padding: 4px; text-align: center;">{{ $item['details']['Tingkat Kerusakan_Baik'] }}</td>
+                                                    <td style="border: 1px solid #333; padding: 4px; text-align: center;">{{ $item['details']['Tingkat Kerusakan_Rusak'] }}</td>
+                                                    <td style="border: 1px solid #333; padding: 4px; text-align: center;">{{ $item['details']['Status Kepemilikan_Milik'] }}</td>
+                                                    <td style="border: 1px solid #333; padding: 4px; text-align: center;">{{ $item['details']['Status Kepemilikan_Bukan Milik'] }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -363,8 +470,9 @@
                                                 </th>
                                                 @foreach ($headers as $header)
                                                     @php
-                                                        $centeredHeaders = ['No.', 'Hari Kerja', 'Sakit', 'Alpa', 'Izin', 'Jam', 'Jumlah', 'Kondisi Baik', 'Rusak', 'Persentase Kelulusan', 'Kepemilikan'];
-                                                        $isCentered = in_array($header, $centeredHeaders);
+                                                        // List of headers that should NOT be centered (usually labels/names)
+                                                        $notCentered = ['Alamat', 'Keterangan'];
+                                                        $isCentered = !in_array($header, $notCentered);
                                                     @endphp
                                                     <th style="padding: 4px; font-weight: 600; color: #374151; border-right: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; {{ $isCentered ? 'text-align: center;' : '' }}">{{ $header }}</th>
                                                 @endforeach
@@ -378,8 +486,8 @@
                                                     @if (is_array($item['details']))
                                                         @foreach ($headers as $header)
                                                             @php
-                                                                $centeredHeaders = ['No.', 'Hari Kerja', 'Sakit', 'Alpa', 'Izin', 'Jam', 'Jumlah', 'Kondisi Baik', 'Rusak', 'Persentase Kelulusan', 'Kepemilikan'];
-                                                                $isCentered = in_array($header, $centeredHeaders);
+                                                                $notCentered = ['Alamat', 'Keterangan'];
+                                                                $isCentered = !in_array($header, $notCentered);
                                                             @endphp
                                                             <td style="padding: 4px; color: #4b5563; border-right: 1px solid #e5e7eb; {{ $isCentered ? 'text-align: center;' : '' }}">{{ $item['details'][$header] ?? '-' }}</td>
                                                         @endforeach
@@ -408,49 +516,8 @@
         @endif
     @endforeach
  
-    <!-- Selection Modal -->
-    <div id="selection-modal" role="dialog"
-        style="display: none; position: fixed; inset: 0; z-index: 60; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.5);">
-        <div style="background-color: white; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 25rem; margin: 0 1rem;">
-            <div style="border-bottom: 1px solid #e5e7eb; padding: 1.25rem; background-color: #f9fafb; border-radius: 8px 8px 0 0;">
-                <h2 style="font-size: 1rem; font-weight: bold; color: #1f2937; margin: 0;">Pilih Data Laporan</h2>
-            </div>
-            <div style="padding: 1.5rem;">
-                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Silakan pilih bagian laporan yang ingin Anda pratinjau:</p>
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    @php
-                        $anyValid = collect($this->checklistStatus)->contains(true);
-                        $checked = 'checked';
-                    @endphp
-
-                    @if ($anyValid)
-                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='transparent'">
-                            <input type="radio" name="preview_group" value="all" {{ $checked }} style="width: 1.125rem; height: 1.125rem; accent-color: #3b82f6;">
-                            <span style="font-size: 0.875rem; font-weight: 500; color: #1f2937;">Seluruh Data Laporan</span>
-                        </label>
-                        @php $checked = ''; @endphp
-                    @endif
-
-                    @foreach ($this->groups as $groupLabel => $items)
-                        @php
-                            $isGroupValid = collect($items)->every(fn($key) => $this->checklistStatus[$key] ?? false);
-                        @endphp
-                        @if ($isGroupValid)
-                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor='transparent'">
-                                <input type="radio" name="preview_group" value="{{ $groupLabel }}" {{ $checked }} style="width: 1.125rem; height: 1.125rem; accent-color: #3b82f6;">
-                                <span style="font-size: 0.875rem; font-weight: 500; color: #1f2937;">{{ $groupLabel }}</span>
-                            </label>
-                            @php $checked = ''; @endphp
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-            <div style="border-top: 1px solid #e5e7eb; padding: 1.25rem; background-color: #f9fafb; display: flex; gap: 0.75rem; border-radius: 0 0 8px 8px;">
-                <button type="button" id="confirmPreviewBtn" style="flex: 1; background-color: #3b82f6; color: white; padding: 0.625rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Tampilkan</button>
-                <button type="button" id="cancelSelectionBtn" style="flex: 1; background-color: #e5e7eb; color: #374151; padding: 0.625rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Batal</button>
-            </div>
-        </div>
-    </div>
+    {{-- Selection Modal removed as per user request --}}
+    <input type="hidden" id="preview_group_all" value="all">
 
     <div id="preview-modal" role="dialog"
         style="display:none; position:fixed; inset:0; z-index:60; align-items:center; justify-content:center; background-color: rgba(0,0,0,0.5);">
@@ -461,7 +528,7 @@
             <!-- Header -->
             <div
                 style="padding:1rem 1.5rem; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="font-weight:600; margin:0;">Pratinjau Laporan Bulanan</h3>
+                <h3 id="preview-modal-title" style="font-weight:600; margin:0;">Pratinjau Laporan Bulanan</h3>
                 <button type="button" id="preview-modal-close"
                     style="border:none;background:none;cursor:pointer;font-size:1.5rem; color:#9ca3af; line-height:1;">✕</button>
             </div>
@@ -504,8 +571,8 @@
                     </div>
 
                     <!-- Kondisi Gedung/Ruang Section -->
-                    <div class="chart-section" data-section="Kondisi Gedung/Ruang" style="grid-column: 1 / -1; margin-top: 2rem;">
-                        <h3 style="font-weight: bold; font-size: 1rem; color: #1f2937; margin-bottom: 1rem; border-left: 4px solid #ef4444; padding-left: 0.5rem;">Kondisi Gedung/Ruang</h3>
+                    <div class="chart-section" data-section="B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU" style="grid-column: 1 / -1; margin-top: 2rem;">
+                        <h3 style="font-weight: bold; font-size: 1rem; color: #1f2937; margin-bottom: 1rem; border-left: 4px solid #ef4444; padding-left: 0.5rem;">B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU</h3>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                             <div class="chart-card"><h4>Gedung Rusak dan Baik</h4><div class="chart-container"><canvas id="chart-sarpras-kondisi"></canvas></div></div>
                         </div>
@@ -553,6 +620,9 @@
         data-desa="{{ auth()->user()->sekolah?->desa ?? '-' }}"
         data-kecamatan="{{ auth()->user()->sekolah?->kecamatan ?? '-' }}"
         data-kabupaten="{{ auth()->user()->sekolah?->kabupaten ?? '-' }}"
+        data-email="{{ auth()->user()->sekolah?->email ?? '-' }}"
+        data-website="{{ auth()->user()->sekolah?->website ?? '-' }}"
+        data-kodepos="{{ auth()->user()->sekolah?->kodepos ?? '-' }}"
         data-bulan="{{ \Carbon\Carbon::now()->translatedFormat('F') }}"
         data-tahun="{{ date('Y') }}"
         data-logo-left="{{ asset('assets/logo/logo-bintuni.png') }}"
@@ -607,7 +677,6 @@
         });
 
         // PREVIEW GABUNGAN
-        const selectionModal = document.getElementById('selection-modal');
         const confirmPreviewBtn = document.getElementById('confirmPreviewBtn');
         const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
 
@@ -620,58 +689,37 @@
         // Judul laporan per grup
         const groupTitleMap = {
             'all': 'LAPORAN BULANAN LENGKAP',
-            'Keadaan Siswa': 'LAPORAN BULANAN - REKAP DATA SISWA',
-            'Keadaan GTK': 'LAPORAN BULANAN - REKAP DATA GURU & TENAGA KEPENDIDIKAN',
-            'Kondisi Gedung/Ruang': 'LAPORAN BULANAN - REKAP GEDUNG/RUANG',
-            'Sebaran Jam Mengajar': 'LAPORAN BULANAN - SEBARAN JAM MENGAJAR',
-            'Kehadiran GTK': 'LAPORAN BULANAN - REKAP KEHADIRAN GTK',
-            'Kelulusan': 'LAPORAN BULANAN - DATA KELULUSAN',
-            'Identitas Sekolah': 'LAPORAN BULANAN - IDENTITAS SEKOLAH',
+            'Halaman 1': 'HALAMAN 1: IDENTITAS & SARPRAS',
+            'Halaman 2': 'HALAMAN 2: REKAP SISWA & GTK',
+            'Halaman 3': 'HALAMAN 3: NOMINATIF & PENDIDIKAN GTK',
+            'Halaman 4': 'HALAMAN 4: NOMINATIF SISWA',
+            'Halaman 5': 'HALAMAN 5: REKENING & NPWP',
+            'Halaman 6': 'HALAMAN 6: SEBARAN JAM MENGAJAR',
+            'Halaman 7': 'HALAMAN 7: ABSENSI',
+            'Halaman 8': 'HALAMAN 8: KELULUSAN',
         };
 
         // Simpan label grup yang dipilih agar bisa diakses oleh print listener
         let currentSelectedGroupLabel = 'LAPORAN BULANAN';
 
         previewBtn.addEventListener('click', function() {
-            const hasRadioButtons = selectionModal.querySelectorAll('input[name="preview_group"]').length > 0;
-            if (!hasRadioButtons) {
-                alert('Silakan pastikan data telah valid (tercentang) sebelum pratinjau');
-                return;
-            }
-            selectionModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        });
-
-        cancelSelectionBtn.addEventListener('click', function() {
-            selectionModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-
-        confirmPreviewBtn.addEventListener('click', function() {
-            const selectedGroup = document.querySelector('input[name="preview_group"]:checked').value;
             const checkedItems = document.querySelectorAll('.report-checkbox:checked');
-
             if (checkedItems.length === 0) {
                 alert('Silakan pastikan data telah valid (tercentang) sebelum pratinjau');
-                selectionModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
                 return;
             }
+
+            // Set title modal
+            const printArea = document.getElementById('print-area');
+            document.getElementById('preview-modal-title').textContent = 'Laporan Periode ' + printArea.dataset.bulan + ' ' + printArea.dataset.tahun;
 
             const previewBody = document.getElementById('preview-modal-body');
             previewBody.innerHTML = '';
 
+            // Otomatis 'all' karena user tidak lagi memilih bagian
+            const selectedGroup = 'all';
+
             let itemsToPreview = Array.from(checkedItems);
-
-            if (selectedGroup !== 'all') {
-                const allowedKeys = groupMapping[selectedGroup] || [];
-                itemsToPreview = itemsToPreview.filter(cb => allowedKeys.includes(cb.value));
-            }
-
-            if (itemsToPreview.length === 0) {
-                alert('Tidak ada data yang valid untuk bagian ' + selectedGroup);
-                return;
-            }
 
             itemsToPreview.forEach(checkbox => {
                 const key = checkbox.value;
@@ -697,7 +745,7 @@
                             <div style="background:${bgColor}; padding:0.5rem 0.75rem; font-weight:600; border: 1px solid #e5e7eb; border-bottom: none;">
                                 ${title}
                             </div>
-                            <div>
+                            <div class="preview-content-box">
                                 ${content}
                             </div>
                         </div>
@@ -705,12 +753,11 @@
                 }
             });
 
-            selectionModal.style.display = 'none';
-
             // Simpan judul laporan berdasarkan grup yang dipilih
             currentSelectedGroupLabel = groupTitleMap[selectedGroup] || 'LAPORAN BULANAN';
 
             document.getElementById('preview-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         });
 
         // Cetak / Simpan PDF menggunakan print area native (no external library)
@@ -731,47 +778,97 @@
             const logoRight = printArea.dataset.logoRight;
 
             // Bangun header resmi dengan logo kiri dan kanan
-            const header =
+            const headerTemplate = (title) =>
                 '<div style="display:table; width:100%; border-bottom: 3px solid #000; padding-bottom: 12px; margin-bottom: 16px;">' +
                     '<div style="display:table-cell; width:80px; vertical-align:middle; text-align:left;">' +
                         '<img src="' + logoLeft + '" style="height:70px; width:auto; display:block;" />' +
                     '</div>' +
                     '<div style="display:table-cell; vertical-align:middle; text-align:center; padding: 0 10px;">' +
                         '<p style="font-size:11px; margin:0 0 1px 0; font-weight:normal;">PEMERINTAH KABUPATEN TELUK BINTUNI</p>' +
-                        '<p style="font-size:11px; margin:0 0 1px 0; font-weight:normal;">DINAS PENDIDIKAN</p>' +
+                        '<p style="font-size:11px; margin:0 0 1px 0; font-weight:normal;">DINAS PENDIDIKAN, KEBUDAYAAN, PEMUDA, DAN OLAHRAGA</p>' +
                         '<h1 style="font-size:17px; margin:0 0 1px 0; text-transform:uppercase; font-weight:bold;">' + namaSekolah + '</h1>' +
-                        '<p style="font-size:9px; margin:0;">NPSN: ' + npsn + ' | ' + alamat + ', ' + desa + ', Kec. ' + kecamatan + ', ' + kabupaten + '</p>' +
+                        '<p style="font-size:9px; margin:0;">' + alamat + ' - ' + desa + ', ' + kecamatan + ', ' + kabupaten + ', Papua Barat</p>' +
+                        '<p style="font-size:9px; margin:0; font-style:italic; color:blue; text-decoration:underline;">email : ' + printArea.dataset.email + ' Website : ' + printArea.dataset.website + ' Kode Pos: ' + printArea.dataset.kodepos + '</p>' +
                     '</div>' +
                     '<div style="display:table-cell; width:80px; vertical-align:middle; text-align:right;">' +
                         '<img src="' + logoRight + '" style="height:70px; width:auto; display:block; margin-left:auto;" />' +
                     '</div>' +
                 '</div>' +
                 '<div style="text-align:center; margin-bottom: 16px;">' +
-                    '<h2 style="font-size:13px; font-weight:bold; text-transform:uppercase; margin:0 0 3px 0; text-decoration:underline;">' + currentSelectedGroupLabel + '</h2>' +
+                    '<h2 style="font-size:13px; font-weight:bold; text-transform:uppercase; margin:0 0 3px 0; text-decoration:underline;">' + title + '</h2>' +
                     '<p style="font-size:10px; margin:0;">Bulan: <strong>' + bulan + ' ' + tahun + '</strong></p>' +
                 '</div>';
 
             let printContent = '';
+            const selectedGroup = 'all';
 
             if (activeTab === 'tab-data') {
-                const element = document.getElementById('preview-modal-body');
-                const sections = element.children;
-                if (sections.length > 0) {
-                    for (let i = 0; i < sections.length; i++) {
-                        const section = sections[i];
-                        const titleEl = section.children[0];
-                        const contentEl = section.children[1];
-                        if (titleEl && contentEl) {
-                            printContent +=
-                                '<div style="margin-bottom: 16px;">' +
-                                    contentEl.innerHTML +
-                                '</div>';
-                        } else {
-                            printContent += section.innerHTML;
+                if (selectedGroup === 'all') {
+                    // Loop through Halaman structure
+                    const pages = Object.keys(groupMapping);
+                    const orientationMap = {
+                        'Halaman 1': 'portrait',
+                        'Halaman 2': 'portrait',
+                        'Halaman 3': 'landscape',
+                        'Halaman 4': 'landscape',
+                        'Halaman 5': 'portrait',
+                        'Halaman 6': 'landscape',
+                        'Halaman 7': 'landscape',
+                        'Halaman 8': 'portrait',
+                    };
+
+                    pages.forEach((pageKey, index) => {
+                        const itemKeys = groupMapping[pageKey];
+                        const orientation = orientationMap[pageKey] || 'portrait';
+                        let pageHtml = '';
+                        let hasDataInPage = false;
+
+                        itemKeys.forEach(key => {
+                            const modal = document.getElementById('modal-' + key);
+                            if (modal) {
+                                const title = modal.querySelector('h2').innerText;
+                                const contentEl = modal.querySelector('.report-modal-content-wrapper');
+                                if (contentEl) {
+                                    pageHtml += `
+                                        <div style="margin-bottom: 1.5rem;">
+                                            <div style="font-weight:bold; font-size:11px; margin-bottom:8px; border-bottom:1px solid #000; padding-bottom:2px;">${title}</div>
+                                            <div>${contentEl.innerHTML}</div>
+                                        </div>
+                                    `;
+                                    hasDataInPage = true;
+                                }
+                            }
+                        });
+
+                        if (hasDataInPage) {
+                            printContent += `
+                                <div class="print-page ${orientation}" style="${index < pages.length - 1 ? 'page-break-after: always;' : ''}">
+                                    ${headerTemplate('LAPORAN BULANAN - ' + pageKey)}
+                                    ${pageHtml}
+                                </div>
+                            `;
                         }
-                    }
+                    });
                 } else {
-                    printContent = element.innerHTML;
+                    // Single page print
+                    const itemKeys = groupMapping[selectedGroup] || [];
+                    let pageHtml = '';
+                    itemKeys.forEach(key => {
+                        const modal = document.getElementById('modal-' + key);
+                        if (modal) {
+                            const title = modal.querySelector('h2').innerText;
+                            const contentEl = modal.querySelector('.report-modal-content-wrapper');
+                            if (contentEl) {
+                                pageHtml += `
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="font-weight:bold; font-size:11px; margin-bottom:8px; border-bottom:1px solid #000; padding-bottom:2px;">${title}</div>
+                                        <div>${contentEl.innerHTML}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    });
+                    printContent = headerTemplate(currentSelectedGroupLabel) + pageHtml;
                 }
             } else {
                 // EXPORT CHARTS
@@ -801,7 +898,7 @@
             }
 
             // Salin konten ke print area
-            printArea.innerHTML = header + printContent;
+            printArea.innerHTML = printContent;
 
             if (activeTab === 'tab-data') {
                 // Strip inline padding/height dan terapkan rata tengah untuk kolom tertentu (hanya untuk tabel)
@@ -913,7 +1010,7 @@
                 createChart('chart-gtk-status', 'bar', sectionData.status, 'Status', colors[3]);
                 createChart('chart-gtk-umur-bar', 'bar', sectionData.umur_bar, 'Umur', colors[4]);
                 createChart('chart-gtk-pendidikan', 'bar', sectionData.pendidikan, 'Pendidikan', colors[5]);
-            } else if (sectionName === 'Kondisi Gedung/Ruang') {
+            } else if (sectionName === 'B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU') {
                 createChart('chart-sarpras-kondisi', 'pie', sectionData.kondisi, 'Kondisi', [colors[1], colors[3]]);
             } else if (sectionName === 'Kehadiran GTK') {
                 createChart('chart-kehadiran-rekap', 'pie', sectionData.rekap, 'Kehadiran', [colors[1], colors[2], colors[3]]);

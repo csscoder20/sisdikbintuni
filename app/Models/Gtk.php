@@ -59,4 +59,24 @@ class Gtk extends Model
     {
         return $this->hasOne(GtkTugasTambahan::class);
     }
+
+    protected static function booted()
+    {
+        static::created(function ($gtk) {
+            // 1. Sync to Sebaran Jam Mengajar (Principals and Teachers only)
+            if ($gtk->jenis_gtk !== 'Tenaga Administrasi') {
+                \App\Models\Mengajar::firstOrCreate([
+                    'gtk_id' => $gtk->id,
+                    'rombel_id' => null,
+                    'mapel_id' => null,
+                ]);
+            }
+
+            // 2. Ensure GtkPendidikan exists
+            \App\Models\GtkPendidikan::firstOrCreate(['gtk_id' => $gtk->id]);
+
+            // 3. Ensure GtkKeuangan exists
+            \App\Models\GtkKeuangan::firstOrCreate(['gtk_id' => $gtk->id]);
+        });
+    }
 }
