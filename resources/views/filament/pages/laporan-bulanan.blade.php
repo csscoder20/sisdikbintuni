@@ -16,16 +16,20 @@
                 display: block !important;
                 font-family: Arial, sans-serif;
                 font-size: 10px;
-                color: #000;
+                color: #000 !important;
                 background: white;
             }
-            #print-area table { width: 100%; border-collapse: collapse !important; margin-bottom: 10px; }
-            #print-area th, #print-area td { border: 1px solid #333 !important; padding: 4px !important; text-align: left !important; font-size: 9px !important; line-height: normal !important; vertical-align: middle !important; }
+            /* Force all text to black in print area */
+            #print-area *:not(canvas) {
+                color: #000 !important;
+            }
+            #print-area table { width: 100%; border-collapse: collapse !important; margin-bottom: 10px; border: 1px solid #000 !important; }
+            #print-area th, #print-area td { border: 1px solid #000 !important; padding: 4px !important; text-align: left !important; font-size: 9px !important; line-height: normal !important; vertical-align: middle !important; color: #000 !important; }
             #print-area th.text-center, #print-area td.text-center { text-align: center !important; }
             #print-area th { background-color: #e8e8e8 !important; font-weight: bold !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            #print-area h2 { font-size: 13px; margin: 0 0 6px 0; }
-            #print-area .print-section { border: 1px solid #ccc; margin-bottom: 20px; page-break-inside: avoid; }
-            #print-area .print-section-title { background: #e8e8e8 !important; padding: 6px 10px; font-weight: bold; border-bottom: 1px solid #ccc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #print-area h2 { font-size: 13px; margin: 0 0 6px 0; color: #000 !important; }
+            #print-area .print-section { border: 1px solid #000; margin-bottom: 20px; page-break-inside: avoid; }
+            #print-area .print-section-title { background: #e8e8e8 !important; padding: 6px 10px; font-weight: bold; border-bottom: 1px solid #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             #print-area .print-section-body { padding: 10px; }
             @page { size: A4 landscape; margin: 12mm; }
         }
@@ -788,7 +792,7 @@
                         '<p style="font-size:11px; margin:0 0 1px 0; font-weight:normal;">DINAS PENDIDIKAN, KEBUDAYAAN, PEMUDA, DAN OLAHRAGA</p>' +
                         '<h1 style="font-size:17px; margin:0 0 1px 0; text-transform:uppercase; font-weight:bold;">' + namaSekolah + '</h1>' +
                         '<p style="font-size:9px; margin:0;">' + alamat + ' - ' + desa + ', ' + kecamatan + ', ' + kabupaten + ', Papua Barat</p>' +
-                        '<p style="font-size:9px; margin:0; font-style:italic; color:blue; text-decoration:underline;">email : ' + printArea.dataset.email + ' Website : ' + printArea.dataset.website + ' Kode Pos: ' + printArea.dataset.kodepos + '</p>' +
+                        '<p style="font-size:9px; margin:0; font-style:italic; color:#000; text-decoration:none;">email : ' + printArea.dataset.email + ' Website : ' + printArea.dataset.website + ' Kode Pos: ' + printArea.dataset.kodepos + '</p>' +
                     '</div>' +
                     '<div style="display:table-cell; width:80px; vertical-align:middle; text-align:right;">' +
                         '<img src="' + logoRight + '" style="height:70px; width:auto; display:block; margin-left:auto;" />' +

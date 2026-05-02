@@ -302,10 +302,17 @@ class OperatorDashboard extends BaseDashboard
 
         return $gtkList->map(function ($gtk) {
             $p = $gtk->pendidikan->first();
+            
+            $gd = $p->gelar_depan ?? '';
+            if ($gd && !str_ends_with($gd, '.')) $gd .= '.';
+            
+            $gb = $p->gelar_belakang ?? '';
+            if ($gb && !str_ends_with($gb, '.')) $gb .= '.';
+            
             return [
                 'label' => $gtk->nama ?? 'Tidak tersedia',
                 'details' => [
-                    'Gelar' => ($p->gelar_depan ? $p->gelar_depan . ' ' : '') . ($p->gelar_belakang ? ', ' . $p->gelar_belakang : '-'),
+                    'Gelar' => trim("$gd $gb") ?: '-',
                     'Tahun Tamat SD' => $p->thn_tamat_sd ?? '-',
                     'Tahun Tamat SMP' => $p->thn_tamat_smp ?? '-',
                     'Tahun Tamat SMA' => $p->thn_tamat_sma ?? '-',
