@@ -426,6 +426,26 @@ class ValidateChecklistAction
                             $writeCategory('pendidikan', $subKategori, $jumlah);
                         }
                     }
+
+                    // Sync laporan_id ke KehadiranGtk (rekap bulanan) untuk periode ini
+                    $gtkIds = \App\Models\Gtk::where('sekolah_id', $sekolahId)->pluck('id');
+                    \App\Models\KehadiranGtk::whereIn('gtk_id', $gtkIds)
+                        ->where('bulan', $month)
+                        ->where('tahun', $year)
+                        ->whereNull('laporan_id')
+                        ->update(['laporan_id' => $laporan->id]);
+
+                    // Sync laporan_id ke GtkKehadiran (absensi harian) untuk periode ini
+                    \App\Models\GtkKehadiran::whereIn('gtk_id', $gtkIds)
+                        ->whereYear('tgl_presensi', $year)
+                        ->whereMonth('tgl_presensi', $month)
+                        ->whereNull('laporan_id')
+                        ->update(['laporan_id' => $laporan->id]);
+
+                    // Sync laporan_id ke Mengajar (sebaran jam mengajar) untuk GTK sekolah ini
+                    \App\Models\Mengajar::whereIn('gtk_id', $gtkIds)
+                        ->whereNull('laporan_id')
+                        ->update(['laporan_id' => $laporan->id]);
                 }
 
                 Notification::make()

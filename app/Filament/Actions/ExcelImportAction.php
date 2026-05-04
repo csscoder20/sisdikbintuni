@@ -55,17 +55,18 @@ class ExcelImportAction extends Action
     protected function mergeSheets(Collection $sheets): Collection
     {
         $primarySheet = $sheets->shift();
-        
-        // Find header row in primary sheet (could be index 0 or 1)
-        $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-0]/', '', (string)$s));
+
+        $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $s));
+
+        // Cari header row di sheet utama (bisa baris 0 atau 1)
         $primaryHeaderIndex = 0;
-        $keyIndex = false;
-        
+        $keyIndex           = false;
+
         foreach ($primarySheet->take(2) as $idx => $row) {
             $foundKey = $row->search(fn($h) => in_array($normalize($h), ['no', 'nourut', 'nik', 'nip']));
             if ($foundKey !== false) {
                 $primaryHeaderIndex = $idx;
-                $keyIndex = $foundKey;
+                $keyIndex           = $foundKey;
                 break;
             }
         }
@@ -75,46 +76,52 @@ class ExcelImportAction extends Action
         }
 
         $primaryHeaders = $primarySheet[$primaryHeaderIndex];
-        $mergedData = [];
-        $headerMap = $primaryHeaders->toArray();
-        
+        $mergedData     = [];
+        $headerMap      = $primaryHeaders->toArray();
+
+        // Kumpulkan data dari sheet utama, key = nilai kolom kunci (NO / NIK / NIP)
+        // Hanya ambil baris yang key-nya adalah angka positif (skip baris instruksi)
         foreach ($primarySheet->slice($primaryHeaderIndex + 1) as $row) {
-            $key = (string) ($row[$keyIndex] ?? '');
-            if ($key !== '') {
+            $key = trim((string) ($row[$keyIndex] ?? ''));
+            if ($key !== '' && is_numeric($key) && (int)$key > 0) {
                 $mergedData[$key] = $row->toArray();
             }
         }
 
         foreach ($sheets as $sheet) {
-            // Find header row in this sheet
-            $headerIndex = 0;
+            // Cari header row & kolom kunci di sheet tambahan
+            $headerIndex  = 0;
             $sheetKeyIndex = false;
+
             foreach ($sheet->take(2) as $idx => $row) {
                 $foundKey = $row->search(fn($h) => in_array($normalize($h), ['no', 'nourut', 'nik', 'nip']));
                 if ($foundKey !== false) {
-                    $headerIndex = $idx;
+                    $headerIndex   = $idx;
                     $sheetKeyIndex = $foundKey;
                     break;
                 }
             }
-            
+
             if ($sheetKeyIndex === false) continue;
 
-            $headers = $sheet[$headerIndex];
+            $headers    = $sheet[$headerIndex];
             $newColumns = [];
             foreach ($headers as $idx => $header) {
                 if ($idx === $sheetKeyIndex) continue;
-                // If header already exists in primary sheet, we don't need to add it as a "new column" 
-                // but we might want to update the data if it's different.
-                // For simplicity, we only add columns that were NOT in the primary sheet.
-                if (!in_array($header, $headerMap)) {
+                // Lewati kolom yang sudah ada di sheet utama (mis. NAMA GTK di sheet PENDIDIKAN)
+                $alreadyExists = collect($headerMap)->contains(
+                    fn($h) => $normalize($h) === $normalize($header)
+                );
+                if (!$alreadyExists) {
                     $newColumns[$idx] = count($headerMap);
-                    $headerMap[] = $header;
+                    $headerMap[]      = $header;
                 }
             }
 
             foreach ($sheet->slice($headerIndex + 1) as $row) {
-                $key = (string) ($row[$sheetKeyIndex] ?? '');
+                $key = trim((string) ($row[$sheetKeyIndex] ?? ''));
+                // Coba cocokkan langsung, lalu coba cocokkan sebagai angka
+                // (sheet PENDIDIKAN/REKENING pakai NO integer, sheet IDENTITAS key-nya juga NO)
                 if (isset($mergedData[$key])) {
                     foreach ($newColumns as $oldIdx => $newIdx) {
                         $mergedData[$key][$newIdx] = $row[$oldIdx] ?? null;
@@ -123,7 +130,8 @@ class ExcelImportAction extends Action
             }
         }
 
-        return collect([collect($headerMap)])->concat(collect(array_values($mergedData))->map(fn($r) => collect($r)));
+        return collect([collect($headerMap)])
+            ->concat(collect(array_values($mergedData))->map(fn($r) => collect($r)));
     }
 
     public function importer(string $importerClass): static
@@ -159,11 +167,26 @@ class ExcelImportAction extends Action
             throw new \Exception('Tidak ada data yang terbaca dari berkas Excel.');
         }
 
-        $headerRow = $rows->shift(); // Row 1: Header
-        
-        $isGtkImport = str_contains($this->importerClass, 'GtkImporter');
-        if ($isGtkImport && $rows->isNotEmpty()) {
-            $rows->shift();
+        $headerRow = $rows->shift(); // Baris header pertama
+
+        // Skip baris instruksi (baris ke-2) jika ada.
+        // Deteksi otomatis: baris ke-2 dianggap instruksi jika TIDAK ada satu pun
+        // nilai yang cocok dengan kolom importer (artinya isinya teks petunjuk, bukan data).
+        if ($rows->isNotEmpty()) {
+            $columns      = $this->importerClass::getColumns();
+            $normalize    = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $s));
+            $validHeaders = collect($columns)->map(fn($c) => $normalize($c->getLabel() ?? $c->getName()));
+
+            $secondRow    = $rows->first();
+            $secondValues = $secondRow->filter()->map(fn($v) => $normalize($v));
+
+            // Hitung berapa nilai baris ke-2 yang cocok dengan header kolom
+            $matchCount = $secondValues->intersect($validHeaders)->count();
+
+            // Jika tidak ada satupun yang cocok dengan nama kolom → itu baris instruksi, skip
+            if ($matchCount === 0) {
+                $rows->shift();
+            }
         }
 
         $columns = $this->importerClass::getColumns();

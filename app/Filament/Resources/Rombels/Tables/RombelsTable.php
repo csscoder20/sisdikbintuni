@@ -32,6 +32,10 @@ class RombelsTable
                     ->searchable(),
                 TextColumn::make('tingkat')
                     ->sortable(),
+                TextColumn::make('siswa_count')
+                    ->counts('siswa')
+                    ->label('Jumlah Siswa')
+                    ->sortable(),
                 TextColumn::make('sekolah.nama')
                     ->sortable(),
                 TextColumn::make('created_at')

@@ -614,139 +614,140 @@
             </div>
         </div>
 
-        {{-- ================================================================ --}}
-        {{-- Tabel 4: Siswa Menurut Daerah Asal --}}
-        {{-- ================================================================ --}}
-        <div class="ks-card" style="margin-bottom:1.25rem;">
-            <div class="ks-card-header"
-                style="background:linear-gradient(135deg,#fed7aa33,#fdba7411); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
-                <h2 style="color:#b45309; flex-grow: 1;">Jumlah Siswa Menurut Daerah Asal</h2>
-            </div>
-
-            <div class="ks-table-wrapper">
-                <table class="ks-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">NO</th>
-                            <th rowspan="2" style="text-align:left;min-width:140px;">KELAS / ROMBEL</th>
-                            <th colspan="3">PAPUA</th>
-                            <th colspan="3">NON-PAPUA</th>
-                        </tr>
-                        <tr>
-                            <th>L</th>
-                            <th>P</th>
-                            <th class="ks-col-jml">JML</th>
-                            <th>L</th>
-                            <th>P</th>
-                            <th class="ks-col-jml">JML</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($siswaPDaerah as $item)
-                            <tr wire:key="daerah-{{ $item['rombel_id'] ?? $loop->index }}">
-                                <td style="text-align:center;">{{ $loop->iteration }}</td>
-                                <td>{{ $item['nama_rombel'] ?? '-' }}</td>
-                                <td style="text-align:center;">{{ $item['papua_l'] ?? 0 }}</td>
-                                <td style="text-align:center;">{{ $item['papua_p'] ?? 0 }}</td>
-                                <td style="text-align:center;" class="ks-col-jml">{{ $item['papua_jml'] ?? 0 }}</td>
-                                <td style="text-align:center;">{{ $item['non_papua_l'] ?? 0 }}</td>
-                                <td style="text-align:center;">{{ $item['non_papua_p'] ?? 0 }}</td>
-                                <td style="text-align:center;" class="ks-col-jml">{{ $item['non_papua_jml'] ?? 0 }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" style="text-align:center;padding:2rem;color:var(--ks-text-muted);">
-                                    Tidak ada data
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                    <tfoot>
-                        <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
-                            <td colspan="2" style="text-align: center; padding-right: 1.5rem;">TOTAL KESELURUHAN
-                            </td>
-                            <td style="text-align:center !important;">{{ $totalSiswaPDaerah['papua_l'] }}</td>
-                            <td style="text-align:center;">{{ $totalSiswaPDaerah['papua_p'] }}</td>
-                            <td style="text-align:center;" class="ks-col-jml">{{ $totalSiswaPDaerah['papua_jml'] }}
-                            </td>
-                            <td style="text-align:center;">{{ $totalSiswaPDaerah['non_papua_l'] }}</td>
-                            <td style="text-align:center;">{{ $totalSiswaPDaerah['non_papua_p'] }}</td>
-                            <td style="text-align:center;" class="ks-col-jml">
-                                {{ $totalSiswaPDaerah['non_papua_jml'] }}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div class="ks-pagination-container">
-                <div class="ks-pagination-row" style="justify-content:flex-end;">
-                    <div class="ks-pagination-info">
-                        @if ($siswaPDaerah->total() > 0)
-                            {{ $siswaPDaerah->firstItem() }}–{{ $siswaPDaerah->lastItem() }}
-                            dari {{ $siswaPDaerah->total() }} data
-                        @endif
-                    </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); gap: 1.25rem; margin-bottom: 1.25rem; align-items: start;">
+            {{-- ================================================================ --}}
+            {{-- Tabel 4: Siswa Menurut Daerah Asal --}}
+            {{-- ================================================================ --}}
+            <div class="ks-card" style="margin-bottom:0;">
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#fed7aa33,#fdba7411); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#b45309; flex-grow: 1;">Jumlah Siswa Menurut Daerah Asal</h2>
                 </div>
-                @if ($siswaPDaerah->hasPages())
-                    <div style="margin-top:.5rem;">
-                        {{ $siswaPDaerah->onEachSide(1)->links('pagination::ks-pagination') }}
-                    </div>
-                @endif
-            </div>
-        </div>
 
-        {{-- ================================================================ --}}
-        {{-- Tabel 5: Siswa Disabilitas --}}
-        {{-- ================================================================ --}}
-        <div class="ks-card" style="margin-bottom:1.25rem;">
-            <div class="ks-card-header"
-                style="background:linear-gradient(135deg,#fecaca33,#fca5a511); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
-                <h2 style="color:#b91c1c; flex-grow: 1;">Jumlah Siswa Disabilitas</h2>
-            </div>
-
-            <div class="ks-table-wrapper">
-                <table class="ks-table">
-                    <thead>
-                        <tr>
-                            <th style="width:40px;">NO</th>
-                            <th style="text-align:left; min-width:180px;">JENIS DISABILITAS</th>
-                            <th>LAKI-LAKI</th>
-                            <th>PEREMPUAN</th>
-                            <th class="ks-col-jml">JUMLAH</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($siswaDisabilitas as $item)
-                            <tr wire:key="disabilitas-{{ $loop->index }}">
-                                <td style="text-align:center;">{{ $loop->iteration }}</td>
-                                <td>{{ $item['jenis_disabilitas'] ?? '-' }}</td>
-                                <td style="text-align:center;">{{ $item['laki_laki'] ?? 0 }}</td>
-                                <td style="text-align:center;">{{ $item['perempuan'] ?? 0 }}</td>
-                                <td style="text-align:center;" class="ks-col-jml">{{ $item['total'] ?? 0 }}</td>
-                            </tr>
-                        @empty
+                <div class="ks-table-wrapper">
+                    <table class="ks-table">
+                        <thead>
                             <tr>
-                                <td colspan="5" style="text-align:center;padding:2rem;color:var(--ks-text-muted);">
-                                    Tidak ada data
+                                <th rowspan="2">NO</th>
+                                <th rowspan="2" style="text-align:left;min-width:140px;">KELAS / ROMBEL</th>
+                                <th colspan="3">PAPUA</th>
+                                <th colspan="3">NON-PAPUA</th>
+                            </tr>
+                            <tr>
+                                <th>L</th>
+                                <th>P</th>
+                                <th class="ks-col-jml">JML</th>
+                                <th>L</th>
+                                <th>P</th>
+                                <th class="ks-col-jml">JML</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($siswaPDaerah as $item)
+                                <tr wire:key="daerah-{{ $item['rombel_id'] ?? $loop->index }}">
+                                    <td style="text-align:center;">{{ $loop->iteration }}</td>
+                                    <td>{{ $item['nama_rombel'] ?? '-' }}</td>
+                                    <td style="text-align:center;">{{ $item['papua_l'] ?? 0 }}</td>
+                                    <td style="text-align:center;">{{ $item['papua_p'] ?? 0 }}</td>
+                                    <td style="text-align:center;" class="ks-col-jml">{{ $item['papua_jml'] ?? 0 }}</td>
+                                    <td style="text-align:center;">{{ $item['non_papua_l'] ?? 0 }}</td>
+                                    <td style="text-align:center;">{{ $item['non_papua_p'] ?? 0 }}</td>
+                                    <td style="text-align:center;" class="ks-col-jml">{{ $item['non_papua_jml'] ?? 0 }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" style="text-align:center;padding:2rem;color:var(--ks-text-muted);">
+                                        Tidak ada data
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
+                                <td colspan="2" style="text-align: center; padding-right: 1.5rem;">TOTAL KESELURUHAN
+                                </td>
+                                <td style="text-align:center !important;">{{ $totalSiswaPDaerah['papua_l'] }}</td>
+                                <td style="text-align:center;">{{ $totalSiswaPDaerah['papua_p'] }}</td>
+                                <td style="text-align:center;" class="ks-col-jml">{{ $totalSiswaPDaerah['papua_jml'] }}
+                                </td>
+                                <td style="text-align:center;">{{ $totalSiswaPDaerah['non_papua_l'] }}</td>
+                                <td style="text-align:center;">{{ $totalSiswaPDaerah['non_papua_p'] }}</td>
+                                <td style="text-align:center;" class="ks-col-jml">
+                                    {{ $totalSiswaPDaerah['non_papua_jml'] }}
                                 </td>
                             </tr>
-                        @endforelse
-                    </tbody>
-                    <tfoot>
-                        <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
-                            <td colspan="2" style="text-align: center; padding-right: 1.5rem;">TOTAL KESELURUHAN
-                            </td>
-                            <td style="text-align:center !important;">{{ $totalSiswaDisabilitas['l'] }}</td>
-                            <td style="text-align:center;">{{ $totalSiswaDisabilitas['p'] }}</td>
-                            <td style="text-align:center;" class="ks-col-jml">{{ $totalSiswaDisabilitas['total'] }}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="ks-pagination-container">
+                    <div class="ks-pagination-row" style="justify-content:flex-end;">
+                        <div class="ks-pagination-info">
+                            @if ($siswaPDaerah->total() > 0)
+                                {{ $siswaPDaerah->firstItem() }}–{{ $siswaPDaerah->lastItem() }}
+                                dari {{ $siswaPDaerah->total() }} data
+                            @endif
+                        </div>
+                    </div>
+                    @if ($siswaPDaerah->hasPages())
+                        <div style="margin-top:.5rem;">
+                            {{ $siswaPDaerah->onEachSide(1)->links('pagination::ks-pagination') }}
+                        </div>
+                    @endif
+                </div>
             </div>
 
+            {{-- ================================================================ --}}
+            {{-- Tabel 5: Siswa Disabilitas --}}
+            {{-- ================================================================ --}}
+            <div class="ks-card" style="margin-bottom:0;">
+                <div class="ks-card-header"
+                    style="background:linear-gradient(135deg,#fecaca33,#fca5a511); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <h2 style="color:#b91c1c; flex-grow: 1;">Jumlah Siswa Disabilitas</h2>
+                </div>
+
+                <div class="ks-table-wrapper">
+                    <table class="ks-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">NO</th>
+                                <th style="text-align:left; min-width:180px;">JENIS DISABILITAS</th>
+                                <th>LAKI-LAKI</th>
+                                <th>PEREMPUAN</th>
+                                <th class="ks-col-jml">JUMLAH</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($siswaDisabilitas as $item)
+                                <tr wire:key="disabilitas-{{ $loop->index }}">
+                                    <td style="text-align:center;">{{ $loop->iteration }}</td>
+                                    <td>{{ $item['jenis_disabilitas'] ?? '-' }}</td>
+                                    <td style="text-align:center;">{{ $item['laki_laki'] ?? 0 }}</td>
+                                    <td style="text-align:center;">{{ $item['perempuan'] ?? 0 }}</td>
+                                    <td style="text-align:center;" class="ks-col-jml">{{ $item['total'] ?? 0 }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="text-align:center;padding:2rem;color:var(--ks-text-muted);">
+                                        Tidak ada data
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
+                                <td colspan="2" style="text-align: center; padding-right: 1.5rem;">TOTAL KESELURUHAN
+                                </td>
+                                <td style="text-align:center !important;">{{ $totalSiswaDisabilitas['l'] }}</td>
+                                <td style="text-align:center;">{{ $totalSiswaDisabilitas['p'] }}</td>
+                                <td style="text-align:center;" class="ks-col-jml">{{ $totalSiswaDisabilitas['total'] }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
         </div>
 
         {{-- ================================================================ --}}

@@ -338,96 +338,192 @@
                 </div>
             </div>
 
-            {{-- Tabel 2: Daerah Asal --}}
-            <div class="ks-card" wire:key="card-daerah">
-                <div class="ks-card-header"
-                    style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
-                    <h2 style="color:#15803d; flex-grow: 1;">Jumlah GTK Berdasarkan Daerah Asal</h2>
-                </div>
-                <div class="ks-table-wrapper">
-                    <table class="ks-table">
-                        <colgroup>
-                            <col class="ksc-no">
-                            <col class="ksc-nama">
-                            @for ($i = 0; $i < 6; $i++)
-                                <col class="ksc-num">
-                            @endfor
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th rowspan="2" style="width: 30px;">NO</th>
-                                <th rowspan="2" class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
-                                <th colspan="3">PAPUA</th>
-                                <th colspan="3">NON PAPUA</th>
-                            </tr>
-                            <tr>
-                                <th class="ks-w-lp">L</th>
-                                <th class="ks-w-lp">P</th>
-                                <th class="ks-w-jml ks-col-jml">JML</th>
-                                <th class="ks-w-lp">L</th>
-                                <th class="ks-w-lp">P</th>
-                                <th class="ks-w-jml ks-col-jml">JML</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($gtkDaerah as $item)
-                                <tr wire:key="row-daerah-{{ $loop->index }}">
-                                    <td class="ks-w-no">
-                                        {{ ($gtkDaerah->currentPage() - 1) * $gtkDaerah->perPage() + $loop->iteration }}
-                                    </td>
-                                    <td class="ks-w-nama">{{ $item->jenis_gtk }}</td>
-                                    <td>{{ $item->papua_l }}</td>
-                                    <td>{{ $item->papua_p }}</td>
-                                    <td class="ks-col-jml">{{ $item->papua_jml }}</td>
-                                    <td>{{ $item->non_papua_l }}</td>
-                                    <td>{{ $item->non_papua_p }}</td>
-                                    <td class="ks-col-jml">{{ $item->non_papua_jml }}</td>
-                                </tr>
-                            @empty
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); gap: 1.25rem; margin-bottom: 2rem; align-items: start;">
+                {{-- Tabel 2: Daerah Asal --}}
+                <div class="ks-card" wire:key="card-daerah" style="margin-bottom:0;">
+                    <div class="ks-card-header"
+                        style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                        <h2 style="color:#15803d; flex-grow: 1;">Jumlah GTK Berdasarkan Daerah Asal</h2>
+                    </div>
+                    <div class="ks-table-wrapper">
+                        <table class="ks-table">
+                            <colgroup>
+                                <col class="ksc-no">
+                                <col class="ksc-nama">
+                                @for ($i = 0; $i < 6; $i++)
+                                    <col class="ksc-num">
+                                @endfor
+                            </colgroup>
+                            <thead>
                                 <tr>
-                                    <td colspan="8" style="text-align:center;padding:2rem;">Data tidak tersedia</td>
+                                    <th rowspan="2" style="width: 30px;">NO</th>
+                                    <th rowspan="2" class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
+                                    <th colspan="3">PAPUA</th>
+                                    <th colspan="3">NON PAPUA</th>
                                 </tr>
-                            @endforelse
-                        </tbody>
-                        <tfoot>
-                            <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
-                                <td colspan="2" style="text-align: center">TOTAL KESELURUHAN</td>
-                                <td>{{ $totalGtkDaerah['papua_l'] ?? 0 }}</td>
-                                <td>{{ $totalGtkDaerah['papua_p'] ?? 0 }}</td>
-                                <td class="ks-col-jml">{{ $totalGtkDaerah['papua_jml'] ?? 0 }}</td>
+                                <tr>
+                                    <th class="ks-w-lp">L</th>
+                                    <th class="ks-w-lp">P</th>
+                                    <th class="ks-w-jml ks-col-jml">JML</th>
+                                    <th class="ks-w-lp">L</th>
+                                    <th class="ks-w-lp">P</th>
+                                    <th class="ks-w-jml ks-col-jml">JML</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($gtkDaerah as $item)
+                                    <tr wire:key="row-daerah-{{ $loop->index }}">
+                                        <td class="ks-w-no">
+                                            {{ ($gtkDaerah->currentPage() - 1) * $gtkDaerah->perPage() + $loop->iteration }}
+                                        </td>
+                                        <td class="ks-w-nama">{{ $item->jenis_gtk }}</td>
+                                        <td>{{ $item->papua_l }}</td>
+                                        <td>{{ $item->papua_p }}</td>
+                                        <td class="ks-col-jml">{{ $item->papua_jml }}</td>
+                                        <td>{{ $item->non_papua_l }}</td>
+                                        <td>{{ $item->non_papua_p }}</td>
+                                        <td class="ks-col-jml">{{ $item->non_papua_jml }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" style="text-align:center;padding:2rem;">Data tidak tersedia</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
+                                    <td colspan="2" style="text-align: center">TOTAL KESELURUHAN</td>
+                                    <td>{{ $totalGtkDaerah['papua_l'] ?? 0 }}</td>
+                                    <td>{{ $totalGtkDaerah['papua_p'] ?? 0 }}</td>
+                                    <td class="ks-col-jml">{{ $totalGtkDaerah['papua_jml'] ?? 0 }}</td>
 
-                                <td>{{ $totalGtkDaerah['non_papua_l'] ?? 0 }}</td>
-                                <td>{{ $totalGtkDaerah['non_papua_p'] ?? 0 }}</td>
-                                <td class="ks-col-jml">{{ $totalGtkDaerah['non_papua_jml'] ?? 0 }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                    <td>{{ $totalGtkDaerah['non_papua_l'] ?? 0 }}</td>
+                                    <td>{{ $totalGtkDaerah['non_papua_p'] ?? 0 }}</td>
+                                    <td class="ks-col-jml">{{ $totalGtkDaerah['non_papua_jml'] ?? 0 }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="ks-pagination-container">
+                        <div class="ks-pagination-row">
+                            <div class="ks-per-page">
+                                <span>Tampilkan</span>
+                                <select wire:model.live="perPage">
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                                <span>data</span>
+                            </div>
+
+                            @if ($gtkDaerah->hasPages())
+                                <div class="ks-pagination-links">
+                                    {{ $gtkDaerah->onEachSide(1)->links('pagination::ks-pagination') }}
+                                </div>
+                            @endif
+
+                            <div class="ks-pagination-info">
+                                @if ($gtkDaerah->total() > 0)
+                                    {{ $gtkDaerah->firstItem() }}–{{ $gtkDaerah->lastItem() }}
+                                    dari {{ $gtkDaerah->total() }} data
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="ks-pagination-container">
-                    <div class="ks-pagination-row">
-                        <div class="ks-per-page">
-                            <span>Tampilkan</span>
-                            <select wire:model.live="perPage">
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                            </select>
-                            <span>data</span>
-                        </div>
+                {{-- Tabel 5: Pendidikan --}}
+                <div class="ks-card" wire:key="card-pendidikan" style="margin-bottom:0;">
+                    <div class="ks-card-header"
+                        style="background:linear-gradient(135deg,#fff1f233,#ffe4e611); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                        <h2 style="color:#be123c; flex-grow: 1;">Jumlah GTK Berdasarkan Pendidikan Terakhir</h2>
+                    </div>
+                    <div class="ks-table-wrapper">
+                        <table class="ks-table">
+                            <colgroup>
+                                <col class="ksc-no">
+                                <col class="ksc-nama">
+                                @for ($i = 0; $i < 7; $i++)
+                                    <col class="ksc-num">
+                                @endfor
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th style="width:30px;">NO</th>
+                                    <th class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
+                                    <th class="ks-w-jml">SLTA</th>
+                                    <th class="ks-w-jml">DI</th>
+                                    <th class="ks-w-jml">DII</th>
+                                    <th class="ks-w-jml">DIII</th>
+                                    <th class="ks-w-jml">S1</th>
+                                    <th class="ks-w-jml">S2</th>
+                                    <th class="ks-w-jml">S3</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($gtkPendidikan as $item)
+                                    <tr wire:key="row-pend-{{ $loop->index }}">
+                                        <td class="ks-w-no">
+                                            {{ ($gtkPendidikan->currentPage() - 1) * $gtkPendidikan->perPage() + $loop->iteration }}
+                                        </td>
+                                        <td class="ks-w-nama">{{ $item->jenis_gtk }}</td>
+                                        <td>{{ $item->slta }}</td>
+                                        <td>{{ $item->di }}</td>
+                                        <td>{{ $item->dii }}</td>
+                                        <td>{{ $item->diii }}</td>
+                                        <td>{{ $item->s1 }}</td>
+                                        <td>{{ $item->s2 }}</td>
+                                        <td>{{ $item->s3 }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" style="text-align:center;padding:2rem;">Data tidak tersedia
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
+                                    <td colspan="2" style="text-align: center">TOTAL KESELURUHAN</td>
+                                    <td>{{ $totalGtkPendidikan['slta'] }}</td>
+                                    <td>{{ $totalGtkPendidikan['di'] }}</td>
+                                    <td>{{ $totalGtkPendidikan['dii'] }}</td>
+                                    <td>{{ $totalGtkPendidikan['diii'] }}</td>
+                                    <td>{{ $totalGtkPendidikan['s1'] }}</td>
+                                    <td>{{ $totalGtkPendidikan['s2'] }}</td>
+                                    <td>{{ $totalGtkPendidikan['s3'] }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
-                        @if ($gtkDaerah->hasPages())
-                            <div class="ks-pagination-links">
-                                {{ $gtkDaerah->onEachSide(1)->links('pagination::ks-pagination') }}
+                    <div class="ks-pagination-container">
+                        <div class="ks-pagination-row">
+                            <div class="ks-per-page">
+                                <span>Tampilkan</span>
+                                <select wire:model.live="perPage">
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                                <span>data</span>
                             </div>
-                        @endif
 
-                        <div class="ks-pagination-info">
-                            @if ($gtkDaerah->total() > 0)
-                                {{ $gtkDaerah->firstItem() }}–{{ $gtkDaerah->lastItem() }}
-                                dari {{ $gtkDaerah->total() }} data
+                            @if ($gtkPendidikan->hasPages())
+                                <div class="ks-pagination-links">
+                                    {{ $gtkPendidikan->onEachSide(1)->links('pagination::ks-pagination') }}
+                                </div>
                             @endif
+
+                            <div class="ks-pagination-info">
+                                @if ($gtkPendidikan->total() > 0)
+                                    {{ $gtkPendidikan->firstItem() }}–{{ $gtkPendidikan->lastItem() }}
+                                    dari {{ $gtkPendidikan->total() }} data
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -665,100 +761,6 @@
                             @if ($gtkUmur->total() > 0)
                                 {{ $gtkUmur->firstItem() }}–{{ $gtkUmur->lastItem() }}
                                 dari {{ $gtkUmur->total() }} data
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Tabel 5: Pendidikan --}}
-            <div class="ks-card" wire:key="card-pendidikan">
-                <div class="ks-card-header"
-                    style="background:linear-gradient(135deg,#fff1f233,#ffe4e611); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
-                    <h2 style="color:#be123c; flex-grow: 1;">Jumlah GTK Berdasarkan Pendidikan Terakhir</h2>
-                </div>
-                <div class="ks-table-wrapper">
-                    <table class="ks-table">
-                        <colgroup>
-                            <col class="ksc-no">
-                            <col class="ksc-nama">
-                            @for ($i = 0; $i < 7; $i++)
-                                <col class="ksc-num">
-                            @endfor
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th style="width:30px;">NO</th>
-                                <th class="ks-w-nama" style="text-align: center !important;">JENIS GTK</th>
-                                <th class="ks-w-jml">SLTA</th>
-                                <th class="ks-w-jml">DI</th>
-                                <th class="ks-w-jml">DII</th>
-                                <th class="ks-w-jml">DIII</th>
-                                <th class="ks-w-jml">S1</th>
-                                <th class="ks-w-jml">S2</th>
-                                <th class="ks-w-jml">S3</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($gtkPendidikan as $item)
-                                <tr wire:key="row-pend-{{ $loop->index }}">
-                                    <td class="ks-w-no">
-                                        {{ ($gtkPendidikan->currentPage() - 1) * $gtkPendidikan->perPage() + $loop->iteration }}
-                                    </td>
-                                    <td class="ks-w-nama">{{ $item->jenis_gtk }}</td>
-                                    <td>{{ $item->slta }}</td>
-                                    <td>{{ $item->di }}</td>
-                                    <td>{{ $item->dii }}</td>
-                                    <td>{{ $item->diii }}</td>
-                                    <td>{{ $item->s1 }}</td>
-                                    <td>{{ $item->s2 }}</td>
-                                    <td>{{ $item->s3 }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="10" style="text-align:center;padding:2rem;">Data tidak tersedia
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                        <tfoot>
-                            <tr style="background-color: var(--ks-th-bg); font-weight: 800;">
-                                <td colspan="2" style="text-align: center">TOTAL KESELURUHAN</td>
-                                <td>{{ $totalGtkPendidikan['slta'] }}</td>
-                                <td>{{ $totalGtkPendidikan['di'] }}</td>
-                                <td>{{ $totalGtkPendidikan['dii'] }}</td>
-                                <td>{{ $totalGtkPendidikan['diii'] }}</td>
-                                <td>{{ $totalGtkPendidikan['s1'] }}</td>
-                                <td>{{ $totalGtkPendidikan['s2'] }}</td>
-                                <td>{{ $totalGtkPendidikan['s3'] }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-
-                <div class="ks-pagination-container">
-                    <div class="ks-pagination-row">
-                        <div class="ks-per-page">
-                            <span>Tampilkan</span>
-                            <select wire:model.live="perPage">
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                            </select>
-                            <span>data</span>
-                        </div>
-
-                        @if ($gtkPendidikan->hasPages())
-                            <div class="ks-pagination-links">
-                                {{ $gtkPendidikan->onEachSide(1)->links('pagination::ks-pagination') }}
-                            </div>
-                        @endif
-
-                        <div class="ks-pagination-info">
-                            @if ($gtkPendidikan->total() > 0)
-                                {{ $gtkPendidikan->firstItem() }}–{{ $gtkPendidikan->lastItem() }}
-                                dari {{ $gtkPendidikan->total() }} data
                             @endif
                         </div>
                     </div>

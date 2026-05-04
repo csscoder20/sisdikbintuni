@@ -181,9 +181,9 @@ class SiswaImporter extends Importer
             $month = now()->month;
             $tahunAjaran = ($month >= 7) ? "$year/".($year + 1) : ($year - 1)."/$year";
 
-            $siswa->rombel()->syncWithoutDetaching([
-                $rombel->id => ['tahun_ajaran' => $tahunAjaran],
-            ]);
+            // Enforce 1 rombel per year by detaching existing for the same year first
+            $siswa->rombel()->wherePivot('tahun_ajaran', $tahunAjaran)->detach();
+            $siswa->rombel()->attach($rombel->id, ['tahun_ajaran' => $tahunAjaran]);
         } else {
             // Clear the invalid mapping
             $siswa->update(['kelas_rombel' => null]);

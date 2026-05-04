@@ -245,12 +245,69 @@ class KeadaanSiswa extends Page
         $rombels = \App\Models\Rombel::where('sekolah_id', $tenantId)->get();
 
         if ($laporanId) {
-            $query = LaporanSiswa::with(['rombel', 'rekap'])
-                ->where('laporan_id', $laporanId);
-            $laporanSiswas = $query->get();
+            $laporanSiswas = LaporanSiswa::with(['rombel', 'rekap'])
+                ->where('laporan_id', $laporanId)
+                ->get()
+                ->keyBy('rombel_id');
 
-            return $laporanSiswas->map(function ($ls) {
-                $rekaps = $ls->rekap->groupBy('kategori');
+            $data = $rombels->map(function ($rombel) use ($laporanSiswas) {
+                $ls = $laporanSiswas->get($rombel->id);
+                
+                if ($ls) {
+                    $rekaps = $ls->rekap->groupBy('kategori');
+                    $getRekap = function ($cat) use ($rekaps) {
+                        $item = $rekaps->get($cat)?->first();
+                        return ['l' => $item?->laki_laki ?? 0, 'p' => $item?->perempuan ?? 0, 'jml' => $item?->total ?? 0];
+                    };
+                    $awal = $getRekap('awal_bulan');
+                    $mutasi_masuk = $getRekap('mutasi_masuk');
+                    $mutasi_keluar = $getRekap('mutasi_keluar');
+                    $putus = $getRekap('putus_sekolah');
+                    $mengulang = $getRekap('mengulang');
+                    $akhir = $getRekap('akhir_bulan');
+
+                    return [
+                        'rombel_id' => $ls->rombel_id,
+                        'nama_rombel' => $ls->rombel?->nama ?? 'Tidak Diketahui',
+                        'awal_bulan_l' => $awal['l'],
+                        'awal_bulan_p' => $awal['p'],
+                        'awal_bulan_jml' => $awal['jml'],
+                        'mutasi_l' => $mutasi_masuk['l'],
+                        'mutasi_p' => $mutasi_masuk['p'],
+                        'mutasi_jml' => $mutasi_masuk['jml'],
+                        'mutasi_keluar_l' => $mutasi_keluar['l'],
+                        'mutasi_keluar_p' => $mutasi_keluar['p'],
+                        'mutasi_keluar_jml' => $mutasi_keluar['jml'],
+                        'putus_sekolah_l' => $putus['l'],
+                        'putus_sekolah_p' => $putus['p'],
+                        'putus_sekolah_jml' => $putus['jml'],
+                        'mengulang_l' => $mengulang['l'],
+                        'mengulang_p' => $mengulang['p'],
+                        'mengulang_jml' => $mengulang['jml'],
+                        'akhir_bulan_l' => $akhir['l'],
+                        'akhir_bulan_p' => $akhir['p'],
+                        'akhir_bulan_jml' => $akhir['jml'],
+                    ];
+                } else {
+                    return [
+                        'rombel_id' => $rombel->id,
+                        'nama_rombel' => $rombel->nama,
+                        'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0,
+                        'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0,
+                        'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0,
+                        'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0,
+                        'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0,
+                        'akhir_bulan_l' => 0, 'akhir_bulan_p' => 0, 'akhir_bulan_jml' => 0,
+                    ];
+                }
+            });
+
+            // Tambahkan data TANPA ROMBEL jika ada di snapshot (rombel_id null)
+            $lsNone = $laporanSiswas->get(""); // keyBy('rombel_id') handles null as empty string key sometimes or check specifically
+            if (!$lsNone) $lsNone = $laporanSiswas->get(null);
+            
+            if ($lsNone) {
+                $rekaps = $lsNone->rekap->groupBy('kategori');
                 $getRekap = function ($cat) use ($rekaps) {
                     $item = $rekaps->get($cat)?->first();
                     return ['l' => $item?->laki_laki ?? 0, 'p' => $item?->perempuan ?? 0, 'jml' => $item?->total ?? 0];
@@ -262,9 +319,9 @@ class KeadaanSiswa extends Page
                 $mengulang = $getRekap('mengulang');
                 $akhir = $getRekap('akhir_bulan');
 
-                return [
-                    'rombel_id' => $ls->rombel_id,
-                    'nama_rombel' => $ls->rombel?->nama ?? 'Tidak Diketahui',
+                $data->push([
+                    'rombel_id' => 'none',
+                    'nama_rombel' => 'TANPA ROMBEL',
                     'awal_bulan_l' => $awal['l'],
                     'awal_bulan_p' => $awal['p'],
                     'awal_bulan_jml' => $awal['jml'],
@@ -283,8 +340,10 @@ class KeadaanSiswa extends Page
                     'akhir_bulan_l' => $akhir['l'],
                     'akhir_bulan_p' => $akhir['p'],
                     'akhir_bulan_jml' => $akhir['jml'],
-                ];
-            });
+                ]);
+            }
+
+            return $data;
         }
 
         // LIVE DATA

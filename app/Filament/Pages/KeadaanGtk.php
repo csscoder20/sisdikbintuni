@@ -262,6 +262,11 @@ class KeadaanGtk extends Page
 
     public function getTabelGtkByPangkat()
     {
+        $laporanId = $this->getActiveLaporanId();
+        if (!$laporanId) {
+            return collect();
+        }
+
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
 
         return Gtk::where('sekolah_id', $tenantId)
@@ -275,84 +280,67 @@ class KeadaanGtk extends Page
 
     protected function getGtkAgamaCollection(?int $laporanId = null)
     {
-        if ($laporanId) {
-            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
-                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
-
+        $categories = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
+        
+        if (!$laporanId) {
+            return collect($categories)->map(function ($type) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
                 foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $agama) {
-                    $row->{$agama . '_l'} = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_l");
-                    $row->{$agama . '_p'} = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_p");
-                    $storedTotal = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_jml");
-                    $row->{$agama . '_jml'} = $storedTotal ?: $row->{$agama . '_l'} + $row->{$agama . '_p'};
+                    $row->{$agama . '_l'} = 0; $row->{$agama . '_p'} = 0; $row->{$agama . '_jml'} = 0;
                 }
-
                 return $row;
             });
         }
 
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        return Gtk::where('sekolah_id', $tenantId)
-            ->select('jenis_gtk', 
-                DB::raw("SUM(CASE WHEN agama ILIKE '%islam%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as islam_l"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%islam%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as islam_p"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%islam%' THEN 1 ELSE 0 END) as islam_jml"),
-                DB::raw("SUM(CASE WHEN (agama ILIKE '%kristen%' OR agama ILIKE '%protestan%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as kristen_protestan_l"),
-                DB::raw("SUM(CASE WHEN (agama ILIKE '%kristen%' OR agama ILIKE '%protestan%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as kristen_protestan_p"),
-                DB::raw("SUM(CASE WHEN (agama ILIKE '%kristen%' OR agama ILIKE '%protestan%') THEN 1 ELSE 0 END) as kristen_protestan_jml"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%katolik%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as katolik_l"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%katolik%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as katolik_p"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%katolik%' THEN 1 ELSE 0 END) as katolik_jml"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%hindu%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as hindu_l"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%hindu%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as hindu_p"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%hindu%' THEN 1 ELSE 0 END) as hindu_jml"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%budha%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as budha_l"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%budha%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as budha_p"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%budha%' THEN 1 ELSE 0 END) as budha_jml"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as konghucu_l"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as konghucu_p"),
-                DB::raw("SUM(CASE WHEN agama ILIKE '%konghucu%' THEN 1 ELSE 0 END) as konghucu_jml")
-            )->groupBy('jenis_gtk')
-            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
-            ->get();
+        return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+            foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $agama) {
+                $row->{$agama . '_l'} = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_l");
+                $row->{$agama . '_p'} = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_p");
+                $storedTotal = $this->getKategoriJumlah($laporanGtk, 'agama', "{$agama}_jml");
+                $row->{$agama . '_jml'} = $storedTotal ?: $row->{$agama . '_l'} + $row->{$agama . '_p'};
+            }
+
+            return $row;
+        });
     }
 
     protected function getGtkDaerahCollection(?int $laporanId = null)
     {
-        if ($laporanId) {
-            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
-                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+        $categories = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
 
+        if (!$laporanId) {
+            return collect($categories)->map(function ($type) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
                 foreach (['papua', 'non_papua'] as $daerah) {
-                    $row->{$daerah . '_l'} = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_l");
-                    $row->{$daerah . '_p'} = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_p");
-                    $storedTotal = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_jml");
-                    $row->{$daerah . '_jml'} = $storedTotal ?: $row->{$daerah . '_l'} + $row->{$daerah . '_p'};
+                    $row->{$daerah . '_l'} = 0; $row->{$daerah . '_p'} = 0; $row->{$daerah . '_jml'} = 0;
                 }
-
                 return $row;
             });
         }
 
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        return Gtk::where('sekolah_id', $tenantId)
-            ->select('jenis_gtk', 
-                DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%papua%' AND daerah_asal NOT ILIKE '%non%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as papua_l"),
-                DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%papua%' AND daerah_asal NOT ILIKE '%non%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as papua_p"),
-                DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%papua%' AND daerah_asal NOT ILIKE '%non%') THEN 1 ELSE 0 END) as papua_jml"),
-                DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') AND jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as non_papua_l"),
-                DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') AND jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as non_papua_p"),
-                DB::raw("SUM(CASE WHEN (daerah_asal ILIKE '%non%' OR daerah_asal NOT ILIKE '%papua%') THEN 1 ELSE 0 END) as non_papua_jml")
-            )->groupBy('jenis_gtk')
-            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
-            ->get();
+        return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+            foreach (['papua', 'non_papua'] as $daerah) {
+                $row->{$daerah . '_l'} = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_l");
+                $row->{$daerah . '_p'} = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_p");
+                $storedTotal = $this->getKategoriJumlah($laporanGtk, 'daerah', "{$daerah}_jml");
+                $row->{$daerah . '_jml'} = $storedTotal ?: $row->{$daerah . '_l'} + $row->{$daerah . '_p'};
+            }
+
+            return $row;
+        });
     }
 
     protected function getGtkStatusCollection(?int $laporanId = null)
     {
-        if ($laporanId) {
-            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
-                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+        $categories = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
 
+        if (!$laporanId) {
+            return collect($categories)->map(function ($type) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
                 foreach ([
                     'gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d',
                     'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d',
@@ -360,151 +348,118 @@ class KeadaanGtk extends Page
                     'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e',
                     'pppk', 'honorer_sekolah',
                 ] as $status) {
-                    $row->{$status} = $this->getKategoriJumlah($laporanGtk, 'status_kepegawaian', $status);
+                    $row->{$status} = 0;
                 }
-
                 return $row;
             });
         }
 
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        return Gtk::where('sekolah_id', $tenantId)
-            ->select('jenis_gtk', 
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/a' THEN 1 ELSE 0 END) as gol_i_a"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/b' THEN 1 ELSE 0 END) as gol_i_b"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/c' THEN 1 ELSE 0 END) as gol_i_c"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'I/d' THEN 1 ELSE 0 END) as gol_i_d"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/a' THEN 1 ELSE 0 END) as gol_ii_a"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/b' THEN 1 ELSE 0 END) as gol_ii_b"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/c' THEN 1 ELSE 0 END) as gol_ii_c"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'II/d' THEN 1 ELSE 0 END) as gol_ii_d"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/a' THEN 1 ELSE 0 END) as gol_iii_a"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/b' THEN 1 ELSE 0 END) as gol_iii_b"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/c' THEN 1 ELSE 0 END) as gol_iii_c"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'III/d' THEN 1 ELSE 0 END) as gol_iii_d"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/a' THEN 1 ELSE 0 END) as gol_iv_a"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/b' THEN 1 ELSE 0 END) as gol_iv_b"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/c' THEN 1 ELSE 0 END) as gol_iv_c"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/d' THEN 1 ELSE 0 END) as gol_iv_d"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pns%' AND pangkat_gol_terakhir = 'IV/e' THEN 1 ELSE 0 END) as gol_iv_e"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%pppk%' THEN 1 ELSE 0 END) as pppk"),
-                DB::raw("SUM(CASE WHEN status_kepegawaian ILIKE '%honorer%' OR status_kepegawaian ILIKE '%GTY%' OR status_kepegawaian ILIKE '%PTY%' THEN 1 ELSE 0 END) as honorer_sekolah")
-            )->groupBy('jenis_gtk')
-            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
-            ->get();
+        return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+            foreach ([
+                'gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d',
+                'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d',
+                'gol_iii_a', 'gol_iii_b', 'gol_iii_c', 'gol_iii_d',
+                'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e',
+                'pppk', 'honorer_sekolah',
+            ] as $status) {
+                $row->{$status} = $this->getKategoriJumlah($laporanGtk, 'status_kepegawaian', $status);
+            }
+
+            return $row;
+        });
     }
 
     protected function getGtkUmurCollection(?int $laporanId = null)
     {
-        if ($laporanId) {
-            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
-                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+        $categories = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
 
+        if (!$laporanId) {
+            return collect($categories)->map(function ($type) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
                 foreach (array_keys($this->getGtkAgeRanges()) as $prefix) {
-                    $row->{$prefix . '_l'} = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_l");
-                    $row->{$prefix . '_p'} = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_p");
-                    $storedTotal = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_jml");
-                    $row->{$prefix . '_jml'} = $storedTotal ?: $row->{$prefix . '_l'} + $row->{$prefix . '_p'};
+                    $row->{$prefix . '_l'} = 0; $row->{$prefix . '_p'} = 0; $row->{$prefix . '_jml'} = 0;
                 }
-
                 return $row;
             });
         }
 
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        $gtks = Gtk::where('sekolah_id', $tenantId)
-            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
-            ->get();
-        $periodEndDate = $this->getCurrentPeriodEndDate();
-        $dataByJenis = collect();
-        foreach ($gtks as $g) {
-            $jenis = $g->jenis_gtk ?? 'Lainnya';
-            if (!$dataByJenis->has($jenis)) {
-                $item = (object)['jenis_gtk' => $jenis];
-                foreach (array_keys($this->getGtkAgeRanges()) as $prefix) {
-                    $item->{$prefix . '_l'} = 0; $item->{$prefix . '_p'} = 0; $item->{$prefix . '_jml'} = 0;
-                }
-                $dataByJenis->put($jenis, $item);
+        return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+            foreach (array_keys($this->getGtkAgeRanges()) as $prefix) {
+                $row->{$prefix . '_l'} = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_l");
+                $row->{$prefix . '_p'} = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_p");
+                $storedTotal = $this->getKategoriJumlah($laporanGtk, 'umur', "{$prefix}_jml");
+                $row->{$prefix . '_jml'} = $storedTotal ?: $row->{$prefix . '_l'} + $row->{$prefix . '_p'};
             }
-            if ($g->tanggal_lahir) {
-                $umur = \Carbon\Carbon::parse($g->tanggal_lahir)->diffInYears($periodEndDate);
-                $prefix = $this->getAgeRangeKey($umur);
-                if ($prefix) {
-                    $row = $dataByJenis->get($jenis);
-                    if (str_contains(strtolower($g->jenis_kelamin), 'l')) $row->{$prefix . '_l'}++;
-                    else $row->{$prefix . '_p'}++;
-                    $row->{$prefix . '_jml'}++;
-                }
-            }
-        }
-        return $dataByJenis->values();
+
+            return $row;
+        });
     }
 
     protected function getGtkPendidikanCollection(?int $laporanId = null)
     {
-        if ($laporanId) {
-            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
-                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+        $categories = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
 
+        if (!$laporanId) {
+            return collect($categories)->map(function ($type) {
+                $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
                 foreach (['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'] as $pendidikan) {
-                    $row->{$pendidikan} = $this->getKategoriJumlah($laporanGtk, 'pendidikan', $pendidikan);
+                    $row->{$pendidikan} = 0;
                 }
-
                 return $row;
             });
         }
 
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        return Gtk::where('sekolah_id', $tenantId)
-            ->select('jenis_gtk', 
-                DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%slta%' OR pendidikan_terakhir ILIKE '%sma%' OR pendidikan_terakhir ILIKE '%smk%' THEN 1 ELSE 0 END) as slta"),
-                DB::raw("SUM(CASE WHEN pendidikan_terakhir = 'D1' THEN 1 ELSE 0 END) as di"),
-                DB::raw("SUM(CASE WHEN pendidikan_terakhir = 'D2' THEN 1 ELSE 0 END) as dii"),
-                DB::raw("SUM(CASE WHEN (pendidikan_terakhir = 'D3' OR pendidikan_terakhir = 'DIII') THEN 1 ELSE 0 END) as diii"),
-                DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s1%' OR pendidikan_terakhir ILIKE '%d4%' THEN 1 ELSE 0 END) as s1"),
-                DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s2%' THEN 1 ELSE 0 END) as s2"),
-                DB::raw("SUM(CASE WHEN pendidikan_terakhir ILIKE '%s3%' THEN 1 ELSE 0 END) as s3")
-            )->groupBy('jenis_gtk')
-            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
-            ->get();
+        return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk)];
+
+            foreach (['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'] as $pendidikan) {
+                $row->{$pendidikan} = $this->getKategoriJumlah($laporanGtk, 'pendidikan', $pendidikan);
+            }
+
+            return $row;
+        });
     }
 
     protected function getGtkByJenisCollection(?int $laporanId = null)
     {
-        if ($laporanId) {
-            return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
-                $laki = $this->getKategoriJumlah($laporanGtk, 'agama', 'islam_l')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'kristen_protestan_l')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'katolik_l')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'hindu_l')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'budha_l')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'konghucu_l');
-                $perempuan = $this->getKategoriJumlah($laporanGtk, 'agama', 'islam_p')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'kristen_protestan_p')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'katolik_p')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'hindu_p')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'budha_p')
-                    + $this->getKategoriJumlah($laporanGtk, 'agama', 'konghucu_p');
+        $categories = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
 
+        if (!$laporanId) {
+            return collect($categories)->map(function ($type) {
                 return (object) [
-                    'jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk),
-                    'laki_laki' => $laki,
-                    'perempuan' => $perempuan,
-                    'total' => $laki + $perempuan,
+                    'jenis_gtk' => $this->getJenisGtkLabel($type),
+                    'laki_laki' => 0,
+                    'perempuan' => 0,
+                    'total' => 0,
                 ];
             });
         }
 
-        $tenantId = \Filament\Facades\Filament::getTenant()?->id;
-        return Gtk::where('sekolah_id', $tenantId)
-            ->select('jenis_gtk', 
-                DB::raw('COUNT(*) as total'),
-                DB::raw("SUM(CASE WHEN jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as laki_laki"),
-                DB::raw("SUM(CASE WHEN jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as perempuan"))
-            ->whereNotNull('jenis_gtk')
-            ->groupBy('jenis_gtk')
-            ->orderByRaw("CASE WHEN jenis_gtk ILIKE '%kepala%' THEN 1 WHEN jenis_gtk ILIKE '%guru%' THEN 2 WHEN jenis_gtk ILIKE '%administrasi%' THEN 3 ELSE 4 END")
-            ->get();
+        return $this->getLaporanGtkRows($laporanId)->map(function (LaporanGtk $laporanGtk) {
+            $laki = $this->getKategoriJumlah($laporanGtk, 'agama', 'islam_l')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'kristen_protestan_l')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'katolik_l')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'hindu_l')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'budha_l')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'konghucu_l');
+            $perempuan = $this->getKategoriJumlah($laporanGtk, 'agama', 'islam_p')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'kristen_protestan_p')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'katolik_p')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'hindu_p')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'budha_p')
+                + $this->getKategoriJumlah($laporanGtk, 'agama', 'konghucu_p');
+
+            return (object) [
+                'jenis_gtk' => $this->getJenisGtkLabel($laporanGtk->jenis_gtk),
+                'laki_laki' => $laki,
+                'perempuan' => $perempuan,
+                'total' => $laki + $perempuan,
+            ];
+        });
     }
 
     /**

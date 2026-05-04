@@ -106,14 +106,22 @@ class KehadiranGtkGrid extends Component
         $this->attendanceData[$gtkId][$day] = $value;
     }
 
-    protected function getActiveLaporanId()
+    protected function getActiveLaporanId(): ?int
     {
-        $laporan = \App\Models\Laporan::where('sekolah_id', filament()->getTenant()?->id)
-            ->where('bulan', $this->bulan)
-            ->where('tahun', $this->tahun)
-            ->first();
-            
-        return $laporan ? $laporan->id : null;
+        $sekolahId = filament()->getTenant()?->id;
+        if (! $sekolahId) {
+            return null;
+        }
+
+        $laporan = \App\Models\Laporan::firstOrCreate(
+            [
+                'sekolah_id' => $sekolahId,
+                'bulan'      => $this->bulan,
+                'tahun'      => $this->tahun,
+            ]
+        );
+
+        return $laporan->id;
     }
 
     protected function syncMonthlySummary($gtkId)

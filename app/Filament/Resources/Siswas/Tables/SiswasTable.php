@@ -177,13 +177,9 @@ class SiswasTable
                             }
                             return $data;
                         })
-                        ->modalCancelActionLabel(null)
-                        ->modalSubmitActionLabel(null)
-                        ->form(function (): \Filament\Schemas\Schema {
-                            return \App\Filament\Resources\Siswas\Schemas\SiswaForm::configure(
-                                \Filament\Schemas\Schema::make()
-                            );
-                        }),
+                        ->modalCancelAction(false)
+                        ->modalSubmitAction(false),
+
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])

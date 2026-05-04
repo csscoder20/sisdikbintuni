@@ -12,6 +12,16 @@ use Illuminate\Support\Str;
 
 class ImportTemplateController extends Controller
 {
+    /**
+     * Peta nama file statis per importer.
+     * Key  : nama importer (lowercase, misal 'gtk', 'siswa')
+     * Value: nama file di storage/app/templates/
+     */
+    protected static array $staticFileMap = [
+        'gtk'   => 'gtk-import_template.xlsx',
+        'siswa' => 'siswa_import_template.xlsx',
+    ];
+
     public function download(string $importerName)
     {
         $importerClass = "App\\Filament\\Imports\\" . Str::studly($importerName) . "Importer";
@@ -20,8 +30,23 @@ class ImportTemplateController extends Controller
             abort(404, "Importer not found: {$importerClass}");
         }
 
-        $fileName = Str::kebab($importerName) . '-template.xlsx';
-        
+        // Nama file untuk download response (yang user lihat)
+        $downloadFileName = Str::kebab($importerName) . '-template.xlsx';
+
+        // --- Prioritas 1: File statis di storage/app/templates/ ---
+        // Cari menggunakan peta nama, atau fallback ke konvensi kebab
+        $staticFileName = static::$staticFileMap[strtolower($importerName)]
+            ?? $downloadFileName;
+        $staticPath = storage_path('app/templates/' . $staticFileName);
+
+        if (file_exists($staticPath)) {
+            return response()->download($staticPath, $downloadFileName, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'max-age=0',
+            ]);
+        }
+
+        // --- Prioritas 2: Generate dinamis menggunakan PhpSpreadsheet ---
         $spreadsheet = new Spreadsheet();
         
         // Set default alignment to center for the entire spreadsheet

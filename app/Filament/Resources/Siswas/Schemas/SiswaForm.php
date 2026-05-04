@@ -141,11 +141,11 @@ class SiswaForm
                                 ->saveRelationshipsUsing(function ($record, $state, $get) {
                                     $tahunAjaran = $get('tahun_ajaran');
                                     if ($state && $tahunAjaran) {
-                                        $record->rombel()->sync([
-                                            $state => ['tahun_ajaran' => $tahunAjaran]
-                                        ]);
+                                        // Only detach for the current year to preserve history
+                                        $record->rombel()->wherePivot('tahun_ajaran', $tahunAjaran)->detach();
+                                        $record->rombel()->attach($state, ['tahun_ajaran' => $tahunAjaran]);
                                     } else {
-                                        $record->rombel()->detach();
+                                        $record->rombel()->wherePivot('tahun_ajaran', $tahunAjaran)->detach();
                                     }
                                 }),
                             Select::make('tahun_ajaran')

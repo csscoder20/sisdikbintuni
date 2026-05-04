@@ -65,12 +65,18 @@ class AssignSiswa extends Page
     {
         $ids = is_array($siswaIds) ? $siswaIds : [$siswaIds];
         
+        // Enforce 1 rombel per year: remove these students from any other rombels in the same year
+        \Illuminate\Support\Facades\DB::table('siswa_rombel')
+            ->whereIn('siswa_id', $ids)
+            ->where('tahun_ajaran', $this->tahunAjaran)
+            ->delete();
+
         $syncData = [];
         foreach ($ids as $id) {
             $syncData[$id] = ['tahun_ajaran' => $this->tahunAjaran];
         }
 
-        $this->record->siswa()->syncWithoutDetaching($syncData);
+        $this->record->siswa()->attach($syncData);
         
         $this->updateCounts();
         
