@@ -25,6 +25,7 @@ class LaporanGedungTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 // TextColumn::make('laporan.tahun')
                 //     ->label('Tahun')

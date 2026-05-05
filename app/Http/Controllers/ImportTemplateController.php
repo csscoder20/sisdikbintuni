@@ -18,8 +18,9 @@ class ImportTemplateController extends Controller
      * Value: nama file di storage/app/templates/
      */
     protected static array $staticFileMap = [
-        'gtk'   => 'gtk-import_template.xlsx',
-        'siswa' => 'siswa_import_template.xlsx',
+        'gtk'            => 'gtk_import_template.xlsx',
+        'siswa'          => 'siswa_import_template.xlsx',
+        'laporan-gedung' => 'laporan-gedung_import_template.xlsx',
     ];
 
     public function download(string $importerName)
@@ -106,6 +107,51 @@ class ImportTemplateController extends Controller
             $this->setupSheet($sheet3, null, $financeColumns, '28A745', 'FFFFFF', [], 'cukup jelas');
 
             $spreadsheet->setActiveSheetIndex(0);
+        } elseif (\Illuminate\Support\Str::contains(strtolower($importerName), 'gedung')) {
+            $noColumn = \Filament\Actions\Imports\ImportColumn::make('no')
+                ->label('No')
+                ->example('1');
+            $columns = array_merge([$noColumn], $columns);
+
+            $instructions = [
+                'no' => 'cukup jelas',
+                'nama_ruang' => 'diisi dengan nama ruang/gedung. Contoh: Ruang Kelas X-A, Laboratorium Komputer',
+                'jumlah_total' => 'jumlah total unit/ruang',
+                'jumlah_baik' => 'jumlah unit dalam kondisi baik',
+                'jumlah_rusak' => 'jumlah unit dalam kondisi rusak',
+                'status_kepemilikan' => 'pilihan: milik / pinjam',
+            ];
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('SARANA PRASARANA');
+            $this->setupSheet($sheet, 'DATA SARANA DAN PRASARANA (GEDUNG/RUANG)', $columns, 'F59E0B', 'FFFFFF', $instructions);
+        } elseif (\Illuminate\Support\Str::contains(strtolower($importerName), 'siswa')) {
+            $noColumn = \Filament\Actions\Imports\ImportColumn::make('no')
+                ->label('No')
+                ->example('1');
+            $columns = array_merge([$noColumn], $columns);
+
+            $instructions = [
+                'no' => 'cukup jelas',
+                'nama' => 'nama lengkap siswa',
+                'nisn' => 'nomor induk siswa nasional',
+                'nik' => 'nomor induk kependudukan',
+                'tempat_lahir' => 'kota tempat lahir',
+                'tanggal_lahir' => 'format: dd/mm/yyyy',
+                'jenis_kelamin' => 'Laki-laki / Perempuan',
+                'agama' => 'Islam, Kristen, Katolik, Hindu, Buddha, Konghucu',
+                'alamat' => 'alamat lengkap',
+                'desa' => 'desa/kelurahan',
+                'kecamatan' => 'distrik/kecamatan',
+                'kabupaten' => 'kabupaten',
+                'provinsi' => 'provinsi',
+                'status' => 'Aktif / Pindah / Keluar',
+                'disabilitas' => 'pilihan: tidak, tuna_netra, tuna_rungu, tuna_wicara, tuna_daksa, tuna_grahita, tuna_lainnya',
+                'beasiswa' => 'pilihan: tidak, beasiswa_pemerintah_pusat, beasiswa_pemerintah_daerah, beasisswa_swasta, beasiswa_khusus, beasiswa_afirmasi, beasiswa_lainnya',
+                'daerah_asal' => 'Papua / Non Papua',
+            ];
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('DATA SISWA');
+            $this->setupSheet($sheet, 'DATA PESERTA DIDIK', $columns, '10B981', 'FFFFFF', $instructions);
         } else {
             $sheet = $spreadsheet->getActiveSheet();
             $this->setupSheet($sheet, null, $columns);
@@ -115,7 +161,7 @@ class ImportTemplateController extends Controller
         $tempFile = tempnam(sys_get_temp_dir(), 'import_template');
         $writer->save($tempFile);
 
-        return response()->download($tempFile, $fileName, [
+        return response()->download($tempFile, $downloadFileName, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Cache-Control' => 'max-age=0',
         ])->deleteFileAfterSend(true);

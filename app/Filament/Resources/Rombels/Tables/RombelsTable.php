@@ -26,6 +26,7 @@ class RombelsTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->poll('5s')
             ->columns([
                 TextColumn::make('nama')

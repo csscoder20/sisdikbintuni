@@ -91,9 +91,28 @@ class ValidateChecklistAction
                 // Map type to column name
                 $column = "is_" . Str::snake($type) . "_valid";
 
-                $laporan->update([
-                    $column => true,
-                ]);
+                $updateData = [$column => true];
+
+                if ($type === 'nominatif_siswa') {
+                    $updateData['is_kondisi_siswa_valid'] = true;
+                    $updateData['is_siswa_rombel_valid'] = true;
+                    $updateData['is_siswa_umur_valid'] = true;
+                    $updateData['is_siswa_agama_valid'] = true;
+                    $updateData['is_siswa_daerah_valid'] = true;
+                    $updateData['is_siswa_disabilitas_valid'] = true;
+                    $updateData['is_siswa_beasiswa_valid'] = true;
+                }
+
+                if ($type === 'nominatif_gtk') {
+                    $updateData['is_kondisi_gtk_valid'] = true;
+                    $updateData['is_gtk_agama_valid'] = true;
+                    $updateData['is_gtk_daerah_valid'] = true;
+                    $updateData['is_gtk_status_valid'] = true;
+                    $updateData['is_gtk_umur_valid'] = true;
+                    $updateData['is_gtk_pendidikan_valid'] = true;
+                }
+
+                $laporan->update($updateData);
 
                 // If validating nominatif siswa, persist snapshot into laporan_siswa tables
                 if ($type === 'nominatif_siswa') {

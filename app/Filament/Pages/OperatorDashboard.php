@@ -13,6 +13,10 @@ use App\Models\Sekolah;
 use App\Models\KehadiranGtk;
 use App\Models\Kelulusan;
 use App\Models\Mengajar;
+use App\Models\LaporanSiswa;
+use App\Models\LaporanSiswaKategori;
+use App\Models\LaporanGtk;
+use App\Models\LaporanGtkKategori;
 use Filament\Facades\Filament;
 
 class OperatorDashboard extends BaseDashboard
@@ -27,17 +31,17 @@ class OperatorDashboard extends BaseDashboard
     }
 
     public array $checklist = [
-        'identitas_sekolah' => 'A. IDENTITAS SEKOLAH',
-        'kondisi_sarpras' => 'B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU',
-        'kondisi_siswa' => 'C. KEADAAN SISWA',
-        'kondisi_gtk' => 'D. KEADAAN GURU & TENAGA KEPENDIDIKAN',
-        'nominatif_gtk' => 'E. NOMINATIF GURU & TENAGA KEPENDIDIKAN',
-        'riwayat_pendidikan_gtk' => 'F. RIWAYAT PENDIDIKAN GTK',
-        'nominatif_siswa' => 'G. NOMINATIF SISWA',
-        'rekening_npwp_gtk' => 'H. REKENING & NPWP GTK',
-        'sebaran_jam' => 'I. SEBARAN JAM MENGAJAR',
-        'rekap_kehadiran' => 'J. ABSENSI (REKAP KEHADIRAN)',
-        'kelulusan' => 'K. DATA KELULUSAN',
+        'identitas_sekolah' => 'IDENTITAS SEKOLAH',
+        'kondisi_sarpras' => 'KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU',
+        'kondisi_siswa' => 'KEADAAN SISWA',
+        'kondisi_gtk' => 'KEADAAN GURU & TENAGA KEPENDIDIKAN',
+        'nominatif_gtk' => 'NOMINATIF GURU & TENAGA KEPENDIDIKAN',
+        'riwayat_pendidikan_gtk' => 'RIWAYAT PENDIDIKAN GTK',
+        'nominatif_siswa' => 'NOMINATIF SISWA',
+        'rekening_npwp_gtk' => 'REKENING & NPWP GTK',
+        'sebaran_jam' => 'SEBARAN JAM MENGAJAR',
+        'rekap_kehadiran' => 'ABSENSI (REKAP KEHADIRAN)',
+        'kelulusan' => 'DATA KELULUSAN',
     ];
 
     public array $groups = [
@@ -55,7 +59,7 @@ class OperatorDashboard extends BaseDashboard
     public array $selectedChecklist = [];
     public ?string $previewType = null;
     public ?int $selectedLaporanId = null;
-    public array $chartData = [];
+
 
     public function updatedSelectedChecklist()
     {
@@ -96,8 +100,10 @@ class OperatorDashboard extends BaseDashboard
         // Virtual status mapping for education and finance (tied to nominatif)
         $this->checklistStatus['riwayat_pendidikan_gtk'] = $this->checklistStatus['nominatif_gtk'] ?? false;
         $this->checklistStatus['rekening_npwp_gtk'] = $this->checklistStatus['nominatif_gtk'] ?? false;
+        $this->checklistStatus['kondisi_gtk'] = $this->checklistStatus['kondisi_gtk'] || ($this->checklistStatus['nominatif_gtk'] ?? false);
+        $this->checklistStatus['kondisi_siswa'] = $this->checklistStatus['kondisi_siswa'] || ($this->checklistStatus['nominatif_siswa'] ?? false);
 
-        $this->chartData = $this->getChartData($schoolId);
+
 
         // Set default selected laporan
         if ($laporan) {
@@ -135,70 +141,12 @@ class OperatorDashboard extends BaseDashboard
             // Sync virtual items
             $this->checklistStatus['riwayat_pendidikan_gtk'] = $this->checklistStatus['nominatif_gtk'] ?? false;
             $this->checklistStatus['rekening_npwp_gtk'] = $this->checklistStatus['nominatif_gtk'] ?? false;
+            $this->checklistStatus['kondisi_gtk'] = $this->checklistStatus['kondisi_gtk'] || ($this->checklistStatus['nominatif_gtk'] ?? false);
+            $this->checklistStatus['kondisi_siswa'] = $this->checklistStatus['kondisi_siswa'] || ($this->checklistStatus['nominatif_siswa'] ?? false);
         }
     }
 
-    public function getChartData($schoolId)
-    {
-        if (!$schoolId) return [];
 
-        $siswa = Siswa::where('sekolah_id', $schoolId)->get();
-        $gtk = Gtk::where('sekolah_id', $schoolId)->get();
-
-        return [
-            'Keadaan Siswa' => [
-                'rombel' => Siswa::where('siswa.sekolah_id', $schoolId)
-                    ->join('siswa_rombel', 'siswa.id', '=', 'siswa_rombel.siswa_id')
-                    ->join('rombel', 'siswa_rombel.rombel_id', '=', 'rombel.id')
-                    ->select('rombel.nama', \DB::raw('count(*) as total'))
-                    ->groupBy('rombel.nama')
-                    ->pluck('total', 'nama')->toArray(),
-                'umur' => $siswa->map(fn($s) => $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->age : null)
-                    ->filter()->countBy()->sortKeys()->toArray(),
-                'agama' => $siswa->countBy('agama')->toArray(),
-                'daerah' => $siswa->countBy('daerah_asal')->toArray(), // Assuming daerah refers to daerah_asal
-                'disabilitas' => $siswa->countBy('disabilitas')->toArray(),
-                'beasiswa' => $siswa->countBy('beasiswa')->toArray(),
-            ],
-            'Keadaan GTK' => [
-                'umur_pie' => $gtk->map(function($g) {
-                        if (!$g->tanggal_lahir) return 'Tidak diketahui';
-                        $age = \Carbon\Carbon::parse($g->tanggal_lahir)->age;
-                        if ($age < 30) return '< 30';
-                        if ($age < 40) return '30-39';
-                        if ($age < 50) return '40-49';
-                        if ($age < 60) return '50-59';
-                        return '60+';
-                    })->countBy()->toArray(),
-                'daerah' => $gtk->countBy('daerah_asal')->toArray(),
-                'status' => $gtk->countBy('status_kepegawaian')->toArray(),
-                'umur_bar' => $gtk->map(fn($g) => $g->tanggal_lahir ? \Carbon\Carbon::parse($g->tanggal_lahir)->age : null)
-                    ->filter()->countBy()->sortKeys()->toArray(),
-                'pendidikan' => $gtk->countBy('pendidikan_terakhir')->toArray(),
-            ],
-            'B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU' => [
-                'kondisi' => [
-                    'Baik' => (int) LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', $schoolId))->sum('jumlah_baik'),
-                    'Rusak' => (int) LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', $schoolId))->sum('jumlah_rusak'),
-                ]
-            ],
-            'Kehadiran GTK' => [
-                'rekap' => [
-                    'Sakit' => (int) KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', $schoolId))->sum('sakit'),
-                    'Izin' => (int) KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', $schoolId))->sum('izin'),
-                    'Alpa' => (int) KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', $schoolId))->sum('alfa'),
-                ]
-            ],
-            'Kelulusan' => [
-                'tren' => Kelulusan::where('sekolah_id', $schoolId)
-                    ->orderBy('tahun', 'desc')
-                    ->take(5)
-                    ->get()
-                    ->reverse()
-                    ->pluck('persentase_kelulusan', 'tahun')->toArray()
-            ]
-        ];
-    }
 
     public static function getNavigationIcon(): ?string
     {
@@ -344,28 +292,284 @@ class OperatorDashboard extends BaseDashboard
 
     private function getRekapSiswaData($schoolId)
     {
-        // Combined rekap data for Halaman 2
+        $laporanId = $this->selectedLaporanId;
+        if (!$laporanId) {
+            $laporanId = Laporan::where('sekolah_id', $schoolId)
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->value('id');
+        }
+
         return [
-            'type' => 'rekap_summary',
-            'sections' => [
-                'Siswa per Rombel' => $this->getChartData($schoolId)['Keadaan Siswa']['rombel'],
-                'Siswa per Agama' => $this->getChartData($schoolId)['Keadaan Siswa']['agama'],
-                'Siswa per Daerah' => $this->getChartData($schoolId)['Keadaan Siswa']['daerah'],
+            'type' => 'rekap_siswa_matrix',
+            'data' => [
+                'perKelas' => $this->getSiswaPerKelasCollection($laporanId, $schoolId),
+                'perUmur' => $this->getSiswaPerUmurCollection($laporanId, $schoolId),
+                'perAgama' => $this->getSiswaPerAgamaCollection($laporanId, $schoolId),
+                'perDaerah' => $this->getSiswaPDaerahCollection($laporanId, $schoolId),
+                'disabilitas' => $this->getSiswaDisabilitasCollection($laporanId, $schoolId),
+                'beasiswa' => $this->getSiswaBeasiswaCollection($laporanId, $schoolId),
             ]
         ];
     }
 
+    private function getSiswaPerKelasCollection($laporanId, $schoolId)
+    {
+        $rombels = \App\Models\Rombel::where('sekolah_id', $schoolId)->get();
+        if ($laporanId) {
+            $laporanSiswas = \App\Models\LaporanSiswa::with(['rombel', 'rekap'])->where('laporan_id', $laporanId)->get()->keyBy('rombel_id');
+            return $rombels->map(function ($rombel) use ($laporanSiswas) {
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $rekaps = $ls->rekap->groupBy('kategori');
+                    $getRekap = function ($cat) use ($rekaps) {
+                        $item = $rekaps->get($cat)?->first();
+                        return ['l' => $item?->laki_laki ?? 0, 'p' => $item?->perempuan ?? 0, 'jml' => $item?->total ?? 0];
+                    };
+                    $awal = $getRekap('awal_bulan');
+                    $mutasi_masuk = $getRekap('mutasi_masuk');
+                    $mutasi_keluar = $getRekap('mutasi_keluar');
+                    $putus = $getRekap('putus_sekolah');
+                    $mengulang = $getRekap('mengulang');
+                    $akhir = $getRekap('akhir_bulan');
+                    return [
+                        'nama_rombel' => $rombel->nama,
+                        'awal_bulan_l' => $awal['l'], 'awal_bulan_p' => $awal['p'], 'awal_bulan_jml' => $awal['jml'],
+                        'mutasi_l' => $mutasi_masuk['l'], 'mutasi_p' => $mutasi_masuk['p'], 'mutasi_jml' => $mutasi_masuk['jml'],
+                        'mutasi_keluar_l' => $mutasi_keluar['l'], 'mutasi_keluar_p' => $mutasi_keluar['p'], 'mutasi_keluar_jml' => $mutasi_keluar['jml'],
+                        'putus_sekolah_l' => $putus['l'], 'putus_sekolah_p' => $putus['p'], 'putus_sekolah_jml' => $putus['jml'],
+                        'mengulang_l' => $mengulang['l'], 'mengulang_p' => $mengulang['p'], 'mengulang_jml' => $mengulang['jml'],
+                        'akhir_bulan_l' => $akhir['l'], 'akhir_bulan_p' => $akhir['p'], 'akhir_bulan_jml' => $akhir['jml'],
+                    ];
+                }
+                return ['nama_rombel' => $rombel->nama, 'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0, 'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0, 'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0, 'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0, 'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0, 'akhir_bulan_l' => 0, 'akhir_bulan_p' => 0, 'akhir_bulan_jml' => 0];
+            });
+        }
+        return $rombels->map(fn($r) => ['nama_rombel' => $r->nama, 'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0, 'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0, 'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0, 'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0, 'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0, 'akhir_bulan_l' => $r->siswa()->where('jenis_kelamin', 'LIKE', 'L%')->count(), 'akhir_bulan_p' => $r->siswa()->where('jenis_kelamin', 'LIKE', 'P%')->count(), 'akhir_bulan_jml' => $r->siswa()->count()]);
+    }
+
+    private function getSiswaPerUmurCollection($laporanId, $schoolId)
+    {
+        $rombels = \App\Models\Rombel::where('sekolah_id', $schoolId)->get();
+        if ($laporanId) {
+            $laporanSiswas = \App\Models\LaporanSiswa::where('laporan_id', $laporanId)->with('kategori')->get()->keyBy('rombel_id');
+            return $rombels->map(function ($rombel) use ($laporanSiswas) {
+                $item = ['nama_rombel' => $rombel->nama];
+                for ($age = 13; $age <= 23; $age++) { $px = 'umur_' . $age; $item[$px . '_l'] = 0; $item[$px . '_p'] = 0; $item[$px . '_jml'] = 0; }
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $umurKats = $ls->kategori->where('jenis_kategori', 'umur')->groupBy('sub_kategori');
+                    foreach ($umurKats as $sub => $group) {
+                        $age = (int) $sub;
+                        if ($age >= 13 && $age <= 23) { $px = 'umur_' . $age; $item[$px . '_l'] = $group->sum('laki_laki'); $item[$px . '_p'] = $group->sum('perempuan'); $item[$px . '_jml'] = $group->sum('total'); }
+                    }
+                }
+                return $item;
+            });
+        }
+        return $rombels->map(function ($rombel) {
+            $item = ['nama_rombel' => $rombel->nama];
+            for ($age = 13; $age <= 23; $age++) { $px = 'umur_' . $age; $item[$px . '_l'] = 0; $item[$px . '_p'] = 0; $item[$px . '_jml'] = 0; }
+            $siswas = $rombel->siswa()->whereNotNull('tanggal_lahir')->get();
+            foreach ($siswas as $s) {
+                $age = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
+                if ($age >= 13 && $age <= 23) { $px = 'umur_' . $age; if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$px . '_l']++; else $item[$px . '_p']++; $item[$px . '_jml']++; }
+            }
+            return $item;
+        });
+    }
+
+    private function getSiswaPerAgamaCollection($laporanId, $schoolId)
+    {
+        $rombels = \App\Models\Rombel::where('sekolah_id', $schoolId)->get();
+        if ($laporanId) {
+            $laporanSiswas = \App\Models\LaporanSiswa::where('laporan_id', $laporanId)->with('kategori')->get()->keyBy('rombel_id');
+            return $rombels->map(function ($rombel) use ($laporanSiswas) {
+                $item = ['nama_rombel' => $rombel->nama];
+                foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) { $item[$ag . '_l'] = 0; $item[$ag . '_p'] = 0; $item[$ag . '_jml'] = 0; }
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $agamaKats = $ls->kategori->where('jenis_kategori', 'agama')->groupBy('sub_kategori');
+                    foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) { $group = $agamaKats->get($ag); if ($group) { $item[$ag . '_l'] = $group->sum('laki_laki'); $item[$ag . '_p'] = $group->sum('perempuan'); $item[$ag . '_jml'] = $group->sum('total'); } }
+                }
+                return $item;
+            });
+        }
+        return $rombels->map(function ($rombel) {
+            $item = ['nama_rombel' => $rombel->nama];
+            foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) { $item[$ag . '_l'] = 0; $item[$ag . '_p'] = 0; $item[$ag . '_jml'] = 0; }
+            foreach ($rombel->siswa()->get() as $s) {
+                $agama = strtolower($s->agama ?? '');
+                $field = null;
+                if (str_contains($agama, 'islam')) $field = 'islam';
+                elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $field = 'kristen';
+                elseif (str_contains($agama, 'katolik')) $field = 'katolik';
+                elseif (str_contains($agama, 'hindu')) $field = 'hindu';
+                elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $field = 'buddha';
+                elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $field = 'khonghucu';
+                if ($field) { if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$field . '_l']++; else $item[$field . '_p']++; $item[$field . '_jml']++; }
+            }
+            return $item;
+        });
+    }
+
+    private function getSiswaPDaerahCollection($laporanId, $schoolId)
+    {
+        $rombels = \App\Models\Rombel::where('sekolah_id', $schoolId)->get();
+        if ($laporanId) {
+            $laporanSiswas = \App\Models\LaporanSiswa::where('laporan_id', $laporanId)->with('kategori')->get()->keyBy('rombel_id');
+            return $rombels->map(function ($rombel) use ($laporanSiswas) {
+                $item = ['nama_rombel' => $rombel->nama, 'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0, 'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0];
+                $ls = $laporanSiswas->get($rombel->id);
+                if ($ls) {
+                    $daerahKats = $ls->kategori->where('jenis_kategori', 'asal_daerah')->groupBy('sub_kategori');
+                    foreach (['papua', 'non_papua'] as $sub) { $group = $daerahKats->get($sub); if ($group) { $item[$sub . '_l'] = $group->sum('laki_laki'); $item[$sub . '_p'] = $group->sum('perempuan'); $item[$sub . '_jml'] = $group->sum('total'); } }
+                }
+                return $item;
+            });
+        }
+        return $rombels->map(function ($rombel) {
+            $item = ['nama_rombel' => $rombel->nama, 'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0, 'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0];
+            foreach ($rombel->siswa()->get() as $s) {
+                $daerah = strtolower($s->daerah_asal ?? '');
+                $cat = (str_contains($daerah, 'papua') && !str_contains($daerah, 'non')) ? 'papua' : 'non_papua';
+                if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$cat . '_l']++; else $item[$cat . '_p']++; $item[$cat . '_jml']++;
+            }
+            return $item;
+        });
+    }
+
+    private function getSiswaDisabilitasCollection($laporanId, $schoolId)
+    {
+        $categories = ['tidak' => 'Tidak', 'tuna_netra' => 'Tuna Netra', 'tuna_rungu' => 'Tuna Rungu', 'tuna_wicara' => 'Tuna Wicara', 'tuna_daksa' => 'Tuna Daksa', 'tuna_grahita' => 'Tuna Grahita', 'tuna_lainnya' => 'Tuna Lainnya'];
+        if ($laporanId) {
+            $counts = \App\Models\LaporanSiswaKategori::where('jenis_kategori', 'disabilitas')->whereHas('laporanSiswa', fn($q) => $q->where('laporan_id', $laporanId))->get()->groupBy('sub_kategori');
+            return collect($categories)->map(fn($label, $key) => ['jenis_disabilitas' => $label, 'laki_laki' => ($counts->get($key) ?: collect())->sum('laki_laki'), 'perempuan' => ($counts->get($key) ?: collect())->sum('perempuan'), 'total' => ($counts->get($key) ?: collect())->sum('total')])->values();
+        }
+        return collect($categories)->map(function ($label, $key) use ($schoolId) {
+            $l = Siswa::where('sekolah_id', $schoolId)->where('disabilitas', $key)->where('jenis_kelamin', 'LIKE', 'L%')->count();
+            $p = Siswa::where('sekolah_id', $schoolId)->where('disabilitas', $key)->where('jenis_kelamin', 'LIKE', 'P%')->count();
+            return ['jenis_disabilitas' => $label, 'laki_laki' => $l, 'perempuan' => $p, 'total' => $l + $p];
+        })->values();
+    }
+
+    private function getSiswaBeasiswaCollection($laporanId, $schoolId)
+    {
+        $categories = ['tidak' => 'Tidak', 'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat', 'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah', 'beasisswa_swasta' => 'Beasiswa Swasta', 'beasiswa_khusus' => 'Beasiswa Khusus', 'beasiswa_afirmasi' => 'Beasiswa Afirmasi', 'beasiswa_lainnya' => 'Beasiswa Lainnya'];
+        if ($laporanId) {
+            $counts = \App\Models\LaporanSiswaKategori::where('jenis_kategori', 'beasiswa')->whereHas('laporanSiswa', fn($q) => $q->where('laporan_id', $laporanId))->get()->groupBy('sub_kategori');
+            return collect($categories)->map(fn($label, $key) => ['jenis_beasiswa' => $label, 'penerima_l' => ($counts->get($key) ?: collect())->sum('laki_laki'), 'penerima_p' => ($counts->get($key) ?: collect())->sum('perempuan'), 'penerima_jml' => ($counts->get($key) ?: collect())->sum('total'), 'keterangan' => ''])->values();
+        }
+        return collect($categories)->map(function ($label, $key) use ($schoolId) {
+            $l = Siswa::where('sekolah_id', $schoolId)->where('beasiswa', $key)->where('jenis_kelamin', 'LIKE', 'L%')->count();
+            $p = Siswa::where('sekolah_id', $schoolId)->where('beasiswa', $key)->where('jenis_kelamin', 'LIKE', 'P%')->count();
+            return ['jenis_beasiswa' => $label, 'penerima_l' => $l, 'penerima_p' => $p, 'penerima_jml' => $l + $p, 'keterangan' => ''];
+        })->values();
+    }
+
     private function getRekapGtkData($schoolId)
     {
-        // Combined rekap data for Halaman 2
+        $laporanId = $this->selectedLaporanId;
+        if (!$laporanId) {
+            $laporanId = Laporan::where('sekolah_id', $schoolId)
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->value('id');
+        }
+
         return [
-            'type' => 'rekap_summary',
-            'sections' => [
-                'GTK per Status' => $this->getChartData($schoolId)['Keadaan GTK']['status'],
-                'GTK per Pendidikan' => $this->getChartData($schoolId)['Keadaan GTK']['pendidikan'],
-                'GTK per Daerah' => $this->getChartData($schoolId)['Keadaan GTK']['daerah'],
+            'type' => 'rekap_gtk_matrix',
+            'data' => [
+                'agama' => $this->getGtkAgamaCollection($laporanId, $schoolId),
+                'daerah' => $this->getGtkDaerahCollection($laporanId, $schoolId),
+                'status' => $this->getGtkStatusCollection($laporanId, $schoolId),
+                'umur' => $this->getGtkUmurCollection($laporanId, $schoolId),
+                'pendidikan' => $this->getGtkPendidikanCollection($laporanId, $schoolId),
+                'jenis' => $this->getGtkByJenisCollection($laporanId, $schoolId),
             ]
         ];
+    }
+
+    private function getGtkAgamaCollection($laporanId, $schoolId)
+    {
+        if (!$laporanId) return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(fn($t) => (object) ['jenis_gtk' => $this->getJenisGtkLabel($t), 'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0, 'kristen_protestan_l' => 0, 'kristen_protestan_p' => 0, 'kristen_protestan_jml' => 0, 'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0, 'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0, 'budha_l' => 0, 'budha_p' => 0, 'budha_jml' => 0, 'konghucu_l' => 0, 'konghucu_p' => 0, 'konghucu_jml' => 0]);
+        return \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")->get()->map(function ($lg) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
+            foreach (['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'] as $ag) {
+                $row->{$ag . '_l'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'agama' && $k->sub_kategori === "{$ag}_l")?->jumlah ?? 0);
+                $row->{$ag . '_p'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'agama' && $k->sub_kategori === "{$ag}_p")?->jumlah ?? 0);
+                $row->{$ag . '_jml'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'agama' && $k->sub_kategori === "{$ag}_jml")?->jumlah ?: $row->{$ag . '_l'} + $row->{$ag . '_p'});
+            }
+            return $row;
+        });
+    }
+
+    private function getGtkDaerahCollection($laporanId, $schoolId)
+    {
+        if (!$laporanId) return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(fn($t) => (object) ['jenis_gtk' => $this->getJenisGtkLabel($t), 'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0, 'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0]);
+        return \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")->get()->map(function ($lg) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
+            foreach (['papua', 'non_papua'] as $d) {
+                $row->{$d . '_l'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'daerah' && $k->sub_kategori === "{$d}_l")?->jumlah ?? 0);
+                $row->{$d . '_p'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'daerah' && $k->sub_kategori === "{$d}_p")?->jumlah ?? 0);
+                $row->{$d . '_jml'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'daerah' && $k->sub_kategori === "{$d}_jml")?->jumlah ?: $row->{$d . '_l'} + $row->{$d . '_p'});
+            }
+            return $row;
+        });
+    }
+
+    private function getGtkStatusCollection($laporanId, $schoolId)
+    {
+        $cols = ['gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d', 'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d', 'gol_iii_a', 'gol_iii_b', 'gol_iii_c', 'gol_iii_d', 'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e', 'pppk', 'honorer_sekolah'];
+        if (!$laporanId) return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(fn($t) => (object) array_merge(['jenis_gtk' => $this->getJenisGtkLabel($t)], array_fill_keys($cols, 0)));
+        return \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")->get()->map(function ($lg) use ($cols) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
+            foreach ($cols as $c) { $row->{$c} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'status_kepegawaian' && $k->sub_kategori === $c)?->jumlah ?? 0); }
+            return $row;
+        });
+    }
+
+    private function getGtkUmurCollection($laporanId, $schoolId)
+    {
+        $ranges = ['umur_20_29', 'umur_30_39', 'umur_40_49', 'umur_50_59', 'umur_60_ke_atas'];
+        if (!$laporanId) return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(fn($t) => (object) array_merge(['jenis_gtk' => $this->getJenisGtkLabel($t)], array_fill_keys(array_map(fn($r) => [$r . '_l', $r . '_p', $r . '_jml'], $ranges), 0))); // simplified
+        return \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")->get()->map(function ($lg) use ($ranges) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
+            foreach ($ranges as $r) {
+                $row->{$r . '_l'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'umur' && $k->sub_kategori === "{$r}_l")?->jumlah ?? 0);
+                $row->{$r . '_p'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'umur' && $k->sub_kategori === "{$r}_p")?->jumlah ?? 0);
+                $row->{$r . '_jml'} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'umur' && $k->sub_kategori === "{$r}_jml")?->jumlah ?: $row->{$r . '_l'} + $row->{$r . '_p'});
+            }
+            return $row;
+        });
+    }
+
+    private function getGtkPendidikanCollection($laporanId, $schoolId)
+    {
+        $cols = ['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'];
+        if (!$laporanId) return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(fn($t) => (object) array_merge(['jenis_gtk' => $this->getJenisGtkLabel($t)], array_fill_keys($cols, 0)));
+        return \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")->get()->map(function ($lg) use ($cols) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
+            foreach ($cols as $c) { $row->{$c} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'pendidikan' && $k->sub_kategori === $c)?->jumlah ?? 0); }
+            return $row;
+        });
+    }
+
+    private function getGtkByJenisCollection($laporanId, $schoolId)
+    {
+        if (!$laporanId) return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(fn($t) => (object) ['jenis_gtk' => $this->getJenisGtkLabel($t), 'laki_laki' => 0, 'perempuan' => 0, 'total' => 0]);
+        return \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->orderByRaw("CASE jenis_gtk WHEN 'kepala_sekolah' THEN 1 WHEN 'guru' THEN 2 WHEN 'tenaga_administrasi' THEN 3 ELSE 4 END")->get()->map(function ($lg) {
+            $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
+            $row->laki_laki = $lg->kategori->where('jenis_kategori', 'agama')->where('sub_kategori', 'LIKE', '%_l')->sum('jumlah');
+            $row->perempuan = $lg->kategori->where('jenis_kategori', 'agama')->where('sub_kategori', 'LIKE', '%_p')->sum('jumlah');
+            $row->total = $row->laki_laki + $row->perempuan;
+            return $row;
+        });
+    }
+
+    private function getJenisGtkLabel($type)
+    {
+        return match ($type) { 'kepala_sekolah' => 'Kepala Sekolah', 'tenaga_administrasi' => 'Tenaga Administrasi', 'guru' => 'Guru', default => ucfirst($type) };
     }
 
     private function getNominatifSiswaData($schoolId)

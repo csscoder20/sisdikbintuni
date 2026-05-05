@@ -71,6 +71,7 @@ class KehadiranGtkResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with(['gtk', 'laporan'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])

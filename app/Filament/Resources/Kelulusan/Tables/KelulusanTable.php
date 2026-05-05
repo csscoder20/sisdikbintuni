@@ -25,6 +25,7 @@ class KelulusanTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 TextColumn::make('tahun')
                     ->label('Tahun Lulus')

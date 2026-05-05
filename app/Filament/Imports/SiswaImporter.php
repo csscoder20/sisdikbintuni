@@ -139,8 +139,14 @@ class SiswaImporter extends Importer
         ];
     }
 
-    public function resolveRecord(): Siswa
+    public function resolveRecord(): ?Siswa
     {
+        // Skip if this is the instruction or example row from the template
+        $nama = $this->data['nama'] ?? '';
+        if (str_contains(strtolower($nama), 'nama lengkap') || str_contains($nama, 'Budi Santoso')) {
+            return null;
+        }
+
         $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
 
         if (! $sekolahId) {

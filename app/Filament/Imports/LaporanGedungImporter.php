@@ -38,8 +38,14 @@ class LaporanGedungImporter extends Importer
         ];
     }
 
-    public function resolveRecord(): LaporanGedung
+    public function resolveRecord(): ?LaporanGedung
     {
+        // Skip if this is the instruction or example row from the template
+        $namaRuang = $this->data['nama_ruang'] ?? '';
+        if (str_contains(strtolower($namaRuang), 'diisi dengan') || str_contains($namaRuang, 'Ruang Kelas X-1')) {
+            return null;
+        }
+
         $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
 
         if (! $sekolahId) {

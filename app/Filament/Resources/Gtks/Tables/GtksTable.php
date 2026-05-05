@@ -27,6 +27,7 @@ class GtksTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->defaultSort('id', 'asc')
             ->columns([
                 TextColumn::make('nama')

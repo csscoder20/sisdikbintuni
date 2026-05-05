@@ -25,6 +25,7 @@ class ActivityLogsTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Waktu')

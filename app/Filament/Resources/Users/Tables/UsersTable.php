@@ -32,6 +32,7 @@ class UsersTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),

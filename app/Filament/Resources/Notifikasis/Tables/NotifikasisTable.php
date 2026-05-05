@@ -19,6 +19,7 @@ class NotifikasisTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 TextColumn::make('subject')
                     ->label('Subject')

@@ -43,6 +43,7 @@ class GtkJamAjarsTable
             ->recordUrl(null)
             ->recordAction(null)
             ->defaultSort('id', 'asc')
+            ->striped()
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('GTK')

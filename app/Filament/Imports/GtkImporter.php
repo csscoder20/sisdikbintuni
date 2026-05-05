@@ -207,6 +207,12 @@ class GtkImporter extends Importer
 
     public function resolveRecord(): ?Gtk
     {
+        // Skip if this is the instruction or example row from the template
+        $nama = $this->data['nama'] ?? '';
+        if (str_contains(strtolower($nama), 'diisi nama lengkap') || str_contains($nama, 'Siti Maimunah')) {
+            return null;
+        }
+
         $sekolahId = filament()->getTenant()->id;
         
         if (!empty($this->data['nik'])) {

@@ -148,13 +148,16 @@ class AdminPanelProvider extends PanelProvider
                 return <<<'HTML'
                     <style>
                         .fi-ta-header-cell > * {
-                            padding: 4px !important;
+                            padding-top: 0px !important;
+                            padding-bottom: 0px !important;
                         }
                         .fi-ta-cell > * {
-                            padding: 4px !important;
+                            padding-top: 0px !important;
+                            padding-bottom: 0px !important;
                         }
                         .fi-ta-cell {
                             height: auto !important;
+                            min-height: unset !important;
                         }
                         .fi-modal-actions,
                         .fi-modal-footer-actions,
@@ -273,12 +276,17 @@ class AdminPanelProvider extends PanelProvider
                             max-width: 100%;
                         }
 
-                        /* Compact tables */
                         .fi-ta-header-cell > * {
-                            padding: 4px !important;
+                            padding-top: 0px !important;
+                            padding-bottom: 0px !important;
                         }
                         .fi-ta-cell > * {
-                            padding: 4px !important;
+                            padding-top: 0px !important;
+                            padding-bottom: 0px !important;
+                        }
+                        .fi-ta-cell {
+                            height: auto !important;
+                            min-height: unset !important;
                         }
                         .fi-modal-actions,
                         .fi-modal-footer-actions,

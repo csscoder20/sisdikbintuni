@@ -341,8 +341,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); gap: 1.25rem; margin-bottom: 2rem; align-items: start;">
                 {{-- Tabel 2: Daerah Asal --}}
                 <div class="ks-card" wire:key="card-daerah" style="margin-bottom:0;">
-                    <div class="ks-card-header"
-                        style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                    <div class="ks-card-header" style="background:linear-gradient(135deg,#dcfce733,#86efac11); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                         <h2 style="color:#15803d; flex-grow: 1;">Jumlah GTK Berdasarkan Daerah Asal</h2>
                     </div>
                     <div class="ks-table-wrapper">

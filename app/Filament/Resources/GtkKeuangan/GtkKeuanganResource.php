@@ -67,6 +67,7 @@ class GtkKeuanganResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with(['gtk'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])

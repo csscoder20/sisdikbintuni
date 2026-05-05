@@ -21,6 +21,7 @@ class LaporanKeuanganTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 TextColumn::make('laporan.bulan')
                     ->label('Periode')

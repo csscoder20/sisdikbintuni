@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     <style>
@@ -95,43 +95,10 @@
             display: block;
         }
 
-        /* Chart Styles */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 1.5rem;
-            padding: 0 1.5rem 1.5rem 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .charts-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .chart-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .chart-card h4 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #374151;
-            align-self: flex-start;
-        }
-
         .chart-container {
-            width: 100%;
-            height: 300px;
-            position: relative;
+            display: none;
         }
+
 
         @media print {
             @page {
@@ -382,46 +349,333 @@
                                 <p style="color: #6b7280;">Tidak ada data untuk ditampilkan</p>
                             </div>
                         @else
-                            @if (isset($previewData['type']) && $previewData['type'] === 'rekap_summary')
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                                    @foreach ($previewData['sections'] as $sectionTitle => $data)
-                                        <div style="border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.5rem; background: #fff;">
-                                            <h4 style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 2px;">{{ $sectionTitle }}</h4>
-                                            <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+                            @if (isset($previewData['type']) && $previewData['type'] === 'rekap_siswa_matrix')
+                                @php
+                                    $data = $previewData['data'];
+                                    $perKelas = $data['perKelas'];
+                                    $perUmur = $data['perUmur'];
+                                    $perAgama = $data['perAgama'];
+                                    $perDaerah = $data['perDaerah'];
+                                    $disabilitas = $data['disabilitas'];
+                                    $beasiswa = $data['beasiswa'];
+                                @endphp
+
+                                {{-- 1. Siswa per Rombel --}}
+                                <div class="matrix-table-wrapper" data-title="JUMLAH SISWA BERDASARKAN KELAS / ROMBEL" style="margin-bottom: 3rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                                    <div style="overflow-x: auto; position: relative;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; border: 1px solid #cbd5e1; table-layout: fixed; min-width: 1000px;">
+                                            <thead>
+                                                <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                    <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 10px 4px; width: 40px; background: #f8fafc; position: sticky; left: 0; z-index: 20; white-space: nowrap;">NO</th>
+                                                    <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; width: 160px; background: #f8fafc; position: sticky; left: 40px; z-index: 20; border-right: 2px solid #cbd5e1; white-space: nowrap;">KELAS / ROMBEL</th>
+                                                    <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">AWAL BULAN</th>
+                                                    <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">MUTASI MASUK</th>
+                                                    <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">MUTASI KELUAR</th>
+                                                    <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">PUTUS SEKOLAH</th>
+                                                    <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">MENGULANG</th>
+                                                    <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">AKHIR BULAN</th>
+                                                </tr>
+                                                <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                    @for ($i = 0; $i < 6; $i++)
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px; white-space: nowrap;">L</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px; white-space: nowrap;">P</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 45px; background-color: #f1f5f9; font-weight: 800; white-space: nowrap;">JML</th>
+                                                    @endfor
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($perKelas as $index => $row)
+                                                    <tr style="background: white;">
+                                                        <td style="border: 1px solid #cbd5e1; padding: 10px 4px; background: #fff; position: sticky; left: 0; z-index: 10;">{{ $index + 1 }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; background: #fff; position: sticky; left: 40px; z-index: 10; font-weight: 600; border-right: 2px solid #cbd5e1;">{{ $row['nama_rombel'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['awal_bulan_l'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['awal_bulan_p'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['awal_bulan_jml'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['mutasi_l'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['mutasi_p'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['mutasi_jml'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['mutasi_keluar_l'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['mutasi_keluar_p'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['mutasi_keluar_jml'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['putus_sekolah_l'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['putus_sekolah_p'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['putus_sekolah_jml'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['mengulang_l'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['mengulang_p'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['mengulang_jml'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['akhir_bulan_l'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['akhir_bulan_p'] }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 800; background-color: #f8fafc;">{{ $row['akhir_bulan_jml'] }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot>
+                                                <tr style="background-color: #f1f5f9; font-weight: 800;">
+                                                    <td colspan="2" style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: right; background: #f1f5f9; position: sticky; left: 0; z-index: 15; border-right: 2px solid #cbd5e1;">TOTAL KESELURUHAN</td>
+                                                    @php
+                                                        $sums = ['awal_bulan_l', 'awal_bulan_p', 'awal_bulan_jml', 'mutasi_l', 'mutasi_p', 'mutasi_jml', 'mutasi_keluar_l', 'mutasi_keluar_p', 'mutasi_keluar_jml', 'putus_sekolah_l', 'putus_sekolah_p', 'putus_sekolah_jml', 'mengulang_l', 'mengulang_p', 'mengulang_jml', 'akhir_bulan_l', 'akhir_bulan_p', 'akhir_bulan_jml'];
+                                                    @endphp
+                                                    @foreach ($sums as $col)
+                                                        <td style="border: 1px solid #cbd5e1; padding: 12px 4px;">{{ collect($perKelas)->sum($col) }}</td>
+                                                    @endforeach
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="matrix-table-wrapper" data-title="JUMLAH SISWA MENURUT UMUR" style="margin-bottom: 3rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                                    <div style="overflow-x: auto; position: relative;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 0.7rem; text-align: center; border: 1px solid #cbd5e1; table-layout: fixed; min-width: 1400px;">
+                                            <thead>
+                                                <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                    <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 10px 4px; width: 40px; background: #f8fafc; position: sticky; left: 0; z-index: 20; white-space: nowrap;">NO</th>
+                                                    <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; width: 140px; background: #f8fafc; position: sticky; left: 40px; z-index: 20; border-right: 2px solid #cbd5e1; white-space: nowrap;">KELAS / ROMBEL</th>
+                                                    @for ($age = 13; $age <= 23; $age++)
+                                                        <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 2px; white-space: nowrap;">{{ $age }} Thn</th>
+                                                    @endfor
+                                                </tr>
+                                                <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                    @for ($age = 13; $age <= 23; $age++)
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 30px; white-space: nowrap;">L</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 30px; white-space: nowrap;">P</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 40px; background-color: #f1f5f9; font-weight: 800; white-space: nowrap;">J</th>
+                                                    @endfor
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($perUmur as $index => $row)
+                                                    <tr style="background: white;">
+                                                        <td style="border: 1px solid #cbd5e1; padding: 10px 4px; background: #fff; position: sticky; left: 0; z-index: 10;">{{ $index + 1 }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; background: #fff; position: sticky; left: 40px; z-index: 10; font-weight: 600; border-right: 2px solid #cbd5e1;">{{ $row['nama_rombel'] }}</td>
+                                                        @for ($age = 13; $age <= 23; $age++)
+                                                            @php $px = 'umur_' . $age; @endphp
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row[$px . '_l'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row[$px . '_p'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700; background: #f8fafc;">{{ $row[$px . '_jml'] }}</td>
+                                                        @endfor
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="matrix-table-wrapper" data-title="JUMLAH SISWA MENURUT AGAMA" style="margin-bottom: 3rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                                    <div style="overflow-x: auto; position: relative;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; border: 1px solid #cbd5e1; table-layout: fixed; min-width: 1000px;">
+                                            <thead>
+                                                <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                    <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 12px 4px; width: 40px; background: #f8fafc; position: sticky; left: 0; z-index: 20; white-space: nowrap;">NO</th>
+                                                    <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left; width: 160px; background: #f8fafc; position: sticky; left: 40px; z-index: 20; border-right: 2px solid #cbd5e1; white-space: nowrap;">KELAS / ROMBEL</th>
+                                                    @foreach (['ISLAM', 'KRISTEN', 'KATOLIK', 'HINDU', 'BUDDHA', 'KHONGHUCU'] as $ag)
+                                                        <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">{{ $ag }}</th>
+                                                    @endforeach
+                                                </tr>
+                                                <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                    @for ($i = 0; $i < 6; $i++)
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px; white-space: nowrap;">L</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px; white-space: nowrap;">P</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 4px; width: 45px; background-color: #f1f5f9; font-weight: 800; white-space: nowrap;">J</th>
+                                                    @endfor
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($perAgama as $index => $row)
+                                                    <tr style="background: white;">
+                                                        <td style="border: 1px solid #cbd5e1; padding: 12px 4px; background: #fff; position: sticky; left: 0; z-index: 10;">{{ $index + 1 }}</td>
+                                                        <td style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left; background: #fff; position: sticky; left: 40px; z-index: 10; font-weight: 600; border-right: 2px solid #cbd5e1;">{{ $row['nama_rombel'] }}</td>
+                                                        @foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag)
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row[$ag . '_l'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row[$ag . '_p'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700; background: #f8fafc;">{{ $row[$ag . '_jml'] }}</td>
+                                                        @endforeach
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                    {{-- 4. Daerah Asal --}}
+                                    <div class="matrix-table-wrapper" data-title="SISWA PER DAERAH ASAL" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 3rem;">
+                                        <div style="overflow-x: auto; position: relative;">
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; border: 1px solid #cbd5e1; table-layout: fixed; min-width: 600px;">
+                                                <thead>
+                                                    <tr style="background-color: #f8fafc;">
+                                                        <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 12px 4px; width: 40px; background: #f8fafc; position: sticky; left: 0; z-index: 20;">NO</th>
+                                                        <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left; width: 160px; background: #f8fafc; position: sticky; left: 40px; z-index: 20; border-right: 2px solid #cbd5e1;">ROMBEL</th>
+                                                        <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px;">PAPUA</th>
+                                                        <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px;">NON-PAPUA</th>
+                                                    </tr>
+                                                    <tr style="background-color: #f8fafc;">
+                                                        @for ($i = 0; $i < 2; $i++)
+                                                            <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px;">L</th>
+                                                            <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px;">P</th>
+                                                            <th style="border: 1px solid #cbd5e1; padding: 4px; width: 45px; background-color: #f1f5f9; font-weight: 800;">J</th>
+                                                        @endfor
+                                                    </tr>
+                                                </thead>
                                                 <tbody>
-                                                    @foreach ($data as $label => $value)
-                                                        <tr style="border-bottom: 1px solid #f3f4f6;">
-                                                            <td style="padding: 2px 0; color: #4b5563;">{{ $label }}</td>
-                                                            <td style="padding: 2px 0; text-align: right; font-weight: 600; color: #111827;">{{ $value }}</td>
+                                                    @foreach ($perDaerah as $index => $row)
+                                                        <tr style="background: white;">
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 4px; background: #fff; position: sticky; left: 0; z-index: 10;">{{ $index + 1 }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; background: #fff; position: sticky; left: 40px; z-index: 10; font-weight: 600; border-right: 2px solid #cbd5e1;">{{ $row['nama_rombel'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['papua_l'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['papua_p'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['papua_jml'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['non_papua_l'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row['non_papua_p'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700;">{{ $row['non_papua_jml'] }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
+                                    </div>
+
+                                    {{-- 5. Disabilitas --}}
+                                    <div class="matrix-table-wrapper" data-title="SISWA DISABILITAS" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 3rem;">
+                                        <div style="overflow-x: auto;">
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; border: 1px solid #cbd5e1;">
+                                                <thead>
+                                                    <tr style="background-color: #f8fafc;">
+                                                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; width: 60px;">NO</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; text-align: left;">JENIS DISABILITAS</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; width: 80px;">L</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; width: 80px;">P</th>
+                                                        <th style="border: 1px solid #cbd5e1; padding: 12px 8px; width: 100px; background-color: #f1f5f9; font-weight: 800;">JUMLAH</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($disabilitas as $index => $row)
+                                                        <tr style="background: white;">
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 8px;">{{ $index + 1 }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 8px; text-align: left; font-weight: 600;">{{ $row['jenis_disabilitas'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 8px;">{{ $row['laki_laki'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 8px;">{{ $row['perempuan'] }}</td>
+                                                            <td style="border: 1px solid #cbd5e1; padding: 10px 8px; font-weight: 700; background: #f8fafc;">{{ $row['total'] }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif (isset($previewData['type']) && $previewData['type'] === 'rekap_gtk_matrix')
+                                @php
+                                    $data = $previewData['data'];
+                                @endphp
+                                {{-- Rendering GTK Matrix tables here (Agama, Daerah, Status, Umur, Pendidikan) --}}
+                                <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+                                    @foreach(['Agama' => 'agama', 'Daerah' => 'daerah', 'Umur' => 'umur'] as $title => $key)
+                                        <div class="matrix-table-wrapper" data-title="DATA GTK MENURUT {{ $title }}" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                                            <div style="overflow-x: auto; position: relative;">
+                                                <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; table-layout: fixed; min-width: 800px;">
+                                                    <thead>
+                                                        <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                            <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 12px 4px; width: 40px; background: #f8fafc; position: sticky; left: 0; z-index: 20; white-space: nowrap;">NO</th>
+                                                            <th rowspan="2" style="border: 1px solid #cbd5e1; padding: 12px 8px; width: 200px; background: #f8fafc; position: sticky; left: 40px; z-index: 20; border-right: 2px solid #cbd5e1; white-space: nowrap;">JENIS GTK</th>
+                                                            @if($key === 'agama')
+                                                                @foreach(['ISLAM', 'KRISTEN', 'KATOLIK', 'HINDU', 'BUDHA', 'KONGHUCU'] as $h) <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">{{ $h }}</th> @endforeach
+                                                            @elseif($key === 'daerah')
+                                                                @foreach(['PAPUA', 'NON-PAPUA'] as $h) <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">{{ $h }}</th> @endforeach
+                                                            @elseif($key === 'umur')
+                                                                @foreach(['20-29', '30-39', '40-49', '50-59', '60+'] as $h) <th colspan="3" style="border: 1px solid #cbd5e1; padding: 8px 4px; white-space: nowrap;">{{ $h }}</th> @endforeach
+                                                            @endif
+                                                        </tr>
+                                                        <tr style="background-color: #f8fafc; white-space: nowrap;">
+                                                            @php $cols = ($key === 'agama' ? 6 : ($key === 'daerah' ? 2 : 5)); @endphp
+                                                            @for($i=0;$i<$cols;$i++) 
+                                                                <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px; font-weight: 700; white-space: nowrap;">L</th>
+                                                                <th style="border: 1px solid #cbd5e1; padding: 4px; width: 35px; font-weight: 700; white-space: nowrap;">P</th>
+                                                                <th style="border: 1px solid #cbd5e1; padding: 4px; width: 45px; font-weight: 800; background: #f1f5f9; white-space: nowrap;">JML</th> 
+                                                            @endfor
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($data[$key] as $idx => $row)
+                                                            <tr style="background: white; transition: background 0.2s;">
+                                                                <td style="border: 1px solid #cbd5e1; padding: 12px 4px; background: #fff; position: sticky; left: 0; z-index: 10;">{{ $idx + 1 }}</td>
+                                                                <td style="border: 1px solid #cbd5e1; padding: 12px 10px; text-align: left; font-weight: 600; color: #334155; position: sticky; left: 40px; z-index: 10; background: #fff; border-right: 2px solid #cbd5e1;">{{ $row->jenis_gtk }}</td>
+                                                                @php
+                                                                    $subs = ($key === 'agama' ? ['islam','kristen_protestan','katolik','hindu','budha','konghucu'] : ($key === 'daerah' ? ['papua','non_papua'] : ['umur_20_29','umur_30_39','umur_40_49','umur_50_59','umur_60_ke_atas']));
+                                                                @endphp
+                                                                @foreach($subs as $s)
+                                                                    <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row->{$s.'_l'} }}</td>
+                                                                    <td style="border: 1px solid #cbd5e1; padding: 8px 4px;">{{ $row->{$s.'_p'} }}</td>
+                                                                    <td style="border: 1px solid #cbd5e1; padding: 8px 4px; font-weight: 700; background: #f8fafc; color: #1e293b;">{{ $row->{$s.'_jml'} }}</td>
+                                                                @endforeach
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @elseif (isset($previewData['type']) && $previewData['type'] === 'rekap_summary')
+                                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                    @foreach ($previewData['sections'] as $sectionTitle => $data)
+                                        <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="padding: 0.6rem 0.75rem; border-bottom: 1px solid #e5e7eb; background: #f8fafc;">
+                                                <h4 style="font-size: 0.9rem; font-weight: 800; text-transform: uppercase; color: #334155; margin: 0;">{{ $sectionTitle }}</h4>
+                                            </div>
+                                            <div style="overflow-x: auto;">
+                                                <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; border: 1px solid #333;">
+                                                    <thead>
+                                                        <tr style="background-color: #f3f4f6;">
+                                                            <th rowspan="2" style="border: 1px solid #333; padding: 4px; width: 40px;">NO</th>
+                                                            <th rowspan="2" style="border: 1px solid #333; padding: 4px; text-align: left;">URAIAN</th>
+                                                            <th colspan="3" style="border: 1px solid #333; padding: 4px;">JUMLAH</th>
+                                                        </tr>
+                                                        <tr style="background-color: #f3f4f6;">
+                                                            <th style="border: 1px solid #333; padding: 4px; width: 40px;">L</th>
+                                                            <th style="border: 1px solid #333; padding: 4px; width: 40px;">P</th>
+                                                            <th style="border: 1px solid #333; padding: 4px; width: 50px; background-color: rgba(59, 130, 246, 0.1);">JML</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($data as $index => $row)
+                                                            <tr>
+                                                                <td style="border: 1px solid #333; padding: 4px;">{{ $index + 1 }}</td>
+                                                                <td style="border: 1px solid #333; padding: 4px; text-align: left;">{{ $row['label'] }}</td>
+                                                                <td style="border: 1px solid #333; padding: 4px;">{{ $row['l'] }}</td>
+                                                                <td style="border: 1px solid #333; padding: 4px;">{{ $row['p'] }}</td>
+                                                                <td style="border: 1px solid #333; padding: 4px; font-weight: bold; background-color: rgba(59, 130, 246, 0.05);">{{ $row['total'] }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     @endforeach
                                 </div>
                             @elseif ($key === 'identitas_sekolah')
                                 <div style="overflow-x: auto;">
-                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left; border: none;">
                                         <tbody>
                                             @foreach ($previewData as $index => $item)
-                                                @if(isset($item['is_header']))
-                                                    <tr>
-                                                        <td colspan="3" style="padding: 0.5rem 0 0.25rem 0; font-weight: 700; color: #111827;">
-                                                            {{ $index + 1 }}. {{ $item['label'] }}
-                                                        </td>
-                                                    </tr>
-                                                @else
-                                                    <tr style="border-bottom: 1px dashed #e5e7eb;">
-                                                        <td style="padding: 0.25rem 0; color: #4b5563; width: 45%; {{ isset($item['is_sub']) ? 'padding-left: 1.5rem;' : '' }}">
-                                                            {{ isset($item['is_sub']) ? $item['label'] : ($index + 1) . ' ' . $item['label'] }}
-                                                        </td>
-                                                        <td style="padding: 0.25rem 0; color: #4b5563; width: 10px;">:</td>
-                                                        <td style="padding: 0.25rem 0; font-weight: 600; color: #111827;">
-                                                            {{ $item['value'] }}
-                                                        </td>
-                                                    </tr>
-                                                @endif
+                                                <tr style="{{ isset($item['is_header']) ? 'font-weight: bold;' : '' }}">
+                                                    {{-- Kolom Nomor --}}
+                                                    <td style="padding: 2px 4px; vertical-align: top; width: 30px; color: #374151;">
+                                                        {{ !isset($item['is_sub']) ? ($index + 1) : '' }}
+                                                    </td>
+                                                    
+                                                    {{-- Kolom Uraian --}}
+                                                    <td style="padding: 2px 4px; vertical-align: top; width: 350px; color: #374151; {{ isset($item['is_sub']) ? 'padding-left: 1.5rem !important;' : '' }}">
+                                                        {{ $item['label'] }}
+                                                    </td>
+
+                                                    {{-- Kolom Titik Dua --}}
+                                                    <td style="padding: 2px 4px; vertical-align: top; width: 15px; color: #374151; text-align: center;">:</td>
+
+                                                    {{-- Kolom Nilai/Data --}}
+                                                    <td style="padding: 2px 4px; vertical-align: top; color: #111827; font-weight: normal;">
+                                                        {{ $item['value'] }}
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -531,84 +785,27 @@
 
             <!-- Header -->
             <div
-                style="padding:1rem 1.5rem; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                style="padding:1rem 1.5rem; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center; position: relative; z-index: 70; background: #fff;">
                 <h3 id="preview-modal-title" style="font-weight:600; margin:0;">Pratinjau Laporan Bulanan</h3>
                 <button type="button" id="preview-modal-close"
-                    style="border:none;background:none;cursor:pointer;font-size:1.5rem; color:#9ca3af; line-height:1;">✕</button>
+                    style="border:none;background:none;cursor:pointer;font-size:1.5rem; color:#9ca3af; line-height:1; padding: 5px;">✕</button>
             </div>
 
-            <!-- Tabs Header -->
-            <div class="tabs-header " style="margin-top: 1rem;">
-                <button class="tab-btn active" data-tab="tab-data">Data</button>
-                <button class="tab-btn" data-tab="tab-grafik">Grafik</button>
-            </div>
 
-            <!-- Body -->
+
             <div id="tab-data" class="tab-content active" style="overflow:auto; flex: 1;">
-                <div id="preview-modal-body" style="padding:0 1.5rem 1.5rem 1.5rem;"></div>
-            </div>
-
-            <div id="tab-grafik" class="tab-content" style="overflow:auto; flex: 1;">
-                <div class="charts-grid">
-                    <!-- Keadaan Siswa Section -->
-                    <div class="chart-section" data-section="Keadaan Siswa" style="grid-column: 1 / -1; margin-top: 1rem;">
-                        <h3 style="font-weight: bold; font-size: 1rem; color: #1f2937; margin-bottom: 1rem; border-left: 4px solid #f97316; padding-left: 0.5rem;">Keadaan Siswa</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                            <div class="chart-card"><h4>Siswa by Rombel</h4><div class="chart-container"><canvas id="chart-siswa-rombel"></canvas></div></div>
-                            <div class="chart-card"><h4>Siswa by Umur</h4><div class="chart-container"><canvas id="chart-siswa-umur"></canvas></div></div>
-                            <div class="chart-card"><h4>Siswa by Agama</h4><div class="chart-container"><canvas id="chart-siswa-agama"></canvas></div></div>
-                            <div class="chart-card"><h4>Siswa by Daerah</h4><div class="chart-container"><canvas id="chart-siswa-daerah"></canvas></div></div>
-                            <div class="chart-card"><h4>Siswa Disabilitas</h4><div class="chart-container"><canvas id="chart-siswa-disabilitas"></canvas></div></div>
-                            <div class="chart-card"><h4>Siswa Beasiswa</h4><div class="chart-container"><canvas id="chart-siswa-beasiswa"></canvas></div></div>
-                        </div>
-                    </div>
-
-                    <!-- Keadaan GTK Section -->
-                    <div class="chart-section" data-section="Keadaan GTK" style="grid-column: 1 / -1; margin-top: 2rem;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                            <div class="chart-card"><h4>Pie GTK by Umur</h4><div class="chart-container"><canvas id="chart-gtk-umur-pie"></canvas></div></div>
-                            <div class="chart-card"><h4>Pie GTK by Daerah Asal</h4><div class="chart-container"><canvas id="chart-gtk-daerah-asal"></canvas></div></div>
-                            <div class="chart-card"><h4>GTK by Status Kepegawaian</h4><div class="chart-container"><canvas id="chart-gtk-status"></canvas></div></div>
-                            <div class="chart-card"><h4>GTK by Umur</h4><div class="chart-container"><canvas id="chart-gtk-umur-bar"></canvas></div></div>
-                            <div class="chart-card"><h4>GTK by Pendidikan</h4><div class="chart-container"><canvas id="chart-gtk-pendidikan"></canvas></div></div>
-                        </div>
-                    </div>
-
-                    <!-- Kondisi Gedung/Ruang Section -->
-                    <div class="chart-section" data-section="B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU" style="grid-column: 1 / -1; margin-top: 2rem;">
-                        <h3 style="font-weight: bold; font-size: 1rem; color: #1f2937; margin-bottom: 1rem; border-left: 4px solid #ef4444; padding-left: 0.5rem;">B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                            <div class="chart-card"><h4>Gedung Rusak dan Baik</h4><div class="chart-container"><canvas id="chart-sarpras-kondisi"></canvas></div></div>
-                        </div>
-                    </div>
-
-                    <!-- Kehadiran GTK Section -->
-                    <div class="chart-section" data-section="Kehadiran GTK" style="grid-column: 1 / -1; margin-top: 2rem;">
-                        <h3 style="font-weight: bold; font-size: 1rem; color: #1f2937; margin-bottom: 1rem; border-left: 4px solid #ec4899; padding-left: 0.5rem;">Kehadiran GTK</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                            <div class="chart-card"><h4>Perbandingan Sakit, Izin, dan Alpa</h4><div class="chart-container"><canvas id="chart-kehadiran-rekap"></canvas></div></div>
-                        </div>
-                    </div>
-
-                    <!-- Kelulusan Section -->
-                    <div class="chart-section" data-section="Kelulusan" style="grid-column: 1 / -1; margin-top: 2rem; margin-bottom: 2rem;">
-                        <h3 style="font-weight: bold; font-size: 1rem; color: #1f2937; margin-bottom: 1rem; border-left: 4px solid #8b5cf6; padding-left: 0.5rem;">Kelulusan</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                            <div class="chart-card"><h4>Persentase Kelulusan 5 Tahun Terakhir</h4><div class="chart-container"><canvas id="chart-kelulusan-tren"></canvas></div></div>
-                        </div>
-                    </div>
-                </div>
+                <div id="preview-modal-body" style="padding:1.5rem;"></div>
             </div>
 
 
             <!-- Footer -->
-            <div style="padding:1rem; border-top:1px solid #e5e7eb; display:flex; gap:1rem;">
+            <div style="padding:1rem; border-top:1px solid #e5e7eb; display:flex; gap:1rem; position: relative; z-index: 70; background: #f9fafb;">
                 <button type="button" id="preview-modal-pdf"
-                    style="flex:1; background:#ef4444; color:white; padding:0.75rem; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:background-color 0.2s;">
+                    style="flex:1; background:#ef4444; color:white; padding:0.75rem; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:background-color 0.2s; z-index: 80;">
                     Cetak / Simpan PDF
                 </button>
                 <button type="button" id="preview-modal-close-2"
-                    style="flex:1; background:#e5e7eb; padding:0.75rem; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:background-color 0.2s;">
+                    style="flex:1; background:#e5e7eb; padding:0.75rem; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:background-color 0.2s; z-index: 80;">
                     Tutup
                 </button>
             </div>
@@ -669,16 +866,7 @@
             });
         });
 
-        // close klik luar
-        document.querySelectorAll('[role="dialog"]').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                // Jangan tutup pemilihan data laporan jika klik luar
-                if (e.target === this && this.id !== 'selection-modal') {
-                    this.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            });
-        });
+
 
         // PREVIEW GABUNGAN
         const confirmPreviewBtn = document.getElementById('confirmPreviewBtn');
@@ -709,7 +897,12 @@
         previewBtn.addEventListener('click', function() {
             const checkedItems = document.querySelectorAll('.report-checkbox:checked');
             if (checkedItems.length === 0) {
-                alert('Silakan pastikan data telah valid (tercentang) sebelum pratinjau');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Pastikan data telah valid (tercentang) sebelum pratinjau',
+                    confirmButtonColor: '#3b82f6',
+                });
                 return;
             }
 
@@ -722,38 +915,52 @@
 
             // Otomatis 'all' karena user tidak lagi memilih bagian
             const selectedGroup = 'all';
-
-            let itemsToPreview = Array.from(checkedItems);
-
-            itemsToPreview.forEach(checkbox => {
+            let sectionCounter = 0;
+            const itemsToPreview = Array.from(checkedItems);
+            itemsToPreview.forEach((checkbox, index) => {
                 const key = checkbox.value;
                 const modal = document.getElementById('modal-' + key);
 
-                const sectionColors = {
-                    identitas_sekolah: '#dbeafe',
-                    kondisi_sarpras: '#fee2e2',
-                    sebaran_jam: '#cffafe',
-                    rekap_kehadiran: '#fce7f3',
-                    kelulusan: '#ede9fe',
-                };
-
                 if (modal) {
-                    const title = modal.querySelector('h2').innerHTML;
                     const contentElement = modal.querySelector('.report-modal-content-wrapper');
-                    const content = contentElement ? contentElement.innerHTML : 'Data tidak dapat dimuat';
+                    const matrixWrappers = contentElement.querySelectorAll('.matrix-table-wrapper');
 
-                    const bgColor = sectionColors[key] || '#f3f4f6';
+                    if (matrixWrappers.length > 0) {
+                        // Flatten matrix tables into individual sections
+                        matrixWrappers.forEach((wrapper, wIdx) => {
+                            const letter = String.fromCharCode(65 + sectionCounter++);
+                            const title = wrapper.getAttribute('data-title') || 'DATA';
+                            const mt = (index === 0 && wIdx === 0) ? '0' : '2rem';
 
-                    previewBody.innerHTML += `
-                        <div style="margin-bottom:1.5rem;">
-                            <div style="background:${bgColor}; padding:0.5rem 0.75rem; font-weight:600; border: 1px solid #e5e7eb; border-bottom: none;">
-                                ${title}
+                            previewBody.innerHTML += `
+                                <div style="margin-top:${mt}; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; background: #fff;">
+                                    <div style="background:#f8fafc; padding:0.75rem 1rem; border-bottom: 1px solid #e5e7eb;">
+                                        <h3 style="margin:0; font-size:0.9rem; font-weight:800; color:#111827; text-transform:uppercase;">${letter}. ${title}</h3>
+                                    </div>
+                                    <div class="preview-content-box" style="padding:1.5rem;">
+                                        ${wrapper.innerHTML}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        // Normal section
+                        const letter = String.fromCharCode(65 + sectionCounter++);
+                        let title = modal.querySelector('h2').innerText;
+                        const content = contentElement ? contentElement.innerHTML : 'Data tidak dapat muat';
+                        const mt = index === 0 ? '0' : '2rem';
+
+                        previewBody.innerHTML += `
+                            <div style="margin-top:${mt}; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; background: #fff;">
+                                <div style="background:#f8fafc; padding:0.75rem 1rem; border-bottom: 1px solid #e5e7eb;">
+                                    <h3 style="margin:0; font-size:0.9rem; font-weight:800; color:#111827; text-transform:uppercase;">${letter}. ${title}</h3>
+                                </div>
+                                <div class="preview-content-box" style="padding:1.5rem;">
+                                    ${content}
+                                </div>
                             </div>
-                            <div class="preview-content-box">
-                                ${content}
-                            </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
             });
 
@@ -764,9 +971,13 @@
             document.body.style.overflow = 'hidden';
         });
 
+        // Attach close listeners
+        document.getElementById('preview-modal-close').addEventListener('click', closePreview);
+        document.getElementById('preview-modal-close-2').addEventListener('click', closePreview);
+
         // Cetak / Simpan PDF menggunakan print area native (no external library)
         document.getElementById('preview-modal-pdf').addEventListener('click', function() {
-            const activeTab = document.querySelector('.tab-btn.active').getAttribute('data-tab');
+            const activeTab = 'tab-data';
             const printArea = document.getElementById('print-area');
 
             // Ambil data sekolah dari data attributes
@@ -804,108 +1015,112 @@
                 '</div>';
 
             let printContent = '';
-            const selectedGroup = 'all';
+            const checkedCheckboxes = document.querySelectorAll('.report-checkbox:checked');
+            const checkedItemsMap = {};
+            checkedCheckboxes.forEach(cb => checkedItemsMap[cb.value] = true);
 
             if (activeTab === 'tab-data') {
-                if (selectedGroup === 'all') {
-                    // Loop through Halaman structure
-                    const pages = Object.keys(groupMapping);
-                    const orientationMap = {
-                        'Halaman 1': 'portrait',
-                        'Halaman 2': 'portrait',
-                        'Halaman 3': 'landscape',
-                        'Halaman 4': 'landscape',
-                        'Halaman 5': 'portrait',
-                        'Halaman 6': 'landscape',
-                        'Halaman 7': 'landscape',
-                        'Halaman 8': 'portrait',
-                    };
+                let sectionCounter = 0;
+                const pages = Object.keys(groupMapping);
+                const orientationMap = {
+                    'Halaman 1': 'portrait',
+                    'Halaman 2': 'landscape',
+                    'Halaman 3': 'landscape',
+                    'Halaman 4': 'landscape',
+                    'Halaman 5': 'portrait',
+                    'Halaman 6': 'landscape',
+                    'Halaman 7': 'landscape',
+                    'Halaman 8': 'portrait',
+                };                const printedPages = [];                pages.forEach((pageKey) => {
+                    const itemKeys = groupMapping[pageKey];
+                    const orientation = orientationMap[pageKey] || 'portrait';
+                    let pageHtml = '';
+                    let hasDataInPage = false;
+                    let isFirstInPage = true;
 
-                    pages.forEach((pageKey, index) => {
-                        const itemKeys = groupMapping[pageKey];
-                        const orientation = orientationMap[pageKey] || 'portrait';
-                        let pageHtml = '';
-                        let hasDataInPage = false;
-
-                        itemKeys.forEach(key => {
+                    itemKeys.forEach(key => {
+                        if (checkedItemsMap[key]) {
                             const modal = document.getElementById('modal-' + key);
                             if (modal) {
-                                const title = modal.querySelector('h2').innerText;
-                                const contentEl = modal.querySelector('.report-modal-content-wrapper');
-                                if (contentEl) {
+                                const contentElement = modal.querySelector('.report-modal-content-wrapper');
+                                // Filter strictly for content
+                                if (!contentElement || contentElement.innerText.trim() === '') return;
+
+                                const matrixWrappers = contentElement.querySelectorAll('.matrix-table-wrapper');
+                                const sectionTitle = modal.querySelector('h2').innerText;
+
+                                if (matrixWrappers.length > 0) {
+                                    matrixWrappers.forEach(wrapper => {
+                                        const letter = String.fromCharCode(65 + sectionCounter++);
+                                        const subTitle = wrapper.getAttribute('data-title') || 'DATA';
+                                        const mt = isFirstInPage ? '0' : '2.5rem';
+                                        isFirstInPage = false;
+                                        hasDataInPage = true;
+                                        
+                                        pageHtml += `
+                                            <div style="margin-top:${mt}; page-break-inside: avoid; clear: both;">
+                                                <h3 style="font-size:10pt; font-weight:bold; margin-top: 0; margin-bottom:8px; text-transform:uppercase;">${letter}. ${subTitle}</h3>
+                                                <div style="margin-bottom:10px;">
+                                                    ${wrapper.innerHTML}
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                } else {
+                                    const letter = String.fromCharCode(65 + sectionCounter++);
+                                    const mt = isFirstInPage ? '0' : '2.5rem';
+                                    isFirstInPage = false;
+                                    hasDataInPage = true;
+
                                     pageHtml += `
-                                        <div style="margin-bottom: 1.5rem;">
-                                            <div style="font-weight:bold; font-size:11px; margin-bottom:8px; border-bottom:1px solid #000; padding-bottom:2px;">${title}</div>
-                                            <div>${contentEl.innerHTML}</div>
+                                        <div style="margin-top:${mt}; clear: both;">
+                                            <h3 style="font-size:10pt; font-weight:bold; margin-top: 0; margin-bottom:8px; text-transform:uppercase;">${letter}. ${sectionTitle}</h3>
+                                            <div style="margin-bottom:10px;">
+                                                ${contentElement.innerHTML}
+                                            </div>
                                         </div>
                                     `;
-                                    hasDataInPage = true;
                                 }
                             }
-                        });
+                        }
+                    });
 
-                        if (hasDataInPage) {
-                            printContent += `
-                                <div class="print-page ${orientation}" style="${index < pages.length - 1 ? 'page-break-after: always;' : ''}">
-                                    ${headerTemplate('LAPORAN BULANAN - ' + pageKey)}
-                                    ${pageHtml}
-                                </div>
-                            `;
-                        }
-                    });
-                } else {
-                    // Single page print
-                    const itemKeys = groupMapping[selectedGroup] || [];
-                    let pageHtml = '';
-                    itemKeys.forEach(key => {
-                        const modal = document.getElementById('modal-' + key);
-                        if (modal) {
-                            const title = modal.querySelector('h2').innerText;
-                            const contentEl = modal.querySelector('.report-modal-content-wrapper');
-                            if (contentEl) {
-                                pageHtml += `
-                                    <div style="margin-bottom: 1.5rem;">
-                                        <div style="font-weight:bold; font-size:11px; margin-bottom:8px; border-bottom:1px solid #000; padding-bottom:2px;">${title}</div>
-                                        <div>${contentEl.innerHTML}</div>
-                                    </div>
-                                `;
-                            }
-                        }
-                    });
-                    printContent = headerTemplate(currentSelectedGroupLabel) + pageHtml;
-                }
-            } else {
-                // EXPORT CHARTS
-                const chartSections = document.querySelectorAll('.chart-section');
-                chartSections.forEach(section => {
-                    if (section.style.display !== 'none') {
-                        const sectionTitle = section.querySelector('h3').innerText;
-                        printContent += `<h3 style="font-size:12px; font-weight:bold; border-bottom:1px solid #ccc; padding-bottom:4px; margin-bottom:10px; margin-top:20px;">${sectionTitle}</h3>`;
-                        
-                        const canvases = section.querySelectorAll('canvas');
-                        printContent += '<div style="display:flex; flex-wrap:wrap; gap:20px;">';
-                        canvases.forEach(canvas => {
-                            const chartCard = canvas.closest('.chart-card');
-                            const chartTitle = chartCard.querySelector('h4').innerText;
-                            const imageData = canvas.toDataURL('image/png');
-                            
-                            printContent += `
-                                <div style="width: calc(50% - 10px); min-width:300px; margin-bottom:20px; page-break-inside:avoid;">
-                                    <p style="font-size:10px; font-weight:bold; margin-bottom:5px;">${chartTitle}</p>
-                                    <img src="${imageData}" style="width:100%; height:auto; border:1px solid #eee;" />
-                                </div>
-                            `;
+                    if (hasDataInPage) {
+                        printedPages.push({
+                            label: pageKey,
+                            orientation: orientation,
+                            html: pageHtml
                         });
-                        printContent += '</div>';
                     }
                 });
+
+                // Build final content with proper page breaks
+                printedPages.forEach((page, pIdx) => {
+                    const isLast = pIdx === printedPages.length - 1;
+                    printContent += `
+                        <div class="print-page ${page.orientation}" style="${isLast ? '' : 'page-break-after: always;'}">
+                            ${headerTemplate('LAPORAN BULANAN - ' + page.label)}
+                            ${page.html}
+                        </div>
+                    `;
+                });
+            } else {
+                printContent = '';
             }
 
             // Salin konten ke print area
             printArea.innerHTML = printContent;
 
             if (activeTab === 'tab-data') {
-                // Strip inline padding/height dan terapkan rata tengah untuk kolom tertentu (hanya untuk tabel)
+                // Strip UI elements and sticky positioning for print
+                printArea.querySelectorAll('div').forEach(function(div) {
+                    div.style.overflow = 'visible';
+                    div.style.overflowX = 'visible';
+                    div.style.position = 'static';
+                    div.style.boxShadow = 'none';
+                    div.style.border = 'none';
+                });
+
                 printArea.querySelectorAll('td, th').forEach(function(cell) {
                     const isCentered = cell.style.textAlign === 'center';
                     cell.style.removeProperty('padding');
@@ -916,10 +1131,48 @@
                     cell.style.removeProperty('height');
                     cell.style.removeProperty('min-height');
                     cell.style.removeProperty('line-height');
+                    
+                    // Kill sticky columns for print
+                    cell.style.position = 'static';
+                    cell.style.left = 'auto';
+                    cell.style.zIndex = 'auto';
+                    cell.style.backgroundColor = 'transparent';
+                    cell.style.width = 'auto';
+                    cell.style.minWidth = '0';
+                    cell.style.border = '1px solid #000';
 
                     if (isCentered) {
                         cell.classList.add('text-center');
                     }
+                });
+
+                // Force tables to use auto layout for print to avoid overlap/cut-off
+                printArea.querySelectorAll('table').forEach(function(table) {
+                    table.style.tableLayout = 'auto';
+                    table.style.width = '100%';
+                    table.style.minWidth = '0';
+                    table.style.borderCollapse = 'collapse';
+
+                    // Check if this table belongs to a matrix section (Siswa/GTK)
+                    const isMatrix = table.closest('.matrix-table-wrapper');
+                    
+                    table.querySelectorAll('th, td').forEach(function(cell) {
+                        cell.style.border = '1px solid #000';
+                        cell.style.padding = '3px 2px';
+                        cell.style.fontSize = '8pt';
+
+                        // Centering for Matrix tables
+                        if (isMatrix) {
+                            cell.style.textAlign = 'center';
+                            cell.style.verticalAlign = 'middle';
+                            
+                            // Narrow NO column
+                            if (cell.innerText.trim() === 'NO' || (cell.parentElement.firstElementChild === cell && cell.innerText.trim().match(/^\d+$/))) {
+                                cell.style.width = '25px';
+                                cell.style.minWidth = '25px';
+                            }
+                        }
+                    });
                 });
             }
 
@@ -958,140 +1211,7 @@
             });
         });
 
-        // TABS AND CHARTS LOGIC
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const chartData = @json($this->chartData);
-        let chartInstances = {};
-
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tabId = this.getAttribute('data-tab');
-                
-                tabBtns.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                this.classList.add('active');
-                document.getElementById(tabId).classList.add('active');
-
-                if (tabId === 'tab-grafik') {
-                    renderCharts();
-                }
-            });
-        });
-
-        function renderCharts() {
-            const selectedGroup = document.querySelector('input[name="preview_group"]:checked').value;
-            const chartSections = document.querySelectorAll('.chart-section');
-
-            chartSections.forEach(section => {
-                const sectionName = section.getAttribute('data-section');
-                if (selectedGroup === 'all' || selectedGroup === sectionName) {
-                    section.style.display = 'block';
-                    initSectionCharts(sectionName);
-                } else {
-                    section.style.display = 'none';
-                }
-            });
-        }
-
-        function initSectionCharts(sectionName) {
-            const sectionData = chartData[sectionName];
-            if (!sectionData) return;
-
-            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899', '#14b8a6', '#f97316'];
-
-            if (sectionName === 'Keadaan Siswa') {
-                createChart('chart-siswa-rombel', 'bar', sectionData.rombel, 'Siswa', colors[0]);
-                createChart('chart-siswa-umur', 'line', sectionData.umur, 'Siswa', colors[1]);
-                createChart('chart-siswa-agama', 'pie', sectionData.agama, 'Agama', colors);
-                createChart('chart-siswa-daerah', 'pie', sectionData.daerah, 'Daerah', colors);
-                createChart('chart-siswa-disabilitas', 'pie', sectionData.disabilitas, 'Disabilitas', colors);
-                createChart('chart-siswa-beasiswa', 'bar', sectionData.beasiswa, 'Beasiswa', colors[2]);
-            } else if (sectionName === 'Keadaan GTK') {
-                createChart('chart-gtk-umur-pie', 'pie', sectionData.umur_pie, 'Umur', colors);
-                createChart('chart-gtk-daerah-asal', 'pie', sectionData.daerah, 'Daerah', colors);
-                createChart('chart-gtk-status', 'bar', sectionData.status, 'Status', colors[3]);
-                createChart('chart-gtk-umur-bar', 'bar', sectionData.umur_bar, 'Umur', colors[4]);
-                createChart('chart-gtk-pendidikan', 'bar', sectionData.pendidikan, 'Pendidikan', colors[5]);
-            } else if (sectionName === 'B. KEADAAN GEDUNG SEKOLAH DAN RUMAH GURU') {
-                createChart('chart-sarpras-kondisi', 'pie', sectionData.kondisi, 'Kondisi', [colors[1], colors[3]]);
-            } else if (sectionName === 'Kehadiran GTK') {
-                createChart('chart-kehadiran-rekap', 'pie', sectionData.rekap, 'Kehadiran', [colors[1], colors[2], colors[3]]);
-            } else if (sectionName === 'Kelulusan') {
-                createChart('chart-kelulusan-tren', 'line', sectionData.tren, 'Persentase (%)', colors[4]);
-            }
-        }
-
-        function createChart(canvasId, type, data, label, color) {
-            const ctx = document.getElementById(canvasId);
-            if (!ctx) return;
-
-            // Destroy existing chart if it exists
-            if (chartInstances[canvasId]) {
-                chartInstances[canvasId].destroy();
-            }
-
-            const labels = Object.keys(data);
-            const values = Object.values(data);
-
-            const isPie = type === 'pie' || type === 'doughnut';
-
-            chartInstances[canvasId] = new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: label,
-                        data: values,
-                        backgroundColor: isPie ? color : (Array.isArray(color) ? color[0] : color),
-                        borderColor: isPie ? '#fff' : (Array.isArray(color) ? color[0] : color),
-                        borderWidth: 1,
-                        tension: 0.3,
-                        fill: type === 'line' ? false : true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: isPie,
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10 }
-                            }
-                        }
-                    },
-                    scales: isPie ? {} : {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { font: { size: 10 } }
-                        },
-                        x: {
-                            ticks: { font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // close preview modal
-        document.getElementById('preview-modal-close').addEventListener('click', closePreview);
-        document.getElementById('preview-modal-close-2').addEventListener('click', closePreview);
-
         function closePreview() {
-            // Reset tabs
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            tabBtns[0].classList.add('active');
-            tabContents[0].classList.add('active');
-
-            // Destroy all charts
-            Object.values(chartInstances).forEach(chart => chart.destroy());
-            chartInstances = {};
-
             document.getElementById('preview-modal').style.display = 'none';
             document.body.style.overflow = 'auto';
         }
@@ -1102,11 +1222,21 @@
             const checkedItems = document.querySelectorAll('.report-checkbox:checked');
 
             if (checkedItems.length !== totalItems) {
-                alert('Semua item harus dicentang sebelum mengirim laporan');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Semua item harus dicentang sebelum mengirim laporan',
+                    confirmButtonColor: '#10b981',
+                });
                 return;
             }
 
-            alert('Laporan berhasil dikirim!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Laporan berhasil dikirim!',
+                confirmButtonColor: '#10b981',
+            });
         });
 
         updateProgress();

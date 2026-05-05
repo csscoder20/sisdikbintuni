@@ -25,6 +25,7 @@ class LaporanTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 TextColumn::make('tahun')
                     ->sortable(),

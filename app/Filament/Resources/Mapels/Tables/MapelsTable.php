@@ -27,6 +27,7 @@ class MapelsTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 TextColumn::make('kode_mapel')
                     ->label('Kode')

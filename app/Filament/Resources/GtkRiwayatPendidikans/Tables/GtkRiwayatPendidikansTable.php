@@ -27,6 +27,7 @@ class GtkRiwayatPendidikansTable
         return $table
             ->recordUrl(null)
             ->recordAction(null)
+            ->striped()
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')
