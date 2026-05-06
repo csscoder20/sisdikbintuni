@@ -371,10 +371,7 @@ class SekolahPage extends Page implements HasSchemas
                     ->label('Pilih Foto')
                     ->image()
                     ->imageEditor()
-                    ->imageEditorAspectRatios([
-                        '4:3',
-                        null,
-                    ])
+                    ->imageCropAspectRatio('4:3')
                     ->disk('public')
                     ->directory('sekolah-foto')
                     ->required(),
@@ -403,10 +400,7 @@ class SekolahPage extends Page implements HasSchemas
                     ->label('Pilih Logo')
                     ->image()
                     ->imageEditor()
-                    ->imageEditorAspectRatios([
-                        '1:1',
-                        null,
-                    ])
+                    ->imageCropAspectRatio('1:1')
                     ->disk('public')
                     ->directory('sekolah-logo')
                     ->required(),

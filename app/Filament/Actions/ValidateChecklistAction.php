@@ -26,13 +26,26 @@ class ValidateChecklistAction
 
             // Fallback: resolve current laporan for this tenant and check column
             $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
-            $month = (int) date('m');
-            $year = (int) date('Y');
-            $laporan = \App\Models\Laporan::where([
-                'sekolah_id' => $sekolahId,
-                'bulan' => $month,
-                'tahun' => $year,
-            ])->first();
+            
+            // Check if there is a selected laporan_id filter in the table
+            $selectedLaporanId = null;
+            if (method_exists($livewire, 'getTableFilterState')) {
+                try {
+                    $selectedLaporanId = $livewire->getTableFilterState('laporan_id')['value'] ?? null;
+                } catch (\Throwable $e) {}
+            }
+
+            if ($selectedLaporanId) {
+                $laporan = \App\Models\Laporan::find($selectedLaporanId);
+            } else {
+                $month = (int) date('m');
+                $year = (int) date('Y');
+                $laporan = \App\Models\Laporan::where([
+                    'sekolah_id' => $sekolahId,
+                    'bulan' => $month,
+                    'tahun' => $year,
+                ])->first();
+            }
 
             $column = "is_" . Str::snake($type) . "_valid";
             return $laporan ? (bool) ($laporan->$column ?? false) : false;

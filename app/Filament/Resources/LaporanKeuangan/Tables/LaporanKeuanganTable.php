@@ -50,8 +50,37 @@ class LaporanKeuanganTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('laporan_id')
+                    ->label('Pilih Periode')
+                    ->options(function () {
+                        $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
+                        return \App\Models\Laporan::where('sekolah_id', $sekolahId)
+                            ->orderBy('tahun', 'desc')
+                            ->orderBy('bulan', 'desc')
+                            ->get()
+                            ->mapWithKeys(function ($laporan) {
+                                $namaBulan = \Carbon\Carbon::create()->month($laporan->bulan)->translatedFormat('F');
+                                return [$laporan->id => "{$namaBulan} {$laporan->tahun}"];
+                            });
+                    })
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
+                        if (!empty($data['value'])) {
+                            return $query->where('laporan_id', $data['value']);
+                        }
+                        
+                        // Default to the latest active Laporan for this school if no filter is selected
+                        $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
+                        $latestLaporan = \App\Models\Laporan::where('sekolah_id', $sekolahId)
+                            ->orderBy('tahun', 'desc')
+                            ->orderBy('bulan', 'desc')
+                            ->first();
+                            
+                        if ($latestLaporan) {
+                            return $query->where('laporan_id', $latestLaporan->id);
+                        }
+                        return $query;
+                    }),
                 TrashedFilter::make(),
-                //
             ])
 
             ->recordActions([
