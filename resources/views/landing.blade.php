@@ -12,6 +12,11 @@
         body { font-family: 'Inter', sans-serif; }
         .hero-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
     </style>
+    <meta property="og:title" content="Lapbul Dikpora Bintuni" />
+    <meta property="og:description" content="Aplikasi laporan bulanan Dikpora Bintuni" />
+    <meta property="og:image" content="https://lapbul.dikporabintuni.com/images/og.jpg" />
+    <meta property="og:url" content="https://lapbul.dikporabintuni.com" />
+    <meta property="og:type" content="website" />
 </head>
 <body class="bg-gray-50">
 
