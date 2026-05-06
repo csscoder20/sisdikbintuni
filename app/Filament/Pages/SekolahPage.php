@@ -105,20 +105,20 @@ class SekolahPage extends Page implements HasSchemas
         return $schema->components([
             Grid::make(['default' => 1, 'md' => 3])
                 ->schema([
-                    Section::make('Foto Sekolah')
+                    Section::make('Foto & Logo Sekolah')
                         ->columnSpan(['default' => 1, 'md' => 1])
-                        ->schema($this->getFotoSchemaComponents())
-                        ->extraAttributes([
-                            'class' => 'h-full flex flex-col justify-center',
+                        ->schema([
+                            Grid::make(10)
+                                ->schema([
+                                    ...$this->getFotoSchemaComponents(),
+                                    ...$this->getLogoSchemaComponents(),
+                                ]),
                         ]),
 
                     Section::make('Identitas Sekolah')
                         ->columnSpan(['default' => 1, 'md' => 2])
                         ->schema($this->getIdentitasFormComponents())
-                        ->columns(3)
-                        ->extraAttributes([
-                            'class' => 'h-full',
-                        ]),
+                        ->columns(3),
                 ]),
 
             Section::make('Alamat Sekolah')
@@ -273,19 +273,32 @@ class SekolahPage extends Page implements HasSchemas
 
     protected function getFotoSchemaComponents(): array
     {
+        $sekolah = $this->getSekolah();
+        $foto = $sekolah?->foto;
+        
         return [
-            Image::make(
-                url: fn () => $this->getSekolah()?->foto 
-                    ? Storage::disk('public')->url($this->getSekolah()->foto) 
-                    : 'https://placehold.co/600x400?text=Foto+Sekolah',
-                alt: 'Foto Sekolah'
-            )
-            ->imageHeight('auto')
-            ->imageWidth('100%')
-            ->extraAttributes([
-                'class' => 'cursor-pointer hover:opacity-80 transition-opacity rounded-xl shadow-md border-4 border-white',
-                'wire:click' => "\$wire.mountAction('updateFoto')",
-            ]),
+            \Filament\Schemas\Components\View::make('filament.components.image-hover')
+                ->viewData([
+                    'field' => 'foto',
+                    'livewire' => $this,
+                ])
+                ->columnSpan(7),
+        ];
+    }
+
+    protected function getLogoSchemaComponents(): array
+    {
+        $sekolah = $this->getSekolah();
+        $logo = $sekolah?->logo;
+        
+        return [
+            \Filament\Schemas\Components\View::make('filament.components.image-hover')
+                ->viewData([
+                    'field' => 'logo',
+                    'livewire' => $this,
+                    'width' => '50%',
+                ])
+                ->columnSpan(3),
         ];
     }
 
@@ -357,6 +370,11 @@ class SekolahPage extends Page implements HasSchemas
                 FileUpload::make('foto')
                     ->label('Pilih Foto')
                     ->image()
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '4:3',
+                        null,
+                    ])
                     ->disk('public')
                     ->directory('sekolah-foto')
                     ->required(),
@@ -368,6 +386,41 @@ class SekolahPage extends Page implements HasSchemas
                     
                     Notification::make()
                         ->title('Foto sekolah berhasil diperbarui!')
+                        ->success()
+                        ->send();
+                }
+            });
+    }
+
+    public function updateLogoAction(): Action
+    {
+        return Action::make('updateLogo')
+            ->label('Perbarui Logo Sekolah')
+            ->modalHeading('Unggah Logo Sekolah')
+            ->modalSubmitActionLabel('Simpan')
+            ->form([
+                FileUpload::make('logo')
+                    ->label('Pilih Logo')
+                    ->image()
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '1:1',
+                        null,
+                    ])
+                    ->disk('public')
+                    ->directory('sekolah-logo')
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                $sekolah = $this->getSekolah();
+                if ($sekolah) {
+                    $sekolah->update(['logo' => $data['logo']]);
+                    
+                    $logoUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($data['logo']);
+                    $this->dispatch('school-logo-updated', logo_url: $logoUrl);
+                    
+                    Notification::make()
+                        ->title('Logo sekolah berhasil diperbarui!')
                         ->success()
                         ->send();
                 }

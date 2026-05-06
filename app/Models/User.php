@@ -13,7 +13,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 
 
-class User extends Authenticatable implements HasTenants, FilamentUser
+use Filament\Models\Contracts\HasAvatar;
+
+class User extends Authenticatable implements HasTenants, FilamentUser, HasAvatar
 {
     use SoftDeletes;
     use HasRoles, \App\Traits\HasActivityLog, Notifiable;
@@ -98,4 +100,13 @@ class User extends Authenticatable implements HasTenants, FilamentUser
             //     'operator@gmail.com',
             // ]);
         }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if ($this->sekolah?->logo) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($this->sekolah->logo);
+        }
+
+        return null;
+    }
 }

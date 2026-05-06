@@ -34,6 +34,7 @@ class Sekolah extends Model
         'luas_tanah',
         'email',
         'foto',
+        'logo',
     ];
 
     public function laporan()

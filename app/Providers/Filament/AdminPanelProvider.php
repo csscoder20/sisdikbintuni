@@ -65,7 +65,7 @@ class AdminPanelProvider extends PanelProvider
                         </svg>
                     </div>
                     <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
-                        Sisdik<span style="color: #3b82f6;">Bintuni</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
+                        Sistem Pelaporan Bulanan<span style="color: #3b82f6;"> SMA/SMK</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
                     </span>
                 </div>
             '))
@@ -207,15 +207,11 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('OPERATOR ' . strtoupper($jenjang))
             ->brandLogo(fn () => new \Illuminate\Support\HtmlString('
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-                            <path d="M2 12h20"/>
-                        </svg>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                        <img src="' . asset('storage/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
                     <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
-                        Sisdik<span style="color: #10b981;">Bintuni</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
+                        Sistem Pelaporan Bulanan<span style="color: #10b981;"> SMA/SMK</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
                     </span>
                 </div>
             '))
