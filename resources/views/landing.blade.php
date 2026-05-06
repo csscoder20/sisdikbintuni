@@ -14,7 +14,7 @@
     </style>
     <meta property="og:title" content="Lapbul Dikpora Bintuni" />
     <meta property="og:description" content="Aplikasi laporan bulanan Dikpora Bintuni" />
-    <meta property="og:image" content="https://lapbul.dikporabintuni.com/images/og.jpg" />
+    <meta property="og:image" content="https://lapbul.dikporabintuni.com/assets/og.jpg" />
     <meta property="og:url" content="https://lapbul.dikporabintuni.com" />
     <meta property="og:type" content="website" />
 </head>
