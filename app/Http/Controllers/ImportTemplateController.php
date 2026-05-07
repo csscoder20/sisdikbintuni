@@ -148,6 +148,7 @@ class ImportTemplateController extends Controller
                 'disabilitas' => 'pilihan: tidak, tuna_netra, tuna_rungu, tuna_wicara, tuna_daksa, tuna_grahita, tuna_lainnya',
                 'beasiswa' => 'pilihan: tidak, beasiswa_pemerintah_pusat, beasiswa_pemerintah_daerah, beasisswa_swasta, beasiswa_khusus, beasiswa_afirmasi, beasiswa_lainnya',
                 'daerah_asal' => 'Papua / Non Papua',
+                'rombel' => 'isi sesuai nama rombel yang sudah ada, contoh: Kelas XII IPS 1. Kosongkan jika belum ada.',
             ];
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('DATA SISWA');

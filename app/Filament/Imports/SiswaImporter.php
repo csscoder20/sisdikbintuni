@@ -12,49 +12,131 @@ class SiswaImporter extends Importer
 {
     protected static ?string $model = Siswa::class;
 
+    protected static function textOrNull($state, int $maxLength = 255): ?string
+    {
+        if (blank($state)) {
+            return null;
+        }
+
+        $value = trim((string) $state);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (in_array(strtolower($value), ['null', 'nil', 'n/a', 'na', '-'], true)) {
+            return null;
+        }
+
+        return mb_substr($value, 0, $maxLength);
+    }
+
+    protected static function normalizeRombelName(string $value): string
+    {
+        return (string) str($value)
+            ->lower()
+            ->replaceMatches('/\bkelas\b/u', '')
+            ->replaceMatches('/[^a-z0-9]+/u', '')
+            ->trim();
+    }
+
+    protected static function strictDateFromParts(int $year, int $month, int $day): ?string
+    {
+        if ($year < 1900 || $year > 2100 || ! checkdate($month, $day, $year)) {
+            return null;
+        }
+
+        return sprintf('%04d-%02d-%02d', $year, $month, $day);
+    }
+
+    public static function parseFlexibleDate($state): ?string
+    {
+        if (blank($state)) return null;
+        if ($state instanceof \DateTimeInterface) {
+            return $state->format('Y-m-d');
+        }
+
+        try {
+            $stateString = trim((string) $state);
+            if (empty($stateString)) return null;
+
+            // Excel serial dates are often imported as plain numbers.
+            if (is_numeric($stateString) && (float) $stateString >= 20000 && (float) $stateString <= 60000) {
+                return \Illuminate\Support\Carbon::create(1899, 12, 30)
+                    ->addDays((int) $stateString)
+                    ->format('Y-m-d');
+            }
+
+            // Map Indonesian months
+            $months = [
+                'januari' => 'January', 'februari' => 'February', 'maret' => 'March',
+                'april' => 'April', 'mei' => 'May', 'juni' => 'June',
+                'juli' => 'July', 'agustus' => 'August', 'september' => 'September',
+                'oktober' => 'October', 'november' => 'November', 'desember' => 'December'
+            ];
+
+            $normalizedState = strtolower($stateString);
+            foreach ($months as $indo => $eng) {
+                if (str_contains($normalizedState, $indo)) {
+                    $normalizedState = str_replace($indo, $eng, $normalizedState);
+                    break;
+                }
+            }
+
+            // Handle d/m/Y, d-m-Y, d.m.Y even with 2 digit years
+            if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/', $normalizedState, $matches)) {
+                $first = (int) $matches[1];
+                $second = (int) $matches[2];
+                $year = (int) $matches[3];
+                if ($year < 100) $year += 2000;
+
+                return static::strictDateFromParts($year, $second, $first)
+                    ?? static::strictDateFromParts($year, $first, $second);
+            }
+
+            // Handle Y-m-d, Y/m/d, Y.m.d strictly so impossible dates become null.
+            if (preg_match('/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})$/', $normalizedState, $matches)) {
+                return static::strictDateFromParts((int) $matches[1], (int) $matches[2], (int) $matches[3]);
+            }
+
+            $date = \Illuminate\Support\Carbon::parse($normalizedState);
+
+            if ($date->year < 1900 || $date->year > 2100) {
+                return null;
+            }
+
+            return $date->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public static function getColumns(): array
     {
         return [
             ImportColumn::make('nama')
                 ->requiredMapping()
-                ->rules(['required', 'string', 'max:255'])
+                ->rules(['required'])
+                ->castStateUsing(fn($state) => static::textOrNull($state) ?? '-')
                 ->example('Budi Santoso'),
             ImportColumn::make('nisn')
-                ->rules(['string', 'max:255', 'unique:siswa,nisn'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('1234567890'),
             ImportColumn::make('nik')
-                ->rules(['string', 'max:255', 'unique:siswa,nik'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('3201010101010001'),
             ImportColumn::make('tempat_lahir')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Bandung'),
             ImportColumn::make('tanggal_lahir')
-                ->rules(['nullable', 'date'])
+                ->rules(['nullable'])
                 ->example('20/08/2011')
-                ->castStateUsing(function ($state): ?string {
-                    if (blank($state)) return null;
-                    if ($state instanceof \DateTimeInterface) {
-                        return $state->format('Y-m-d');
-                    }
-                    try {
-                        $stateString = trim((string) $state);
-                        if (empty($stateString)) return null;
-
-                        // Handle d/m/Y or d-m-Y even with 2 digit years
-                        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/', $stateString, $matches)) {
-                            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-                            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-                            $year = $matches[3];
-                            if (strlen($year) === 2) $year = '20' . $year;
-                            return "{$year}-{$month}-{$day}";
-                        }
-                        return \Illuminate\Support\Carbon::parse($stateString)->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        return null;
-                    }
-                }),
+                ->castStateUsing(fn ($state) => static::parseFlexibleDate($state)),
             ImportColumn::make('jenis_kelamin')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
                 ->example('Laki-laki')
                 ->castStateUsing(function ($state): ?string {
                     if (blank($state)) return null;
@@ -64,7 +146,7 @@ class SiswaImporter extends Importer
                     return null;
                 }),
             ImportColumn::make('agama')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
                 ->example('Islam')
                 ->castStateUsing(function ($state): ?string {
                     if (blank($state)) return null;
@@ -76,13 +158,15 @@ class SiswaImporter extends Importer
                     return null;
                 }),
             ImportColumn::make('nokk')
-                ->rules(['string', 'max:16'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('3201010101010002'),
             ImportColumn::make('nobpjs')
-                ->rules(['string', 'max:20', 'unique:siswa,nobpjs'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('0001234567890'),
             ImportColumn::make('daerah_asal')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
                 ->example('Non Papua')
                 ->castStateUsing(function ($state): string {
                     if (blank($state)) return 'Non Papua';
@@ -90,52 +174,95 @@ class SiswaImporter extends Importer
                     return stripos($state, 'papua') !== false && stripos($state, 'non') === false ? 'Papua' : 'Non Papua';
                 }),
             ImportColumn::make('alamat')
-                ->rules(['string'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state, 65535))
                 ->example('Jl. Merdeka No. 10'),
             ImportColumn::make('provinsi')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Jawa Barat'),
             ImportColumn::make('kabupaten')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Bandung'),
             ImportColumn::make('kecamatan')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Coblong'),
             ImportColumn::make('desa')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Dago'),
             ImportColumn::make('nama_ayah')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Ahmad Santoso'),
             ImportColumn::make('nama_ibu')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Siti Aminah'),
             ImportColumn::make('nama_wali')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Paman Budi'),
             ImportColumn::make('status')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
                 ->example('Aktif')
-                ->castStateUsing(fn($state): string => strtolower(trim((string)($state ?? 'aktif')))),
+                ->castStateUsing(function ($state): string {
+                    $state = strtolower(trim((string)($state ?? 'aktif')));
+
+                    return match (true) {
+                        $state === '',
+                        str_contains($state, 'aktif') => 'aktif',
+                        str_contains($state, 'masuk') => 'mutasi_masuk',
+                        str_contains($state, 'keluar'),
+                        str_contains($state, 'pindah') => 'mutasi_keluar',
+                        str_contains($state, 'lulus') => 'lulus',
+                        str_contains($state, 'putus') => 'putus_sekolah',
+                        str_contains($state, 'ulang') => 'mengulang',
+                        default => 'aktif',
+                    };
+                }),
             ImportColumn::make('disabilitas')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
                 ->example('Tidak')
                 ->castStateUsing(function ($state): string {
                     if (blank($state)) return 'tidak';
                     $state = strtolower(trim((string)$state));
-                    if ($state === 'tidak' || $state === 'no' || $state === 'none') return 'tidak';
-                    return $state;
+                    if (in_array($state, ['tidak', 'no', 'none', 'normal', 'sehat', '-'], true)) return 'tidak';
+                    if (str_contains($state, 'netra')) return 'tuna_netra';
+                    if (str_contains($state, 'rungu')) return 'tuna_rungu';
+                    if (str_contains($state, 'wicara')) return 'tuna_wicara';
+                    if (str_contains($state, 'daksa')) return 'tuna_daksa';
+                    if (str_contains($state, 'grahita')) return 'tuna_grahita';
+                    return in_array($state, ['tuna_netra', 'tuna_rungu', 'tuna_wicara', 'tuna_daksa', 'tuna_grahita', 'tuna_lainnya'], true)
+                        ? $state
+                        : 'tuna_lainnya';
                 }),
             ImportColumn::make('beasiswa')
-                ->rules(['string', 'max:255'])
+                ->rules(['nullable'])
                 ->example('Tidak')
                 ->castStateUsing(function ($state): string {
                     if (blank($state)) return 'tidak';
                     $state = strtolower(trim((string)$state));
-                    if ($state === 'tidak' || $state === 'no' || $state === 'none') return 'tidak';
+                    if (in_array($state, ['tidak', 'no', 'none', 'tidak ada', '-'], true)) return 'tidak';
                     if ($state === 'ya' || $state === 'yes') return 'beasiswa_pemerintah_pusat';
-                    return $state;
+                    if (str_contains($state, 'pusat')) return 'beasiswa_pemerintah_pusat';
+                    if (str_contains($state, 'daerah')) return 'beasiswa_pemerintah_daerah';
+                    if (str_contains($state, 'swasta')) return 'beasisswa_swasta';
+                    if (str_contains($state, 'khusus')) return 'beasiswa_khusus';
+                    if (str_contains($state, 'afirmasi')) return 'beasiswa_afirmasi';
+                    return in_array($state, ['beasiswa_pemerintah_pusat', 'beasiswa_pemerintah_daerah', 'beasisswa_swasta', 'beasiswa_khusus', 'beasiswa_afirmasi', 'beasiswa_lainnya'], true)
+                        ? $state
+                        : 'beasiswa_lainnya';
                 }),
+            ImportColumn::make('rombel')
+                ->label('ROMBEL')
+                ->guess(['kelas_rombel', 'kelas', 'nama_rombel'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state))
+                ->fillRecordUsing(fn() => null)
+                ->example('Kelas XII IPS 1'),
         ];
     }
 
@@ -153,34 +280,27 @@ class SiswaImporter extends Importer
             throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
         }
 
-        // Always return a new instance if we want unique validation to trigger properly
-        // If we use firstOrNew, the unique rule might not trigger as the record "exists" in the resolved state
         return new Siswa(['sekolah_id' => $sekolahId]);
-    }
-
-    public function getValidationMessages(): array
-    {
-        return [
-            'nisn.unique' => 'NISN :input sudah terdaftar di database.',
-            'nik.unique' => 'NIK :input sudah terdaftar di database.',
-            'nobpjs.unique' => 'Nomor BPJS :input sudah terdaftar di database.',
-        ];
     }
 
     protected function afterSave(): void
     {
         $siswa = $this->record;
-        $kelasRombel = $siswa->kelas_rombel;
+        $kelasRombel = $this->data['rombel'] ?? $this->data['kelas_rombel'] ?? null;
 
         if (blank($kelasRombel)) {
             return;
         }
 
         $sekolahId = $siswa->sekolah_id;
+        $kelasRombel = trim((string) $kelasRombel);
 
         $rombel = \App\Models\Rombel::where('sekolah_id', $sekolahId)
-            ->where('nama', $kelasRombel)
-            ->first();
+            ->get()
+            ->first(function (\App\Models\Rombel $rombel) use ($kelasRombel): bool {
+                return strcasecmp(trim($rombel->nama), $kelasRombel) === 0
+                    || static::normalizeRombelName($rombel->nama) === static::normalizeRombelName($kelasRombel);
+            });
 
         if ($rombel) {
             $year = now()->year;
@@ -190,9 +310,6 @@ class SiswaImporter extends Importer
             // Enforce 1 rombel per year by detaching existing for the same year first
             $siswa->rombel()->wherePivot('tahun_ajaran', $tahunAjaran)->detach();
             $siswa->rombel()->attach($rombel->id, ['tahun_ajaran' => $tahunAjaran]);
-        } else {
-            // Clear the invalid mapping
-            $siswa->update(['kelas_rombel' => null]);
         }
     }
 

@@ -110,7 +110,7 @@ class KeadaanSiswa extends Page
         );
     }
 
-    protected function getActiveLaporanId()
+    protected function getActiveLaporanId(): ?int
     {
         $tenantId = \Filament\Facades\Filament::getTenant()?->id;
 
@@ -120,16 +120,10 @@ class KeadaanSiswa extends Page
         }
 
         if ($this->selectedLaporanId) {
-            return $this->selectedLaporanId;
+            return (int) $this->selectedLaporanId;
         }
 
-        // Default behavior: if no selection, show the latest report if it exists
-        $lap = Laporan::where('sekolah_id', $tenantId)
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
-            ->first();
-
-        return $lap?->id;
+        return null;
     }
 
     protected function getViewData(): array

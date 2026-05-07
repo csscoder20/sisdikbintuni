@@ -9,19 +9,6 @@ class ListKehadiranGtk extends ListRecords {
 
     protected string $view = 'filament.resources.kehadiran-gtk.pages.list-kehadiran-gtk';
 
-    public function getLaporanStatus(string $type): bool
-    {
-        $sekolahId = filament()->getTenant()?->id;
-        $laporan = \App\Models\Laporan::where([
-            'sekolah_id' => $sekolahId,
-            'bulan' => (int) date('m'),
-            'tahun' => (int) date('Y'),
-        ])->first();
-
-        $column = "is_{$type}_valid";
-        return $laporan ? (bool) $laporan->$column : false;
-    }
-
     protected function getHeaderActions(): array {
         return [
             ValidateChecklistAction::make('validateRekapKehadiran', 'rekap_kehadiran', fn() => \App\Models\KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', filament()->getTenant()?->id))->exists()),

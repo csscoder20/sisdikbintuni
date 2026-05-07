@@ -61,6 +61,7 @@ class GtkKeuanganTable
                     ->icon('heroicon-m-ellipsis-vertical')
                     ->color('primary'),
             ])
+            
             ->toolbarActions([
                 BulkActionGroup::make([
                     RestoreBulkAction::make(),

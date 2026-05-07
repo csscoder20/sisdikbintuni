@@ -67,10 +67,12 @@ class GtkImporter extends Importer
             ImportColumn::make('nik')
                 ->label('NIK')
                 ->rules(['nullable', 'max:255', 'unique:gtk,nik'])
+                ->castStateUsing(fn($state) => blank($state) ? null : (string) $state)
                 ->example('3201010101010005'),
             ImportColumn::make('nip')
                 ->label('NIP')
                 ->rules(['nullable', 'max:255', 'unique:gtk,nip'])
+                ->castStateUsing(fn($state) => blank($state) ? null : (string) $state)
                 ->example('198501012010012001'),
             ImportColumn::make('nokarpeg')
                 ->label('NO. KARPEG')

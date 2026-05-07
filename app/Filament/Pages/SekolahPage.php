@@ -108,7 +108,7 @@ class SekolahPage extends Page implements HasSchemas
                     Section::make('Foto & Logo Sekolah')
                         ->columnSpan(['default' => 1, 'md' => 1])
                         ->schema([
-                            Grid::make(10)
+                            Grid::make(['default' => 1, 'lg' => 10])
                                 ->schema([
                                     ...$this->getFotoSchemaComponents(),
                                     ...$this->getLogoSchemaComponents(),
@@ -282,7 +282,7 @@ class SekolahPage extends Page implements HasSchemas
                     'field' => 'foto',
                     'livewire' => $this,
                 ])
-                ->columnSpan(7),
+                ->columnSpan(['default' => 1, 'lg' => 7]),
         ];
     }
 
@@ -298,7 +298,7 @@ class SekolahPage extends Page implements HasSchemas
                     'livewire' => $this,
                     'width' => '50%',
                 ])
-                ->columnSpan(3),
+                ->columnSpan(['default' => 1, 'lg' => 3]),
         ];
     }
 
@@ -360,64 +360,89 @@ class SekolahPage extends Page implements HasSchemas
             ->send();
     }
 
-    public function updateFotoAction(): Action
+    public function viewFotoAction(): Action
     {
-        return Action::make('updateFoto')
-            ->label('Perbarui Foto Sekolah')
-            ->modalHeading('Unggah Foto Sekolah')
-            ->modalSubmitActionLabel('Simpan')
+        return Action::make('viewFoto')
+            ->label('Preview Foto')
+            ->modalHeading('Foto Sekolah')
+            ->modalWidth('4xl')
             ->form([
-                FileUpload::make('foto')
-                    ->label('Pilih Foto')
+                \Filament\Forms\Components\ViewField::make('current_foto')
+                    ->view('filament.components.image-current-preview')
+                    ->viewData([
+                        'url' => $this->getSekolah()?->foto 
+                            ? Storage::disk('public')->url($this->getSekolah()->foto) 
+                            : 'https://placehold.co/800x600?text=Foto+Sekolah',
+                        'title' => 'Foto Sekolah'
+                    ]),
+                FileUpload::make('new_foto')
+                    ->label('Pilih Foto Baru')
                     ->image()
                     ->imageEditor()
                     ->imageCropAspectRatio('4:3')
                     ->disk('public')
                     ->directory('sekolah-foto')
-                    ->required(),
+                    ->helperText('Klik area di atas untuk memilih gambar baru dari komputer Anda.')
             ])
             ->action(function (array $data) {
-                $sekolah = $this->getSekolah();
-                if ($sekolah) {
-                    $sekolah->update(['foto' => $data['foto']]);
-                    
-                    Notification::make()
-                        ->title('Foto sekolah berhasil diperbarui!')
-                        ->success()
-                        ->send();
+                if (!empty($data['new_foto'])) {
+                    $sekolah = $this->getSekolah();
+                    if ($sekolah) {
+                        $sekolah->update(['foto' => $data['new_foto']]);
+                        Notification::make()
+                            ->title('Foto sekolah berhasil diperbarui!')
+                            ->success()
+                            ->send();
+                    }
                 }
-            });
+            })
+            ->modalSubmitActionLabel('Perbarui Foto')
+            ->modalCancelActionLabel('Tutup');
     }
 
-    public function updateLogoAction(): Action
+    public function viewLogoAction(): Action
     {
-        return Action::make('updateLogo')
-            ->label('Perbarui Logo Sekolah')
-            ->modalHeading('Unggah Logo Sekolah')
-            ->modalSubmitActionLabel('Simpan')
+        return Action::make('viewLogo')
+            ->label('Preview Logo')
+            ->modalHeading('Logo Sekolah')
+            ->modalWidth('2xl')
             ->form([
-                FileUpload::make('logo')
-                    ->label('Pilih Logo')
+                \Filament\Forms\Components\ViewField::make('current_logo')
+                    ->view('filament.components.image-current-preview')
+                    ->viewData([
+                        'url' => $this->getSekolah()?->logo 
+                            ? Storage::disk('public')->url($this->getSekolah()->logo) 
+                            : 'https://placehold.co/400x400?text=Logo+Sekolah',
+                        'title' => 'Logo Sekolah'
+                    ]),
+                FileUpload::make('new_logo')
+                    ->label('Pilih Logo Baru')
                     ->image()
                     ->imageEditor()
                     ->imageCropAspectRatio('1:1')
                     ->disk('public')
                     ->directory('sekolah-logo')
-                    ->required(),
+                    ->helperText('Klik area di atas untuk memilih logo baru dari komputer Anda.')
             ])
             ->action(function (array $data) {
-                $sekolah = $this->getSekolah();
-                if ($sekolah) {
-                    $sekolah->update(['logo' => $data['logo']]);
-                    
-                    $logoUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($data['logo']);
-                    $this->dispatch('school-logo-updated', logo_url: $logoUrl);
-                    
-                    Notification::make()
-                        ->title('Logo sekolah berhasil diperbarui!')
-                        ->success()
-                        ->send();
+                if (!empty($data['new_logo'])) {
+                    $sekolah = $this->getSekolah();
+                    if ($sekolah) {
+                        $sekolah->update(['logo' => $data['new_logo']]);
+                        
+                        $logoUrl = Storage::disk('public')->url($data['new_logo']);
+                        $this->dispatch('school-logo-updated', logo_url: $logoUrl);
+                        
+                        Notification::make()
+                            ->title('Logo sekolah berhasil diperbarui!')
+                            ->success()
+                            ->send();
+                    }
                 }
-            });
+            })
+            ->modalSubmitActionLabel('Perbarui Logo')
+            ->modalCancelActionLabel('Tutup');
     }
+
+    // Menghapus updateFotoAction dan updateLogoAction yang lama agar tidak membingungkan
 }

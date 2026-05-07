@@ -200,10 +200,12 @@ class ExcelImportAction extends Action
             $label = $column->getLabel() ?? Str::title($column->getName());
             $normalizedLabel = $normalize($label);
             $normalizedName = $normalize($column->getName());
+            $normalizedGuesses = collect($column->getGuesses())->map($normalize);
             
             $index = $headerRow->search(fn($h) => 
                 $normalize($h) === $normalizedLabel || 
-                $normalize($h) === $normalizedName
+                $normalize($h) === $normalizedName ||
+                $normalizedGuesses->contains($normalize($h))
             );
             if ($index !== false) {
                 $columnMap[$column->getName()] = $index;
@@ -221,10 +223,12 @@ class ExcelImportAction extends Action
                 $label = $column->getLabel() ?? Str::title($column->getName());
                 $normalizedLabel = $normalize($label);
                 $normalizedName = $normalize($column->getName());
+                $normalizedGuesses = collect($column->getGuesses())->map($normalize);
 
                 $index = $secondRow->search(fn($h) => 
                     $normalize($h) === $normalizedLabel || 
-                    $normalize($h) === $normalizedName
+                    $normalize($h) === $normalizedName ||
+                    $normalizedGuesses->contains($normalize($h))
                 );
                 if ($index !== false) {
                     $secondRowMap[$column->getName()] = $index;
@@ -277,8 +281,10 @@ class ExcelImportAction extends Action
                 // Process the row using __invoke
                 // We pass the raw row data, and __invoke handles remapping via columnMap
                 $importer($row->toArray());
-                
-                $successCount++;
+
+                if ($importer->getRecord()?->exists) {
+                    $successCount++;
+                }
             } catch (\Illuminate\Validation\ValidationException $e) {
                 $errorCount++;
                 $errors = collect($e->errors())->flatten()->toArray();

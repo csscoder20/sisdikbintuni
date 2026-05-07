@@ -14,6 +14,9 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+
 
 
 class LaporanKeuanganTable
@@ -99,9 +102,12 @@ class LaporanKeuanganTable
                     ->color('primary')
             ])
             ->toolbarActions([
-                RestoreBulkAction::make(),
-                ForceDeleteBulkAction::make(),
-                //
+                BulkActionGroup::make([
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
+                ]),
             ]);
+
     }
 }

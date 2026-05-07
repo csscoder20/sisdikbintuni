@@ -88,18 +88,39 @@ class ValidateChecklistAction
 
                 $sekolahId = filament()->getTenant()?->id ?? Auth::user()->sekolah_id;
 
-                // Determine current period
-                $month = (int) date('m');
-                $year = (int) date('Y');
+                // Determine target period from filters if available, otherwise current month
+                $livewire = $action->getLivewire();
+                $selectedLaporanId = null;
+                if (method_exists($livewire, 'getTableFilterState')) {
+                    try {
+                        $selectedLaporanId = $livewire->getTableFilterState('laporan_id')['value'] ?? null;
+                    } catch (\Throwable $e) {}
+                }
 
-                // Find or create report for current period
-                $laporan = Laporan::firstOrCreate(
-                    [
+                if ($selectedLaporanId) {
+                    $laporan = Laporan::find($selectedLaporanId);
+                    if ($laporan) {
+                        $month = $laporan->bulan;
+                        $year = $laporan->tahun;
+                    } else {
+                        $month = (int) date('m');
+                        $year = (int) date('Y');
+                        $laporan = Laporan::firstOrCreate([
+                            'sekolah_id' => $sekolahId,
+                            'bulan' => $month,
+                            'tahun' => $year,
+                        ]);
+                    }
+                } else {
+                    $month = (int) date('m');
+                    $year = (int) date('Y');
+                    $laporan = Laporan::firstOrCreate([
                         'sekolah_id' => $sekolahId,
                         'bulan' => $month,
                         'tahun' => $year,
-                    ]
-                );
+                    ]);
+                }
+
 
                 // Map type to column name
                 $column = "is_" . Str::snake($type) . "_valid";
@@ -479,6 +500,25 @@ class ValidateChecklistAction
                         ->whereNull('laporan_id')
                         ->update(['laporan_id' => $laporan->id]);
                 }
+
+                if ($type === 'rekap_kehadiran') {
+                    $gtkIds = \App\Models\Gtk::where('sekolah_id', $sekolahId)->pluck('id');
+                    
+                    // Sync laporan_id ke KehadiranGtk (rekap bulanan)
+                    \App\Models\KehadiranGtk::whereIn('gtk_id', $gtkIds)
+                        ->where('bulan', $month)
+                        ->where('tahun', $year)
+                        ->whereNull('laporan_id')
+                        ->update(['laporan_id' => $laporan->id]);
+
+                    // Sync laporan_id ke GtkKehadiran (absensi harian)
+                    \App\Models\GtkKehadiran::whereIn('gtk_id', $gtkIds)
+                        ->whereYear('tgl_presensi', $year)
+                        ->whereMonth('tgl_presensi', $month)
+                        ->whereNull('laporan_id')
+                        ->update(['laporan_id' => $laporan->id]);
+                }
+
 
                 Notification::make()
                     ->title("Data berhasil divalidasi untuk periode {$month}/{$year}")
