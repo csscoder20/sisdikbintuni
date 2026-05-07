@@ -65,7 +65,8 @@ class GtkJamAjarResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return GtkJamAjarsTable::configure($table);
+        return GtkJamAjarsTable::configure($table)
+            ->paginated([10, 25, 50, 100, 'all']);
     }
 
     public static function getEloquentQuery(): Builder

@@ -290,6 +290,17 @@
                     {{ $tahun }}
                 </span>
             </div>
+            <div style="width: 1px; background: #e5e7eb; height: 20px; margin: 0 12px;"></div>
+            <div class="control-group">
+                <label>Tampilkan</label>
+                <select wire:model.live="perPage">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -311,7 +322,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($gtks as $index => $gtk)
+                @forelse($gtks as $index => $gtk)
                     <tr>
                         <td class="sticky-no text-center" style="color: #9ca3af;">{{ $gtks->firstItem() + $index }}</td>
                         <td class="sticky-name" style="font-weight: 600; color: #374151;">{{ $gtk->nama }}</td>
@@ -345,7 +356,20 @@
                             {{ $rowTotal }}
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="{{ count($days) + 3 }}" style="padding: 80px 0;">
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                                <div style="width: 64px; height: 64px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                    <svg style="width: 32px; height: 32px; color: #9ca3af;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </div>
+                                <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">Belum Ada Data GTK</h3>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

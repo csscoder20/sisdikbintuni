@@ -47,7 +47,8 @@ class LaporanKeuanganResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return LaporanKeuanganTable::configure($table);
+        return LaporanKeuanganTable::configure($table)
+            ->paginated([10, 25, 50, 100, 'all']);
     }
 
     public static function getEloquentQuery(): Builder

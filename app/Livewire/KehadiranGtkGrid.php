@@ -156,9 +156,12 @@ class KehadiranGtkGrid extends Component
 
     public function render()
     {
-        $gtks = Gtk::where('sekolah_id', filament()->getTenant()?->id)
-            ->orderBy('id')
-            ->paginate($this->perPage);
+        $query = Gtk::where('sekolah_id', filament()->getTenant()?->id)
+            ->orderBy('id');
+            
+        $gtks = ($this->perPage === 'all') 
+            ? $query->paginate($query->count()) 
+            : $query->paginate((int) $this->perPage);
         
         $this->loadAttendance($gtks->getCollection());
 

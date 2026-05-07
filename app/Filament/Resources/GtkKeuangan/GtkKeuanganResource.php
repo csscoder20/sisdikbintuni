@@ -61,7 +61,8 @@ class GtkKeuanganResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return GtkKeuanganTable::configure($table);
+        return GtkKeuanganTable::configure($table)
+            ->paginated([10, 25, 50, 100, 'all']);
     }
 
     public static function getEloquentQuery(): Builder

@@ -84,7 +84,8 @@ class LaporanSiswaResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return LaporanSiswaTable::configure($table);
+        return LaporanSiswaTable::configure($table)
+            ->paginated([10, 25, 50, 100, 'all']);
     }
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {

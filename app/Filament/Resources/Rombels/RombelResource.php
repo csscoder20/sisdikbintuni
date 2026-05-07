@@ -62,7 +62,8 @@ class RombelResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return RombelsTable::configure($table);
+        return RombelsTable::configure($table)
+            ->paginated([10, 25, 50, 100, 'all']);
     }
 
     public static function getRelations(): array

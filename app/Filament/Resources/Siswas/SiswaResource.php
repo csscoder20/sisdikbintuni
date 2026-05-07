@@ -103,7 +103,8 @@ class SiswaResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return SiswasTable::configure($table);
+        return SiswasTable::configure($table)
+            ->paginated([10, 25, 50, 100, 'all']);
     }
 
     public static function getRelations(): array
