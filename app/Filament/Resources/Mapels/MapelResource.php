@@ -67,8 +67,7 @@ class MapelResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return MapelsTable::configure($table)
-            ->paginated([10, 25, 50, 100, 'all']);
+        return MapelsTable::configure($table);
     }
 
     public static function getEloquentQuery(): Builder

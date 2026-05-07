@@ -82,8 +82,7 @@ class LaporanResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return LaporanTable::configure($table)
-            ->paginated([10, 25, 50, 100, 'all']);
+        return LaporanTable::configure($table);
     }
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {

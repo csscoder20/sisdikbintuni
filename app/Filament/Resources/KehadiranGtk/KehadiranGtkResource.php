@@ -65,8 +65,7 @@ class KehadiranGtkResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return KehadiranGtkTable::configure($table)
-            ->paginated([10, 25, 50, 100, 'all']);
+        return KehadiranGtkTable::configure($table);
     }
 
     public static function getEloquentQuery(): Builder

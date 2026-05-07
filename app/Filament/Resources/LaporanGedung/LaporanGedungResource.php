@@ -68,8 +68,7 @@ class LaporanGedungResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return LaporanGedungTable::configure($table)
-            ->paginated([10, 25, 50, 100, 'all']);
+        return LaporanGedungTable::configure($table);
     }
 
     public static function getEloquentQuery(): Builder

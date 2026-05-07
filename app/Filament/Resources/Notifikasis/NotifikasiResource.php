@@ -63,8 +63,7 @@ class NotifikasiResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return NotifikasisTable::configure($table)
-            ->paginated([10, 25, 50, 100, 'all']);
+        return NotifikasisTable::configure($table);
     }
 
     public static function getRelations(): array

@@ -66,8 +66,7 @@ class ActivityLogResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return ActivityLogsTable::configure($table)
-            ->paginated([10, 25, 50, 100, 'all']);
+        return ActivityLogsTable::configure($table);
     }
 
     public static function getEloquentQuery(): Builder
