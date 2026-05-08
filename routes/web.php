@@ -7,8 +7,37 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     $totalSiswa = Siswa::count();
     $totalGtk = Gtk::count();
+    $totalSekolah = \App\Models\Sekolah::count();
 
-    return view('landing', compact('totalSiswa', 'totalGtk'));
+    // Mengambil data dari tabel laporan_gedung
+    $gedungStats = \Illuminate\Support\Facades\DB::table('laporan_gedung')
+        ->selectRaw('SUM(jumlah_baik) as baik, SUM(jumlah_rusak) as rusak')
+        ->first();
+
+    $kondisiRuang = [
+        'Baik' => (int) ($gedungStats->baik ?? 0),
+        'Rusak Ringan' => 0, // Tabel laporan_gedung Anda tidak memisahkan rusak ringan/sedang
+        'Rusak Sedang' => 0,
+        'Rusak Berat' => (int) ($gedungStats->rusak ?? 0),
+    ];
+
+    // Mengambil data Laporan Masuk terbaru
+    $latestLaporan = \App\Models\Laporan::orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->first();
+    $laporanBulan = $latestLaporan ? $latestLaporan->bulan : date('n');
+    $laporanTahun = $latestLaporan ? $latestLaporan->tahun : date('Y');
+
+    $laporanMasuk = \App\Models\Laporan::where('tahun', $laporanTahun)
+        ->where('bulan', $laporanBulan)
+        ->whereIn('status', ['submitted', 'verified'])
+        ->count();
+
+    $namaBulan = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+        7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ][$laporanBulan] ?? '';
+    $periodeLaporan = "{$namaBulan} {$laporanTahun}";
+
+    return view('landing', compact('totalSiswa', 'totalGtk', 'kondisiRuang', 'totalSekolah', 'laporanMasuk', 'periodeLaporan'));
 });
 
 Route::get('/admin', function () {

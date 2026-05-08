@@ -171,7 +171,7 @@ class SekolahPage extends Page implements HasSchemas
                     'A'     => 'A',
                     'B'     => 'B',
                     'C'     => 'C',
-                    'Belum' => 'Belum Terakreditasi',
+                    'Belum Terakreditasi' => 'Belum Terakreditasi',
                 ]),
 
             TextInput::make('tahun_berdiri')

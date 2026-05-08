@@ -170,21 +170,15 @@ class ExcelImportAction extends Action
         $headerRow = $rows->shift(); // Baris header pertama
 
         // Skip baris instruksi (baris ke-2) jika ada.
-        // Deteksi otomatis: baris ke-2 dianggap instruksi jika TIDAK ada satu pun
-        // nilai yang cocok dengan kolom importer (artinya isinya teks petunjuk, bukan data).
+        // Deteksi otomatis: Cek apakah baris ke-2 mengandung kata kunci instruksi
         if ($rows->isNotEmpty()) {
-            $columns      = $this->importerClass::getColumns();
-            $normalize    = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $s));
-            $validHeaders = collect($columns)->map(fn($c) => $normalize($c->getLabel() ?? $c->getName()));
+            $secondRow = $rows->first();
+            $isInstruction = $secondRow->contains(function ($value) {
+                $str = strtolower((string) $value);
+                return str_contains($str, 'diisi dengan') || str_contains($str, 'wajib diisi') || str_contains($str, 'contoh:');
+            });
 
-            $secondRow    = $rows->first();
-            $secondValues = $secondRow->filter()->map(fn($v) => $normalize($v));
-
-            // Hitung berapa nilai baris ke-2 yang cocok dengan header kolom
-            $matchCount = $secondValues->intersect($validHeaders)->count();
-
-            // Jika tidak ada satupun yang cocok dengan nama kolom → itu baris instruksi, skip
-            if ($matchCount === 0) {
+            if ($isInstruction) {
                 $rows->shift();
             }
         }
@@ -192,7 +186,7 @@ class ExcelImportAction extends Action
         $columns = $this->importerClass::getColumns();
         
         // Try to map headers from Row 1
-        $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-0]/', '', (string)$s));
+        $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string)$s));
         
         $columnMap = [];
         $matchCount = 0;
@@ -215,8 +209,12 @@ class ExcelImportAction extends Action
 
         // If very few matches were found, the first row might be a grouping header (Row 1: Group, Row 2: Header)
         // Check Row 2 if it exists and gives better matches
-        if ($matchCount < 3 && $rows->isNotEmpty()) {
-            $secondRow = $rows->shift();
+        $totalColumns = count($columns);
+        // Anggap match buruk jika kurang dari sepertiga kolom yang terdeteksi, atau matchCount < 2 (untuk form kecil)
+        $isBadMatch = $totalColumns > 0 && ($matchCount < min(2, $totalColumns) || $matchCount < ($totalColumns / 3));
+
+        if ($isBadMatch && $rows->isNotEmpty()) {
+            $secondRow = $rows->first(); // Gunakan first() bukan shift() agar data tidak hilang
             $secondRowMap = [];
             $secondMatchCount = 0;
             foreach ($columns as $column) {
@@ -237,12 +235,11 @@ class ExcelImportAction extends Action
             }
 
             if ($secondMatchCount > $matchCount) {
-                $headerRow = $secondRow;
+                $headerRow = $rows->shift(); // Baru di-shift jika benar-benar header yang lebih baik
                 $columnMap = $secondRowMap;
                 $matchCount = $secondMatchCount;
             } else {
-                // If second row didn't help, put it back or keep skipping (it might be a sub-header)
-                // But generally $rows already has the data now.
+                // Jika baris kedua tidak membantu, biarkan saja (jangan di-shift)
             }
         }
 

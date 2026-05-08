@@ -34,20 +34,20 @@ class LaporanGedungTable
                 //     ->label('Bulan')
                 //     ->sortable(),
                 TextColumn::make('nama_ruang')
-                    ->label('Nama Ruang')
+                    ->label('Nama Ruang/Gedung')
                     ->searchable(),
                 TextColumn::make('jumlah_total')
-                    ->label('Jumlah Total')
+                    ->label('Jumlah')
                     ->numeric()
                     ->sortable()
                     ->alignCenter(),
                 TextColumn::make('jumlah_baik')
-                    ->label('Jumlah Baik')
+                    ->label('Kondisi Baik')
                     ->numeric()
                     ->sortable()
                     ->alignCenter(),
                 TextColumn::make('jumlah_rusak')
-                    ->label('Jumlah Rusak')
+                    ->label('Kondisi Rusak')
                     ->numeric()
                     ->sortable()
                     ->alignCenter(),

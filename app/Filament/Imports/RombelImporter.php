@@ -28,8 +28,13 @@ class RombelImporter extends Importer
         ];
     }
 
-    public function resolveRecord(): Rombel
+    public function resolveRecord(): ?Rombel
     {
+        $nama = $this->data['nama'] ?? '';
+        if (str_contains(strtolower($nama), 'diisi dengan') || str_contains($nama, 'X-IPA-1')) {
+            return null; // Abaikan baris contoh/instruksi
+        }
+
         $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
 
         if (! $sekolahId) {

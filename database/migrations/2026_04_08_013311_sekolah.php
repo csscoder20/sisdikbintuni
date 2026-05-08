@@ -35,6 +35,8 @@ return new class extends Migration
             $table->integer('luas_tanah')->nullable();
             $table->string('email')->nullable();
             $table->string('foto')->nullable();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->timestamps();
         });
     }

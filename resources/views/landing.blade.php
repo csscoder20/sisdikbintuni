@@ -37,11 +37,16 @@
     </header>
 
     <main class="container mx-auto px-6 -mt-10">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-red-500">
+                <div class="text-gray-500 text-sm font-bold uppercase">Total Sekolah</div>
+                <div class="text-3xl font-bold text-gray-800">{{ number_format($totalSekolah) }}</div>
+                <div class="text-red-500 text-xs font-semibold mt-2"><i class="fas fa-building mr-1"></i> SMA & SMK</div>
+            </div>
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600">
                 <div class="text-gray-500 text-sm font-bold uppercase">Total Siswa</div>
                 <div class="text-3xl font-bold text-gray-800">{{ number_format($totalSiswa) }}</div>
-                <div class="text-green-500 text-xs font-semibold mt-2"><i class="fas fa-user-grad mr-1"></i> Tersebar di 24 Sekolah</div>
+                <div class="text-green-500 text-xs font-semibold mt-2"><i class="fas fa-user-grad mr-1"></i> Tersebar di {{ number_format($totalSekolah) }} Sekolah</div>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-green-500">
                 <div class="text-gray-500 text-sm font-bold uppercase">Total GTK</div>
@@ -49,14 +54,20 @@
                 <div class="text-gray-400 text-xs mt-2">Guru & Tenaga Kependidikan</div>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-purple-500">
-                <div class="text-gray-500 text-sm font-bold uppercase">Kondisi Ruang</div>
-                <div class="text-3xl font-bold text-gray-800">85%</div>
-                <div class="text-blue-500 text-xs font-semibold mt-2">Kategori Layak</div>
+                @php
+                    $kondisi = $kondisiRuang ?? ['Baik' => 0, 'Rusak Ringan' => 0, 'Rusak Sedang' => 0, 'Rusak Berat' => 0];
+                    $totalRuang = array_sum($kondisi);
+                    $layak = ($kondisi['Baik'] ?? 0) + ($kondisi['Rusak Ringan'] ?? 0);
+                    $persentaseLayak = $totalRuang > 0 ? round(($layak / $totalRuang) * 100) : 0;
+                @endphp
+                <div class="text-gray-500 text-sm font-bold uppercase">Kondisi Ruang/Gedung</div>
+                <div class="text-3xl font-bold text-gray-800">{{ $persentaseLayak }}%</div>
+                <div class="text-blue-500 text-xs font-semibold mt-2">Kategori Layak ({{ $layak }} dari total {{ $totalRuang }} ruang/gedung)</div>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-yellow-500">
                 <div class="text-gray-500 text-sm font-bold uppercase">Laporan Masuk</div>
-                <div class="text-3xl font-bold text-gray-800">18/24</div>
-                <div class="text-orange-500 text-xs font-semibold mt-2">Update: Mei 2024</div>
+                <div class="text-3xl font-bold text-gray-800">{{ $laporanMasuk }}/{{ $totalSekolah }}</div>
+                <div class="text-orange-500 text-xs font-semibold mt-2">Update: {{ $periodeLaporan }}</div>
             </div>
         </div>
 
@@ -92,10 +103,15 @@
         new Chart(sarprasCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Baik', 'Rusak Ringan', 'Rusak Berat'],
+                labels: ['Baik', 'Rusak Ringan', 'Rusak Sedang', 'Rusak Berat'],
                 datasets: [{
-                    data: [70, 20, 10],
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    data: [
+                        {{ $kondisi['Baik'] ?? 0 }},
+                        {{ $kondisi['Rusak Ringan'] ?? 0 }},
+                        {{ $kondisi['Rusak Sedang'] ?? 0 }},
+                        {{ $kondisi['Rusak Berat'] ?? 0 }}
+                    ],
+                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
                     borderWidth: 0
                 }]
             },
