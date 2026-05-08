@@ -23,7 +23,7 @@
     <header class="hero-gradient text-white">
         <div class="container mx-auto px-6 py-16 text-center">
             <img src="/assets/logo/logo-bintuni.png" alt="Logo Bintuni" class="h-24 mx-auto mb-6">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Laporan Bulanan SMA/SMK</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Sistem Pelaporan Bulanan SMA/SMK</h1>
             <p class="text-xl mb-8 opacity-90">Kabupaten Teluk Bintuni - Portal Data Pendidikan Terpadu</p>
             <div class="flex justify-center gap-4">
                 <a target="_blank" href="/login" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
@@ -40,12 +40,12 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600">
                 <div class="text-gray-500 text-sm font-bold uppercase">Total Siswa</div>
-                <div class="text-3xl font-bold text-gray-800">4,520</div>
+                <div class="text-3xl font-bold text-gray-800">{{ number_format($totalSiswa) }}</div>
                 <div class="text-green-500 text-xs font-semibold mt-2"><i class="fas fa-user-grad mr-1"></i> Tersebar di 24 Sekolah</div>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-green-500">
                 <div class="text-gray-500 text-sm font-bold uppercase">Total GTK</div>
-                <div class="text-3xl font-bold text-gray-800">385</div>
+                <div class="text-3xl font-bold text-gray-800">{{ number_format($totalGtk) }}</div>
                 <div class="text-gray-400 text-xs mt-2">Guru & Tenaga Kependidikan</div>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-purple-500">

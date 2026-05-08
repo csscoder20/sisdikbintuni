@@ -6,11 +6,13 @@ use App\Models\OperatorSekolah;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 
 class OperatorPending extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected static ?int $sort = 2;
+    protected int | string | array $columnSpan = 1;
 
     protected static ?string $heading = 'Operator Sekolah Menunggu Verifikasi';
 
@@ -18,7 +20,7 @@ class OperatorPending extends BaseWidget
     {
         return $table
             ->query(
-                OperatorSekolah::query()->where('status', 'pending')
+                OperatorSekolah::query()->whereHas('user', fn (Builder $query) => $query->where('status', 'pending'))
             )
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
@@ -35,15 +37,14 @@ class OperatorPending extends BaseWidget
                     ->sortable(),
             ])
             ->actions([
-                // Memanggil langsung class Action dari namespace Tables
-                \Filament\Tables\Actions\Action::make('approve')
+                Action::make('approve')
                     ->label('Setujui')
                     ->color('success')
                     ->icon('heroicon-m-check-circle')
                     ->requiresConfirmation()
                     ->modalHeading('Aktivasi Akun Operator')
                     ->modalDescription('Apakah Anda yakin ingin menyetujui akun operator ini?')
-                    ->action(fn (OperatorSekolah $record) => $record->update(['status' => 'approved'])),
+                    ->action(fn (OperatorSekolah $record) => $record->user->update(['status' => 'approved'])),
             ]);
     }
 }

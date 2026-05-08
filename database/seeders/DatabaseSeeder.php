@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             WilayahBintuniSeeder::class,
             SekolahSeeder::class,
             OperatorSekolahSeeder::class,
-            RombelSeeder::class,
+            // RombelSeeder::class,
             // GtkSeeder::class,
             // GtkPendidikanSeeder::class,
             // GtkKeuanganSeeder::class,

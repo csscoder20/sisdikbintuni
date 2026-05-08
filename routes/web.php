@@ -1,9 +1,14 @@
 <?php
 
+use App\Models\Gtk;
+use App\Models\Siswa;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('landing');
+    $totalSiswa = Siswa::count();
+    $totalGtk = Gtk::count();
+
+    return view('landing', compact('totalSiswa', 'totalGtk'));
 });
 
 Route::get('/admin', function () {
