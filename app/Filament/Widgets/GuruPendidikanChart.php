@@ -16,7 +16,12 @@ class GuruPendidikanChart extends ChartWidget
         $data = [];
 
         foreach ($pendidikan as $p) {
-            $data[] = Gtk::whereIn('jenis_gtk', ['Guru', 'Kepala Sekolah'])->where('pendidikan_terakhir', $p)->count();
+            $data[] = Gtk::whereIn('jenis_gtk', ['Guru', 'Kepala Sekolah'])
+                ->where(function($query) use ($p) {
+                    $query->where('pendidikan_terakhir', 'like', $p . '%')
+                        ->orWhere('pendidikan_terakhir', 'like', substr($p, 0, 1) . '-' . substr($p, 1) . '%');
+                })
+                ->count();
         }
 
         return [

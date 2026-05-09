@@ -33,6 +33,12 @@ class Gtk extends Model
         'pangkat_gol_terakhir',
         'tmt_pangkat_gol_terakhir',
         'sekolah_id',
+        'nama_bank_gaji',
+        'nomor_rekening_gaji',
+        'nama_rekening_gaji',
+        'nama_bank_tunjangan',
+        'nomor_rekening_tunjangan',
+        'nama_rekening_tunjangan',
     ];
 
     public function sekolah()

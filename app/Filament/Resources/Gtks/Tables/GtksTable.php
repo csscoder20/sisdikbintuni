@@ -121,6 +121,16 @@ class GtksTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('status_kepegawaian')
+                    ->label('Status Kepegawaian')
+                    ->options([
+                        'PNS' => 'PNS',
+                        'CPNS' => 'CPNS',
+                        'PPPK' => 'PPPK',
+                        'GTY/PTY' => 'GTY/PTY',
+                        'Kontrak' => 'Kontrak',
+                        'Honorer Sekolah' => 'Honorer Sekolah',
+                    ]),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -131,6 +141,7 @@ class GtksTable
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
+                        ->modalFooterActions([])
                         ->icon(Heroicon::OutlinedPencilSquare),
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),

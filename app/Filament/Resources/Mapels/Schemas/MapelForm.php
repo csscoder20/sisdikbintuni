@@ -32,7 +32,15 @@ class MapelForm
                         'sma' => 'SMA',
                         'smk' => 'SMK',
                     ])
-                    ->default(fn() => Filament::getTenant()?->jenjang ?: (Filament::getCurrentPanel() && in_array(Filament::getCurrentPanel()->getId(), ['sma', 'smk']) ? strtoupper(Filament::getCurrentPanel()->getId()) : null))
+                    ->default(function() {
+                        $jenjang = Filament::getTenant()?->jenjang ?: (Filament::getCurrentPanel() && in_array(Filament::getCurrentPanel()->getId(), ['sma', 'smk']) ? Filament::getCurrentPanel()->getId() : null);
+                        return $jenjang ? strtolower($jenjang) : null;
+                    })
+                    ->disabled(function() {
+                        $jenjang = Filament::getTenant()?->jenjang ?: (Filament::getCurrentPanel() && in_array(Filament::getCurrentPanel()->getId(), ['sma', 'smk']) ? Filament::getCurrentPanel()->getId() : null);
+                        return !empty($jenjang);
+                    })
+                    ->dehydrated()
                     ->required(),
             ]);
     }

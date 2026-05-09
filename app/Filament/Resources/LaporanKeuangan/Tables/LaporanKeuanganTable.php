@@ -25,32 +25,53 @@ class LaporanKeuanganTable
     {
         return $table
             ->striped()
+            ->defaultSort('tanggal', 'asc')
             ->columns([
-                TextColumn::make('laporan.bulan')
-                    ->label('Periode')
-                    ->formatStateUsing(fn($record) => $record->laporan ? "Bulan {$record->laporan->bulan} / {$record->laporan->tahun}" : '-')
+                TextColumn::make('tanggal')
+                    ->label('Tanggal')
+                    ->date('d F Y')
                     ->sortable(),
-                TextColumn::make('sumber_dana')
-                    ->label('Sumber Dana')
+                TextColumn::make('keterangan')
+                    ->label('Uraian / Keterangan')
                     ->searchable()
+                    ->wrap()
+                    ->grow(),
+                TextColumn::make('sumber_dana')
+                    ->label('Sumber')
+                    ->badge()
+                    ->color('info')
                     ->sortable(),
                 TextColumn::make('penerimaan')
-                    ->label('Penerimaan')
+                    ->label('Debet')
                     ->money('idr')
-                    ->sortable(),
+                    ->alignment('right')
+                    ->summarize(\Filament\Tables\Columns\Summarizers\Sum::make()->label('Total Debet')->money('idr')),
                 TextColumn::make('pengeluaran')
-                    ->label('Pengeluaran')
+                    ->label('Kredit')
                     ->money('idr')
-                    ->sortable(),
-                TextColumn::make('saldo')
-                    ->label('Saldo Akhir')
+                    ->alignment('right')
+                    ->summarize(\Filament\Tables\Columns\Summarizers\Sum::make()->label('Total Kredit')->money('idr')),
+                TextColumn::make('running_balance')
+                    ->label('Saldo')
                     ->money('idr')
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->label('Terakhir Diupdate')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->alignment('right')
+                    ->state(function ($record) {
+                        $sekolahId = $record->laporan->sekolah_id ?? filament()->getTenant()?->id;
+                        
+                        $query = \App\Models\LaporanKeuangan::query()
+                            ->whereHas('laporan', fn($q) => $q->where('sekolah_id', $sekolahId))
+                            ->where(function($q) use ($record) {
+                                $q->where('tanggal', '<', $record->tanggal)
+                                  ->orWhere(function($q2) use ($record) {
+                                      $q2->where('tanggal', '=', $record->tanggal)
+                                         ->where('id', '<=', $record->id);
+                                  });
+                            });
+                        
+                        return $query->sum('penerimaan') - $query->sum('pengeluaran');
+                    })
+                    ->color(fn($state) => $state < 0 ? 'danger' : 'success')
+                    ->weight('bold'),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('laporan_id')
@@ -71,7 +92,6 @@ class LaporanKeuanganTable
                             return $query->where('laporan_id', $data['value']);
                         }
                         
-                        // Default to the latest active Laporan for this school if no filter is selected
                         $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
                         $latestLaporan = \App\Models\Laporan::where('sekolah_id', $sekolahId)
                             ->orderBy('tahun', 'desc')
@@ -85,7 +105,6 @@ class LaporanKeuanganTable
                     }),
                 TrashedFilter::make(),
             ])
-
             ->recordActions([
                 ActionGroup::make([
                     RestoreAction::make(),

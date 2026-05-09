@@ -14,9 +14,10 @@ class ListLaporanKeuangan extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Tambah Laporan Keuangan')
-                ->modalHeading('Tambah Laporan Keuangan')
-                ->modalSubmitActionLabel('Simpan Laporan Keuangan')
+                ->label('Tambah Transaksi')
+                ->icon(\Filament\Support\Icons\Heroicon::OutlinedPlus)
+                ->modalHeading('Tambah Transaksi Baru')
+                ->modalSubmitActionLabel('Simpan Transaksi')
                 ->createAnother(false),
         ];
     }

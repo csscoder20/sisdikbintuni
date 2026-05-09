@@ -27,7 +27,7 @@ class GtkJamAjarResource extends Resource
     protected static ?string $pluralModelLabel = 'Sebaran Jam Mengajar';
     protected static ?int $navigationSort = 4;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 
     protected static bool $isScopedToTenant = false;
 
@@ -37,8 +37,9 @@ class GtkJamAjarResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
 
 

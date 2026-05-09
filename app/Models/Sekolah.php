@@ -35,6 +35,14 @@ class Sekolah extends Model
         'email',
         'foto',
         'logo',
+        'nama_rekening_bop',
+        'nomor_rekening_bop',
+        'nama_bank_bop',
+        'nama_rekening_bosp',
+        'nomor_rekening_bosp',
+        'nama_bank_bosp',
+        'latitude',
+        'longitude',
     ];
 
     public function laporan()

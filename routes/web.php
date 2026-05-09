@@ -59,3 +59,19 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::get('/import-template/{importer}', [\App\Http\Controllers\ImportTemplateController::class, 'download'])->name('import-template.download');
+Route::get('/start-impersonating/{sekolah}', function (\App\Models\Sekolah $sekolah) {
+    if (!auth()->check() || !(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('admin_dinas'))) {
+        abort(403);
+    }
+    session(['impersonating_sekolah_id' => $sekolah->id]);
+    $panelId = strtolower($sekolah->jenjang);
+    return redirect()->route("filament.{$panelId}.pages.operator-dashboard", ['tenant' => $sekolah->npsn]);
+})->name('start-impersonating')->middleware('auth');
+
+
+
+Route::get('/stop-impersonating', function () {
+
+    session()->forget('impersonating_sekolah_id');
+    return redirect()->back();
+})->name('stop-impersonating');

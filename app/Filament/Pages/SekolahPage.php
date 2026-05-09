@@ -57,8 +57,9 @@ class SekolahPage extends Page implements HasSchemas
     // Hanya tampil di panel operator (bukan panel dinas/admin)
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
     public function mount(): void
     {
@@ -127,6 +128,10 @@ class SekolahPage extends Page implements HasSchemas
 
             Section::make('Data Pendukung')
                 ->schema($this->getSupportingFormComponents())
+                ->columns(3),
+
+            Section::make('Rekening Sekolah')
+                ->schema($this->getRekeningFormComponents())
                 ->columns(3),
         ]);
     }
@@ -239,6 +244,25 @@ class SekolahPage extends Page implements HasSchemas
                 ->label('Alamat')
                 ->rows(2)
                 ->columnSpan(2),
+
+            TextInput::make('latitude')
+                ->label('Latitude')
+                ->numeric()
+                ->live()
+                ->helperText('Contoh: -2.123456'),
+
+            TextInput::make('longitude')
+                ->label('Longitude')
+                ->numeric()
+                ->live()
+                ->helperText('Contoh: 133.123456'),
+
+            \Filament\Schemas\Components\View::make('filament.components.map-location')
+                ->viewData([
+                    'latField' => 'latitude',
+                    'lngField' => 'longitude',
+                ])
+                ->columnSpanFull(),
         ];
     }
 
@@ -268,6 +292,45 @@ class SekolahPage extends Page implements HasSchemas
                 ->label('Alamat Penyelenggara / Yayasan')
                 ->rows(2)
                 ->columnSpan(2),
+        ];
+    }
+
+    protected function getRekeningFormComponents(): array
+    {
+        return [
+            TextInput::make('nama_rekening_bop')
+                ->label('Nama Rekening BOP'),
+            TextInput::make('nomor_rekening_bop')
+                ->label('Nomor Rekening BOP'),
+            Select::make('nama_bank_bop')
+                ->label('Nama Bank Rekening BOP')
+                ->options([
+                    'Bank Papua' => 'Bank Papua',
+                    'BRI' => 'BRI',
+                    'BNI' => 'BNI',
+                    'Mandiri' => 'Mandiri',
+                    'BCA' => 'BCA',
+                    'BSI' => 'BSI',
+                    'Lainnya' => 'Lainnya',
+                ])
+                ->searchable(),
+
+            TextInput::make('nama_rekening_bosp')
+                ->label('Nama Rekening BOSP'),
+            TextInput::make('nomor_rekening_bosp')
+                ->label('Nomor Rekening BOSP'),
+            Select::make('nama_bank_bosp')
+                ->label('Nama Bank Rekening BOSP')
+                ->options([
+                    'Bank Papua' => 'Bank Papua',
+                    'BRI' => 'BRI',
+                    'BNI' => 'BNI',
+                    'Mandiri' => 'Mandiri',
+                    'BCA' => 'BCA',
+                    'BSI' => 'BSI',
+                    'Lainnya' => 'Lainnya',
+                ])
+                ->searchable(),
         ];
     }
 

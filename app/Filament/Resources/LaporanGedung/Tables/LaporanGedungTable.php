@@ -27,14 +27,12 @@ class LaporanGedungTable
             ->recordAction(null)
             ->striped()
             ->columns([
-                // TextColumn::make('laporan.tahun')
-                //     ->label('Tahun')
-                //     ->sortable(),
-                // TextColumn::make('laporan.bulan')
-                //     ->label('Bulan')
-                //     ->sortable(),
                 TextColumn::make('nama_ruang')
+<<<<<<< Updated upstream
                     ->label('Nama Ruang/Gedung')
+=======
+                    ->label('Nama Sarpras')
+>>>>>>> Stashed changes
                     ->searchable(),
                 TextColumn::make('jumlah_total')
                     ->label('Jumlah')

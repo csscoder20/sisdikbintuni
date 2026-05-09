@@ -27,7 +27,7 @@ class LaporanKeuanganResource extends Resource
 
     protected static ?string $navigationLabel = 'Laporan Keuangan';
     protected static ?int $navigationSort = 5;
-    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
@@ -37,8 +37,9 @@ class LaporanKeuanganResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
     public static function form(Schema $schema): Schema
     {

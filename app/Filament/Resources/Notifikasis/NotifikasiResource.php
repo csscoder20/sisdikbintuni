@@ -52,8 +52,11 @@ class NotifikasiResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && !auth()->user()->hasRole('operator');
+        return auth()->check() && 
+               !auth()->user()->hasRole('operator') && 
+               filament()->getCurrentPanel()?->getId() === 'dinas';
     }
+
 
 
     public static function form(Schema $schema): Schema

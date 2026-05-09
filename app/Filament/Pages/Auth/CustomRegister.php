@@ -15,6 +15,8 @@ use Filament\Facades\Filament;
 
 class CustomRegister extends BaseRegister
 {
+    use HasCustomLogo;
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -22,7 +24,7 @@ class CustomRegister extends BaseRegister
                 $this->getNameFormComponent(),
                 $this->getEmailFormComponent(),
                 TextInput::make('nohp')
-                    ->label('Nomor Handphone')
+                    ->label('Nomor WA')
                     ->required()
                     ->tel()
                     ->maxLength(255),
@@ -76,12 +78,13 @@ class CustomRegister extends BaseRegister
         // Skip automatic login after registration
         // Filament::auth()->login($user);
 
-        Notification::make()
-            ->title('Pendaftaran Berhasil')
-            ->body('Akun Anda telah berhasil didaftarkan. Harap tunggu verifikasi dari Admin Dinas sebelum Anda dapat masuk ke panel.')
-            ->success()
-            ->persistent()
-            ->send();
+        session()->flash('swal_message', [
+            'title' => 'Pendaftaran Berhasil',
+            'text' => 'Akun Anda telah berhasil didaftarkan. Harap tunggu verifikasi dari Admin Dinas sebelum Anda dapat masuk ke panel.',
+            'icon' => 'success',
+        ]);
+
+
 
         // Redirect to login page using the correct RegistrationResponse contract
         return new class implements RegistrationResponse {

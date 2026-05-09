@@ -31,8 +31,7 @@ class GtkJamAjarForm
                 TextInput::make('total_jam')
                     ->label('Total Jam')
                     ->numeric()
-                    ->required()
-                    ->disabled(),
+                    ->required(),
                 Select::make('semester')
                     ->label('Semester')
                     ->options([

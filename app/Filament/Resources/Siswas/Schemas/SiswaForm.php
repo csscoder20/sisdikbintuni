@@ -129,6 +129,8 @@ class SiswaForm
                                 ->label('Nama Ibu'),
                             TextInput::make('nama_wali')
                                 ->label('Nama Wali'),
+                            TextInput::make('nohp_ortu_wali')
+                                ->label('No. HP Orang Tua/Wali'),
                         ])->columns(2),
 
                     Step::make('Lainnya')
@@ -192,19 +194,6 @@ class SiswaForm
                                     'tuna_daksa' => 'Tuna Daksa',
                                     'tuna_grahita' => 'Tuna Grahita',
                                     'tuna_lainnya' => 'Lainnya',
-                                ])
-                                ->default('tidak')
-                                ->required(),
-                            Select::make('beasiswa')
-                                ->label('Status Beasiswa')
-                                ->options([
-                                    'tidak' => 'Tidak Menerima',
-                                    'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat',
-                                    'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah',
-                                    'beasisswa_swasta' => 'Beasiswa Swasta',
-                                    'beasiswa_khusus' => 'Beasiswa Khusus',
-                                    'beasiswa_afirmasi' => 'Beasiswa Afirmasi',
-                                    'beasiswa_lainnya' => 'Beasiswa Lainnya',
                                 ])
                                 ->default('tidak')
                                 ->required(),

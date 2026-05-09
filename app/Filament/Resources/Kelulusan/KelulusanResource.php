@@ -19,6 +19,7 @@ use Filament\Support\Icons\Heroicon;
 class KelulusanResource extends Resource
 {
     protected static ?string $slug = 'kelulusan';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $model = Kelulusan::class;
 
@@ -38,6 +39,12 @@ class KelulusanResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
     protected static ?string $recordTitleAttribute = 'Data Kelulusan';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
+    }
+
 
     public static function form(Schema $schema): Schema
     {

@@ -26,7 +26,7 @@ class RombelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Rombel';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     protected static bool $isScopedToTenant = true;
@@ -37,8 +37,9 @@ class RombelResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
 
 

@@ -27,8 +27,9 @@ class OperatorDashboard extends BaseDashboard
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
     public array $checklist = [
         'identitas_sekolah' => 'IDENTITAS SEKOLAH',

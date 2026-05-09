@@ -30,7 +30,7 @@ class KehadiranGtkResource extends Resource
 
     protected static ?string $navigationLabel = 'Kehadiran GTK';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 
     protected static ?int $navigationSort = 5;
 
@@ -39,6 +39,12 @@ class KehadiranGtkResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
     protected static ?string $recordTitleAttribute = 'NOMINATIF GTK';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
+    }
+
 
     public static function form(Schema $schema): Schema
     {

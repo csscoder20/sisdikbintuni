@@ -14,11 +14,16 @@ class LaporanKeuangan extends Model
 
     protected $fillable = [
         'laporan_id',
+        'tanggal',
         'sumber_dana',
         'penerimaan',
         'pengeluaran',
         'saldo',
         'keterangan',
+    ];
+
+    protected $casts = [
+        'tanggal' => 'date',
     ];
 
     protected static function booted(): void

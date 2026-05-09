@@ -37,27 +37,28 @@ class MapelResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
     public static function canCreate(): bool
     {
-        return false;
+        return true;
     }
 
     public static function canEdit(Model $record): bool
     {
-        return false;
+        return true;
     }
 
     public static function canView(Model $record): bool
     {
-        return false;
+        return true;
     }
 
     public static function canDelete(Model $record): bool
     {
-        return false;
+        return true;
     }
 
     public static function form(Schema $schema): Schema

@@ -64,6 +64,11 @@ class RedirectIncorrectPanel
 
         // 2. If Admin tries to access a School panel
         if ($panel->getId() !== 'dinas' && ! $user->hasRole('operator')) {
+            // Allow if impersonating
+            if (session()->has('impersonating_sekolah_id')) {
+                return $next($request);
+            }
+
             Notification::make()
                 ->title('Dialihkan ke Dashboard Admin Dinas')
                 ->info()

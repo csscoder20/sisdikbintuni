@@ -21,14 +21,14 @@ class LaporanGedungResource extends Resource
 {
     protected static ?string $model = LaporanGedung::class;
 
-    protected static ?string $modelLabel = 'Keadaan Gedung/Ruang';
-    protected static ?string $pluralModelLabel = 'Keadaan Gedung/Ruang';
+    protected static ?string $modelLabel = 'Sarana & Prasarana';
+    protected static ?string $pluralModelLabel = 'Sarana & Prasarana';
 
     protected static ?string $slug = 'laporan-gedung';
 
-    protected static ?string $navigationLabel = 'Keadaan Gedung/Ruang';
-    protected static ?int $navigationSort = 1;
-    protected static string | \UnitEnum | null $navigationGroup = 'Laporan Bulanan';
+    protected static ?string $navigationLabel = 'Sarana & Prasarana';
+    protected static ?int $navigationSort = 2;
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
@@ -38,8 +38,9 @@ class LaporanGedungResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
 
 

@@ -39,8 +39,9 @@ class GtkResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
 
 
@@ -79,6 +80,13 @@ class GtkResource extends Resource
                 TextEntry::make('kecamatan')->label('Kecamatan')->prefix(': ')->placeholder('-'),
                 TextEntry::make('kabupaten')->label('Kabupaten')->prefix(': ')->placeholder('-'),
                 TextEntry::make('provinsi')->label('Provinsi')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_bank_gaji')->label('Bank Gaji')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nomor_rekening_gaji')->label('No. Rekening Gaji')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_rekening_gaji')->label('Nama Rekening Gaji')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_bank_tunjangan')->label('Bank Tunjangan')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nomor_rekening_tunjangan')
+                ->label('No. Rekening Tunjangan')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nama_rekening_tunjangan')->label('Nama Rekening Tunjangan')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
 

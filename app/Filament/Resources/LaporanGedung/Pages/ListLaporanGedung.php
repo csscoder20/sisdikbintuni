@@ -34,7 +34,7 @@ class ListLaporanGedung extends ListRecords
         return [
             \App\Filament\Actions\ExcelImportAction::make()
                 ->importer(LaporanGedungImporter::class)
-                ->label('Impor Data Gedung')
+                ->label('Impor Data Sarpras')
                 ->modalHeading('Impor Data Sarana & Prasarana')
                 ->modalDescription(fn () => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
@@ -55,9 +55,9 @@ class ListLaporanGedung extends ListRecords
                 ->modalSubmitActionLabel('Impor Sekarang')
                 ->color('info'),
             CreateAction::make()
-                ->label('Tambah Laporan Gedung')
-                ->modalHeading('Tambah Laporan Gedung')
-                ->modalSubmitActionLabel('Simpan Laporan Gedung')
+                ->label('Tambah Sarpras')
+                ->modalHeading('Tambah Sarpras')
+                ->modalSubmitActionLabel('Simpan Data')
                 ->createAnother(false),
             ValidateChecklistAction::make('validateKondisiSarpras', 'kondisi_sarpras', fn() => \App\Models\LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', filament()->getTenant()?->id))->exists()),
         ];

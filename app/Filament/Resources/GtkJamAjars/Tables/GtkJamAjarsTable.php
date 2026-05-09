@@ -225,7 +225,6 @@ class GtkJamAjarsTable
                                                         ->hiddenLabel()
                                                         ->placeholder('Jam')
                                                         ->numeric()
-                                                        ->readOnly()
                                                         ->required()
                                                         ->extraInputAttributes(['class' => 'text-center'])
                                                         ->columnSpan(2),

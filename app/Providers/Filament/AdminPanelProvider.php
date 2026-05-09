@@ -28,7 +28,9 @@ use Filament\Navigation\MenuItem;
 use Filament\Support\Enums\Width;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
+use App\Filament\Pages\Auth\CustomRequestPasswordReset;
 use App\Filament\Pages\KeadaanGtk;
+
 use App\Filament\Pages\KeadaanSiswa;
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
 use App\Filament\Resources\GtkKeuangan\GtkKeuanganResource;
@@ -52,19 +54,37 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('dinas')
             ->path('admin')
+            ->passwordReset(CustomRequestPasswordReset::class)
+            ->emailVerification()
+
             ->darkMode(false)
             ->brandName('ADMIN')
             ->databaseNotifications()
-            ->brandLogo(fn () => new \Illuminate\Support\HtmlString('
+            ->brandLogo(fn () => request()->routeIs('filament.*.auth.*') 
+                ? new \Illuminate\Support\HtmlString('
+                    <style>.fi-logo { height: auto !important; margin-bottom: 1rem; }</style>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;">
+                        <img src="' . asset('storage/logo/logo-bintuni.png') . '" style="height: 5rem; width: auto; object-fit: contain;">
+                        <div style="font-size: 1rem; line-height: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: inherit;">
+                            Sistem Pelaporan Bulanan <span style="color: #ea580c;">SMA/SMK</span>
+                        </div>
+                    </div>
+                ')
+
+
+
+
+                : new \Illuminate\Support\HtmlString('
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                        <img src="' . asset('storage/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
+                        <img src="' . asset('assets/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
                     <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
                         Sistem Pelaporan Bulanan<span style="color: #3b82f6;"> SMA/SMK</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
                     </span>
                 </div>
             '))
+
             ->profile(isSimple: false)
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
@@ -85,8 +105,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->resources([
                 \App\Filament\Resources\Users\UserResource::class,
+                \App\Filament\Resources\Sekolahs\SekolahResource::class,
                 \App\Filament\Resources\ActivityLog\ActivityLogResource::class,
                 \App\Filament\Resources\Notifikasis\NotifikasiResource::class,
+
             ])
             ->pages([
                 SuperAdminDashboard::class,
@@ -153,6 +175,25 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 HTML;
             })
+            ->renderHook('panels::body.start', function () {
+                if (!session()->has('impersonating_sekolah_id')) {
+                    return '';
+                }
+                $sekolah = \App\Models\Sekolah::find(session('impersonating_sekolah_id'));
+                $namaSekolah = $sekolah?->nama ?? 'Sekolah';
+                return \Illuminate\Support\Facades\Blade::render('
+                    <div style="background-color: #f97316; color: white; padding: 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            MODE IMPERSONATE: Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
+                        </span>
+                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
+                            HENTIKAN & KELUAR
+                        </a>
+                    </div>
+                ', ['namaSekolah' => $namaSekolah]);
+            })
+
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>
@@ -203,6 +244,9 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications()
             ->profile()
+            ->passwordReset(CustomRequestPasswordReset::class)
+            ->emailVerification()
+
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Kunjungi Web')
@@ -214,7 +258,21 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->brandName('OPERATOR ' . strtoupper($jenjang))
-            ->brandLogo(fn () => new \Illuminate\Support\HtmlString('
+            ->brandLogo(fn () => request()->routeIs('filament.*.auth.*') 
+                ? new \Illuminate\Support\HtmlString('
+                    <style>.fi-logo { height: auto !important; margin-bottom: 1rem; }</style>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;">
+                        <img src="' . asset('storage/logo/logo-bintuni.png') . '" style="height: 5rem; width: auto; object-fit: contain;">
+                        <div style="font-size: 1rem; line-height: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: inherit;">
+                            Sistem Pelaporan Bulanan <span style="color: #10b981;">SMA/SMK</span>
+                        </div>
+                    </div>
+                ')
+
+
+
+
+                : new \Illuminate\Support\HtmlString('
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                         <img src="' . asset('storage/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
@@ -224,6 +282,7 @@ class AdminPanelProvider extends PanelProvider
                     </span>
                 </div>
             '))
+
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -278,6 +337,25 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 HTML;
             })
+            ->renderHook('panels::body.start', function () {
+                if (!session()->has('impersonating_sekolah_id')) {
+                    return '';
+                }
+                $sekolah = \App\Models\Sekolah::find(session('impersonating_sekolah_id'));
+                $namaSekolah = $sekolah?->nama ?? 'Sekolah';
+                return \Illuminate\Support\Facades\Blade::render('
+                    <div style="background-color: #f97316; color: white; padding: 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            MODE IMPERSONATE: Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
+                        </span>
+                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
+                            HENTIKAN & KELUAR
+                        </a>
+                    </div>
+                ', ['namaSekolah' => $namaSekolah]);
+            })
+
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'
                     <style>

@@ -899,8 +899,8 @@
             if (checkedItems.length === 0) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Perhatian',
-                    text: 'Pastikan data telah valid (tercentang) sebelum pratinjau',
+                    title: '<span style="font-size: 1.125rem; font-weight: 600; color: #111827;">Perhatian</span>',
+                    html: '<span style="font-size: 0.875rem; color: #4b5563;">Pastikan data telah valid (tercentang) sebelum pratinjau</span>',
                     confirmButtonColor: '#3b82f6',
                 });
                 return;
@@ -1224,8 +1224,8 @@
             if (checkedItems.length !== totalItems) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Perhatian',
-                    text: 'Semua item harus dicentang sebelum mengirim laporan',
+                    title: '<span style="font-size: 1.125rem; font-weight: 600; color: #111827;">Perhatian</span>',
+                    html: '<span style="font-size: 0.875rem; color: #4b5563;">Semua item harus dicentang sebelum mengirim laporan</span>',
                     confirmButtonColor: '#10b981',
                 });
                 return;
@@ -1233,8 +1233,8 @@
 
             Swal.fire({
                 icon: 'success',
-                title: 'Berhasil',
-                text: 'Laporan berhasil dikirim!',
+                title: '<span style="font-size: 1.125rem; font-weight: 600; color: #111827;">Berhasil</span>',
+                html: '<span style="font-size: 0.875rem; color: #4b5563;">Laporan berhasil dikirim!</span>',
                 confirmButtonColor: '#10b981',
             });
         });

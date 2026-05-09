@@ -36,8 +36,11 @@ class ActivityLogResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && auth()->user()->isSuperAdmin();
+        return auth()->check() && 
+               auth()->user()->isSuperAdmin() && 
+               filament()->getCurrentPanel()?->getId() === 'dinas';
     }
+
 
     public static function form(Schema $schema): Schema
     {

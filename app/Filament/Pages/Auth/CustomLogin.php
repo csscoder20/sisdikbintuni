@@ -19,7 +19,10 @@ use Illuminate\Support\Facades\Blade;
 
 class CustomLogin extends BaseLogin
 {
+    use HasCustomLogo;
+
     public function authenticate(): ?LoginResponse
+
     {
         try {
             $this->rateLimit(5);
@@ -41,27 +44,36 @@ class CustomLogin extends BaseLogin
         if ($user && $user->status === 'rejected') {
             Filament::auth()->logout();
 
-            Notification::make()
-                ->title('Akun Dinonaktifkan')
-                ->body('Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi Admin Dinas untuk informasi lebih lanjut.')
-                ->danger()
-                ->send();
+            session()->flash('swal_message', [
+                'title' => 'Akun Dinonaktifkan',
+                'text' => 'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi Admin Dinas untuk informasi lebih lanjut.',
+                'icon' => 'error',
+            ]);
 
-            return null;
+            return new class implements LoginResponse {
+                public function toResponse($request)
+                {
+                    return redirect()->to(filament()->getLoginUrl());
+                }
+            };
         }
 
         // 2. Cek jika operator belum diverifikasi (Pending)
         if ($user && $user->hasRole('operator') && $user->status === 'pending') {
             Filament::auth()->logout();
 
-            Notification::make()
-                ->title('Verifikasi Tertunda')
-                ->body('Akun Anda sedang diverifikasi oleh Admin Dinas. Silakan cek email Anda untuk mendapatkan update terkait akun Anda.')
-                ->danger()
-                ->persistent()
-                ->send();
+            session()->flash('swal_message', [
+                'title' => 'Verifikasi Tertunda',
+                'text' => 'Akun Anda sedang diverifikasi oleh Admin Dinas. Silakan cek email Anda untuk mendapatkan update terkait akun Anda.',
+                'icon' => 'warning',
+            ]);
 
-            return null;
+            return new class implements LoginResponse {
+                public function toResponse($request)
+                {
+                    return redirect()->to(filament()->getLoginUrl());
+                }
+            };
         }
 
         if (
@@ -86,4 +98,42 @@ class CustomLogin extends BaseLogin
 
         return null;
     }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE),
+                $this->getFormContentComponent(),
+                $this->getMultiFactorChallengeFormContentComponent(),
+                RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER),
+                \Filament\Schemas\Components\Html::make(function () {
+                    if (session()->has('swal_message')) {
+                        $swal = session('swal_message');
+                        $title = addslashes($swal['title']);
+                        $text = addslashes($swal['text']);
+                        $icon = addslashes($swal['icon']);
+                        
+                        return '
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script>
+                            setTimeout(() => {
+                                if (typeof Swal !== "undefined") {
+                                    Swal.fire({
+                                        title: "<span style=\"font-size: 1.125rem; font-weight: 600; color: #111827;\">" + "' . $title . '" + "</span>",
+                                        html: "<span style=\"font-size: 0.875rem; color: #4b5563;\">" + "' . $text . '" + "</span>",
+                                        icon: "' . $icon . '",
+                                        confirmButtonText: "OK",
+                                        confirmButtonColor: "#ea580c"
+                                    });
+                                }
+                            }, 500);
+                        </script>';
+                    }
+                    return '';
+                }),
+            ]);
+    }
 }
+
+

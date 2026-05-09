@@ -68,8 +68,9 @@ class KeadaanGtk extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('operator');
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
     }
+
 
     public static function getNavigationIcon(): ?string
     {
