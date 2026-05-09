@@ -28,11 +28,7 @@ class LaporanGedungTable
             ->striped()
             ->columns([
                 TextColumn::make('nama_ruang')
-<<<<<<< Updated upstream
                     ->label('Nama Ruang/Gedung')
-=======
-                    ->label('Nama Sarpras')
->>>>>>> Stashed changes
                     ->searchable(),
                 TextColumn::make('jumlah_total')
                     ->label('Jumlah')
