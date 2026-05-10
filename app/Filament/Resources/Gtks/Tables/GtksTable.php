@@ -18,6 +18,10 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\BulkAction;
+use Filament\Forms\Components\CheckboxList;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Collection;
 
 
 class GtksTable
@@ -153,6 +157,81 @@ class GtksTable
                 BulkActionGroup::make([
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    BulkAction::make('exportPdf')
+                        ->label('Export PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->modalHeading('Export Nominatif GTK ke PDF')
+                        ->modalDescription('Pilih kolom yang ingin Anda sertakan dalam file PDF.')
+                        ->modalSubmitActionLabel('Export Sekarang')
+                        ->form([
+                            CheckboxList::make('columns')
+                                ->label('Pilih Kolom')
+                                ->options([
+                                    'nama' => 'Nama GTK',
+                                    'nik' => 'NIK',
+                                    'nip' => 'NIP',
+                                    'nuptk' => 'NUPTK',
+                                    'nokarpeg' => 'No Karpeg',
+                                    'jenis_gtk' => 'Jenis GTK',
+                                    'jenis_kelamin' => 'Jenis Kelamin',
+                                    'status_kepegawaian' => 'Status Kepegawaian',
+                                    'pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
+                                    'tmt_pns' => 'TMT PNS',
+                                    'tempat_lahir' => 'Tempat Lahir',
+                                    'tanggal_lahir' => 'Tanggal Lahir',
+                                    'pendidikan_terakhir' => 'Pendidikan Terakhir',
+                                    'daerah_asal' => 'Daerah Asal',
+                                    'agama' => 'Agama',
+                                    'alamat' => 'Alamat',
+                                    'desa' => 'Desa',
+                                    'kecamatan' => 'Kecamatan',
+                                    'kabupaten' => 'Kabupaten',
+                                    'provinsi' => 'Provinsi',
+                                    'tmt_pangkat_gol_terakhir' => 'TMT Pangkat Gol',
+                                ])
+                                ->columns(3)
+                                ->default(['nama', 'nip', 'nuptk'])
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data) {
+                            $allColumns = [
+                                'nama' => 'Nama GTK',
+                                'nik' => 'NIK',
+                                'nip' => 'NIP',
+                                'nuptk' => 'NUPTK',
+                                'nokarpeg' => 'No Karpeg',
+                                'jenis_gtk' => 'Jenis GTK',
+                                'jenis_kelamin' => 'Jenis Kelamin',
+                                'status_kepegawaian' => 'Status Kepegawaian',
+                                'pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
+                                'tmt_pns' => 'TMT PNS',
+                                'tempat_lahir' => 'Tempat Lahir',
+                                'tanggal_lahir' => 'Tanggal Lahir',
+                                'pendidikan_terakhir' => 'Pendidikan Terakhir',
+                                'daerah_asal' => 'Daerah Asal',
+                                'agama' => 'Agama',
+                                'alamat' => 'Alamat',
+                                'desa' => 'Desa',
+                                'kecamatan' => 'Kecamatan',
+                                'kabupaten' => 'Kabupaten',
+                                'provinsi' => 'Provinsi',
+                                'tmt_pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
+                            ];
+
+                            $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));
+
+                            $pdf = Pdf::loadView('pdf.gtk-nominatif', [
+                                'records' => $records,
+                                'columns' => $selectedColumns,
+                                'sekolah' => filament()->getTenant(),
+                            ])->setPaper('a4', count($data['columns']) > 5 ? 'landscape' : 'portrait');
+
+                            return response()->streamDownload(
+                                fn () => print($pdf->output()),
+                                'nominatif-gtk-' . now()->format('Y-m-d-His') . '.pdf'
+                            );
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ])
