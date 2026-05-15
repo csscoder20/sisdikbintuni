@@ -38,7 +38,7 @@ class ImportTemplateController extends Controller
         // Cari menggunakan peta nama, atau fallback ke konvensi kebab
         $staticFileName = static::$staticFileMap[strtolower($importerName)]
             ?? $downloadFileName;
-        $staticPath = storage_path('app/templates/' . $staticFileName);
+        $staticPath = public_path('assets/import-excel/' . $staticFileName);
 
         if (file_exists($staticPath)) {
             return response()->download($staticPath, $downloadFileName, [

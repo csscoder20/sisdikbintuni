@@ -129,7 +129,7 @@ class SiswaForm
                                 ->label('Nama Ibu'),
                             TextInput::make('nama_wali')
                                 ->label('Nama Wali'),
-                            TextInput::make('nohp_ortu_wali')
+                            TextInput::make('nohp_ortuwali')
                                 ->label('No. HP Orang Tua/Wali'),
                         ])->columns(2),
 

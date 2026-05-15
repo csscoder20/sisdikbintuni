@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('persentase_kelulusan', 5, 2);
             $table->integer('jumlah_lanjut_pt');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['sekolah_id','tahun']);
         });

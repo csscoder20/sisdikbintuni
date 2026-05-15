@@ -22,9 +22,9 @@ class GtkRiwayatPendidikanResource extends Resource
 
     protected static ?string $model = GtkPendidikan::class;
 
-    protected static ?string $modelLabel = 'Riwayat Pendidikan GTK';
+    protected static ?string $modelLabel = 'Riwayat Pendidikan';
 
-    protected static ?string $pluralModelLabel = 'Riwayat Pendidikan GTK';
+    protected static ?string $pluralModelLabel = 'Riwayat Pendidikan';
 
     protected static ?int $navigationSort = 2;
 

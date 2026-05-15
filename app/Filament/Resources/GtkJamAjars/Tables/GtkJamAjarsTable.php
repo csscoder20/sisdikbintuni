@@ -46,7 +46,7 @@ class GtkJamAjarsTable
             ->striped()
             ->columns([
                 TextColumn::make('gtk.nama')
-                    ->label('GTK')
+                    ->label('Nama GTK')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('total_jam_mengajar')
@@ -210,16 +210,6 @@ class GtkJamAjarsTable
                                                         ->searchable()
                                                         ->live()
                                                         ->required()
-                                                        ->afterStateHydrated(function ($state, callable $set): void {
-                                                            if (blank($state)) {
-                                                                return;
-                                                            }
-
-                                                            $set('jumlah_jam', Mapel::query()->find($state)?->jjp);
-                                                        })
-                                                        ->afterStateUpdated(function ($state, callable $set): void {
-                                                            $set('jumlah_jam', Mapel::query()->find($state)?->jjp);
-                                                        })
                                                         ->columnSpan(5),
                                                     TextInput::make('jumlah_jam')
                                                         ->hiddenLabel()

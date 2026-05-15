@@ -37,8 +37,8 @@ class RombelsTable
                     ->counts('siswa')
                     ->label('Jumlah Siswa')
                     ->sortable(),
-                TextColumn::make('sekolah.nama')
-                    ->sortable(),
+                // TextColumn::make('sekolah.nama')
+                //     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()

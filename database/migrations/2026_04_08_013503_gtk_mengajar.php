@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('tahun_ajaran')->nullable();
             $table->foreignId('laporan_id')->nullable()->constrained('laporan')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique([
                 'gtk_id',

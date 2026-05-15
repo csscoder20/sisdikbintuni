@@ -113,6 +113,26 @@ class GtksTable
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nama_bank_gaji')
+                    ->label('Bank Gaji')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('no_rek_gaji')
+                    ->label('No. Rekening Gaji')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nama_bank_tunjangan')
+                    ->label('Bank Tunjangan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('no_rek_tunjangan')
+                    ->label('No. Rekening Tunjangan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('npwp')
+                    ->label('NPWP')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime('d/m/Y H:i')
@@ -189,6 +209,11 @@ class GtksTable
                                     'kabupaten' => 'Kabupaten',
                                     'provinsi' => 'Provinsi',
                                     'tmt_pangkat_gol_terakhir' => 'TMT Pangkat Gol',
+                                    'nama_bank_gaji' => 'Bank Gaji',
+                                    'no_rek_gaji' => 'No. Rekening Gaji',
+                                    'nama_bank_tunjangan' => 'Bank Tunjangan',
+                                    'no_rek_tunjangan' => 'No. Rekening Tunjangan',
+                                    'npwp' => 'NPWP',
                                 ])
                                 ->columns(3)
                                 ->default(['nama', 'nip', 'nuptk'])
@@ -217,6 +242,11 @@ class GtksTable
                                 'kabupaten' => 'Kabupaten',
                                 'provinsi' => 'Provinsi',
                                 'tmt_pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
+                                'nama_bank_gaji' => 'Bank Gaji',
+                                'no_rek_gaji' => 'No. Rekening Gaji',
+                                'nama_bank_tunjangan' => 'Bank Tunjangan',
+                                'no_rek_tunjangan' => 'No. Rekening Tunjangan',
+                                'npwp' => 'NPWP',
                             ];
 
                             $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));

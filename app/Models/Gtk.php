@@ -34,11 +34,10 @@ class Gtk extends Model
         'tmt_pangkat_gol_terakhir',
         'sekolah_id',
         'nama_bank_gaji',
-        'nomor_rekening_gaji',
-        'nama_rekening_gaji',
+        'no_rek_gaji',
         'nama_bank_tunjangan',
-        'nomor_rekening_tunjangan',
-        'nama_rekening_tunjangan',
+        'no_rek_tunjangan',
+        'npwp',
     ];
 
     public function sekolah()
@@ -51,11 +50,6 @@ class Gtk extends Model
         return $this->hasMany(GtkPendidikan::class);
     }
 
-    public function keuangan()
-    {
-        return $this->hasOne(GtkKeuangan::class);
-    }
-
     public function mengajar()
     {
         return $this->hasMany(Mengajar::class);
@@ -64,6 +58,11 @@ class Gtk extends Model
     public function tugasTambahan()
     {
         return $this->hasOne(GtkTugasTambahan::class);
+    }
+
+    public function kehadiran()
+    {
+        return $this->hasMany(KehadiranGtk::class);
     }
 
     protected static function booted()
@@ -81,8 +80,6 @@ class Gtk extends Model
             // 2. Ensure GtkPendidikan exists
             \App\Models\GtkPendidikan::firstOrCreate(['gtk_id' => $gtk->id]);
 
-            // 3. Ensure GtkKeuangan exists
-            \App\Models\GtkKeuangan::firstOrCreate(['gtk_id' => $gtk->id]);
         });
     }
 }

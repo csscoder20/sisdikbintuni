@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('laporan_keuangan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('laporan_id')->constrained('laporan')->cascadeOnDelete();
-            $table->string('sumber_dana');
-            $table->decimal('penerimaan', 15, 2)->default(0);
-            $table->decimal('pengeluaran', 15, 2)->default(0);
-            $table->decimal('saldo', 15, 2)->default(0);
+            $table->date('tanggal')->nullable();
+            $table->enum('jenis_transaksi', ['kredit', 'debit']);
             $table->text('keterangan')->nullable();
+            $table->decimal('nominal', 15, 2)->default(0);
+            $table->decimal('saldo', 15, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

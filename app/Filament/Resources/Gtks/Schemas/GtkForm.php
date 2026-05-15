@@ -187,11 +187,9 @@ class GtkForm
                                             'Lainnya' => 'Lainnya',
                                         ])
                                         ->searchable(),
-                                    TextInput::make('nomor_rekening_gaji')
+                                    TextInput::make('no_rek_gaji')
                                         ->label('Nomor Rekening (Gaji)')
-                                        ->numeric(),
-                                    TextInput::make('nama_rekening_gaji')
-                                        ->label('Nama Pemilik Rekening (Gaji)'),
+                                        ->extraInputAttributes(['inputmode' => 'numeric']),
 
                             Select::make('nama_bank_tunjangan')
                                         ->label('Nama Bank (Tunjangan)')
@@ -205,11 +203,11 @@ class GtkForm
                                             'Lainnya' => 'Lainnya',
                                         ])
                                         ->searchable(),
-                                    TextInput::make('nomor_rekening_tunjangan')
+                                    TextInput::make('no_rek_tunjangan')
                                         ->label('Nomor Rekening (Tunjangan)')
-                                        ->numeric(),
-                                    TextInput::make('nama_rekening_tunjangan')
-                                        ->label('Nama Pemilik Rekening (Tunjangan)'),
+                                        ->extraInputAttributes(['inputmode' => 'numeric']),
+                                    TextInput::make('npwp')
+                                        ->label('NPWP'),
                         ])->columns(3),
                 ])
                     ->skippable()

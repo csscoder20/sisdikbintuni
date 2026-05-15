@@ -3,11 +3,11 @@
 namespace App\Filament\Widgets;
 
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
+use Filament\Widgets\TableWidget as BaseWidget;
 
 class OperatorBelumDiverifikasiWidget extends BaseWidget
 {

@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
             // RombelSeeder::class,
             // GtkSeeder::class,
             // GtkPendidikanSeeder::class,
-            // GtkKeuanganSeeder::class,
             // SiswaSeeder::class,
             // LaporanSeeder::class,
             // LaporanGedungSeeder::class,

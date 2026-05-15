@@ -24,11 +24,11 @@ class KehadiranGtkResource extends Resource
 
 
 
-    protected static ?string $modelLabel = 'Kehadiran GTK';
+    protected static ?string $modelLabel = 'Kehadiran';
 
-    protected static ?string $pluralModelLabel = 'Kehadiran GTK';
+    protected static ?string $pluralModelLabel = 'Kehadiran';
 
-    protected static ?string $navigationLabel = 'Kehadiran GTK';
+    protected static ?string $navigationLabel = 'Kehadiran';
 
     protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';
 

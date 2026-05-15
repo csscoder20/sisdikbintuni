@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('tugas_tambahan')->nullable();
             $table->integer('jumlah_jam')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique([
                 'gtk_id'

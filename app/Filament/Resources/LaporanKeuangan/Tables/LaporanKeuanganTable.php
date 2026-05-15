@@ -32,43 +32,46 @@ class LaporanKeuanganTable
                     ->date('d F Y')
                     ->sortable(),
                 TextColumn::make('keterangan')
-                    ->label('Uraian / Keterangan')
+                    ->label('Keterangan')
                     ->searchable()
                     ->wrap()
                     ->grow(),
-                TextColumn::make('sumber_dana')
-                    ->label('Sumber')
+                TextColumn::make('jenis_transaksi')
+                    ->label('Jenis')
                     ->badge()
-                    ->color('info')
+                    ->formatStateUsing(fn(?string $state): string => match ($state) {
+                        'kredit' => 'Kredit',
+                        'debit' => 'Debit',
+                        default => '-',
+                    })
+                    ->color(fn(?string $state): string => match ($state) {
+                        'kredit' => 'success',
+                        'debit' => 'danger',
+                        default => 'gray',
+                    })
                     ->sortable(),
-                TextColumn::make('penerimaan')
-                    ->label('Debet')
+                TextColumn::make('nominal')
+                    ->label('Nominal')
                     ->money('idr')
-                    ->alignment('right')
-                    ->summarize(\Filament\Tables\Columns\Summarizers\Sum::make()->label('Total Debet')->money('idr')),
-                TextColumn::make('pengeluaran')
-                    ->label('Kredit')
-                    ->money('idr')
-                    ->alignment('right')
-                    ->summarize(\Filament\Tables\Columns\Summarizers\Sum::make()->label('Total Kredit')->money('idr')),
+                    ->alignment('right'),
                 TextColumn::make('running_balance')
                     ->label('Saldo')
                     ->money('idr')
                     ->alignment('right')
                     ->state(function ($record) {
                         $sekolahId = $record->laporan->sekolah_id ?? filament()->getTenant()?->id;
-                        
+
                         $query = \App\Models\LaporanKeuangan::query()
                             ->whereHas('laporan', fn($q) => $q->where('sekolah_id', $sekolahId))
                             ->where(function($q) use ($record) {
                                 $q->where('tanggal', '<', $record->tanggal)
                                   ->orWhere(function($q2) use ($record) {
                                       $q2->where('tanggal', '=', $record->tanggal)
-                                         ->where('id', '<=', $record->id);
+                                          ->where('id', '<=', $record->id);
                                   });
                             });
-                        
-                        return $query->sum('penerimaan') - $query->sum('pengeluaran');
+
+                        return $query->sum('saldo');
                     })
                     ->color(fn($state) => $state < 0 ? 'danger' : 'success')
                     ->weight('bold'),

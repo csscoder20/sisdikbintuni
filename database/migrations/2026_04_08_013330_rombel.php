@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama');
             $table->integer('tingkat');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

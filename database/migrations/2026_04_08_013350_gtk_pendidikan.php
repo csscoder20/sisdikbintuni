@@ -51,6 +51,7 @@ return new class extends Migration
             $table->string('gelar_belakang')->nullable();   
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

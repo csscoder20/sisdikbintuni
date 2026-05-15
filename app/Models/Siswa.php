@@ -29,6 +29,7 @@ class Siswa extends Model
         'nama_ayah',
         'nama_ibu',
         'nama_wali',
+        'nohp_ortuwali',
         'disabilitas',
         'beasiswa',
         'status',

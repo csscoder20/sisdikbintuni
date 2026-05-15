@@ -35,9 +35,17 @@ return new class extends Migration
             $table->integer('luas_tanah')->nullable();
             $table->string('email')->nullable();
             $table->string('foto')->nullable();
-            $table->string('latitude')->nullable();
-            $table->string('longitude')->nullable();
+            $table->string('logo')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->string('nama_rekening_bop')->nullable();
+            $table->string('nomor_rekening_bop')->nullable();
+            $table->string('nama_bank_bop')->nullable();
+            $table->string('nama_rekening_bosp')->nullable();
+            $table->string('nomor_rekening_bosp')->nullable();
+            $table->string('nama_bank_bosp')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

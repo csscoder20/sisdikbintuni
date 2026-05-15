@@ -63,7 +63,17 @@ Route::get('/start-impersonating/{sekolah}', function (\App\Models\Sekolah $seko
     if (!auth()->check() || !(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('admin_dinas'))) {
         abort(403);
     }
-    session(['impersonating_sekolah_id' => $sekolah->id]);
+
+    $returnUrl = url()->previous();
+    $returnHost = parse_url($returnUrl, PHP_URL_HOST);
+
+    session([
+        'impersonating_sekolah_id' => $sekolah->id,
+        'impersonating_return_url' => $returnHost === request()->getHost()
+            ? $returnUrl
+            : url('/admin/sekolahs'),
+    ]);
+
     $panelId = strtolower($sekolah->jenjang);
     return redirect()->route("filament.{$panelId}.pages.operator-dashboard", ['tenant' => $sekolah->npsn]);
 })->name('start-impersonating')->middleware('auth');
@@ -71,7 +81,12 @@ Route::get('/start-impersonating/{sekolah}', function (\App\Models\Sekolah $seko
 
 
 Route::get('/stop-impersonating', function () {
+    $returnUrl = session('impersonating_return_url', url('/admin/sekolahs'));
 
-    session()->forget('impersonating_sekolah_id');
-    return redirect()->back();
+    session()->forget([
+        'impersonating_sekolah_id',
+        'impersonating_return_url',
+    ]);
+
+    return redirect()->to($returnUrl);
 })->name('stop-impersonating');

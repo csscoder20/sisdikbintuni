@@ -275,17 +275,18 @@ class OperatorDashboard extends BaseDashboard
 
     private function getRekeningNpwpGtkData($schoolId)
     {
-        $gtkList = Gtk::with('keuangan')->where('sekolah_id', $schoolId)->orderBy('nama', 'asc')->get();
+        $gtkList = Gtk::where('sekolah_id', $schoolId)->orderBy('nama', 'asc')->get();
 
         return $gtkList->map(function ($gtk) {
-            $k = $gtk->keuangan;
             return [
                 'label' => $gtk->nama ?? 'Tidak tersedia',
                 'details' => [
                     'NIP' => $gtk->nip ?? '-',
-                    'Nama Bank' => $k->nama_bank ?? '-',
-                    'Nomor Rekening' => $k->nomor_rekening ?? '-',
-                    'NPWP' => $k->npwp ?? '-',
+                    'Bank Gaji' => $gtk->nama_bank_gaji ?? '-',
+                    'No. Rekening Gaji' => $gtk->no_rek_gaji ?? '-',
+                    'Bank Tunjangan' => $gtk->nama_bank_tunjangan ?? '-',
+                    'No. Rekening Tunjangan' => $gtk->no_rek_tunjangan ?? '-',
+                    'NPWP' => $gtk->npwp ?? '-',
                 ]
             ];
         })->toArray();

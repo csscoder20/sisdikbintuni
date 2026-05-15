@@ -87,6 +87,7 @@ class SiswaResource extends Resource
                 TextEntry::make('nama_ayah')->label('Nama Ayah')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nama_ibu')->label('Nama Ibu')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nama_wali')->label('Nama Wali')->prefix(': ')->placeholder('-'),
+                TextEntry::make('nohp_ortuwali')->label('No. HP Orang Tua/Wali')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nokk')->label('Nomor KK')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nobpjs')->label('Nomor BPJS')->prefix(': ')->placeholder('-'),
                 TextEntry::make('disabilitas')

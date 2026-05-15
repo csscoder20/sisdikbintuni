@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('perempuan');
             $table->integer('total');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['laporan_siswa_id', 'kategori']);
         });

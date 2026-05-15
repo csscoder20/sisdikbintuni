@@ -14,7 +14,7 @@ class SekolahSeeder extends Seeder
                 return null;
             }
 
-            return round(((float) $value) / 10000000000, 6);
+            return round(((float) $value) / 1000000000000, 6);
         };
         
         $data = [

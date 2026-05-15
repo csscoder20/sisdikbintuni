@@ -28,7 +28,7 @@ class LaporanGedungTable
             ->striped()
             ->columns([
                 TextColumn::make('nama_ruang')
-                    ->label('Nama Ruang/Gedung')
+                    ->label('Nama Sarpras')
                     ->searchable(),
                 TextColumn::make('jumlah_total')
                     ->label('Jumlah')

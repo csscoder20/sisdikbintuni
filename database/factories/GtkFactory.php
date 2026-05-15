@@ -33,8 +33,11 @@ class GtkFactory extends Factory
             'golongan_pegawai' => $this->faker->randomElement(['III/a', 'III/b', 'IV/a']),
             'tmt_pegawai' => $this->faker->date(),
             'tgl_penempatan_sk_terakhir' => $this->faker->date(),
+            'nama_bank_gaji' => $this->faker->randomElement(['Bank Papua', 'BRI', 'BNI', 'Mandiri']),
+            'no_rek_gaji' => $this->faker->bankAccountNumber(),
+            'nama_bank_tunjangan' => $this->faker->randomElement(['Bank Papua', 'BRI', 'BNI', 'Mandiri']),
+            'no_rek_tunjangan' => $this->faker->bankAccountNumber(),
             'npwp' => $this->faker->numerify('##.###.###.#-###.###'),
-            'no_rekening' => $this->faker->bankAccountNumber(),
             'id_sekolah' => \App\Models\Sekolah::factory(),
         ];
     }

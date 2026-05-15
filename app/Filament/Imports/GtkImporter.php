@@ -4,7 +4,6 @@ namespace App\Filament\Imports;
 
 use App\Models\Gtk;
 use App\Models\GtkPendidikan;
-use App\Models\GtkKeuangan;
 use App\Models\Mengajar;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -23,7 +22,15 @@ class GtkImporter extends Importer
         }
 
         try {
-            $stateString = (string) $state;
+            $stateString = trim((string) $state);
+            if (empty($stateString)) return null;
+
+            // Handle Excel serial dates (numbers between 1900 and 2100 in day counts)
+            if (is_numeric($stateString) && (float) $stateString >= 20000 && (float) $stateString <= 60000) {
+                return \Illuminate\Support\Carbon::create(1899, 12, 30)
+                    ->addDays((int) $stateString)
+                    ->format('Y-m-d');
+            }
             
             // Map Indonesian months
             $months = [
@@ -42,12 +49,16 @@ class GtkImporter extends Importer
             }
 
             // Try standard numeric formats like dd/mm/yyyy or dd-mm-yyyy
-            if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/', $normalizedState, $matches)) {
-                $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-                $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-                $year = $matches[3];
-                if (strlen($year) === 2) $year = '20' . $year;
-                return "{$year}-{$month}-{$day}";
+            if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/', $normalizedState, $matches)) {
+                $day = (int) $matches[1];
+                $month = (int) $matches[2];
+                $year = (int) $matches[3];
+                
+                if ($year < 100) $year += 2000;
+                
+                if (checkdate($month, $day, $year)) {
+                    return sprintf('%04d-%02d-%02d', $year, $month, $day);
+                }
             }
 
             return \Illuminate\Support\Carbon::parse($normalizedState)->format('Y-m-d');
@@ -200,10 +211,26 @@ class GtkImporter extends Importer
             ImportColumn::make('gelar_depan')->label('GELAR DEPAN')->fillRecordUsing(fn () => null),
             ImportColumn::make('gelar_belakang')->label('GELAR BELAKANG')->fillRecordUsing(fn () => null),
 
-            // Data Keuangan (Will be saved in afterSave to GtkKeuangan model)
-            ImportColumn::make('nomor_rekening')->label('NO. REKENING')->fillRecordUsing(fn () => null),
-            ImportColumn::make('nama_bank')->label('NAMA BANK')->fillRecordUsing(fn () => null),
-            ImportColumn::make('npwp')->label('NPWP')->fillRecordUsing(fn () => null),
+            ImportColumn::make('nama_bank_gaji')
+                ->label('NAMA BANK GAJI')
+                ->guess(['nama_bank', 'bank_gaji'])
+                ->rules(['nullable', 'max:255']),
+            ImportColumn::make('no_rek_gaji')
+                ->label('NO. REKENING GAJI')
+                ->guess(['nomor_rekening', 'no_rekening', 'rekening_gaji'])
+                ->rules(['nullable', 'max:255'])
+                ->castStateUsing(fn($state) => blank($state) ? null : (string) $state),
+            ImportColumn::make('nama_bank_tunjangan')
+                ->label('NAMA BANK TUNJANGAN')
+                ->rules(['nullable', 'max:255']),
+            ImportColumn::make('no_rek_tunjangan')
+                ->label('NO. REKENING TUNJANGAN')
+                ->rules(['nullable', 'max:255'])
+                ->castStateUsing(fn($state) => blank($state) ? null : (string) $state),
+            ImportColumn::make('npwp')
+                ->label('NPWP')
+                ->rules(['nullable', 'max:255'])
+                ->castStateUsing(fn($state) => blank($state) ? null : (string) $state),
         ];
     }
 
@@ -215,8 +242,12 @@ class GtkImporter extends Importer
             return null;
         }
 
-        $sekolahId = filament()->getTenant()->id;
+        $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
         
+        if (!$sekolahId) {
+            throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
+        }
+
         if (!empty($this->data['nik'])) {
             $record = Gtk::where('sekolah_id', $sekolahId)
                 ->where('nik', $this->data['nik'])
@@ -285,22 +316,6 @@ class GtkImporter extends Importer
             GtkPendidikan::updateOrCreate(
                 ['gtk_id' => $gtk->id],
                 $pendidikanData
-            );
-        }
-
-        // 3. Sync to GtkKeuangan
-        $keuanganFields = ['nomor_rekening', 'nama_bank', 'npwp'];
-        $keuanganData = [];
-        foreach ($keuanganFields as $field) {
-            if (array_key_exists($field, $this->data)) {
-                $keuanganData[$field] = $this->data[$field];
-            }
-        }
-
-        if (!empty($keuanganData)) {
-            GtkKeuangan::updateOrCreate(
-                ['gtk_id' => $gtk->id],
-                $keuanganData
             );
         }
     }

@@ -3,24 +3,19 @@
 namespace App\Filament\Resources\GtkKeuangan\Tables;
 
 use Filament\Actions\ActionGroup;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\ImportAction;
-use App\Filament\Imports\GtkKeuanganImporter;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 
-
-class GtkKeuanganTable
+class GtkKeuangansTable
 {
     public static function configure(Table $table): Table
     {
@@ -28,20 +23,26 @@ class GtkKeuanganTable
             ->recordUrl(null)
             ->recordAction(null)
             ->striped()
-            ->defaultSort('id', 'asc')
             ->columns([
-                TextColumn::make('gtk.nama')
+                TextColumn::make('nama')
                     ->label('Nama GTK')
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('nomor_rekening')
-                    ->label('No. Rekening')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('nama_bank')
-                    ->label('Nama Bank'),
+                TextColumn::make('nama_bank_gaji')
+                    ->label('Bank Gaji')
+                    ->searchable(),
+                TextColumn::make('no_rek_gaji')
+                    ->label('No. Rek. Gaji')
+                    ->searchable(),
+                TextColumn::make('nama_bank_tunjangan')
+                    ->label('Bank Tunjangan')
+                    ->searchable(),
+                TextColumn::make('no_rek_tunjangan')
+                    ->label('No. Rek. Tunjangan')
+                    ->searchable(),
                 TextColumn::make('npwp')
                     ->label('NPWP')
-                    ->sortable(),
+                    ->searchable(),
             ])
             ->filters([
                 TrashedFilter::make(),
@@ -50,24 +51,22 @@ class GtkKeuanganTable
                 ActionGroup::make([
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
-                    ViewAction::make()
-                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
-                        ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
+                        ->modalWidth('lg')
+                        ->modalHeading('Edit Rekening & NPWP GTK')
                         ->icon(Heroicon::OutlinedPencilSquare),
-                    DeleteAction::make()
-                        ->icon(Heroicon::OutlinedTrash),
                 ])
                     ->icon('heroicon-m-ellipsis-vertical')
                     ->color('primary'),
             ])
-            
             ->toolbarActions([
                 BulkActionGroup::make([
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Belum ada data GTK')
+            ->emptyStateDescription('Data GTK akan otomatis terambil dari menu Nominatif GTK.');
     }
 }

@@ -33,7 +33,6 @@ use App\Filament\Pages\KeadaanGtk;
 
 use App\Filament\Pages\KeadaanSiswa;
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
-use App\Filament\Resources\GtkKeuangan\GtkKeuanganResource;
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
 use App\Filament\Resources\Gtks\GtkResource;
 use App\Filament\Resources\KehadiranGtk\KehadiranGtkResource;
@@ -60,7 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->brandName('ADMIN')
             ->databaseNotifications()
-            ->brandLogo(fn () => request()->routeIs('filament.*.auth.*') 
+            ->brandLogo(fn() => request()->routeIs('filament.*.auth.*')
                 ? new \Illuminate\Support\HtmlString('
                     <style>.fi-logo { height: auto !important; margin-bottom: 1rem; }</style>
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;">
@@ -136,7 +135,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 'panels::auth.login.form.after',
-                fn (): string => filament()->hasRegistration()
+                fn(): string => filament()->hasRegistration()
                     ? '<p style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:#6b7280;">
                             Belum punya akun?
                             <a href="' . filament()->getRegistrationUrl() . '"
@@ -148,7 +147,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 'panels::auth.register.form.after',
-                fn (): string => '<p style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:#6b7280;">
+                fn(): string => '<p style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:#6b7280;">
                         Sudah punya akun?
                         <a href="' . filament()->getLoginUrl() . '"
                            style="color:#f97316; font-weight:600; text-decoration:none;">
@@ -156,11 +155,13 @@ class AdminPanelProvider extends PanelProvider
                         </a>
                    </p>'
             )
-            ->renderHook('panels::head.done', fn (): string =>
+            ->renderHook(
+                'panels::head.done',
+                fn(): string =>
                 \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])") .
-                '<link rel="icon" type="image/png" href="/favicon.png?v=20260507b">' .
-                '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=20260507b">' .
-                '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">'
+                    '<link rel="icon" type="image/png" href="/favicon.png?v=20260507b">' .
+                    '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=20260507b">' .
+                    '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">'
             )
             ->renderHook('panels::table.container.after', function () {
                 return <<<'HTML'
@@ -182,12 +183,12 @@ class AdminPanelProvider extends PanelProvider
                 $sekolah = \App\Models\Sekolah::find(session('impersonating_sekolah_id'));
                 $namaSekolah = $sekolah?->nama ?? 'Sekolah';
                 return \Illuminate\Support\Facades\Blade::render('
-                    <div style="background-color: #f97316; color: white; padding: 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                    <div style="background-color: transparent; color: #ea580c; padding: 8px 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 40; box-shadow: none; width: 100%; pointer-events: none;">
                         <span style="display: flex; align-items: center; gap: 8px;">
                             <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            MODE IMPERSONATE: Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
+                            Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
                         </span>
-                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
+                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s; pointer-events: auto;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
                             HENTIKAN & KELUAR
                         </a>
                     </div>
@@ -258,7 +259,7 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->brandName('OPERATOR ' . strtoupper($jenjang))
-            ->brandLogo(fn () => request()->routeIs('filament.*.auth.*') 
+            ->brandLogo(fn() => request()->routeIs('filament.*.auth.*')
                 ? new \Illuminate\Support\HtmlString('
                     <style>.fi-logo { height: auto !important; margin-bottom: 1rem; }</style>
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;">
@@ -305,6 +306,7 @@ class AdminPanelProvider extends PanelProvider
                 'Data Siswa',
                 'Data GTK',
                 'Laporan Bulanan',
+                'Validasi',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->pages([
@@ -312,17 +314,20 @@ class AdminPanelProvider extends PanelProvider
                 SekolahPage::class,
                 KeadaanGtk::class,
                 KeadaanSiswa::class,
+                \App\Filament\Pages\ValidasiData::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
-            ->renderHook('panels::head.done', fn (): string =>
+            ->renderHook(
+                'panels::head.done',
+                fn(): string =>
                 \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])") .
-                '<link rel="icon" type="image/png" href="/favicon.png?v=20260507b">' .
-                '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=20260507b">' .
-                '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">'
+                    '<link rel="icon" type="image/png" href="/favicon.png?v=20260507b">' .
+                    '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=20260507b">' .
+                    '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">'
             )
             ->renderHook('panels::table.container.after', function () {
                 return <<<'HTML'
@@ -344,12 +349,12 @@ class AdminPanelProvider extends PanelProvider
                 $sekolah = \App\Models\Sekolah::find(session('impersonating_sekolah_id'));
                 $namaSekolah = $sekolah?->nama ?? 'Sekolah';
                 return \Illuminate\Support\Facades\Blade::render('
-                    <div style="background-color: #f97316; color: white; padding: 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%;">
+                    <div style="background-color: transparent; color: #ea580c; padding: 8px 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 40; box-shadow: none; width: 100%; pointer-events: none;">
                         <span style="display: flex; align-items: center; gap: 8px;">
                             <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            MODE IMPERSONATE: Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
+                            Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
                         </span>
-                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
+                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s; pointer-events: auto;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
                             HENTIKAN & KELUAR
                         </a>
                     </div>

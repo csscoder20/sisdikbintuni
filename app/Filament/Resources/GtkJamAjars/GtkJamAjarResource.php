@@ -22,9 +22,9 @@ class GtkJamAjarResource extends Resource
 
     protected static ?string $model = \App\Models\Mengajar::class;
 
-    protected static ?string $modelLabel = 'Sebaran Jam Mengajar';
+    protected static ?string $modelLabel = 'Jam Mengajar';
 
-    protected static ?string $pluralModelLabel = 'Sebaran Jam Mengajar';
+    protected static ?string $pluralModelLabel = 'Jam Mengajar';
     protected static ?int $navigationSort = 4;
 
     protected static string | \UnitEnum | null $navigationGroup = 'Data GTK';

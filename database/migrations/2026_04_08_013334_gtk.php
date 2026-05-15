@@ -35,7 +35,13 @@ return new class extends Migration
             $table->date('tmt_pns')->nullable();
             $table->string('pangkat_gol_terakhir')->nullable();
             $table->date('tmt_pangkat_gol_terakhir')->nullable();
+            $table->string('nama_bank_gaji')->nullable();
+            $table->string('no_rek_gaji')->nullable();
+            $table->string('nama_bank_tunjangan')->nullable();
+            $table->string('no_rek_tunjangan')->nullable();
+            $table->string('npwp')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

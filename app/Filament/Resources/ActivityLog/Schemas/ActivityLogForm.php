@@ -3,10 +3,10 @@
 
 namespace App\Filament\Resources\ActivityLog\Schemas;
 
-use Filament\Forms\Components\KeyValueField;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ActivityLogForm
@@ -45,10 +45,10 @@ class ActivityLogForm
                 Section::make('Detail Perubahan')
                     ->columnSpanFull()
                     ->schema([
-                        KeyValueField::make('properties.before')
+                        KeyValue::make('properties.before')
                             ->label('Sebelum')
                             ->visible(fn ($record) => !is_null($record) && !empty($record->properties['before'])),
-                        KeyValueField::make('properties.after')
+                        KeyValue::make('properties.after')
                             ->label('Sesudah')
                             ->visible(fn ($record) => !is_null($record) && !empty($record->properties['after'])),
                     ])->columns(2)

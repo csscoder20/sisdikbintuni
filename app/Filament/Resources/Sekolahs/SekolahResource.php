@@ -6,6 +6,7 @@ use App\Filament\Resources\Sekolahs\Pages\ManageSekolahs;
 use App\Models\Sekolah;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 
 use Filament\Actions\DeleteAction;
@@ -40,9 +41,9 @@ class SekolahResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && 
-               (auth()->user()->hasRole(['super_admin', 'admin_dinas'])) && 
-               filament()->getCurrentPanel()?->getId() === 'dinas';
+        return auth()->check() &&
+            (auth()->user()->hasRole(['super_admin', 'admin_dinas'])) &&
+            filament()->getCurrentPanel()?->getId() === 'dinas';
     }
 
 
@@ -81,12 +82,12 @@ class SekolahResource extends Resource
                 TextColumn::make('jenjang')
                     ->label('Jenjang')
                     ->badge()
-                    ->color(fn (string $state): string => match (strtolower($state)) {
+                    ->color(fn(string $state): string => match (strtolower($state)) {
                         'sma' => 'info',
                         'smk' => 'success',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
+                    ->formatStateUsing(fn(string $state): string => strtoupper($state))
                     ->searchable(),
                 TextColumn::make('kecamatan')
                     ->label('Kecamatan')
@@ -108,18 +109,21 @@ class SekolahResource extends Resource
                     ]),
                 TrashedFilter::make(),
             ])
-            ->actions([
-                Action::make('impersonate')
-                    ->label('Impersonate')
-                    ->icon('heroicon-o-finger-print')
 
-                    ->color('warning')
-                    ->url(fn (Sekolah $record) => route('start-impersonating', $record))
-                    ->openUrlInNewTab(),
+            ->recordActions([
+                ActionGroup::make([
+                    Action::make('impersonate')
+                        ->label('Masuk sebagai Operator')
+                        ->icon('heroicon-o-finger-print')
+                        ->color('warning')
+                        ->url(fn(Sekolah $record) => route('start-impersonating', $record))
+                        ->openUrlInNewTab(),
 
-
-                EditAction::make(),
-                DeleteAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+                    ->label('Aksi')
+                    ->tooltip('Aksi'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

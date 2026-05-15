@@ -21,17 +21,17 @@ class LaporanKeuanganResource extends Resource
     protected static ?string $model = LaporanKeuangan::class;
 
     protected static ?string $modelLabel = 'Keuangan';
-    protected static ?string $pluralModelLabel = 'Laporan Keuangan';
+    protected static ?string $pluralModelLabel = 'Keuangan';
 
     protected static ?string $slug = 'laporan-keuangan';
 
-    protected static ?string $navigationLabel = 'Laporan Keuangan';
+    protected static ?string $navigationLabel = 'Keuangan';
     protected static ?int $navigationSort = 5;
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static ?string $recordTitleAttribute = 'sumber_dana';
+    protected static ?string $recordTitleAttribute = 'keterangan';
 
     protected static bool $isScopedToTenant = false;
 

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('laporan_id')->constrained('laporan')->cascadeOnDelete();
             $table->foreignId('rombel_id')->constrained('rombel')->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['laporan_id', 'rombel_id']);
         });

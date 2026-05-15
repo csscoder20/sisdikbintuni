@@ -128,6 +128,10 @@ class SiswasTable
                     ->label('Nama Wali')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nohp_ortuwali')
+                    ->label('No. HP Orang Tua/Wali')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('disabilitas')
                     ->label('Jenis Disabilitas')
                     ->searchable()

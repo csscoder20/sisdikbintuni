@@ -14,13 +14,17 @@ return new class extends Migration
         Schema::create('kehadiran_gtk', function (Blueprint $table) {
             $table->id();
             $table->foreignId('gtk_id')->constrained('gtk')->cascadeOnDelete();
-            $table->foreignId('laporan_id')->constrained('laporan')->cascadeOnDelete();
+            $table->foreignId('laporan_id')->nullable()->constrained('laporan')->cascadeOnDelete();
+            $table->integer('bulan')->nullable();
+            $table->integer('tahun')->nullable();
+            $table->jsonb('data_harian')->nullable();
             $table->integer('hadir')->default(0);
             $table->integer('sakit')->default(0);
             $table->integer('izin')->default(0);
             $table->integer('alfa')->default(0);
             $table->integer('hari_kerja')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['gtk_id', 'laporan_id']);
         });

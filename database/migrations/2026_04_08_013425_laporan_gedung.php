@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('jumlah_rusak');
             $table->enum('status_kepemilikan', ['milik','pinjam']);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

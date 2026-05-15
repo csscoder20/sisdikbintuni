@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('laporan_id')->constrained('laporan')->cascadeOnDelete();
             $table->enum('jenis_gtk', ['kepala_sekolah','guru','tenaga_administrasi']); 
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['laporan_id','jenis_gtk']);
         });

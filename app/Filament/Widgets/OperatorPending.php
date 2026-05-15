@@ -3,10 +3,10 @@
 namespace App\Filament\Widgets;
 
 use App\Models\OperatorSekolah;
+use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 
 class OperatorPending extends BaseWidget

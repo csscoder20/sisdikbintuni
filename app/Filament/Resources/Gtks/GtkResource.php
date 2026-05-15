@@ -81,12 +81,11 @@ class GtkResource extends Resource
                 TextEntry::make('kabupaten')->label('Kabupaten')->prefix(': ')->placeholder('-'),
                 TextEntry::make('provinsi')->label('Provinsi')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nama_bank_gaji')->label('Bank Gaji')->prefix(': ')->placeholder('-'),
-                TextEntry::make('nomor_rekening_gaji')->label('No. Rekening Gaji')->prefix(': ')->placeholder('-'),
-                TextEntry::make('nama_rekening_gaji')->label('Nama Rekening Gaji')->prefix(': ')->placeholder('-'),
+                TextEntry::make('no_rek_gaji')->label('No. Rekening Gaji')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nama_bank_tunjangan')->label('Bank Tunjangan')->prefix(': ')->placeholder('-'),
-                TextEntry::make('nomor_rekening_tunjangan')
+                TextEntry::make('no_rek_tunjangan')
                 ->label('No. Rekening Tunjangan')->prefix(': ')->placeholder('-'),
-                TextEntry::make('nama_rekening_tunjangan')->label('Nama Rekening Tunjangan')->prefix(': ')->placeholder('-'),
+                TextEntry::make('npwp')->label('NPWP')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
 

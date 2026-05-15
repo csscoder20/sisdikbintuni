@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Siswas\Pages;
 
 use App\Filament\Resources\Siswas\SiswaResource;
-use App\Filament\Actions\ValidateChecklistAction;
 use Filament\Actions\CreateAction;
+use Filament\Actions\Action;
 use App\Filament\Imports\SiswaImporter;
 use App\Filament\Traits\HasImportTemplate;
 use Filament\Resources\Pages\ListRecords;
@@ -46,7 +46,6 @@ class ListSiswas extends ListRecords
                 ->modalSubmitActionLabel('Simpan Data Siswa')
                 ->modalFooterActions([])
                 ->createAnother(false),
-            \App\Filament\Actions\ValidateChecklistAction::make('validateNominatif', 'nominatif_siswa', fn() => \App\Models\Siswa::where('sekolah_id', filament()->getTenant()?->id)->exists())
         ];
     }
 }

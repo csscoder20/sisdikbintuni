@@ -15,23 +15,25 @@ class LaporanKeuangan extends Model
     protected $fillable = [
         'laporan_id',
         'tanggal',
-        'sumber_dana',
-        'penerimaan',
-        'pengeluaran',
-        'saldo',
+        'jenis_transaksi',
         'keterangan',
+        'nominal',
+        'saldo',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
+        'nominal' => 'decimal:2',
+        'saldo' => 'decimal:2',
     ];
 
     protected static function booted(): void
     {
         static::saving(function (self $laporanKeuangan): void {
-            $laporanKeuangan->penerimaan = self::parseNominal($laporanKeuangan->penerimaan);
-            $laporanKeuangan->pengeluaran = self::parseNominal($laporanKeuangan->pengeluaran);
-            $laporanKeuangan->saldo = $laporanKeuangan->penerimaan - $laporanKeuangan->pengeluaran;
+            $laporanKeuangan->nominal = self::parseNominal($laporanKeuangan->nominal);
+            $laporanKeuangan->saldo = $laporanKeuangan->jenis_transaksi === 'kredit'
+                ? $laporanKeuangan->nominal
+                : -$laporanKeuangan->nominal;
         });
     }
 

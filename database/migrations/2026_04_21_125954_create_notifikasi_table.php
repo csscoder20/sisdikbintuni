@@ -19,6 +19,7 @@ return new class extends Migration
             $blueprint->json('target_ids')->nullable();
             $blueprint->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
             $blueprint->timestamps();
+            $blueprint->softDeletes();
         });
     }
 

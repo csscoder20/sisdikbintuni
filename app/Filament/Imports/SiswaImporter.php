@@ -205,6 +205,12 @@ class SiswaImporter extends Importer
                 ->rules(['nullable'])
                 ->castStateUsing(fn($state) => static::textOrNull($state))
                 ->example('Paman Budi'),
+            ImportColumn::make('nohp_ortuwali')
+                ->label('No. HP Orang Tua/Wali')
+                ->guess(['nohp_ortu_wali', 'no_hp_ortu_wali', 'no_hp_orang_tua_wali', 'hp_ortu_wali'])
+                ->rules(['nullable'])
+                ->castStateUsing(fn($state) => static::textOrNull($state, 30))
+                ->example('081234567890'),
             ImportColumn::make('status')
                 ->rules(['nullable'])
                 ->example('Aktif')
@@ -249,10 +255,10 @@ class SiswaImporter extends Importer
                     if ($state === 'ya' || $state === 'yes') return 'beasiswa_pemerintah_pusat';
                     if (str_contains($state, 'pusat')) return 'beasiswa_pemerintah_pusat';
                     if (str_contains($state, 'daerah')) return 'beasiswa_pemerintah_daerah';
-                    if (str_contains($state, 'swasta')) return 'beasisswa_swasta';
+                    if (str_contains($state, 'swasta')) return 'beasiswa_swasta';
                     if (str_contains($state, 'khusus')) return 'beasiswa_khusus';
                     if (str_contains($state, 'afirmasi')) return 'beasiswa_afirmasi';
-                    return in_array($state, ['beasiswa_pemerintah_pusat', 'beasiswa_pemerintah_daerah', 'beasisswa_swasta', 'beasiswa_khusus', 'beasiswa_afirmasi', 'beasiswa_lainnya'], true)
+                    return in_array($state, ['beasiswa_pemerintah_pusat', 'beasiswa_pemerintah_daerah', 'beasiswa_swasta', 'beasiswa_khusus', 'beasiswa_afirmasi', 'beasiswa_lainnya'], true)
                         ? $state
                         : 'beasiswa_lainnya';
                 }),
