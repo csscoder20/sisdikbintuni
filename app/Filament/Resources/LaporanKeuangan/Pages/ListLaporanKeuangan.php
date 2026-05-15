@@ -15,7 +15,6 @@ class ListLaporanKeuangan extends ListRecords
         return [
             CreateAction::make()
                 ->label('Tambah Transaksi')
-                ->icon(\Filament\Support\Icons\Heroicon::OutlinedPlus)
                 ->modalHeading('Tambah Transaksi Baru')
                 ->modalSubmitActionLabel('Simpan Transaksi')
                 ->createAnother(false),

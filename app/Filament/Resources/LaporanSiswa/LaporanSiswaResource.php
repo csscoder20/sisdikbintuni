@@ -31,7 +31,7 @@ class LaporanSiswaResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->check() && !auth()->user()->hasRole('operator');
+        return false;
     }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\GtkJamAjars\Pages;
 
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
-use App\Filament\Actions\ValidateChecklistAction;
 use App\Models\Gtk;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -28,13 +27,6 @@ class ListGtkJamAjars extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            ValidateChecklistAction::make(
-                'validateSebaranJam',
-                'sebaran_jam',
-                fn() => $this->allGtkTeachingHoursFulfilled(),
-                'Sebaran Jam Belum Terpenuhi',
-                'Masih ada GTK dengan kolom Keterangan "Belum Terpenuhi". Pastikan total jam setiap GTK minimal 24 sebelum melakukan validasi.',
-            ),
         ];
     }
 

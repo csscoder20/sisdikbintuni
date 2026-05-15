@@ -34,7 +34,7 @@ class LaporanResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->check() && !auth()->user()->hasRole('operator');
+        return false;
     }
 
     protected static bool $isScopedToTenant = true;

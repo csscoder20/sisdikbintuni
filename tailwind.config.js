@@ -17,7 +17,7 @@ export default {
   safelist: [
     // Ensure dynamic classes are included
     {
-      pattern: /^(grid|gap|p|px|py|m|mx|my|rounded|border|bg|text|font|shadow|flex|items|justify|w|h|max)/,
+      pattern: /^(grid|gap|p|px|py|m|mx|my|rounded|border|bg|text|font|shadow|flex|items|justify|w|h|max|animate)/,
       variants: ['md', 'lg', 'dark', 'hover', 'focus'],
     },
   ],

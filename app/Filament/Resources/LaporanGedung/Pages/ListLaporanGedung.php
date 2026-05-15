@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\LaporanGedung\Pages;
 
 use App\Filament\Resources\LaporanGedung\LaporanGedungResource;
-use App\Filament\Actions\ValidateChecklistAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\Action;
@@ -60,7 +59,6 @@ class ListLaporanGedung extends ListRecords
                 ->modalHeading('Tambah Sarpras')
                 ->modalSubmitActionLabel('Simpan Data')
                 ->createAnother(false),
-            ValidateChecklistAction::make('validateKondisiSarpras', 'kondisi_sarpras', fn() => \App\Models\LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', filament()->getTenant()?->id))->exists()),
         ];
     }
 }

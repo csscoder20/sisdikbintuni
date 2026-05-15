@@ -8,6 +8,7 @@ use App\Models\KehadiranGtk;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Carbon;
+use Filament\Notifications\Notification;
 
 class KehadiranGtkGrid extends Component
 {
@@ -74,13 +75,55 @@ class KehadiranGtkGrid extends Component
         }
     }
 
-    public function updateAttendance($gtkId, $day, $value)
+
+
+    public function toggleHoliday($day)
+    {
+        // Reuse existing setHoliday logic (which was removed). Implement toggle behavior here.
+        $date = Carbon::create($this->tahun, $this->bulan, $day);
+        if ($date->isSunday()) return;
+
+        $dateStr = $date->format('Y-m-d');
+        $laporanId = $this->getActiveLaporanId();
+        $gtks = Gtk::where('sekolah_id', filament()->getTenant()->id)->get();
+
+        // Determine if any record already set as Libur for this day
+        $isCurrentlyHoliday = GtkKehadiran::whereIn('gtk_id', $gtks->pluck('id'))
+            ->where('tgl_presensi', $dateStr)
+            ->where('presensi', 'L')
+            ->exists();
+
+        $newValue = $isCurrentlyHoliday ? null : 'L';
+
+        foreach ($gtks as $gtk) {
+            if ($newValue === null) {
+                GtkKehadiran::where('gtk_id', $gtk->id)
+                    ->where('tgl_presensi', $dateStr)
+                    ->where('presensi', 'L')
+                    ->delete();
+            } else {
+                GtkKehadiran::updateOrCreate(
+                    ['gtk_id' => $gtk->id, 'tgl_presensi' => $dateStr],
+                    ['presensi' => 'L', 'laporan_id' => $laporanId]
+                );
+            }
+            $this->syncMonthlySummary($gtk->id);
+            $this->attendanceData[$gtk->id][$day] = $newValue;
+        }
+
+        Notification::make()
+            ->title($newValue === 'L' ? "Tanggal {$day} ditandai sebagai Libur" : "Libur pada tanggal {$day} dihapus")
+            ->success()
+            ->send();
+    }
+
+            public function updateAttendance($gtkId, $day, $value)
     {
         $value = strtoupper(trim($value));
-        if (!in_array($value, ['H', 'I', 'S', 'A'])) {
+        if (!in_array($value, ['H', 'I', 'S', 'A', 'L'])) {
             $value = null;
         }
-        
+
         $date = Carbon::create($this->tahun, $this->bulan, $day)->format('Y-m-d');
 
         if ($value === null) {
@@ -105,7 +148,6 @@ class KehadiranGtkGrid extends Component
 
         $this->attendanceData[$gtkId][$day] = $value;
     }
-
     protected function getActiveLaporanId(): ?int
     {
         $sekolahId = filament()->getTenant()?->id;
@@ -135,7 +177,8 @@ class KehadiranGtkGrid extends Component
         $izin = $records->where('presensi', 'I')->count();
         $sakit = $records->where('presensi', 'S')->count();
         $alfa = $records->where('presensi', 'A')->count();
-        $hariKerja = $hadir + $izin + $sakit + $alfa;
+        $libur = $records->where('presensi', 'L')->count();
+        $hariKerja = $hadir; // Per user request: only H counts as Hari Kerja
 
         KehadiranGtk::updateOrCreate(
             [

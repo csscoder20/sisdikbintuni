@@ -126,7 +126,7 @@
                     @foreach($rows as $r)
                     <tr>
                         <td style="color:#9ca3af;">{{ ($rows->currentPage() - 1) * $rows->perPage() + $loop->iteration }}</td>
-                        <td style="font-weight:600;color:#374151;">{{ $r['label'] }}</td>
+                        <td style="color:#374151;">{{ $r['label'] }}</td>
                         <td style="color:{{ $r['ok'] ? '#111827' : '#dc2626' }};">{{ $r['value'] ?? '—' }}</td>
                         <td>@if($r['ok'])<span class="bOk">✓</span>@else<span class="bErr">✕</span>@endif</td>
                     </tr>
@@ -158,16 +158,17 @@
         <div style="flex:1;overflow:auto;">
             @if(!$list->isEmpty())
             <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Nama Sarpras</th><th width="8%">Jml</th><th width="8%">Baik</th><th width="8%">Rusak</th><th width="15%">Kepemilikan</th></tr></thead>
+                <thead><tr><th width="5%">No</th><th>Nama Sarpras</th><th width="8%">Jml</th><th width="8%">Baik</th><th width="8%">Rusak</th><th width="15%">Kepemilikan</th><th width="12%">Status</th></tr></thead>
                 <tbody>
                     @foreach($list as $i => $s)
                     <tr>
-                        <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $s->nama_ruang ?? '-' }}</td>
+                        <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
+                        <td>{{ $s->nama_ruang ?? '-' }}</td>
                         <td>{{ $s->jumlah_total ?? 0 }}</td>
                         <td><span class="bOk">{{ $s->jumlah_baik ?? 0 }}</span></td>
                         <td><span class="bErr">{{ $s->jumlah_rusak ?? 0 }}</span></td>
                         <td><span class="bBlue">{{ $s->status_kepemilikan ?? '-' }}</span></td>
+                        <td style="text-align:center;"><span class="bOk">✓</span></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -190,6 +191,11 @@
                 <p style="font-size:.8rem;color:#b91c1c;margin:0;">Belum ada data Mata Pelajaran. Harap tambahkan data mapel terlebih dahulu. <a href="{{ route('filament.'.filament()->getId().'.resources.mapels.index', ['tenant' => filament()->getTenant()]) }}" style="color:#b91c1c;font-weight:600;">Perbaiki Sekarang!</a></p>
             </div>
         @else
+            @if(!$statuses[3])
+                <div class="alert-err" style="margin-bottom:1rem;">
+                    <p style="font-size:.8rem;color:#b91c1c;margin:0;"><strong>Validasi Gagal:</strong> Belum ada guru yang ditugaskan ke mata pelajaran manapun. Silakan isi sebaran jam mengajar. <a href="{{ route('filament.'.filament()->getId().'.resources.sebaran-jam-ajar.index', ['tenant' => filament()->getTenant()]) }}" style="color:#b91c1c;font-weight:600;">Perbaiki Sekarang!</a></p>
+                </div>
+            @endif
             <div class="stat">
                 <div class="stat-num">{{ $total }}</div>
                 <div><div class="stat-lbl">Mata Pelajaran</div><div class="stat-sub">Total: {{ $total }} mapel</div></div>
@@ -198,15 +204,22 @@
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
             <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Nama Mapel</th><th width="15%">Kode</th><th width="15%">Jenjang</th><th width="15%">JJP</th></tr></thead>
+                <thead><tr><th width="5%">No</th><th>Nama Mapel</th><th width="15%">Kode</th><th width="15%">Jenjang</th><th width="15%">JJP</th><th width="12%">Status</th></tr></thead>
                 <tbody>
                     @foreach($list as $i => $m)
                     <tr>
-                        <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $m->nama_mapel }}</td>
+                        <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
+                        <td>{{ $m->nama_mapel }}</td>
                         <td>{{ $m->kode_mapel ?? '-' }}</td>
                         <td>{{ $m->jenjang ?? '-' }}</td>
                         <td>{{ $m->jjp ?? '-' }}</td>
+                        <td style="text-align:center;">
+                            @if($m->mengajars_exists)
+                                <span class="bOk">✓</span>
+                            @else
+                                <span class="bErr">✕</span>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -250,7 +263,7 @@
                     @foreach($list as $i => $r)
                     <tr>
                         <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $r->nama }}</td>
+                        <td>{{ $r->nama }}</td>
                         <td>{{ $r->tingkat ?? '-' }}</td>
                         <td>{{ $r->siswa_count }}</td>
                         <td>@if($r->siswa_count > 0)<span class="bOk">✓</span>@else<span class="bErr">✕</span>@endif</td>
@@ -284,16 +297,17 @@
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
             <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Tanggal</th><th width="15%">Jenis</th><th>Keterangan</th><th width="15%">Nominal</th><th width="15%">Saldo</th></tr></thead>
+                <thead><tr><th width="5%">No</th><th>Tanggal</th><th width="15%">Jenis</th><th>Keterangan</th><th width="15%">Nominal</th><th width="15%">Saldo</th><th width="12%">Status</th></tr></thead>
                 <tbody>
                     @foreach($list as $i => $k)
                     <tr>
-                        <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $k->tanggal ? $k->tanggal->format('d M Y') : '-' }}</td>
+                        <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
+                        <td>{{ $k->tanggal ? $k->tanggal->format('d M Y') : '-' }}</td>
                         <td style="font-weight:600;color:{{ $k->jenis_transaksi === 'kredit' ? '#15803d' : '#dc2626' }};">{{ ucfirst($k->jenis_transaksi ?? '-') }}</td>
                         <td>{{ $k->keterangan ?? '-' }}</td>
-                        <td style="font-weight:600;">Rp {{ number_format($k->nominal ?? 0, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($k->nominal ?? 0, 0, ',', '.') }}</td>
                         <td style="font-weight:700;color:{{ ($k->saldo ?? 0) < 0 ? '#dc2626' : '#15803d' }};">Rp {{ number_format($k->saldo ?? 0, 0, ',', '.') }}</td>
+                        <td style="text-align:center;"><span class="bOk">✓</span></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -326,17 +340,62 @@
         @endif
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
-            <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Nama Siswa</th><th width="13%">NISN</th><th width="5%">JK</th><th width="10%">Agama</th><th>Rombel</th></tr></thead>
+            <table class="tbl" style="min-width: 2500px;">
+                <thead>
+                    <tr>
+                        <th width="40px">No</th>
+                        <th>Nama Siswa</th>
+                        <th>NISN</th>
+                        <th>No. KK</th>
+                        <th>NIK</th>
+                        <th>No. BPJS</th>
+                        <th>Tempat Lahir</th>
+                        <th>Tgl Lahir</th>
+                        <th>JK</th>
+                        <th>Agama</th>
+                        <th>Alamat</th>
+                        <th>Desa/Kel</th>
+                        <th>Kecamatan</th>
+                        <th>Kabupaten</th>
+                        <th>Provinsi</th>
+                        <th>Asal</th>
+                        <th>Ayah</th>
+                        <th>Ibu</th>
+                        <th>Wali</th>
+                        <th>HP Ortu</th>
+                        <th>Disabilitas</th>
+                        <th>Beasiswa</th>
+                        <th>Status Siswa</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @foreach($list as $i => $s)
                     <tr>
-                        <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $s->nama }}</td>
+                        <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
+                        <td>{{ $s->nama }}</td>
                         <td>{{ $s->nisn ?? '-' }}</td>
+                        <td>{{ $s->nokk ?? '-' }}</td>
+                        <td>{{ $s->nik ?? '-' }}</td>
+                        <td>{{ $s->nobpjs ?? '-' }}</td>
+                        <td>{{ $s->tempat_lahir ?? '-' }}</td>
+                        <td>{{ $s->tanggal_lahir ?? '-' }}</td>
                         <td>{{ $s->jenis_kelamin ? (stripos($s->jenis_kelamin,'laki')!==false?'L':'P') : '-' }}</td>
                         <td>{{ $s->agama ?? '-' }}</td>
-                        <td>{{ $s->rombel->pluck('nama')->implode(', ') ?: '-' }}</td>
+                        <td>{{ $s->alamat ?? '-' }}</td>
+                        <td>{{ $s->desa ?? '-' }}</td>
+                        <td>{{ $s->kecamatan ?? '-' }}</td>
+                        <td>{{ $s->kabupaten ?? '-' }}</td>
+                        <td>{{ $s->provinsi ?? '-' }}</td>
+                        <td>{{ $s->daerah_asal ?? '-' }}</td>
+                        <td>{{ $s->nama_ayah ?? '-' }}</td>
+                        <td>{{ $s->nama_ibu ?? '-' }}</td>
+                        <td>{{ $s->nama_wali ?? '-' }}</td>
+                        <td>{{ $s->nohp_ortuwali ?? '-' }}</td>
+                        <td>{{ $s->disabilitas ?? '-' }}</td>
+                        <td>{{ $s->beasiswa ?? '-' }}</td>
+                        <td>{{ $s->status ?? '-' }}</td>
+                        <td style="text-align:center;">@if($this->isSiswaComplete($s))<span class="bOk">✓</span>@else<span class="bErr">✕</span>@endif</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -369,16 +428,60 @@
         @endif
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
-            <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Nama GTK</th><th width="15%">NIP</th><th width="15%">Jenis GTK</th><th width="18%">Status</th></tr></thead>
+            <table class="tbl" style="min-width: 2500px;">
+                <thead>
+                    <tr>
+                        <th width="40px">No</th>
+                        <th>Nama GTK</th>
+                        <th>NIP</th>
+                        <th>NIK</th>
+                        <th>Nokarpeg</th>
+                        <th>NUPTK</th>
+                        <th>Tempat Lahir</th>
+                        <th>Tgl Lahir</th>
+                        <th>JK</th>
+                        <th>Agama</th>
+                        <th>Alamat</th>
+                        <th>Desa/Kel</th>
+                        <th>Kecamatan</th>
+                        <th>Kabupaten</th>
+                        <th>Provinsi</th>
+                        <th>Pendidikan</th>
+                        <th>Asal</th>
+                        <th>Jenis GTK</th>
+                        <th>Status Kepegawaian</th>
+                        <th>TMT PNS</th>
+                        <th>Pangkat/Gol</th>
+                        <th>TMT Pangkat</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @foreach($list as $i => $g)
                     <tr>
-                        <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $g->nama }}</td>
+                        <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
+                        <td>{{ $g->nama }}</td>
                         <td>{{ $g->nip ?? '-' }}</td>
+                        <td>{{ $g->nik ?? '-' }}</td>
+                        <td>{{ $g->nokarpeg ?? '-' }}</td>
+                        <td>{{ $g->nuptk ?? '-' }}</td>
+                        <td>{{ $g->tempat_lahir ?? '-' }}</td>
+                        <td>{{ $g->tanggal_lahir ?? '-' }}</td>
+                        <td>{{ $g->jenis_kelamin ? (stripos($g->jenis_kelamin,'laki')!==false?'L':'P') : '-' }}</td>
+                        <td>{{ $g->agama ?? '-' }}</td>
+                        <td>{{ $g->alamat ?? '-' }}</td>
+                        <td>{{ $g->desa ?? '-' }}</td>
+                        <td>{{ $g->kecamatan ?? '-' }}</td>
+                        <td>{{ $g->kabupaten ?? '-' }}</td>
+                        <td>{{ $g->provinsi ?? '-' }}</td>
+                        <td>{{ $g->pendidikan_terakhir ?? '-' }}</td>
+                        <td>{{ $g->daerah_asal ?? '-' }}</td>
                         <td><span class="bBlue">{{ $g->jenis_gtk ?? '-' }}</span></td>
                         <td>{{ $g->status_kepegawaian ?? '-' }}</td>
+                        <td>{{ $g->tmt_pns ?? '-' }}</td>
+                        <td>{{ $g->pangkat_gol_terakhir ?? '-' }}</td>
+                        <td>{{ $g->tmt_pangkat_gol_terakhir ?? '-' }}</td>
+                        <td style="text-align:center;">@if($this->isGtkComplete($g))<span class="bOk">✓</span>@else<span class="bErr">✕</span>@endif</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -415,16 +518,38 @@
         @endif
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
-            <table class="tbl">
+            <table class="tbl" style="min-width: 4000px;">
                 <thead>
                     <tr>
-                        <th width="5%">No</th>
-                        <th>Nama GTK</th>
-                        <th>Tamat S1</th>
-                        <th>Jurusan S1</th>
-                        <th>PT S1</th>
-                        <th>Gelar Akademik</th>
-                        <th width="8%" style="text-align:center;">Status</th>
+                        <th width="40px" rowspan="2">No</th>
+                        <th rowspan="2">Nama GTK</th>
+                        <th colspan="1">SD</th>
+                        <th colspan="1">SMP</th>
+                        <th colspan="1">SMA</th>
+                        <th colspan="3">D1</th>
+                        <th colspan="3">D2</th>
+                        <th colspan="3">D3</th>
+                        <th colspan="3">S1</th>
+                        <th colspan="3">S2</th>
+                        <th colspan="3">S3</th>
+                        <th colspan="3">Akta IV</th>
+                        <th colspan="2">Gelar</th>
+                        <th width="80px" rowspan="2" style="text-align:center;">Status</th>
+                    </tr>
+                    <tr>
+                        <th>Thn Tamat</th> {{-- SD --}}
+                        <th>Thn Tamat</th> {{-- SMP --}}
+                        <th>Thn Tamat</th> {{-- SMA --}}
+                        
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- D1 --}}
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- D2 --}}
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- D3 --}}
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- S1 --}}
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- S2 --}}
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- S3 --}}
+                        <th>Thn Tamat</th><th>Jurusan</th><th>PT</th> {{-- Akta IV --}}
+                        
+                        <th>Depan</th><th>Belakang</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -432,11 +557,31 @@
                     @php $pend = $g->pendidikan->first(); @endphp
                     <tr>
                         <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
-                        <td style="font-weight:600;">{{ $g->nama }}</td>
-                        <td>{{ $pend->thn_tamat_s1 ?? '-' }}</td>
-                        <td>{{ $pend->jurusan_s1 ?? '-' }}</td>
-                        <td>{{ $pend->perguruan_tinggi_s1 ?? '-' }}</td>
-                        <td>{{ $pend->gelar_belakang ?? '-' }}</td>
+                        <td>{{ $g->nama }}</td>
+                        
+                        {{-- Dasar --}}
+                        <td>{{ $pend->thn_tamat_sd ?? '-' }}</td>
+                        <td>{{ $pend->thn_tamat_smp ?? '-' }}</td>
+                        <td>{{ $pend->thn_tamat_sma ?? '-' }}</td>
+
+                        {{-- D1 --}}
+                        <td>{{ $pend->thn_tamat_d1 ?? '-' }}</td><td>{{ $pend->jurusan_d1 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_d1 ?? '-' }}</td>
+                        {{-- D2 --}}
+                        <td>{{ $pend->thn_tamat_d2 ?? '-' }}</td><td>{{ $pend->jurusan_d2 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_d2 ?? '-' }}</td>
+                        {{-- D3 --}}
+                        <td>{{ $pend->thn_tamat_d3 ?? '-' }}</td><td>{{ $pend->jurusan_d3 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_d3 ?? '-' }}</td>
+                        {{-- S1 --}}
+                        <td>{{ $pend->thn_tamat_s1 ?? '-' }}</td><td>{{ $pend->jurusan_s1 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_s1 ?? '-' }}</td>
+                        {{-- S2 --}}
+                        <td>{{ $pend->thn_tamat_s2 ?? '-' }}</td><td>{{ $pend->jurusan_s2 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_s2 ?? '-' }}</td>
+                        {{-- S3 --}}
+                        <td>{{ $pend->thn_tamat_s3 ?? '-' }}</td><td>{{ $pend->jurusan_s3 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_s3 ?? '-' }}</td>
+                        {{-- Akta --}}
+                        <td>{{ $pend->thn_tamat_akta4 ?? '-' }}</td><td>{{ $pend->jurusan_akta4 ?? '-' }}</td><td>{{ $pend->perguruan_tinggi_akta4 ?? '-' }}</td>
+                        
+                        {{-- Gelar --}}
+                        <td>{{ $pend->gelar_depan ?? '-' }}</td><td>{{ $pend->gelar_belakang ?? '-' }}</td>
+
                         <td style="text-align:center;">@if(in_array($g->nama, $tanpaPendidikan))<span class="bErr">✕</span>@else<span class="bOk">✓</span>@endif</td>
                     </tr>
                     @endforeach
@@ -491,7 +636,7 @@
                     @foreach($list as $g)
                     <tr>
                         <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
-                        <td style="font-weight:600;">{{ $g->nama }}</td>
+                        <td>{{ $g->nama }}</td>
                         <td>{{ $g->nama_bank_gaji ?? '-' }}</td>
                         <td>{{ $g->no_rek_gaji ?? '-' }}</td>
                         <td>{{ $g->nama_bank_tunjangan ?? '-' }}</td>
@@ -540,7 +685,7 @@
                     @foreach($list as $i => $m)
                     <tr>
                         <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $m->nama }}</td>
+                        <td>{{ $m->nama }}</td>
                         <td><span class="bBlue">{{ $m->jenis_gtk ?? '-' }}</span></td>
                         <td>{{ $m->jumlah_entri }}</td>
                         <td>{{ number_format($m->total_jam ?? 0, 0, ',', '.') }} jam</td>
@@ -565,7 +710,7 @@
         @endphp
         @if($total === 0)
             <div class="alert-err">
-                <p style="font-size:.8rem;color:#b91c1c;margin:0;">Belum ada data Kehadiran GTK. Harap isi rekap kehadiran terlebih dahulu. <a href="{{ route('filament.'.filament()->getId().'.resources.kehadiran-gtk.index', ['tenant' => filament()->getTenant()]) }}" style="color:#b91c1c;font-weight:600;">Ke Menu Kehadiran GTK</a></p>
+                <p style="font-size:.8rem;color:#b91c1c;margin:0;">Belum ada data Kehadiran GTK. Harap isi rekap kehadiran terlebih dahulu. <a href="{{ route('filament.'.filament()->getId().'.resources.kehadiran-gtk.index', ['tenant' => filament()->getTenant()]) }}" style="color:#b91c1c;font-weight:600;">Perbaiki Sekarang!</a></p>
             </div>
         @else
             @if($allValid)
@@ -583,7 +728,7 @@
                 @if(!empty($gtkTanpaKehadiran))
                 <div style="width:2px;background:#93c5fd;margin:0 10px;align-self:stretch;"></div>
                 <div style="flex:1;">
-                    <p style="font-size:.8rem;color:#dc2626;margin:0;font-weight:500;">Terdapat <strong>{{ count($gtkTanpaKehadiran) }} GTK</strong> yang belum memiliki rekap kehadiran. Harap lengkapi data kehadiran terlebih dahulu. <a href="{{ route('filament.'.filament()->getId().'.resources.kehadiran-gtk.index', ['tenant' => filament()->getTenant()]) }}" style="color:#dc2626;font-weight:700;">Ke Menu Kehadiran GTK</a></p>
+                    <p style="font-size:.8rem;color:#dc2626;margin:0;font-weight:500;">Terdapat <strong>{{ count($gtkTanpaKehadiran) }} GTK</strong> yang belum memiliki rekap kehadiran. Harap lengkapi data kehadiran terlebih dahulu. <a href="{{ route('filament.'.filament()->getId().'.resources.kehadiran-gtk.index', ['tenant' => filament()->getTenant()]) }}" style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
                 </div>
                 @endif
             </div>
@@ -591,16 +736,23 @@
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
             <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Nama GTK</th><th width="12%">Hari Kerja</th><th width="10%">Sakit</th><th width="10%">Izin</th><th width="10%">Alpa</th></tr></thead>
+                <thead><tr><th width="5%">No</th><th>Nama GTK</th><th width="12%">Hari Kerja</th><th width="10%">Sakit</th><th width="10%">Izin</th><th width="10%">Alpa</th><th width="10%" style="text-align:center;">Status</th></tr></thead>
                 <tbody>
                     @foreach($list as $i => $k)
                     <tr>
                         <td>{{ $i+1 }}</td>
-                        <td style="font-weight:600;">{{ $k->gtk->nama ?? '-' }}</td>
+                        <td>{{ $k->gtk->nama ?? '-' }}</td>
                         <td>{{ $k->hari_kerja ?? 0 }}</td>
                         <td>{{ $k->sakit ?? 0 }}</td>
                         <td>{{ $k->izin ?? 0 }}</td>
                         <td>{{ $k->alfa ?? 0 }}</td>
+                        <td style="text-align:center;">
+                            @if($this->isGtkAttendanceComplete($k->gtk))
+                                <span class="bOk">✓</span>
+                            @else
+                                <span class="bErr">✕</span>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

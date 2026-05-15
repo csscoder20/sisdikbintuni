@@ -165,9 +165,9 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook('panels::table.container.after', function () {
                 return <<<'HTML'
-                    <div wire:loading.delay.longer class="fi-ta-loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/5 backdrop-blur-[1px]">
+                    <div wire:loading.delay class="fi-ta-loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/10 backdrop-blur-[1px]">
                         <div class="p-3 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 flex items-center gap-3">
-                            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-5 w-5" style="color: rgb(var(--primary-600))" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -331,9 +331,9 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook('panels::table.container.after', function () {
                 return <<<'HTML'
-                    <div wire:loading.delay.longer class="fi-ta-loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/5 backdrop-blur-[1px]">
+                    <div wire:loading.delay class="fi-ta-loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/10 backdrop-blur-[1px]">
                         <div class="p-3 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 flex items-center gap-3">
-                            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-5 w-5" style="color: rgb(var(--primary-600))" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>

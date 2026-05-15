@@ -40,6 +40,7 @@ class KeadaanGtk extends Page
 
     protected static ?string $navigationLabel = 'Keadaan GTK';
     protected static ?int $navigationSort = 3;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $modelLabel = 'Keadaan GTK';
     protected static ?string $pluralModelLabel = 'Keadaan GTK';

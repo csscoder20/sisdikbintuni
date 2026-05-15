@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\WithPagination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -121,6 +122,42 @@ class ValidasiData extends Page
         ];
     }
 
+    public function getExpectedWorkingDays(): array
+    {
+        $days = [];
+        $today = now();
+        $start = now()->startOfMonth();
+        $end = $today; // Check up to today
+
+        for ($date = $start; $date->lte($end); $date->addDay()) {
+            if (!$date->isSunday()) {
+                $days[] = $date->copy();
+            }
+        }
+        return $days;
+    }
+
+    public function isGtkAttendanceComplete(Gtk $g): bool
+    {
+        $expectedDays = $this->getExpectedWorkingDays();
+        if (empty($expectedDays)) return true;
+
+        $filledDates = \App\Models\GtkKehadiran::where('gtk_id', $g->id)
+            ->whereBetween('tgl_presensi', [now()->startOfMonth(), now()])
+            ->whereIn('presensi', ['H', 'I', 'S', 'A', 'L'])
+            ->pluck('tgl_presensi')
+            ->map(fn($d) => $d->format('Y-m-d'))
+            ->toArray();
+
+        foreach ($expectedDays as $date) {
+            if (!in_array($date->format('Y-m-d'), $filledDates)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /* ------------------------------------------------------------------ */
     /* Step validators                                                      */
     /* ------------------------------------------------------------------ */
@@ -177,14 +214,12 @@ class ValidasiData extends Page
     protected function checkPendidikanGtk(?int $id): bool
     {
         if (!$id) return false;
-        // True if ALL Gtk have Pendidikan record (no empty/null required fields)
         return Gtk::where('sekolah_id', $id)->exists() && !count($this->getGtkTanpaPendidikan());
     }
 
     protected function checkRekeningGtk(?int $id): bool
     {
         if (!$id) return false;
-        // True if ALL Gtk have Rekening record (no empty/null rekening)
         return Gtk::where('sekolah_id', $id)->exists() && !count($this->getGtkTanpaRekening());
     }
 
@@ -197,7 +232,17 @@ class ValidasiData extends Page
     protected function checkStep7(?int $id): bool
     {
         if (!$id) return false;
-        return KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', $id))->exists() && empty($this->getGtkWithoutKehadiran());
+        
+        $gtks = Gtk::where('sekolah_id', $id)->get();
+        if ($gtks->isEmpty()) return false;
+
+        foreach ($gtks as $g) {
+            if (!$this->isGtkAttendanceComplete($g)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /* ------------------------------------------------------------------ */
@@ -336,7 +381,6 @@ class ValidasiData extends Page
         return Siswa::whereHas('rombel', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))->count();
     }
 
-    /** Rombel yang siswa_count = 0 */
     public function getEmptyRombels(): array
     {
         return Rombel::where('sekolah_id', $this->getSchoolId())
@@ -359,7 +403,6 @@ class ValidasiData extends Page
         return Siswa::where('sekolah_id', $this->getSchoolId())->count();
     }
 
-    /** Siswa dengan field penting yang kosong */
     protected array $requiredSiswaFields = [
         'nisn'          => 'NISN',
         'nik'           => 'NIK',
@@ -386,6 +429,14 @@ class ValidasiData extends Page
             }
         }
         return $incomplete;
+    }
+
+    public function isSiswaComplete(Siswa $s): bool
+    {
+        foreach (array_keys($this->requiredSiswaFields) as $field) {
+            if (empty($s->$field)) return false;
+        }
+        return true;
     }
 
     public function getGtkList(): LengthAwarePaginator
@@ -415,7 +466,6 @@ class ValidasiData extends Page
         return Gtk::where('sekolah_id', $this->getSchoolId())->count();
     }
 
-    /** GTK dengan field penting yang kosong */
     protected array $requiredGtkFields = [
         'nik'                  => 'NIK',
         'tempat_lahir'         => 'Tempat Lahir',
@@ -446,6 +496,14 @@ class ValidasiData extends Page
         return $incomplete;
     }
 
+    public function isGtkComplete(Gtk $g): bool
+    {
+        foreach (array_keys($this->requiredGtkFields) as $field) {
+            if (empty($g->$field)) return false;
+        }
+        return true;
+    }
+
     public function getSebaranList(): LengthAwarePaginator
     {
         $id = $this->getSchoolId();
@@ -463,7 +521,6 @@ class ValidasiData extends Page
         return Gtk::where('sekolah_id', $id)->whereHas('mengajar')->count();
     }
 
-    /** GTK yang total jam mengajar < 24 */
     public function getGtkBelowMinJam(): array
     {
         $id = $this->getSchoolId();
@@ -477,7 +534,6 @@ class ValidasiData extends Page
             ->toArray();
     }
 
-    /** GTK (guru) yang belum punya entry mengajar lengkap (rombel/mapel null) */
     public function getGtkWithEmptyMengajar(): array
     {
         $id = $this->getSchoolId();
@@ -501,23 +557,31 @@ class ValidasiData extends Page
         return KehadiranGtk::whereHas('gtk', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))->count();
     }
 
-    /** GTK yang belum punya rekap kehadiran */
     public function getGtkWithoutKehadiran(): array
     {
         $id = $this->getSchoolId();
-        return Gtk::where('sekolah_id', $id)
-            ->whereDoesntHave('kehadiran')
-            ->pluck('nama')
-            ->toArray();
+        $gtks = Gtk::where('sekolah_id', $id)->get();
+        $incomplete = [];
+
+        foreach ($gtks as $g) {
+            if (!$this->isGtkAttendanceComplete($g)) {
+                $incomplete[] = $g->nama;
+            }
+        }
+        return $incomplete;
     }
 
     public function getMapelList(): LengthAwarePaginator
     {
-        $sekolah = Sekolah::find($this->getSchoolId());
+        $id = $this->getSchoolId();
+        $sekolah = Sekolah::find($id);
         $query = Mapel::query();
         if ($sekolah && $sekolah->jenjang) {
             $query->where('jenjang', $sekolah->jenjang);
         }
+        $query->withExists(['mengajars' => function ($q) use ($id) {
+            $q->whereHas('gtk', fn ($sq) => $sq->where('sekolah_id', $id));
+        }]);
         return $query->orderBy('id', 'asc')->paginate(10);
     }
 
@@ -550,9 +614,7 @@ class ValidasiData extends Page
         $id = $this->getSchoolId();
         return Gtk::where('sekolah_id', $id)
             ->where(function ($query) {
-                // GTK dianggap tidak valid jika tidak punya data pendidikan sama sekali
                 $query->whereDoesntHave('pendidikan')
-                    // ATAU punya data pendidikan tapi ada kolom penting yang kosong/strip
                     ->orWhereHas('pendidikan', function ($q) {
                         $q->where(function ($sq) {
                             $fields = ['thn_tamat_s1', 'jurusan_s1', 'perguruan_tinggi_s1'];
@@ -579,6 +641,16 @@ class ValidasiData extends Page
             })
             ->pluck('nama')
             ->toArray();
+    }
+
+    public function getGtkTanpaPendidikanDetailed(): array
+    {
+        return $this->getGtkTanpaPendidikan();
+    }
+
+    public function getGtkTanpaRekeningDetailed(): array
+    {
+        return $this->getGtkTanpaRekening();
     }
 
     public function getCurrentPeriod(): string

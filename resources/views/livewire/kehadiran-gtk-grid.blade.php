@@ -1,13 +1,6 @@
-<div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;">
-    <div wire:loading.delay.longer class="fi-ta-loading-overlay absolute inset-0 z-[100] flex items-center justify-center bg-gray-900/5 backdrop-blur-[1px] rounded-xl">
-        <div class="p-3 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 flex items-center gap-3">
-            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Memuat data...</span>
-        </div>
-    </div>
+<div x-data="{}" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         .grid-header {
             display: flex;
@@ -95,6 +88,9 @@
             background-color: #f9fafb !important;
             text-align: center !important;
             border-right: 1px solid #e5e7eb !important;
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #374151 !important;
         }
         .sticky-name {
             position: sticky;
@@ -106,6 +102,7 @@
             padding-left: 12px !important;
             border-right: 2px solid #e5e7eb !important;
             box-shadow: 4px 0 4px -2px rgba(0,0,0,0.05);
+            font-size: 0.875rem;
         }
         .att-table td.sticky-no {
             background-color: white !important;
@@ -212,11 +209,16 @@
             color: transparent;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath fill-rule='evenodd' d='M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z' clip-rule='evenodd' /%3E%3C/svg%3E");
         }
+        .att-input.status-l:not(:focus) {
+            color: transparent;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/%3E%3Cpath d='M15.5 14h-7c-.28 0-.5-.22-.5-.5v-3c0-.28.22-.5.5-.5h7c.28 0 .5.22.5.5v3c0 .28-.22.5-.5.5z'/%3E%3C/svg%3E");
+        }
 
         .color-h { color: #16a34a; font-weight: 800; }
         .color-i { color: #2563eb; font-weight: 800; }
         .color-s { color: #d97706; font-weight: 800; }
         .color-a { color: #dc2626; font-weight: 800; }
+        .color-l { color: #6b7280; font-weight: 800; }
 
         .icon-placeholder {
             width: 32px;
@@ -227,6 +229,28 @@
             align-items: center;
             justify-content: center;
             color: #0369a1;
+        }
+
+        .btn-set-holiday {
+            margin-top: 4px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 0;
+            border-radius: 4px;
+            color: #9ca3af;
+            transition: all 0.2s;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-set-holiday:hover {
+            background: rgba(0,0,0,0.05);
+            color: #6b7280;
+        }
+        .btn-set-holiday:active {
+            transform: scale(0.9);
         }
 
         /* Custom Pagination Styling */
@@ -280,7 +304,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
             </div>
             <div class="grid-title">
-                <h2>Kehadiran Harian GTK</h2>
+                <h2>Presensi Harian GTK</h2>
                 <p>Rekap absensi bulanan tenaga pendidik dan kependidikan</p>
             </div>
         </div>
@@ -324,17 +348,60 @@
                 </tr>
                 <tr>
                     @foreach($days as $d)
-                        <th class="day-header {{ $d['is_sunday'] ? 'sunday-bg' : '' }}">
-                            {{ $d['day'] }}
+                        <th class="day-header {{ $d['is_sunday'] ? 'sunday-bg' : '' }}" style="padding: 10px 4px;">
+                            <div style="font-size: 11px; font-weight: 700;">
+                                {{ $d['day'] }}
+                            </div>
+                            
+                            @if(!$d['is_sunday'])
+                                @php
+                                    $isHoliday = collect($attendanceData)->pluck($d['day'])->contains('L');
+                                @endphp
+                                <button 
+                                    type="button"
+                                    x-on:click="
+                                        Swal.fire({
+                                            title: '{{ $isHoliday ? 'Hapus Libur Massal?' : 'Tandai Libur Massal?' }}',
+                                            text: '{{ $isHoliday ? 'Status Libur (L) akan dihapus dari semua GTK pada tanggal ini.' : 'Semua GTK akan ditandai Libur (L) pada tanggal ini.' }}',
+                                            icon: '{{ $isHoliday ? 'warning' : 'question' }}',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '{{ $isHoliday ? '#ef4444' : '#fb923c' }}',
+                                            cancelButtonColor: '#94a3b8',
+                                            confirmButtonText: '{{ $isHoliday ? 'Ya, Hapus Libur' : 'Ya, Tandai Libur' }}',
+                                            cancelButtonText: 'Batal',
+                                            reverseButtons: true
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                $wire.toggleHoliday({{ $d['day'] }})
+                                            }
+                                        })
+                                    "
+                                    class="btn-set-holiday"
+                                    title="{{ $isHoliday ? 'Hapus Libur Massal' : 'Set Libur Massal' }}"
+                                    style="{{ $isHoliday ? 'color: #ef4444;' : '' }}"
+                                >
+                                    @if($isHoliday)
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 12px; height: 12px;">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd" />
+                                        </svg>
+                                    @else
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 12px; height: 12px;">
+                                            <path d="M5.25 3A2.25 2.25 0 003 5.25v9.5A2.25 2.25 0 005.25 17h9.5A2.25 2.25 0 0017 14.75v-9.5A2.25 2.25 0 0014.75 3h-9.5zM12 11h2.25a.75.75 0 010 1.5H12V14.25a.75.75 0 01-1.5 0V12H8.25a.75.75 0 010-1.5H10.5V8.75a.75.75 0 011.5 0V11z" />
+                                        </svg>
+                                    @endif
+                                </button>
+                            @else
+                                <div style="height: 18px;"></div>
+                            @endif
                         </th>
                     @endforeach
                 </tr>
             </thead>
             <tbody>
                 @forelse($gtks as $index => $gtk)
-                    <tr>
-                        <td class="sticky-no text-center" style="color: #9ca3af;">{{ $gtks->firstItem() + $index }}</td>
-                        <td class="sticky-name" style="font-weight: 600; color: #374151;">{{ $gtk->nama }}</td>
+                    <tr wire:key="gtk-row-{{ $gtk->id }}">
+                        <td class="sticky-no text-center">{{ $gtks->firstItem() + $index }}</td>
+                        <td class="sticky-name" style="font-weight: 400; color: #374151;">{{ $gtk->nama }}</td>
                         @php $rowTotal = 0; @endphp
                         @foreach($days as $d)
                             @php 
@@ -346,6 +413,7 @@
                                     'I' => 'status-i color-i',
                                     'S' => 'status-s color-s',
                                     'A' => 'status-a color-a',
+                                    'L' => 'status-l color-l',
                                     default => ''
                                 };
                             @endphp
@@ -355,8 +423,9 @@
                                     value="{{ $val }}"
                                     class="att-input {{ $statusClass }}"
                                     maxlength="1"
+                                    wire:key="att-{{ $gtk->id }}-{{ $d['day'] }}"
                                     @if($d['is_sunday']) disabled placeholder=" " @endif
-                                    oninput="this.value = this.value.toUpperCase().replace(/[^HISA]/g, '')"
+                                    oninput="this.value = this.value.toUpperCase().replace(/[^HISAL]/g, '')"
                                     onchange="@this.updateAttendance({{ $gtk->id }}, {{ $d['day'] }}, this.value)"
                                 >
                             </td>
@@ -449,6 +518,15 @@
                 </svg>
             </div>
             <span>Alpa (A)</span>
+        </div>
+        <div class="legend-item">
+            <div class="badge" style="background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 14px; height: 14px;">
+                    <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                    <path d="M15.5 14h-7c-.28 0-.5-.22-.5-.5v-3c0-.28.22-.5.5-.5h7c.28 0 .5.22.5.5v3c0 .28-.22.5-.5.5z" />
+                </svg>
+            </div>
+            <span>Libur (L)</span>
         </div>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>

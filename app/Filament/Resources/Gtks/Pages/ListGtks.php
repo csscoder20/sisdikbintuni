@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Gtks\Pages;
 
 use App\Filament\Resources\Gtks\GtkResource;
-use App\Filament\Actions\ValidateChecklistAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\Action;
@@ -53,7 +52,6 @@ class ListGtks extends ListRecords
                 ->createAnother(false),
             Action::make('exportPdf')
                 ->label('Export PDF')
-                ->icon(Heroicon::OutlinedArrowDownTray)
                 ->color('success')
                 ->modalHeading('Export Nominatif GTK ke PDF')
                 ->modalDescription('Pilih kolom yang ingin Anda sertakan dalam file PDF. Data yang sesuai dengan filter saat ini akan diexport.')
@@ -128,7 +126,6 @@ class ListGtks extends ListRecords
                         'nominatif-gtk-' . now()->format('Y-m-d-His') . '.pdf'
                     );
                 }),
-            ValidateChecklistAction::make('validateNominatif', 'nominatif_gtk', fn() => \App\Models\Gtk::where('sekolah_id', filament()->getTenant()?->id)->exists()),
         ];
     }
 }

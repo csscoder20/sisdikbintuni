@@ -1,7 +1,6 @@
 <?php
 namespace App\Filament\Resources\Kelulusan\Pages;
 use App\Filament\Resources\Kelulusan\KelulusanResource;
-use App\Filament\Actions\ValidateChecklistAction;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 class ListKelulusan extends ListRecords {
@@ -27,7 +26,6 @@ class ListKelulusan extends ListRecords {
                 ->modalHeading('Tambah Data Kelulusan')
                 ->modalSubmitActionLabel('Simpan Data Kelulusan')
                 ->createAnother(false),
-            ValidateChecklistAction::make('validateKelulusan', 'kelulusan', fn() => \App\Models\Kelulusan::where('sekolah_id', filament()->getTenant()?->id)->exists()),
         ];
     }
 }

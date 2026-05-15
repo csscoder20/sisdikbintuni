@@ -15,7 +15,6 @@ use BackedEnum;
 use Filament\Support\Icons\Heroicon;
 use Livewire\WithPagination;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Filament\Actions\ValidateChecklistAction;
 use Livewire\Attributes\Url;
 
 class KeadaanSiswa extends Page
@@ -41,6 +40,7 @@ class KeadaanSiswa extends Page
 
     protected static ?string $navigationLabel = 'Keadaan Siswa';
     protected static ?int $navigationSort = 2;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $modelLabel = 'Keadaan Siswa';
     protected static ?string $pluralModelLabel = 'Keadaan Siswa';
