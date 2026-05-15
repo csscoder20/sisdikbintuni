@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nominatif GTK</title>
+    <title>Nominatif Siswa</title>
     <style>
         @page {
             margin: 1cm;
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <h2>DAFTAR NOMINATIF GURU DAN TENAGA KEPENDIDIKAN</h2>
+    <h2 style="text-transform: uppercase;">DAFTAR NOMINATIF SISWA</h2>
     <div class="header-info">
         &nbsp;
     </div>

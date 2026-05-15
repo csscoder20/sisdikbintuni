@@ -8,6 +8,8 @@ use Filament\Actions\Action;
 use App\Filament\Imports\SiswaImporter;
 use App\Filament\Traits\HasImportTemplate;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Forms\Components\CheckboxList;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ListSiswas extends ListRecords
 {
@@ -46,6 +48,108 @@ class ListSiswas extends ListRecords
                 ->modalSubmitActionLabel('Simpan Data Siswa')
                 ->modalFooterActions([])
                 ->createAnother(false),
+            Action::make('export')
+                ->label('Export')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->modalHeading('Export Nominatif Siswa')
+                ->modalDescription('Pilih format file dan kolom yang ingin Anda sertakan.')
+                ->modalSubmitActionLabel('Export Sekarang')
+                ->form([
+                    \Filament\Schemas\Components\Section::make('Format File')
+                        ->compact()
+                        ->schema([
+                            \Filament\Forms\Components\Radio::make('format')
+                                ->label('Pilih Format')
+                                ->options([
+                                    'xlsx' => 'Excel (.xlsx)',
+                                    'pdf' => 'PDF (.pdf)',
+                                ])
+                                ->default('xlsx')
+                                ->required()
+                                ->inline(),
+                        ]),
+                    \Filament\Schemas\Components\Section::make('Kolom Data')
+                        ->compact()
+                        ->schema([
+                            CheckboxList::make('columns')
+                                ->label('Pilih Kolom')
+                                ->options([
+                                    'nama' => 'Nama Lengkap',
+                                    'nisn' => 'NISN',
+                                    'nik' => 'NIK',
+                                    'jenis_kelamin' => 'JK',
+                                    'status' => 'Status Siswa',
+                                    'tempat_lahir' => 'Tempat Lahir',
+                                    'tanggal_lahir' => 'Tanggal Lahir',
+                                    'agama' => 'Agama',
+                                    'daerah_asal' => 'Daerah Asal',
+                                    'alamat' => 'Alamat Domisili',
+                                    'desa' => 'Desa/Kelurahan',
+                                    'kecamatan' => 'Kecamatan',
+                                    'kabupaten' => 'Kabupaten',
+                                    'provinsi' => 'Provinsi',
+                                    'nama_ayah' => 'Nama Ayah',
+                                    'nama_ibu' => 'Nama Ibu',
+                                    'nama_wali' => 'Nama Wali',
+                                    'nohp_ortuwali' => 'No. HP Orang Tua/Wali',
+                                    'nokk' => 'Nomor KK',
+                                    'nobpjs' => 'Nomor BPJS',
+                                    'disabilitas' => 'Jenis Disabilitas',
+                                ])
+                                ->columns(4)
+                                ->bulkToggleable()
+                                ->default(['nama', 'nisn', 'jenis_kelamin', 'status'])
+                                ->required(),
+                        ]),
+                ])
+                ->action(function (array $data) {
+                    $records = $this->getFilteredTableQuery()->get();
+                    $allColumns = [
+                        'nama' => 'Nama Lengkap',
+                        'nisn' => 'NISN',
+                        'nik' => 'NIK',
+                        'jenis_kelamin' => 'JK',
+                        'status' => 'Status Siswa',
+                        'tempat_lahir' => 'Tempat Lahir',
+                        'tanggal_lahir' => 'Tanggal Lahir',
+                        'agama' => 'Agama',
+                        'daerah_asal' => 'Daerah Asal',
+                        'alamat' => 'Alamat Domisili',
+                        'desa' => 'Desa/Kelurahan',
+                        'kecamatan' => 'Kecamatan',
+                        'kabupaten' => 'Kabupaten',
+                        'provinsi' => 'Provinsi',
+                        'nama_ayah' => 'Nama Ayah',
+                        'nama_ibu' => 'Nama Ibu',
+                        'nama_wali' => 'Nama Wali',
+                        'nohp_ortuwali' => 'No. HP Orang Tua/Wali',
+                        'nokk' => 'Nomor KK',
+                        'nobpjs' => 'Nomor BPJS',
+                        'disabilitas' => 'Jenis Disabilitas',
+                    ];
+
+                    $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));
+                    $filename = 'nominatif-siswa-' . now()->format('Y-m-d-His');
+
+                    if ($data['format'] === 'xlsx') {
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\DynamicExport($records, $selectedColumns, filament()->getTenant(), 'DAFTAR NOMINATIF SISWA'),
+                            $filename . '.xlsx'
+                        );
+                    }
+
+                    $pdf = Pdf::loadView('pdf.siswa-nominatif', [
+                        'records' => $records,
+                        'columns' => $selectedColumns,
+                        'sekolah' => filament()->getTenant(),
+                    ])->setPaper('a4', count($data['columns']) > 7 ? 'landscape' : 'portrait');
+
+                    return response()->streamDownload(
+                        fn () => print($pdf->output()),
+                        $filename . '.pdf'
+                    );
+                }),
         ];
     }
 }

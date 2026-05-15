@@ -50,45 +50,63 @@ class ListGtks extends ListRecords
                 ->modalHeading('Tambah Data GTK')
                 ->modalFooterActions([])
                 ->createAnother(false),
-            Action::make('exportPdf')
-                ->label('Export PDF')
+            Action::make('export')
+                ->label('Export')
+                ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
-                ->modalHeading('Export Nominatif GTK ke PDF')
-                ->modalDescription('Pilih kolom yang ingin Anda sertakan dalam file PDF. Data yang sesuai dengan filter saat ini akan diexport.')
+                ->modalHeading('Export Nominatif GTK')
+                ->modalDescription('Pilih format file dan kolom yang ingin Anda sertakan.')
                 ->modalSubmitActionLabel('Export Sekarang')
                 ->form([
-                    CheckboxList::make('columns')
-                        ->label('Pilih Kolom')
-                        ->options([
-                            'nama' => 'Nama GTK',
-                            'nik' => 'NIK',
-                            'nip' => 'NIP',
-                            'nuptk' => 'NUPTK',
-                            'nokarpeg' => 'No Karpeg',
-                            'jenis_gtk' => 'Jenis GTK',
-                            'jenis_kelamin' => 'Jenis Kelamin',
-                            'status_kepegawaian' => 'Status Kepegawaian',
-                            'pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
-                            'tmt_pns' => 'TMT PNS',
-                            'tempat_lahir' => 'Tempat Lahir',
-                            'tanggal_lahir' => 'Tanggal Lahir',
-                            'pendidikan_terakhir' => 'Pendidikan Terakhir',
-                            'daerah_asal' => 'Daerah Asal',
-                            'agama' => 'Agama',
-                            'alamat' => 'Alamat',
-                            'desa' => 'Desa',
-                            'kecamatan' => 'Kecamatan',
-                            'kabupaten' => 'Kabupaten',
-                            'provinsi' => 'Provinsi',
-                            'tmt_pangkat_gol_terakhir' => 'TMT Pangkat Gol',
-                        ])
-                        ->columns(3)
-                        ->default(['nama', 'nip', 'nuptk'])
-                        ->required(),
+                    \Filament\Schemas\Components\Section::make('Format File')
+                        ->compact()
+                        ->schema([
+                            \Filament\Forms\Components\Radio::make('format')
+                                ->label('Pilih Format')
+                                ->options([
+                                    'xlsx' => 'Excel (.xlsx)',
+                                    'pdf' => 'PDF (.pdf)',
+                                ])
+                                ->default('xlsx')
+                                ->required()
+                                ->inline(),
+                        ]),
+                    \Filament\Schemas\Components\Section::make('Kolom Data')
+                        ->compact()
+                        ->schema([
+                            CheckboxList::make('columns')
+                                ->label('Pilih Kolom')
+                                ->options([
+                                    'nama' => 'Nama GTK',
+                                    'nik' => 'NIK',
+                                    'nip' => 'NIP',
+                                    'nuptk' => 'NUPTK',
+                                    'nokarpeg' => 'No Karpeg',
+                                    'jenis_gtk' => 'Jenis GTK',
+                                    'jenis_kelamin' => 'JK',
+                                    'status_kepegawaian' => 'Status Kepegawaian',
+                                    'pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
+                                    'tmt_pns' => 'TMT PNS',
+                                    'tempat_lahir' => 'Tempat Lahir',
+                                    'tanggal_lahir' => 'Tanggal Lahir',
+                                    'pendidikan_terakhir' => 'Pendidikan Terakhir',
+                                    'daerah_asal' => 'Daerah Asal',
+                                    'agama' => 'Agama',
+                                    'alamat' => 'Alamat',
+                                    'desa' => 'Desa',
+                                    'kecamatan' => 'Kecamatan',
+                                    'kabupaten' => 'Kabupaten',
+                                    'provinsi' => 'Provinsi',
+                                    'tmt_pangkat_gol_terakhir' => 'TMT Pangkat Gol',
+                                ])
+                                ->columns(4)
+                                ->bulkToggleable()
+                                ->default(['nama', 'nip', 'nuptk', 'jenis_gtk', 'status_kepegawaian'])
+                                ->required(),
+                        ]),
                 ])
                 ->action(function (array $data) {
                     $records = $this->getFilteredTableQuery()->get();
-
                     $allColumns = [
                         'nama' => 'Nama GTK',
                         'nik' => 'NIK',
@@ -96,7 +114,7 @@ class ListGtks extends ListRecords
                         'nuptk' => 'NUPTK',
                         'nokarpeg' => 'No Karpeg',
                         'jenis_gtk' => 'Jenis GTK',
-                        'jenis_kelamin' => 'Jenis Kelamin',
+                        'jenis_kelamin' => 'JK',
                         'status_kepegawaian' => 'Status Kepegawaian',
                         'pangkat_gol_terakhir' => 'Pangkat Gol Terakhir',
                         'tmt_pns' => 'TMT PNS',
@@ -114,16 +132,24 @@ class ListGtks extends ListRecords
                     ];
 
                     $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));
+                    $filename = 'nominatif-gtk-' . now()->format('Y-m-d-His');
+
+                    if ($data['format'] === 'xlsx') {
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\DynamicExport($records, $selectedColumns, filament()->getTenant(), 'DAFTAR NOMINATIF GURU DAN TENAGA KEPENDIDIKAN'),
+                            $filename . '.xlsx'
+                        );
+                    }
 
                     $pdf = Pdf::loadView('pdf.gtk-nominatif', [
                         'records' => $records,
                         'columns' => $selectedColumns,
                         'sekolah' => filament()->getTenant(),
-                    ])->setPaper('a4', count($data['columns']) > 5 ? 'landscape' : 'portrait');
+                    ])->setPaper('a4', count($data['columns']) > 7 ? 'landscape' : 'portrait');
 
                     return response()->streamDownload(
                         fn () => print($pdf->output()),
-                        'nominatif-gtk-' . now()->format('Y-m-d-His') . '.pdf'
+                        $filename . '.pdf'
                     );
                 }),
         ];

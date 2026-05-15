@@ -94,10 +94,6 @@ class SiswaResource extends Resource
                     ->label('Jenis Disabilitas')
                     ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-')
                     ->prefix(': '),
-                TextEntry::make('beasiswa')
-                    ->label('Status Beasiswa')
-                    ->formatStateUsing(fn(?string $state): string => $state ? Str::headline($state) : '-')
-                    ->prefix(': '),
             ])->columns(2);
     }
 

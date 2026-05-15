@@ -136,10 +136,6 @@ class SiswasTable
                     ->label('Jenis Disabilitas')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('beasiswa')
-                    ->label('Status Beasiswa')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime('d/m/Y H:i')
