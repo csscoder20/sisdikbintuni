@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('nss')->nullable();
             $table->string('npwp')->nullable();
             $table->enum('jenjang', ['sma', 'smk'])->nullable();
+            $table->enum('status_sekolah', ['negeri', 'swasta'])->nullable();
             $table->text('alamat')->nullable();
             $table->string('desa')->nullable();
             $table->string('kecamatan')->nullable();

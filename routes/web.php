@@ -21,23 +21,19 @@ Route::get('/', function () {
         'Rusak Berat' => (int) ($gedungStats->rusak ?? 0),
     ];
 
-    // Mengambil data Laporan Masuk terbaru
-    $latestLaporan = \App\Models\Laporan::orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->first();
-    $laporanBulan = $latestLaporan ? $latestLaporan->bulan : date('n');
-    $laporanTahun = $latestLaporan ? $latestLaporan->tahun : date('Y');
+    // Daftar Sekolah SMA/SMK
+    $daftarSekolah = \App\Models\Sekolah::whereIn('jenjang', ['SMA', 'SMK', 'sma', 'smk'])
+        ->orderBy('nama')
+        ->get();
 
-    $laporanMasuk = \App\Models\Laporan::where('tahun', $laporanTahun)
-        ->where('bulan', $laporanBulan)
-        ->whereIn('status', ['submitted', 'verified'])
-        ->count();
+    // Sebaran Sekolah SMA/SMK per Kecamatan
+    $sebaranSekolah = \App\Models\Sekolah::whereIn('jenjang', ['SMA', 'SMK', 'sma', 'smk'])
+        ->select('kecamatan', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+        ->groupBy('kecamatan')
+        ->orderBy('kecamatan')
+        ->get();
 
-    $namaBulan = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
-        7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-    ][$laporanBulan] ?? '';
-    $periodeLaporan = "{$namaBulan} {$laporanTahun}";
-
-    return view('landing', compact('totalSiswa', 'totalGtk', 'kondisiRuang', 'totalSekolah', 'laporanMasuk', 'periodeLaporan'));
+    return view('landing', compact('totalSiswa', 'totalGtk', 'kondisiRuang', 'totalSekolah', 'daftarSekolah', 'sebaranSekolah'));
 });
 
 Route::get('/admin', function () {

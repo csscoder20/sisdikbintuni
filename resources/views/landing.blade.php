@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LAPBUL SMA/SMK - Kabupaten Teluk Bintuni</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -24,7 +23,7 @@
         <div class="container mx-auto px-6 py-16 text-center">
             <img src="/assets/logo/logo-bintuni.png" alt="Logo Bintuni" class="h-24 mx-auto mb-6">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Sistem Pelaporan Bulanan SMA/SMK</h1>
-            <p class="text-xl mb-8 opacity-90">Kabupaten Teluk Bintuni - Portal Data Pendidikan Terpadu</p>
+            <p class="text-xl mb-8 opacity-90">Dinas Pendidikan, Kebudayaan, Pemuda dan Olahraga Kabupaten Teluk Bintuni</p>
             <div class="flex justify-center gap-4">
                 <a target="_blank" href="/login" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
                     <i class="fas fa-sign-in-alt mr-2"></i> LOGIN OPERATOR
@@ -37,7 +36,7 @@
     </header>
 
     <main class="container mx-auto px-6 -mt-10">
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-red-500">
                 <div class="text-gray-500 text-sm font-bold uppercase">Total Sekolah</div>
                 <div class="text-3xl font-bold text-gray-800">{{ number_format($totalSekolah) }}</div>
@@ -64,29 +63,79 @@
                 <div class="text-3xl font-bold text-gray-800">{{ $persentaseLayak }}%</div>
                 <div class="text-blue-500 text-xs font-semibold mt-2">Kategori Layak ({{ $layak }} dari total {{ $totalRuang }} ruang/gedung)</div>
             </div>
-            <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-yellow-500">
-                <div class="text-gray-500 text-sm font-bold uppercase">Laporan Masuk</div>
-                <div class="text-3xl font-bold text-gray-800">{{ $laporanMasuk }}/{{ $totalSekolah }}</div>
-                <div class="text-orange-500 text-xs font-semibold mt-2">Update: {{ $periodeLaporan }}</div>
-            </div>
         </div>
 
-        <div id="statistik" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-700 mb-6 border-l-4 border-blue-600 pl-3">Kondisi Ruang Kelas (Kabupaten)</h3>
-                <div class="h-64">
-                    <canvas id="sarprasChart"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16" id="statistik">
+            <!-- Tabel Sebaran Sekolah -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-600 pl-3">Sebaran Sekolah per Distrik</h3>
+                <div class="overflow-x-auto h-96">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white shadow-sm">
+                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
+                                <th class="py-3 px-4 border-b">No</th>
+                                <th class="py-3 px-4 border-b">Distrik / Kecamatan</th>
+                                <th class="py-3 px-4 border-b">Jumlah Sekolah</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700 text-sm">
+                            @forelse($sebaranSekolah as $index => $sebaran)
+                            <tr class="hover:bg-gray-50 border-b last:border-b-0">
+                                <td class="py-3 px-4">{{ $index + 1 }}</td>
+                                <td class="py-3 px-4">{{ $sebaran->kecamatan ?: 'Tidak Diketahui' }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full font-bold">{{ $sebaran->total }}</span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="py-4 text-center text-gray-500">Belum ada data</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-700 mb-6 border-l-4 border-green-500 pl-3">Tren Kehadiran GTK (6 Bulan)</h3>
-                <div class="h-64">
-                    <canvas id="kehadiranChart"></canvas>
+            <!-- Tabel Daftar Sekolah -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Daftar Sekolah SMA/SMK</h3>
+                <div class="overflow-x-auto h-96">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white shadow-sm">
+                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
+                                <th class="py-3 px-4 border-b">No</th>
+                                <th class="py-3 px-4 border-b">Nama Sekolah</th>
+                                <th class="py-3 px-4 border-b">Status</th>
+                                <th class="py-3 px-4 border-b">Kecamatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700 text-sm">
+                            @forelse($daftarSekolah as $index => $sekolah)
+                            <tr class="hover:bg-gray-50 border-b last:border-b-0">
+                                <td class="py-3 px-4">{{ $index + 1 }}</td>
+                                <td class="py-3 px-4 font-semibold text-gray-800">{{ $sekolah->nama }}</td>
+                                <td class="py-3 px-4">
+                                    @if(strtolower($sekolah->status_sekolah) == 'negeri')
+                                        <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Negeri</span>
+                                    @elseif(strtolower($sekolah->status_sekolah) == 'swasta')
+                                        <span class="bg-orange-100 text-orange-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Swasta</span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="py-3 px-4">{{ $sekolah->kecamatan ?: '-' }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="py-4 text-center text-gray-500">Belum ada data</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-
         
     </main>
 
@@ -96,45 +145,5 @@
             <p class="text-xs opacity-40">Dikembangkan untuk kemajuan Pendidikan diatas Tanah Sisar Matiti</p>
         </div>
     </footer>
-
-    <script>
-        // Data Dummy untuk Chart Sarpras
-        const sarprasCtx = document.getElementById('sarprasChart').getContext('2d');
-        new Chart(sarprasCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Baik', 'Rusak Ringan', 'Rusak Sedang', 'Rusak Berat'],
-                datasets: [{
-                    data: [
-                        {{ $kondisi['Baik'] ?? 0 }},
-                        {{ $kondisi['Rusak Ringan'] ?? 0 }},
-                        {{ $kondisi['Rusak Sedang'] ?? 0 }},
-                        {{ $kondisi['Rusak Berat'] ?? 0 }}
-                    ],
-                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
-                    borderWidth: 0
-                }]
-            },
-            options: { maintainAspectRatio: false }
-        });
-
-        // Data Dummy untuk Chart Kehadiran
-        const kehadiranCtx = document.getElementById('kehadiranChart').getContext('2d');
-        new Chart(kehadiranCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
-                datasets: [{
-                    label: '% Kehadiran Rata-rata',
-                    data: [92, 88, 95, 93, 90, 96],
-                    borderColor: '#3b82f6',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
-                }]
-            },
-            options: { maintainAspectRatio: false }
-        });
-    </script>
 </body>
 </html>
