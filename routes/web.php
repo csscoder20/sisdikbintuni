@@ -145,3 +145,5 @@ Route::get('/stop-impersonating', function () {
 
     return redirect()->to($returnUrl);
 })->name('stop-impersonating');
+
+Route::get('/cetak-laporan/{sekolah}/pdf', [\App\Http\Controllers\CetakLaporanController::class, 'downloadPdf'])->name('cetak-laporan.pdf')->middleware('auth');

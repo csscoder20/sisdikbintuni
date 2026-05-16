@@ -23,7 +23,7 @@
         border: 4px solid white;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         background-color: #f9fafb;
-        max-width: 100%;
+        max-width: 250px;
     }
 
     .dark .icp-card {
@@ -41,7 +41,7 @@
     .icp-image {
         width: 100%;
         height: auto;
-        max-height: 40vh;
+        max-height: 180px;
         object-fit: contain;
         display: block;
     }

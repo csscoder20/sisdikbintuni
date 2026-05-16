@@ -438,7 +438,7 @@ class SekolahPage extends Page implements HasSchemas
         return Action::make('viewFoto')
             ->label('Preview Foto')
             ->modalHeading('Foto Sekolah')
-            ->modalWidth('4xl')
+            ->modalWidth('2xl')
             ->form([
                 \Filament\Forms\Components\ViewField::make('current_foto')
                     ->view('filament.components.image-current-preview')
@@ -455,8 +455,10 @@ class SekolahPage extends Page implements HasSchemas
                     ->imageCropAspectRatio('4:3')
                     ->disk('public')
                     ->directory('sekolah-foto')
+                    ->live()
                     ->helperText('Klik area di atas untuk memilih gambar baru dari komputer Anda.')
             ])
+            ->modalSubmitAction(fn ($action) => $action->visible(fn () => filled($this->getMountedActionForm()?->getState()['new_foto'] ?? null)))
             ->action(function (array $data) {
                 if (!empty($data['new_foto'])) {
                     $sekolah = $this->getSekolah();
@@ -478,7 +480,7 @@ class SekolahPage extends Page implements HasSchemas
         return Action::make('viewLogo')
             ->label('Preview Logo')
             ->modalHeading('Logo Sekolah')
-            ->modalWidth('2xl')
+            ->modalWidth('xl')
             ->form([
                 \Filament\Forms\Components\ViewField::make('current_logo')
                     ->view('filament.components.image-current-preview')
@@ -495,8 +497,10 @@ class SekolahPage extends Page implements HasSchemas
                     ->imageCropAspectRatio('1:1')
                     ->disk('public')
                     ->directory('sekolah-logo')
+                    ->live()
                     ->helperText('Klik area di atas untuk memilih logo baru dari komputer Anda.')
             ])
+            ->modalSubmitAction(fn ($action) => $action->visible(fn () => filled($this->getMountedActionForm()?->getState()['new_logo'] ?? null)))
             ->action(function (array $data) {
                 if (!empty($data['new_logo'])) {
                     $sekolah = $this->getSekolah();

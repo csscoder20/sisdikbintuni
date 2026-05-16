@@ -6,15 +6,13 @@ use App\Models\Sekolah;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
 use Filament\Facades\Filament;
-use App\Filament\Traits\HasDinasFilter;
 use App\Filament\Resources\CetakLaporan\Pages;
 
 class CetakLaporanResource extends Resource
 {
-    use HasDinasFilter;
 
     protected static ?string $model = Sekolah::class;
 
@@ -56,14 +54,46 @@ class CetakLaporanResource extends Resource
                 TextColumn::make('kecamatan')
                     ->label('Kecamatan')
                     ->searchable(),
+                TextColumn::make('laporan_status')
+                    ->label('Progress Validasi')
+                    ->state(function (Sekolah $record) {
+                        $stats = $record->getValidationProgress();
+                        return "{$stats['done']}/{$stats['total']} (" . $stats['percentage'] . "%)";
+                    })
+                    ->badge()
+                    ->color(function ($state) {
+                        if (str_contains($state, '100%')) return 'success';
+                        if (str_starts_with($state, '0/')) return 'danger';
+                        return 'warning';
+                    }),
             ])
             ->actions([
                 Action::make('cetak')
                     ->label('Cetak Laporan')
                     ->icon('heroicon-o-printer')
                     ->color('success')
-                    ->url(fn (Sekolah $record) => "#") // Placeholder for PDF route
-                    ->openUrlInNewTab(),
+                    ->visible(fn (Sekolah $record) => $record->getValidationProgress()['percentage'] === 100)
+                    ->modalHeading(fn (Sekolah $record) => "Pratinjau Laporan - " . $record->nama)
+                    ->modalWidth('full')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->extraModalFooterActions([
+                        \Filament\Actions\Action::make('download_pdf')
+                            ->label('Download PDF')
+                            ->color('info')
+                            ->icon('heroicon-m-document-arrow-down')
+                            ->url(fn (Sekolah $record) => route('cetak-laporan.pdf', $record))
+                            ->openUrlInNewTab(),
+                        \Filament\Actions\Action::make('print')
+                            ->label('Cetak Laporan')
+                            ->color('success')
+                            ->icon('heroicon-m-printer')
+                            ->extraAttributes([
+                                'x-on:click' => 'window.print()',
+                                'onclick' => 'window.print()',
+                            ]),
+                    ])
+                    ->modalContent(fn (Sekolah $record) => view('livewire.report-preview-container', ['schoolId' => $record->id])),
             ]);
     }
 

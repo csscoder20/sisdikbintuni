@@ -102,6 +102,7 @@
     }"
     wire:ignore
     class="w-full mt-4"
+    style="position: relative; z-index: 0;"
 >
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -141,7 +142,7 @@
         </div>
     </div>
 
-    <div x-ref="map" style="height: 400px; width: 100%; border-radius: 0.75rem; border: 1px solid #e5e7eb;" class="shadow-sm"></div>
+    <div x-ref="map" style="height: 400px; width: 100%; border-radius: 0.75rem; border: 1px solid #e5e7eb; position: relative; z-index: 0;" class="shadow-sm"></div>
     <div class="mt-2 text-xs text-gray-500 italic flex justify-between">
         <span>* Anda dapat menggeser pin pada peta untuk menyesuaikan koordinat secara otomatis.</span>
         <span x-text="'Lat: ' + lat + ', Lng: ' + lng"></span>

@@ -165,7 +165,7 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Guru & Tenaga Kependidikan</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Gtk::where('sekolah_id', auth()->user()->sekolah?->id)->count() }}
+                        {{ \App\Models\Gtk::where('sekolah_id', $this->getSchoolId())->count() }}
                     </p>
                 </div>
             </div>
@@ -184,7 +184,7 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Peserta Didik Aktif</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Siswa::where('sekolah_id', auth()->user()->sekolah?->id)->count() }}
+                        {{ \App\Models\Siswa::where('sekolah_id', $this->getSchoolId())->count() }}
                     </p>
                 </div>
             </div>
@@ -203,7 +203,7 @@
                 <div>
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Rombel</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
-                        {{ \App\Models\Rombel::where('sekolah_id', auth()->user()->sekolah?->id)->count() }}
+                        {{ \App\Models\Rombel::where('sekolah_id', $this->getSchoolId())->count() }}
                     </p>
                 </div>
             </div>
@@ -222,7 +222,7 @@
                     <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Gedung/Ruang</p>
                     <p style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin: 0;">
                         {{ \App\Models\LaporanGedung::whereHas('laporan', function ($query) {
-                            $query->where('sekolah_id', auth()->user()->sekolah?->id);
+                            $query->where('sekolah_id', $this->getSchoolId());
                         })->count() }}
                     </p>
                 </div>
@@ -310,10 +310,12 @@
             style="flex: 1; min-width: 200px; background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; transition: background-color 0.2s; font-size: 0.75rem;">
             PRATINJAU LAPORAN BULANAN
         </button>
-        <button type="button" id="submitBtn"
-            style="flex: 1; min-width: 200px; background-color: #10b981; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; transition: background-color 0.2s; font-size: 0.75rem;">
-            KIRIMI LAPORAN BULANAN
-        </button>
+        @if (!$this->isPreview)
+            <button type="button" id="submitBtn"
+                style="flex: 1; min-width: 200px; background-color: #10b981; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; transition: background-color 0.2s; font-size: 0.75rem;">
+                KIRIMI LAPORAN BULANAN
+            </button>
+        @endif
     </div>
 
     <!-- Modals for each checklist item -->
