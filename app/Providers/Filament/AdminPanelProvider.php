@@ -17,6 +17,8 @@ use App\Filament\Pages\OperatorDashboard;
 use App\Filament\Pages\DinasDashboard;
 use App\Filament\Pages\SuperAdminDashboard;
 use App\Filament\Pages\SekolahPage;
+use App\Filament\Pages\CetakCustom;
+use App\Filament\Resources\CetakLaporan\CetakLaporanResource;
 use Filament\Facades\Filament;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -116,17 +118,20 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Resources\GtkKeuangan\GtkKeuanganResource::class,
                 \App\Filament\Resources\GtkJamAjars\GtkJamAjarResource::class,
                 \App\Filament\Resources\KehadiranGtk\KehadiranGtkResource::class,
+                \App\Filament\Resources\CetakLaporan\CetakLaporanResource::class,
             ])
             ->pages([
                 SuperAdminDashboard::class,
                 DinasDashboard::class,
                 SekolahPage::class,
+                CetakCustom::class,
             ])
             ->navigationGroups([
                 'Data Sekolah',
                 'Data Siswa',
                 'Data GTK',
                 'Data Master',
+                'Cetak',
                 'Sistem',
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')

@@ -175,40 +175,19 @@ class GtkForm
 
                     Step::make('Data Rekening')
                         ->schema([
-                            Select::make('nama_bank_gaji')
-                                        ->label('Nama Bank (Gaji)')
-                                        ->options([
-                                            'Bank Papua' => 'Bank Papua',
-                                            'BRI' => 'BRI',
-                                            'BNI' => 'BNI',
-                                            'Mandiri' => 'Mandiri',
-                                            'BCA' => 'BCA',
-                                            'BSI' => 'BSI',
-                                            'Lainnya' => 'Lainnya',
-                                        ])
-                                        ->searchable(),
-                                    TextInput::make('no_rek_gaji')
-                                        ->label('Nomor Rekening (Gaji)')
-                                        ->extraInputAttributes(['inputmode' => 'numeric']),
-
-                            Select::make('nama_bank_tunjangan')
-                                        ->label('Nama Bank (Tunjangan)')
-                                        ->options([
-                                            'Bank Papua' => 'Bank Papua',
-                                            'BRI' => 'BRI',
-                                            'BNI' => 'BNI',
-                                            'Mandiri' => 'Mandiri',
-                                            'BCA' => 'BCA',
-                                            'BSI' => 'BSI',
-                                            'Lainnya' => 'Lainnya',
-                                        ])
-                                        ->searchable(),
-                                    TextInput::make('no_rek_tunjangan')
-                                        ->label('Nomor Rekening (Tunjangan)')
-                                        ->extraInputAttributes(['inputmode' => 'numeric']),
-                                    TextInput::make('npwp')
-                                        ->label('NPWP'),
-                        ])->columns(3),
+                            TextInput::make('nama_bank_gaji')
+                                ->label('Nama Bank (Gaji)'),
+                            TextInput::make('no_rek_gaji')
+                                ->label('Nomor Rekening (Gaji)')
+                                ->extraInputAttributes(['inputmode' => 'numeric']),
+                            TextInput::make('nama_bank_tunjangan')
+                                ->label('Nama Bank (Tunjangan)'),
+                            TextInput::make('no_rek_tunjangan')
+                                ->label('Nomor Rekening (Tunjangan)')
+                                ->extraInputAttributes(['inputmode' => 'numeric']),
+                            TextInput::make('npwp')
+                                ->label('NPWP'),
+                        ])->columns(2),
                 ])
                     ->skippable()
                     ->columnSpanFull()

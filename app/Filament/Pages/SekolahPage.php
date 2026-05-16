@@ -332,35 +332,15 @@ class SekolahPage extends Page implements HasSchemas
                 ->label('Nama Rekening BOP'),
             TextInput::make('nomor_rekening_bop')
                 ->label('Nomor Rekening BOP'),
-            Select::make('nama_bank_bop')
-                ->label('Nama Bank Rekening BOP')
-                ->options([
-                    'Bank Papua' => 'Bank Papua',
-                    'BRI' => 'BRI',
-                    'BNI' => 'BNI',
-                    'Mandiri' => 'Mandiri',
-                    'BCA' => 'BCA',
-                    'BSI' => 'BSI',
-                    'Lainnya' => 'Lainnya',
-                ])
-                ->searchable(),
-
+            TextInput::make('nama_bank_bop')
+                ->label('Nama Bank Rekening BOP'),
             TextInput::make('nama_rekening_bosp')
                 ->label('Nama Rekening BOSP'),
             TextInput::make('nomor_rekening_bosp')
                 ->label('Nomor Rekening BOSP'),
-            Select::make('nama_bank_bosp')
-                ->label('Nama Bank Rekening BOSP')
-                ->options([
-                    'Bank Papua' => 'Bank Papua',
-                    'BRI' => 'BRI',
-                    'BNI' => 'BNI',
-                    'Mandiri' => 'Mandiri',
-                    'BCA' => 'BCA',
-                    'BSI' => 'BSI',
-                    'Lainnya' => 'Lainnya',
-                ])
-                ->searchable(),
+            TextInput::make('nama_bank_bosp')
+                ->label('Nama Bank Rekening BOSP'),
+            
         ];
     }
 

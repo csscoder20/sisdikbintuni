@@ -64,4 +64,19 @@ class LaporanKeuangan extends Model
     {
         return $this->belongsTo(Laporan::class);
     }
+
+    /**
+     * Relasi untuk mengakses sekolah melalui laporan (Tenancy)
+     */
+    public function sekolah(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Sekolah::class,
+            Laporan::class,
+            'id',
+            'id',
+            'laporan_id',
+            'sekolah_id'
+        );
+    }
 }
