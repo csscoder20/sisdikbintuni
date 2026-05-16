@@ -42,6 +42,14 @@ class SekolahPage extends Page implements HasSchemas
     
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            return !empty(session('dinas_selected_sekolah_id'));
+        }
+        return true;
+    }
+
     protected static ?string $slug = 'profil';
 
     protected static ?string $title = 'PROFIL SEKOLAH';
@@ -75,6 +83,14 @@ class SekolahPage extends Page implements HasSchemas
         $tenant = Filament::getTenant();
         if ($tenant instanceof Sekolah) {
             return $tenant;
+        }
+
+        // Context Dinas
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $selectedId = session('dinas_selected_sekolah_id');
+            if ($selectedId) {
+                return Sekolah::find($selectedId);
+            }
         }
 
         // Fallback: ambil dari relasi user
@@ -122,8 +138,7 @@ class SekolahPage extends Page implements HasSchemas
                 ]),
 
             Section::make('Alamat Sekolah')
-                ->schema($this->getAlamatFormComponents())
-                ->columns(4),
+                ->schema($this->getAlamatFormComponents()),
 
             Section::make('Data Pendukung')
                 ->schema($this->getSupportingFormComponents())
@@ -195,71 +210,87 @@ class SekolahPage extends Page implements HasSchemas
     protected function getAlamatFormComponents(): array
     {
         return [
-            TextInput::make('provinsi')
-                ->label('Provinsi')
-                ->default('Papua Barat')
-                ->disabled()
-                ->dehydrated(true),
+            Grid::make(['default' => 1, 'md' => 2])
+                ->schema([
+                    // Kolom Kiri: Input Alamat & Koordinat
+                    Grid::make(2)
+                        ->schema([
+                            TextInput::make('provinsi')
+                                ->label('Provinsi')
+                                ->default('Papua Barat')
+                                ->disabled()
+                                ->dehydrated(true),
 
-            TextInput::make('kabupaten')
-                ->label('Kabupaten / Kota')
-                ->default('Teluk Bintuni')
-                ->disabled()
-                ->dehydrated(true),
+                            TextInput::make('kabupaten')
+                                ->label('Kabupaten / Kota')
+                                ->default('Teluk Bintuni')
+                                ->disabled()
+                                ->dehydrated(true),
 
-            Select::make('kecamatan')
-                ->label('Kecamatan')
-                ->options(function () {
-                    return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
-                        ->pluck('nama', 'nama');
-                })
-                ->live()
-                ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
-                ->searchable(),
+                            Select::make('kecamatan')
+                                ->label('Kecamatan')
+                                ->options(function () {
+                                    return WilayahKabBintuni::whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                                        ->pluck('nama', 'nama');
+                                })
+                                ->live()
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
+                                ->searchable(),
 
-            Select::make('desa')
-                ->label('Desa / Kelurahan')
-                ->options(function (callable $get) {
-                    $kecamatan = $get('kecamatan');
-                    if (! $kecamatan) {
-                        return [];
-                    }
+                            Select::make('desa')
+                                ->label('Desa / Kelurahan')
+                                ->options(function (callable $get) {
+                                    $kecamatan = $get('kecamatan');
+                                    if (! $kecamatan) {
+                                        return [];
+                                    }
 
-                    $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
-                        ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
-                        ->first();
+                                    $kecamatanModel = WilayahKabBintuni::where('nama', $kecamatan)
+                                        ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 6")
+                                        ->first();
 
-                    if (!$kecamatanModel) {
-                        return [];
-                    }
+                                    if (!$kecamatanModel) {
+                                        return [];
+                                    }
 
-                    return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
-                        ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
-                        ->pluck('nama', 'nama');
-                })
-                ->searchable(),
+                                    return WilayahKabBintuni::where('kode', 'like', $kecamatanModel->kode . '.%')
+                                        ->whereRaw("LENGTH(REPLACE(kode, '.', '')) = 10")
+                                        ->pluck('nama', 'nama');
+                                })
+                                ->searchable(),
 
-            Textarea::make('alamat')
-                ->label('Alamat')
-                ->rows(2)
-                ->columnSpan(2),
+                            Textarea::make('alamat')
+                                ->label('Alamat Lengkap')
+                                ->rows(3)
+                                ->placeholder('Jl. Contoh No. 123...')
+                                ->columnSpanFull()
+                                ->live(),
 
-            TextInput::make('latitude')
-                ->label('Latitude')
-                ->numeric()
-                ->live()
-                ->helperText('Contoh: -2.123456'),
+                            TextInput::make('latitude')
+                                ->label('Latitude')
+                                ->numeric()
+                                ->live()
+                                ->helperText('Contoh: -2.123456'),
 
-            TextInput::make('longitude')
-                ->label('Longitude')
-                ->numeric()
-                ->live()
-                ->helperText('Contoh: 133.123456'),
+                            TextInput::make('longitude')
+                                ->label('Longitude')
+                                ->numeric()
+                                ->live()
+                                ->helperText('Contoh: 133.123456'),
+                        ])
+                        ->columnSpan(1),
 
-            \Filament\Schemas\Components\View::make('filament.components.map-location')
-                ->viewData([
-                    'latField' => 'latitude',
-                    'lngField' => 'longitude',
+                    // Kolom Kanan: Hanya Peta
+                    Grid::make(1)
+                        ->schema([
+                            \Filament\Schemas\Components\View::make('filament.components.map-location')
+                                ->viewData([
+                                    'latField' => 'latitude',
+                                    'lngField' => 'longitude',
+                                ])
+                                ->columnSpanFull(),
+                        ])
+                        ->columnSpan(1),
                 ])
                 ->columnSpanFull(),
         ];

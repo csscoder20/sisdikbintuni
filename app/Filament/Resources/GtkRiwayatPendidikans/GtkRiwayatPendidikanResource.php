@@ -7,6 +7,7 @@ use App\Filament\Resources\GtkRiwayatPendidikans\Schemas\GtkRiwayatPendidikanFor
 use App\Filament\Resources\GtkRiwayatPendidikans\Tables\GtkRiwayatPendidikansTable;
 use App\Models\GtkPendidikan;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -16,8 +17,11 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use App\Filament\Traits\HasDinasFilter;
+
 class GtkRiwayatPendidikanResource extends Resource
 {
+    use HasDinasFilter;
     protected static ?string $slug = 'riwayat-pendidikan-gtk';
 
     protected static ?string $model = GtkPendidikan::class;
@@ -177,13 +181,22 @@ class GtkRiwayatPendidikanResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $sekolahId = null;
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $sekolahId = session('dinas_selected_sekolah_id');
+        } else {
+            $sekolahId = Filament::getTenant()?->id;
+        }
+
         return parent::getEloquentQuery()
             ->with(['gtk'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])
-            ->whereHas('gtk', function (Builder $query) {
-                $query->where('sekolah_id', filament()->getTenant()->id);
+            ->whereHas('gtk', function (Builder $query) use ($sekolahId) {
+                if ($sekolahId) {
+                    $query->where('sekolah_id', $sekolahId);
+                }
             });
     }
 

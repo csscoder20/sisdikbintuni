@@ -16,8 +16,12 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use App\Filament\Traits\HasDinasFilter;
+
 class RombelResource extends Resource
 {
+    use HasDinasFilter;
+
     protected static ?string $slug = 'rombel';
 
     protected static ?string $model = Rombel::class;
@@ -89,11 +93,5 @@ class RombelResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
+    // The getEloquentQuery and isScopedToTenant are now handled by HasDinasFilter trait
 }

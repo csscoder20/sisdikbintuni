@@ -104,14 +104,30 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->resources([
                 \App\Filament\Resources\Users\UserResource::class,
-                \App\Filament\Resources\Sekolahs\SekolahResource::class,
                 \App\Filament\Resources\ActivityLog\ActivityLogResource::class,
                 \App\Filament\Resources\Notifikasis\NotifikasiResource::class,
-
+                \App\Filament\Resources\Siswas\SiswaResource::class,
+                \App\Filament\Resources\Gtks\GtkResource::class,
+                \App\Filament\Resources\Rombels\RombelResource::class,
+                \App\Filament\Resources\LaporanGedung\LaporanGedungResource::class,
+                \App\Filament\Resources\Mapels\MapelResource::class,
+                \App\Filament\Resources\LaporanKeuangan\LaporanKeuanganResource::class,
+                \App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource::class,
+                \App\Filament\Resources\GtkKeuangan\GtkKeuanganResource::class,
+                \App\Filament\Resources\GtkJamAjars\GtkJamAjarResource::class,
+                \App\Filament\Resources\KehadiranGtk\KehadiranGtkResource::class,
             ])
             ->pages([
                 SuperAdminDashboard::class,
                 DinasDashboard::class,
+                SekolahPage::class,
+            ])
+            ->navigationGroups([
+                'Data Sekolah',
+                'Data Siswa',
+                'Data GTK',
+                'Data Master',
+                'Sistem',
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
@@ -133,6 +149,10 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->renderHook(
+                'panels::global-search.before',
+                fn(): string => \Illuminate\Support\Facades\Blade::render('<livewire:school-selector />'),
+            )
             ->renderHook(
                 'panels::auth.login.form.after',
                 fn(): string => filament()->hasRegistration()
@@ -176,24 +196,7 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 HTML;
             })
-            ->renderHook('panels::body.start', function () {
-                if (!session()->has('impersonating_sekolah_id')) {
-                    return '';
-                }
-                $sekolah = \App\Models\Sekolah::find(session('impersonating_sekolah_id'));
-                $namaSekolah = $sekolah?->nama ?? 'Sekolah';
-                return \Illuminate\Support\Facades\Blade::render('
-                    <div style="background-color: transparent; color: #ea580c; padding: 8px 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 40; box-shadow: none; width: 100%; pointer-events: none;">
-                        <span style="display: flex; align-items: center; gap: 8px;">
-                            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            Anda sedang mengakses panel sebagai Operator {{ $namaSekolah }}
-                        </span>
-                        <a href="{{ route(\'stop-impersonating\') }}" style="background-color: white; color: #ea580c; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.2s; pointer-events: auto;" onmouseover="this.style.backgroundColor=\'#f3f4f6\'" onmouseout="this.style.backgroundColor=\'white\'">
-                            HENTIKAN & KELUAR
-                        </a>
-                    </div>
-                ', ['namaSekolah' => $namaSekolah]);
-            })
+
 
             ->renderHook('panels::body.end', function () {
                 return <<<'HTML'

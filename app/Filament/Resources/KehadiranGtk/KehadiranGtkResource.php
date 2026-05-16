@@ -14,10 +14,14 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use BackedEnum;
 use Filament\Support\Icons\Heroicon;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
+
+use App\Filament\Traits\HasDinasFilter;
 
 class KehadiranGtkResource extends Resource
 {
+    use HasDinasFilter;
     protected static ?string $slug = 'kehadiran-gtk';
 
     protected static ?string $model = KehadiranGtk::class;
@@ -76,13 +80,22 @@ class KehadiranGtkResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $sekolahId = null;
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $sekolahId = session('dinas_selected_sekolah_id');
+        } else {
+            $sekolahId = Filament::getTenant()?->id;
+        }
+
         return parent::getEloquentQuery()
             ->with(['gtk', 'laporan'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])
-            ->whereHas('gtk', function (Builder $query) {
-                $query->where('sekolah_id', filament()->getTenant()->id);
+            ->whereHas('gtk', function (Builder $query) use ($sekolahId) {
+                if ($sekolahId) {
+                    $query->where('sekolah_id', $sekolahId);
+                }
             });
     }
 

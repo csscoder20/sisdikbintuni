@@ -9,6 +9,7 @@ class Gtk extends Model
 {
     use SoftDeletes;
     use \App\Traits\HasActivityLog;
+    use \App\Traits\HasSchoolContext;
     protected $table = 'gtk';
     protected $fillable = [
         'nama',

@@ -16,8 +16,11 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use App\Filament\Traits\HasDinasFilter;
+
 class LaporanKeuanganResource extends Resource
 {
+    use HasDinasFilter;
     protected static ?string $model = LaporanKeuangan::class;
 
     protected static ?string $modelLabel = 'Keuangan';
@@ -61,9 +64,18 @@ class LaporanKeuanganResource extends Resource
 
     protected static function scopeQueryToCurrentTenant(Builder $query): Builder
     {
+        $sekolahId = null;
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $sekolahId = session('dinas_selected_sekolah_id');
+        } else {
+            $sekolahId = Filament::getTenant()?->id;
+        }
+
         return $query
-            ->whereHas('laporan', function (Builder $query) {
-                $query->where('sekolah_id', filament()->getTenant()?->id);
+            ->whereHas('laporan', function (Builder $query) use ($sekolahId) {
+                if ($sekolahId) {
+                    $query->where('sekolah_id', $sekolahId);
+                }
             });
     }
 

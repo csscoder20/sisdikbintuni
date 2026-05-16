@@ -31,7 +31,7 @@ class LaporanKeuangan extends Model
     {
         static::saving(function (self $laporanKeuangan): void {
             $laporanKeuangan->nominal = self::parseNominal($laporanKeuangan->nominal);
-            $laporanKeuangan->saldo = $laporanKeuangan->jenis_transaksi === 'kredit'
+            $laporanKeuangan->saldo = $laporanKeuangan->jenis_transaksi === 'debit'
                 ? $laporanKeuangan->nominal
                 : -$laporanKeuangan->nominal;
         });

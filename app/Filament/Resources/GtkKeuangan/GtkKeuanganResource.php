@@ -10,8 +10,11 @@ use Filament\Tables\Table;
 use App\Filament\Resources\GtkKeuangan\Schemas\GtkKeuanganForm;
 use App\Filament\Resources\GtkKeuangan\Tables\GtkKeuangansTable;
 
+use App\Filament\Traits\HasDinasFilter;
+
 class GtkKeuanganResource extends Resource
 {
+    use HasDinasFilter;
     protected static ?string $model = Gtk::class;
 
     protected static ?string $slug = 'rekening-npwp-gtk';

@@ -297,16 +297,16 @@
         <div style="flex:1;overflow:auto;">
             @if($total > 0)
             <table class="tbl">
-                <thead><tr><th width="5%">No</th><th>Tanggal</th><th width="15%">Jenis</th><th>Keterangan</th><th width="15%">Nominal</th><th width="15%">Saldo</th><th width="12%">Status</th></tr></thead>
+                <thead><tr><th width="5%">No</th><th width="12%">Tanggal</th><th width="28%">Keterangan</th><th width="16%" style="text-align:center;">Debit</th><th width="16%" style="text-align:center;">Kredit</th><th width="16%" style="text-align:center;">Saldo</th><th width="7%" style="text-align:center;">Status</th></tr></thead>
                 <tbody>
                     @foreach($list as $i => $k)
                     <tr>
                         <td>{{ ($list->currentPage() - 1) * $list->perPage() + $loop->iteration }}</td>
-                        <td>{{ $k->tanggal ? $k->tanggal->format('d M Y') : '-' }}</td>
-                        <td style="font-weight:600;color:{{ $k->jenis_transaksi === 'kredit' ? '#15803d' : '#dc2626' }};">{{ ucfirst($k->jenis_transaksi ?? '-') }}</td>
+                        <td>{{ $k->tanggal ? \Carbon\Carbon::parse($k->tanggal)->translatedFormat('d F Y') : '-' }}</td>
                         <td>{{ $k->keterangan ?? '-' }}</td>
-                        <td>Rp {{ number_format($k->nominal ?? 0, 0, ',', '.') }}</td>
-                        <td style="font-weight:700;color:{{ ($k->saldo ?? 0) < 0 ? '#dc2626' : '#15803d' }};">Rp {{ number_format($k->saldo ?? 0, 0, ',', '.') }}</td>
+                        <td style="text-align:center;">{{ $k->jenis_transaksi === 'debit' ? number_format($k->nominal ?? 0, 0, ',', '.') : '' }}</td>
+                        <td style="text-align:center;">{{ $k->jenis_transaksi === 'kredit' ? number_format($k->nominal ?? 0, 0, ',', '.') : '' }}</td>
+                        <td style="text-align:center; font-weight:700;color:{{ ($k->saldo ?? 0) < 0 ? '#dc2626' : '#15803d' }};">{{ number_format($k->saldo ?? 0, 0, ',', '.') }}</td>
                         <td style="text-align:center;"><span class="bOk">✓</span></td>
                     </tr>
                     @endforeach
@@ -379,7 +379,7 @@
                         <td>{{ $s->nik ?? '-' }}</td>
                         <td>{{ $s->nobpjs ?? '-' }}</td>
                         <td>{{ $s->tempat_lahir ?? '-' }}</td>
-                        <td>{{ $s->tanggal_lahir ?? '-' }}</td>
+                        <td>{{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->translatedFormat('d F Y') : '-' }}</td>
                         <td>{{ $s->jenis_kelamin ? (stripos($s->jenis_kelamin,'laki')!==false?'L':'P') : '-' }}</td>
                         <td>{{ $s->agama ?? '-' }}</td>
                         <td>{{ $s->alamat ?? '-' }}</td>
@@ -466,7 +466,7 @@
                         <td>{{ $g->nokarpeg ?? '-' }}</td>
                         <td>{{ $g->nuptk ?? '-' }}</td>
                         <td>{{ $g->tempat_lahir ?? '-' }}</td>
-                        <td>{{ $g->tanggal_lahir ?? '-' }}</td>
+                        <td>{{ $g->tanggal_lahir ? \Carbon\Carbon::parse($g->tanggal_lahir)->translatedFormat('d F Y') : '-' }}</td>
                         <td>{{ $g->jenis_kelamin ? (stripos($g->jenis_kelamin,'laki')!==false?'L':'P') : '-' }}</td>
                         <td>{{ $g->agama ?? '-' }}</td>
                         <td>{{ $g->alamat ?? '-' }}</td>
@@ -478,9 +478,9 @@
                         <td>{{ $g->daerah_asal ?? '-' }}</td>
                         <td><span class="bBlue">{{ $g->jenis_gtk ?? '-' }}</span></td>
                         <td>{{ $g->status_kepegawaian ?? '-' }}</td>
-                        <td>{{ $g->tmt_pns ?? '-' }}</td>
+                        <td>{{ $g->tmt_pns ? \Carbon\Carbon::parse($g->tmt_pns)->translatedFormat('d F Y') : '-' }}</td>
                         <td>{{ $g->pangkat_gol_terakhir ?? '-' }}</td>
-                        <td>{{ $g->tmt_pangkat_gol_terakhir ?? '-' }}</td>
+                        <td>{{ $g->tmt_pangkat_gol_terakhir ? \Carbon\Carbon::parse($g->tmt_pangkat_gol_terakhir)->translatedFormat('d F Y') : '-' }}</td>
                         <td style="text-align:center;">@if($this->isGtkComplete($g))<span class="bOk">✓</span>@else<span class="bErr">✕</span>@endif</td>
                     </tr>
                     @endforeach

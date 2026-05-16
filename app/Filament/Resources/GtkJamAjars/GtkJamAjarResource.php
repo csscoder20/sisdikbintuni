@@ -14,10 +14,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Facades\Filament;
 use Filament\Tables\Table;
+
+use App\Filament\Traits\HasDinasFilter;
 
 class GtkJamAjarResource extends Resource
 {
+    use HasDinasFilter;
     protected static ?string $slug = 'sebaran-jam-ajar';
 
     protected static ?string $model = \App\Models\Mengajar::class;
@@ -71,6 +75,13 @@ class GtkJamAjarResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $sekolahId = null;
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $sekolahId = session('dinas_selected_sekolah_id');
+        } else {
+            $sekolahId = Filament::getTenant()?->id;
+        }
+
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
@@ -79,9 +90,11 @@ class GtkJamAjarResource extends Resource
             ->withSum('teachingEntries as total_jam_mengajar', 'jumlah_jam')
             ->whereNull('rombel_id')
             ->whereNull('mapel_id')
-            ->whereHas('gtk', function (Builder $query) {
-                $query->where('sekolah_id', filament()->getTenant()->id)
-                    ->whereIn('jenis_gtk', ['Kepala Sekolah', 'Guru']);
+            ->whereHas('gtk', function (Builder $query) use ($sekolahId) {
+                if ($sekolahId) {
+                    $query->where('sekolah_id', $sekolahId);
+                }
+                $query->whereIn('jenis_gtk', ['Kepala Sekolah', 'Guru']);
             });
     }
 

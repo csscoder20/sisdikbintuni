@@ -112,12 +112,6 @@ class SekolahResource extends Resource
 
             ->recordActions([
                 ActionGroup::make([
-                    Action::make('impersonate')
-                        ->label('Masuk sebagai Operator')
-                        ->icon('heroicon-o-finger-print')
-                        ->color('warning')
-                        ->url(fn(Sekolah $record) => route('start-impersonating', $record))
-                        ->openUrlInNewTab(),
 
                     EditAction::make(),
                     DeleteAction::make(),

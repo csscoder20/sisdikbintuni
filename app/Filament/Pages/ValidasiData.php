@@ -333,9 +333,17 @@ class ValidasiData extends Page
 
         $rows = [];
         foreach ($this->requiredProfilFields as $field => $label) {
+            $val = $s->$field ?? null;
+            if ($val && $field === 'tanggal_sk_pendirian') {
+                try {
+                    $val = \Carbon\Carbon::parse($val)->translatedFormat('d F Y');
+                } catch (\Exception $e) {
+                    // Do nothing, leave it as is
+                }
+            }
             $rows[] = [
                 'label' => $label,
-                'value' => $s->$field ?? null,
+                'value' => $val,
                 'ok'    => !empty($s->$field),
             ];
         }

@@ -36,28 +36,26 @@ class LaporanKeuanganTable
                     ->searchable()
                     ->wrap()
                     ->grow(),
-                TextColumn::make('jenis_transaksi')
-                    ->label('Jenis')
-                    ->badge()
-                    ->formatStateUsing(fn(?string $state): string => match ($state) {
-                        'kredit' => 'Kredit',
-                        'debit' => 'Debit',
-                        default => '-',
-                    })
-                    ->color(fn(?string $state): string => match ($state) {
-                        'kredit' => 'success',
-                        'debit' => 'danger',
-                        default => 'gray',
-                    })
-                    ->sortable(),
-                TextColumn::make('nominal')
-                    ->label('Nominal')
+                TextColumn::make('debet')
+                    ->label('Debit')
+                    ->state(fn($record) => $record->jenis_transaksi === 'debit' ? $record->nominal : null)
                     ->money('idr')
-                    ->alignment('right'),
+                    ->alignment('center')
+                    ->extraAttributes(['style' => 'min-width: 250px; padding: 0 1rem;'])
+                    ->extraHeaderAttributes(['style' => 'min-width: 250px']),
+                TextColumn::make('kredit')
+                    ->label('Kredit')
+                    ->state(fn($record) => $record->jenis_transaksi === 'kredit' ? $record->nominal : null)
+                    ->money('idr')
+                    ->alignment('center')
+                    ->extraAttributes(['style' => 'min-width: 250px; padding: 0 1rem;'])
+                    ->extraHeaderAttributes(['style' => 'min-width: 250px']),
                 TextColumn::make('running_balance')
                     ->label('Saldo')
                     ->money('idr')
-                    ->alignment('right')
+                    ->alignment('center')
+                    ->extraAttributes(['style' => 'min-width: 250px; padding: 0 1rem;'])
+                    ->extraHeaderAttributes(['style' => 'min-width: 250px'])
                     ->state(function ($record) {
                         $sekolahId = $record->laporan->sekolah_id ?? filament()->getTenant()?->id;
 

@@ -20,9 +20,9 @@ class NotifikasiResource extends Resource
 
     protected static ?string $slug = 'notifikasi';
 
-    protected static ?string $modelLabel = 'Pemberitahuan Masal';
+    protected static ?string $modelLabel = 'Notifikasi';
 
-    protected static ?string $pluralModelLabel = 'Pemberitahuan Masal';
+    protected static ?string $pluralModelLabel = 'Notifikasi';
 
     protected static ?int $navigationSort = 1;
 

@@ -137,7 +137,14 @@ class SiswaForm
                         ->schema([
                             Select::make('rombel')
                                 ->label('Rombel/Kelas')
-                                ->relationship('rombel', 'nama')
+                                ->relationship('rombel', 'nama', function ($query) {
+                                    if (filament()->getCurrentPanel()?->getId() === 'dinas') {
+                                        $selectedSekolahId = session('dinas_selected_sekolah_id');
+                                        if ($selectedSekolahId) {
+                                            $query->where('sekolah_id', $selectedSekolahId);
+                                        }
+                                    }
+                                })
                                 ->searchable()
                                 ->preload()
                                 ->saveRelationshipsUsing(function ($record, $state, $get) {

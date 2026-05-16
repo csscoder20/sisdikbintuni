@@ -18,8 +18,12 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum; // Add this import
 
+use App\Filament\Traits\HasDinasFilter;
+
 class SiswaResource extends Resource
 {
+    use HasDinasFilter;
+
     protected static ?string $slug = 'siswa';
 
     protected static ?string $model = Siswa::class;
@@ -126,11 +130,5 @@ class SiswaResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
+    // The getEloquentQuery and isScopedToTenant are now handled by HasDinasFilter trait
 }

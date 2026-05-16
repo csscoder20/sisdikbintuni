@@ -17,8 +17,11 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use App\Filament\Traits\HasDinasFilter;
+
 class LaporanGedungResource extends Resource
 {
+    use HasDinasFilter;
     protected static ?string $model = LaporanGedung::class;
 
     protected static ?string $modelLabel = 'Sarana & Prasarana';
@@ -74,12 +77,21 @@ class LaporanGedungResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $sekolahId = null;
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $sekolahId = session('dinas_selected_sekolah_id');
+        } else {
+            $sekolahId = Filament::getTenant()?->id;
+        }
+
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])
-            ->whereHas('laporan', function (Builder $query) {
-                $query->where('sekolah_id', filament()->getTenant()->id);
+            ->whereHas('laporan', function (Builder $query) use ($sekolahId) {
+                if ($sekolahId) {
+                    $query->where('sekolah_id', $sekolahId);
+                }
             });
     }
 

@@ -30,6 +30,14 @@ class MapelResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            return !empty(session('dinas_selected_sekolah_id'));
+        }
+        return true;
+    }
+
     // NON AKTIFKAN TENANCY
     protected static bool $isScopedToTenant = false;
 
@@ -78,14 +86,22 @@ class MapelResource extends Resource
                 SoftDeletingScope::class,
             ]);
 
-        if ($tenant = Filament::getTenant()) {
-            $panel = Filament::getCurrentPanel();
-            $panelId = $panel ? $panel->getId() : null;
-            $jenjang = $tenant->jenjang ?: (in_array($panelId, ['sma', 'smk']) ? strtoupper($panelId) : null);
-            
-            if ($jenjang) {
-                $query->where('jenjang', $jenjang);
+        $jenjang = null;
+
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            $selectedId = session('dinas_selected_sekolah_id');
+            if ($selectedId) {
+                $sekolah = \App\Models\Sekolah::find($selectedId);
+                $jenjang = $sekolah?->jenjang;
             }
+        } else {
+            $tenant = Filament::getTenant();
+            $panelId = Filament::getCurrentPanel()?->getId();
+            $jenjang = $tenant?->jenjang ?: (in_array($panelId, ['sma', 'smk']) ? strtoupper($panelId) : null);
+        }
+
+        if ($jenjang) {
+            $query->where('jenjang', $jenjang);
         }
 
         return $query;

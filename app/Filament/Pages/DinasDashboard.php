@@ -22,6 +22,11 @@ class DinasDashboard extends BaseDashboard
 
     public function getTitle(): string | Htmlable
     {
+        $selectedId = session('dinas_selected_sekolah_id');
+        if ($selectedId) {
+            $sekolah = \App\Models\Sekolah::find($selectedId);
+            return "Dashboard " . ($sekolah?->nama ?? 'Sekolah');
+        }
         return 'Dashboard Dinas';
     }
 
@@ -32,16 +37,32 @@ class DinasDashboard extends BaseDashboard
 
     public function getHeading(): string | Htmlable
     {
+        $selectedId = session('dinas_selected_sekolah_id');
+        if ($selectedId) {
+            $sekolah = \App\Models\Sekolah::find($selectedId);
+            return "Dashboard " . ($sekolah?->nama ?? 'Sekolah');
+        }
         return 'Dashboard Dinas Pendidikan';
     }
 
     public function getWidgets(): array
     {
+        $selectedId = session('dinas_selected_sekolah_id');
+        
+        if ($selectedId) {
+            // Widget khusus konteks sekolah
+            return [
+                \App\Filament\Widgets\StatsOverview::class, // Widget statistik sekolah
+                \App\Filament\Widgets\GtkStatusKepegawaianChart::class,
+                \App\Filament\Widgets\GuruPendidikanChart::class,
+            ];
+        }
+
+        // Widget global dinas
         return [
             \App\Filament\Widgets\AdminDinasStatsOverview::class,
             \App\Filament\Widgets\GtkStatusKepegawaianChart::class,
             \App\Filament\Widgets\GuruPendidikanChart::class,
-            // \App\Filament\Widgets\OperatorPending::class,
             \App\Filament\Widgets\LaporanTerbaruWidget::class,
             \App\Filament\Widgets\OperatorActivityLogWidget::class,
         ];

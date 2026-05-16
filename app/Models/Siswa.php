@@ -9,6 +9,7 @@ class Siswa extends Model
 {
     use SoftDeletes;
     use \App\Traits\HasActivityLog;
+    use \App\Traits\HasSchoolContext;
     protected $table = 'siswa';
     protected $fillable = [
         'nama',

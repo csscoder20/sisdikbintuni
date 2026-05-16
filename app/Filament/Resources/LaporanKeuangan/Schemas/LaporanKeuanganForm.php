@@ -39,8 +39,8 @@ class LaporanKeuanganForm
                         Select::make('jenis_transaksi')
                             ->label('Jenis Transaksi')
                             ->options([
-                                'kredit' => 'Kredit (Uang Masuk)',
-                                'debit' => 'Debit (Uang Keluar)',
+                                'debit' => 'Debit (Uang Masuk)',
+                                'kredit' => 'Kredit (Uang Keluar)',
                             ])
                             ->required(),
                     ]),

@@ -35,8 +35,22 @@ class ExcelImportAction extends Action
                     ->disk('local')
                     ->directory('imports')
                     ->visibility('private')
-                    ->preserveFilenames(),
+                    ->preserveFilenames()
+                    ->live(),
             ])
+            ->modalSubmitAction(fn ($action) => $action->extraAttributes([
+                'x-data' => '{
+                    get hasFile() {
+                        let state = $wire.mountedActionsData?.[0]?.file || $wire.mountedTableActionsData?.[0]?.file || null;
+                        if (!state) return false;
+                        if (typeof state === \'string\') return state.length > 0;
+                        if (typeof state === \'object\') return Object.keys(state).length > 0;
+                        return false;
+                    }
+                }',
+                'x-show' => 'hasFile',
+                'x-transition' => '',
+            ]))
             ->action(function (array $data) {
                 $filePath = storage_path('app/private/' . $data['file']);
                 
@@ -272,8 +286,13 @@ class ExcelImportAction extends Action
                     $importMock->setRelation('user', auth()->user());
                 }
 
+                $options = [];
+                if (session()->has('dinas_selected_sekolah_id')) {
+                    $options['dinas_selected_sekolah_id'] = session('dinas_selected_sekolah_id');
+                }
+
                 // Instantiate importer
-                $importer = new $this->importerClass($importMock, $importerColumnMap, []);
+                $importer = new $this->importerClass($importMock, $importerColumnMap, $options);
                 
                 // Process the row using __invoke
                 // We pass the raw row data, and __invoke handles remapping via columnMap
