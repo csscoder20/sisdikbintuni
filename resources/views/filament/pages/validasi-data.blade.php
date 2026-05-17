@@ -770,12 +770,11 @@
     <div class="vd-footer">
         <button wire:click="prevStep" class="btn btn-back" {{ $cur <= 1 ? 'disabled' : '' }}>← Kembali</button>
         @if($cur < $this->totalSteps)
-            <button wire:click="nextStep" class="btn btn-next" {{ !$isValid ? 'disabled' : '' }}
-                title="{{ !$isValid ? 'Data belum lengkap' : 'Lanjut ke langkah berikutnya' }}">
+            <button wire:click="nextStep" class="btn btn-next" title="Lanjut ke langkah berikutnya">
                 Selanjutnya →
             </button>
         @else
-            <button wire:click="submitValidasi" class="btn btn-finish" {{ !$allValid ? 'disabled' : '' }}>
+            <button wire:click="submitValidasi" class="btn btn-finish">
                 ✓ Selesai &amp; Simpan Validasi
             </button>
         @endif
@@ -783,4 +782,41 @@
 
 </div>{{-- end vd-card --}}
 </div>{{-- end vd --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div x-data
+     x-on:swal-confirm-next.window="
+        let msg = typeof $event.detail.message === 'string' ? $event.detail.message : ($event.detail[0] ? $event.detail[0].message : $event.detail.message);
+        Swal.fire({
+            title: 'Data Belum Lengkap',
+            html: msg + '<br><br>Apakah Anda yakin ingin melanjutkan ke langkah berikutnya?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, lanjutkan',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $wire.forceNextStep();
+            }
+        });
+     "
+     x-on:swal-confirm-submit.window="
+        let msg = typeof $event.detail.message === 'string' ? $event.detail.message : ($event.detail[0] ? $event.detail[0].message : $event.detail.message);
+        Swal.fire({
+            title: 'Selesai & Simpan Validasi',
+            html: msg,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Simpan',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $wire.forceSubmit();
+            }
+        });
+     ">
+</div>
 </x-filament-panels::page>

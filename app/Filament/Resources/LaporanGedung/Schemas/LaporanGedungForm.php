@@ -13,14 +13,17 @@ class LaporanGedungForm
     {
         return $schema
             ->components([
-                Select::make('laporan_id')
-                    ->label('Periode Laporan')
-                    ->relationship('laporan', 'id', function ($query) {
-                        return $query->where('sekolah_id', Filament::getTenant()->id)
+                \Filament\Forms\Components\Hidden::make('laporan_id')
+                    ->default(function () {
+                        $sekolahId = Filament::getTenant()?->id;
+                        if (!$sekolahId) {
+                            return null;
+                        }
+                        return \App\Models\Laporan::where('sekolah_id', $sekolahId)
                             ->orderBy('tahun', 'desc')
-                            ->orderBy('bulan', 'desc');
+                            ->orderBy('bulan', 'desc')
+                            ->first()?->id;
                     })
-                    ->getOptionLabelFromRecordUsing(fn($record) => "Tahun {$record->tahun} - Bulan {$record->bulan}")
                     ->required(),
                 TextInput::make('nama_ruang')
                     ->label('Nama Ruang')

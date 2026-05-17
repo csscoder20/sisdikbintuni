@@ -51,9 +51,37 @@ class CetakLaporanResource extends Resource
                     ->label('Jenjang')
                     ->badge()
                     ->formatStateUsing(fn ($state) => strtoupper($state)),
-                TextColumn::make('kecamatan')
-                    ->label('Kecamatan')
-                    ->searchable(),
+                TextColumn::make('periode')
+                    ->label('Periode Laporan')
+                    ->state(function (Sekolah $record) {
+                        $laporan = $record->laporan()->orderBy('tahun', 'desc')->orderBy('bulan', 'desc')->first();
+                        if ($laporan) {
+                            return \Carbon\Carbon::createFromDate($laporan->tahun, $laporan->bulan, 1)->translatedFormat('F Y');
+                        }
+                        return '-';
+                    })
+                    ->badge()
+                    ->color('info'),
+                TextColumn::make('alamat_lengkap')
+                    ->label('Alamat')
+                    ->state(function (Sekolah $record) {
+                        $parts = array_filter([
+                            $record->alamat,
+                            $record->desa,
+                            $record->kecamatan,
+                            $record->kabupaten,
+                            $record->provinsi,
+                        ]);
+                        return implode(', ', $parts);
+                    })
+                    ->wrap()
+                    ->searchable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $search) {
+                        $query->where('alamat', 'like', "%{$search}%")
+                            ->orWhere('desa', 'like', "%{$search}%")
+                            ->orWhere('kecamatan', 'like', "%{$search}%")
+                            ->orWhere('kabupaten', 'like', "%{$search}%")
+                            ->orWhere('provinsi', 'like', "%{$search}%");
+                    }),
                 TextColumn::make('laporan_status')
                     ->label('Progress Validasi')
                     ->state(function (Sekolah $record) {
@@ -86,6 +114,11 @@ class CetakLaporanResource extends Resource
                             ->openUrlInNewTab(),
                     ])
                     ->modalContent(fn (Sekolah $record) => view('livewire.report-preview-container', ['schoolId' => $record->id])),
+            ])
+            ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

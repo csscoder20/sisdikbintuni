@@ -109,23 +109,31 @@ class Sekolah extends Model
         $laporan = $this->laporan()->where('bulan', $month)->where('tahun', $year)->first();
 
         $checklist = [
-            'identitas_sekolah',
-            'kondisi_sarpras',
-            'mapel',
-            'rombel',
-            'keuangan',
-            'nominatif_siswa',
-            'nominatif_gtk',
-            'riwayat_pendidikan_gtk',
-            'rekening_npwp_gtk',
-            'sebaran_jam',
-            'rekap_kehadiran',
+            'identitas_sekolah' => 'is_identitas_sekolah_valid',
+            'kondisi_sarpras' => 'is_kondisi_sarpras_valid',
+            'mapel' => null,
+            'rombel' => 'is_siswa_rombel_valid',
+            'keuangan' => null,
+            'nominatif_siswa' => 'is_nominatif_siswa_valid',
+            'nominatif_gtk' => 'is_nominatif_gtk_valid',
+            'riwayat_pendidikan_gtk' => 'is_gtk_pendidikan_valid',
+            'rekening_npwp_gtk' => null,
+            'sebaran_jam' => 'is_sebaran_jam_valid',
+            'rekap_kehadiran' => 'is_rekap_kehadiran_valid',
         ];
 
         $done = 0;
-        foreach ($checklist as $key) {
-            if ($this->checkSectionValidity($key)) {
-                $done++;
+        foreach ($checklist as $key => $column) {
+            if ($laporan) {
+                if ($column) {
+                    if ($laporan->$column) $done++;
+                } else {
+                    $done++;
+                }
+            } else {
+                if ($this->checkSectionValidity($key)) {
+                    $done++;
+                }
             }
         }
 

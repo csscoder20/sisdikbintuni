@@ -36,6 +36,7 @@ class ValidasiData extends Page
     public int   $currentStep = 1;
     public int   $totalSteps  = 11;
     public array $stepStatuses = [];
+    public array $bypassedSteps = [];
 
     /* ------------------------------------------------------------------ */
     /* Required fields for Profil Sekolah (label => field)                 */
@@ -120,6 +121,10 @@ class ValidasiData extends Page
             10 => $this->checkStep6($id),   // Sebaran Jam
             11 => $this->checkStep7($id),   // Kehadiran GTK
         ];
+
+        foreach ($this->bypassedSteps as $step) {
+            $this->stepStatuses[$step] = true;
+        }
     }
 
     public function getExpectedWorkingDays(): array
@@ -248,10 +253,131 @@ class ValidasiData extends Page
     /* ------------------------------------------------------------------ */
     /* Navigation actions                                                   */
     /* ------------------------------------------------------------------ */
+    public function getMissingMessageForStep(int $step): ?string
+    {
+        switch ($step) {
+            case 1:
+                $missing = $this->getMissingProfilFields();
+                if (!empty($missing)) {
+                    return "Masih terdapat data pada Profil Sekolah yang kolom <b>" . implode(', ', $missing) . "</b> masih kosong.";
+                }
+                break;
+            case 2:
+                if ($this->getSarprasCount() == 0) {
+                    return "Belum ada data pada tabel Sarana & Prasarana.";
+                }
+                break;
+            case 3:
+                if ($this->getMapelCount() == 0) {
+                    return "Belum ada data pada tabel Mata Pelajaran.";
+                } elseif (!\App\Models\Mengajar::whereHas('gtk', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))->whereNotNull('mapel_id')->exists()) {
+                    return "Belum ada guru yang ditugaskan ke mata pelajaran.";
+                }
+                break;
+            case 4:
+                if ($this->getRombelCount() == 0) {
+                    return "Belum ada data pada tabel Rombel.";
+                } else {
+                    $empty = $this->getEmptyRombels();
+                    if (!empty($empty)) {
+                        return "Masih terdapat Rombel yang belum memiliki siswa.";
+                    }
+                }
+                break;
+            case 5:
+                if ($this->getLaporanKeuanganCount() == 0) {
+                    return "Belum ada data Keuangan.";
+                }
+                break;
+            case 6:
+                if ($this->getSiswaCount() == 0) {
+                    return "Belum ada data pada tabel Nominatif Siswa.";
+                } else {
+                    $inc = $this->getIncompleteSiswaInfo();
+                    if (!empty($inc)) {
+                        $allMissingCols = [];
+                        foreach ($inc as $i) {
+                            foreach ($i['missing'] as $m) {
+                                $allMissingCols[] = $m;
+                            }
+                        }
+                        $uniqueCols = array_unique($allMissingCols);
+                        $colsString = implode(', ', $uniqueCols);
+                        return "Masih terdapat data pada tabel Nominatif Siswa yang kolom <b>{$colsString}</b> masih kosong.";
+                    }
+                }
+                break;
+            case 7:
+                if ($this->getGtkCount() == 0) {
+                    return "Belum ada data pada tabel Nominatif GTK.";
+                } else {
+                    $inc = $this->getIncompleteGtkInfo();
+                    if (!empty($inc)) {
+                        $allMissingCols = [];
+                        foreach ($inc as $i) {
+                            foreach ($i['missing'] as $m) {
+                                $allMissingCols[] = $m;
+                            }
+                        }
+                        $uniqueCols = array_unique($allMissingCols);
+                        $colsString = implode(', ', $uniqueCols);
+                        return "Masih terdapat data pada tabel Nominatif GTK yang kolom <b>{$colsString}</b> masih kosong.";
+                    }
+                }
+                break;
+            case 8:
+                $tanpaPend = $this->getGtkTanpaPendidikan();
+                if (!empty($tanpaPend)) {
+                    return "Masih terdapat data GTK yang belum melengkapi <b>Riwayat Pendidikan</b>.";
+                }
+                break;
+            case 9:
+                $tanpaRek = $this->getGtkTanpaRekening();
+                if (!empty($tanpaRek)) {
+                    return "Masih terdapat data GTK yang belum melengkapi data <b>Rekening atau NPWP</b>.";
+                }
+                break;
+            case 10:
+                $below = $this->getGtkBelowMinJam();
+                if (!empty($below)) {
+                    return "Masih terdapat data GTK yang jumlah jam mengajarnya <b>kurang dari 24 jam</b>.";
+                }
+                break;
+            case 11:
+                $tanpaHadir = $this->getGtkWithoutKehadiran();
+                if (!empty($tanpaHadir)) {
+                    return "Masih terdapat data GTK yang <b>belum lengkap rekap kehadirannya</b>.";
+                }
+                break;
+        }
+        return "Terdapat data yang belum lengkap pada langkah ini.";
+    }
+
     public function nextStep(): void
     {
         $this->computeStatuses();
-        if (($this->stepStatuses[$this->currentStep] ?? false) && $this->currentStep < $this->totalSteps) {
+        
+        if (!($this->stepStatuses[$this->currentStep] ?? false)) {
+            $msg = $this->getMissingMessageForStep($this->currentStep);
+            $this->dispatch('swal-confirm-next', message: $msg);
+            return;
+        }
+
+        if ($this->currentStep < $this->totalSteps) {
+            $this->currentStep++;
+            $this->resetPage();
+        }
+    }
+
+    public function forceNextStep(): void
+    {
+        if (!in_array($this->currentStep, $this->bypassedSteps)) {
+            $this->bypassedSteps[] = $this->currentStep;
+        }
+        
+        $this->computeStatuses();
+
+        if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
             $this->resetPage();
         }
@@ -273,14 +399,27 @@ class ValidasiData extends Page
         $this->computeStatuses();
 
         if (!collect($this->stepStatuses)->every(fn($s) => $s)) {
-            Notification::make()
-                ->title('Validasi Gagal')
-                ->body('Masih ada data yang belum lengkap. Periksa setiap langkah.')
-                ->danger()
-                ->send();
+            $incompleteSteps = collect($this->stepStatuses)
+                ->filter(fn($s) => !$s)
+                ->keys()
+                ->map(fn($k) => $this->getStepLabels()[$k])
+                ->implode(', ');
+            
+            $msg = "Masih ada langkah yang belum valid: <b>{$incompleteSteps}</b>.<br><br>Apakah Anda yakin ingin menyelesaikan validasi dengan data yang ada?";
+            $this->dispatch('swal-confirm-submit', message: $msg);
             return;
         }
 
+        $this->forceSubmit();
+    }
+
+    public function forceSubmit(): void
+    {
+        if (!in_array($this->currentStep, $this->bypassedSteps)) {
+            $this->bypassedSteps[] = $this->currentStep;
+        }
+        
+        $this->computeStatuses();
         $id    = $this->getSchoolId();
         $month = (int) date('m');
         $year  = (int) date('Y');
@@ -288,21 +427,21 @@ class ValidasiData extends Page
         Laporan::updateOrCreate(
             ['sekolah_id' => $id, 'bulan' => $month, 'tahun' => $year],
             [
-                'is_identitas_sekolah_valid' => true,
-                'is_kondisi_sarpras_valid'   => true,
-                'is_siswa_rombel_valid'      => true,
-                'is_kondisi_siswa_valid'     => true,
-                'is_nominatif_siswa_valid'   => true,
-                'is_kondisi_gtk_valid'       => true,
-                'is_nominatif_gtk_valid'     => true,
-                'is_sebaran_jam_valid'       => true,
-                'is_rekap_kehadiran_valid'   => true,
+                'is_identitas_sekolah_valid' => $this->stepStatuses[1] ?? false,
+                'is_kondisi_sarpras_valid'   => $this->stepStatuses[2] ?? false,
+                'is_siswa_rombel_valid'      => $this->stepStatuses[4] ?? false,
+                'is_kondisi_siswa_valid'     => $this->stepStatuses[6] ?? false,
+                'is_nominatif_siswa_valid'   => $this->stepStatuses[6] ?? false,
+                'is_kondisi_gtk_valid'       => $this->stepStatuses[7] ?? false,
+                'is_nominatif_gtk_valid'     => $this->stepStatuses[7] ?? false,
+                'is_sebaran_jam_valid'       => $this->stepStatuses[10] ?? false,
+                'is_rekap_kehadiran_valid'   => $this->stepStatuses[11] ?? false,
             ]
         );
 
         Notification::make()
-            ->title('Validasi Berhasil!')
-            ->body('Data periode ' . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y') . ' berhasil divalidasi dan disimpan.')
+            ->title('Validasi Disimpan!')
+            ->body('Data periode ' . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y') . ' berhasil divalidasi dan disimpan ke database.')
             ->success()
             ->send();
     }
