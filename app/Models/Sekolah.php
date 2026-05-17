@@ -111,13 +111,13 @@ class Sekolah extends Model
         $checklist = [
             'identitas_sekolah' => 'is_identitas_sekolah_valid',
             'kondisi_sarpras' => 'is_kondisi_sarpras_valid',
-            'mapel' => null,
+            'mapel' => 'is_mapel_valid',
             'rombel' => 'is_siswa_rombel_valid',
-            'keuangan' => null,
+            'keuangan' => 'is_keuangan_valid',
             'nominatif_siswa' => 'is_nominatif_siswa_valid',
             'nominatif_gtk' => 'is_nominatif_gtk_valid',
             'riwayat_pendidikan_gtk' => 'is_gtk_pendidikan_valid',
-            'rekening_npwp_gtk' => null,
+            'rekening_npwp_gtk' => 'is_rekening_npwp_valid',
             'sebaran_jam' => 'is_sebaran_jam_valid',
             'rekap_kehadiran' => 'is_rekap_kehadiran_valid',
         ];
@@ -125,9 +125,7 @@ class Sekolah extends Model
         $done = 0;
         foreach ($checklist as $key => $column) {
             if ($laporan) {
-                if ($column) {
-                    if ($laporan->$column) $done++;
-                } else {
+                if ($laporan->$column) {
                     $done++;
                 }
             } else {

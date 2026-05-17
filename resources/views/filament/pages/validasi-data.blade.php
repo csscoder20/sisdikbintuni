@@ -9,16 +9,16 @@
 .vd-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:90px;position:relative;}
 .vd-step:not(:last-child)::after{content:'';position:absolute;top:19px;left:calc(50% + 22px);right:calc(-50% + 22px);height:2px;background:#e5e7eb;z-index:0;}
 .vd-step.done:not(:last-child)::after,.vd-step.active:not(:last-child)::after{background:var(--ok);}
-.vd-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;z-index:1;border:2px solid #e5e7eb;background:#fff;color:#9ca3af;transition:all .3s;cursor:pointer;}
+.vd-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;z-index:1;border:2px solid #e5e7eb;background:#fff;color:#9ca3af;transition:all .3s;}
 .vd-step.done .vd-circle{background:var(--ok);border-color:var(--ok);color:#fff;}
 .vd-step.active .vd-circle{background:var(--act);border-color:var(--act);color:#fff;box-shadow:0 0 0 4px rgba(59,130,246,.2);}
 .vd-step.invalid .vd-circle{background:var(--err);border-color:var(--err);color:#fff;}
 .vd-label{font-size:0.75rem;font-weight:600;color:#9ca3af;margin-top:5px;text-align:center;line-height:1.3;}
 .vd-step.active .vd-label{color:var(--act);font-weight:700;}
 .vd-step.done .vd-label{color:var(--ok);}
-.vd-card{display:flex;flex-direction:column;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;}
+.vd-card{display:flex;flex-direction:column;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden; max-height: calc(100vh - 14rem);}
 
-.vd-cb{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.875rem;}
+.vd-cb{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.875rem; flex: 1; overflow-y: auto; overflow-x: hidden;}
 .vd-footer{flex-shrink:0;display:flex;gap:.75rem;padding:1rem 1.5rem;border-top:1px solid #f1f5f9;background:#f8fafc;}
 .btn{padding:.5rem 1.25rem;border-radius:8px;font-weight:600;font-size:0.875rem;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;}
 .btn-back{background:#e5e7eb;color:#374151;}.btn-back:hover:not(:disabled){background:#d1d5db;}.btn-back:disabled{opacity:.4;cursor:not-allowed;}
@@ -40,7 +40,7 @@
 /* Table */
 .tbl{width:100%;border-collapse:collapse;font-size:0.875rem;}
 .tbl th{background:#f8fafc;padding:8px 10px;text-align:left;font-weight:600;color:#374151;border-bottom:2px solid #e5e7eb;white-space:nowrap;font-size:0.75rem;text-transform:uppercase;letter-spacing:.04em;}
-.tbl td{padding:7px 10px;border-bottom:1px solid #f3f4f6;color:#4b5563;vertical-align:middle;}
+.tbl td{padding:7px 10px;border-bottom:1px solid #f3f4f6;color:#4b5563;vertical-align:middle;max-width:16ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tbl tr:last-child td{border-bottom:none;}
 .tbl tr:hover td{background:#fafafa;}
 /* Badges */
@@ -82,7 +82,7 @@
                 if ($n === $cur) $cls .= ' active';
                 else $cls .= ($statuses[$n] ?? false) ? ' done' : ' invalid';
             @endphp
-            <div class="{{ $cls }}" wire:click="$set('currentStep',{{ $n }})" style="cursor:pointer;">
+            <div class="{{ $cls }}">
                 <div class="vd-circle">
                     @if($n === $cur) {{ $n }}
                     @elseif($statuses[$n] ?? false) ✓
@@ -713,15 +713,6 @@
                 <p style="font-size:.8rem;color:#b91c1c;margin:0;">Belum ada data Kehadiran GTK. Harap isi rekap kehadiran terlebih dahulu. <a href="{{ route('filament.'.filament()->getId().'.resources.kehadiran-gtk.index', ['tenant' => filament()->getTenant()]) }}" style="color:#b91c1c;font-weight:600;">Perbaiki Sekarang!</a></p>
             </div>
         @else
-            @if($allValid)
-                <div class="big-ok" style="margin-bottom:1rem;">
-                    <span style="font-size:1.6rem;">🎉</span>
-                    <div>
-                        <div class="big-ok-title">Semua langkah valid! Siap untuk disimpan.</div>
-                        <div class="big-ok-sub">Klik "Selesai & Simpan" untuk merekam validasi periode {{ $this->getCurrentPeriod() }}</div>
-                    </div>
-                </div>
-            @endif
             <div class="stat">
                 <div class="stat-num">{{ $total }}</div>
                 <div><div class="stat-lbl">Rekap Kehadiran GTK</div><div class="stat-sub">{{ count($gtkTanpaKehadiran) > 0 ? count($gtkTanpaKehadiran).' GTK belum tercatat' : 'Semua GTK sudah tercatat' }}</div></div>
@@ -764,6 +755,24 @@
         </div>
     @endif
 
+    {{-- ======================== STEP 12 ======================== --}}
+    @if($cur === 12)
+        <div style="flex:1; padding: 3rem 2rem; text-align: center; background: #fafafa; border-radius: 8px; border: 1px dashed #cbd5e1;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+            <h3 style="color: #1e293b; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Pernyataan Validasi</h3>
+            
+            @if($allValid)
+                <p style="color: #15803d; font-weight: 600; margin-bottom: 1.5rem;">🎉 Semua langkah valid! Siap untuk disimpan.</p>
+            @endif
+
+            <p style="font-size: 1.1rem; color: #333; line-height: 1.6; font-weight: 500; margin-bottom: 2rem;">
+                "Data yang saya masukkan sudah benar dan data akan direkam sebagai laporan resmi<br>periode bulan {{ \Carbon\Carbon::now()->translatedFormat('F') }} tahun {{ \Carbon\Carbon::now()->translatedFormat('Y') }}."
+            </p>
+            
+            <p style="font-size: 0.85rem; color: #64748b;">Klik tombol <b>Selesai & Simpan Validasi</b> di bawah jika Anda setuju.</p>
+        </div>
+    @endif
+
     </div>{{-- end vd-cb --}}
 
     {{-- Footer actions --}}
@@ -774,9 +783,15 @@
                 Selanjutnya →
             </button>
         @else
-            <button wire:click="submitValidasi" class="btn btn-finish">
-                ✓ Selesai &amp; Simpan Validasi
-            </button>
+            @if($isSubmitted)
+                <button disabled class="btn btn-finish" style="opacity: 0.6; cursor: not-allowed;">
+                    ✓ Validasi Sudah Disimpan
+                </button>
+            @else
+                <button wire:click="submitValidasi" class="btn btn-finish">
+                    ✓ Selesai &amp; Simpan Validasi
+                </button>
+            @endif
         @endif
     </div>
 
@@ -802,11 +817,11 @@
         });
      "
      x-on:swal-confirm-submit.window="
-        let msg = typeof $event.detail.message === 'string' ? $event.detail.message : ($event.detail[0] ? $event.detail[0].message : $event.detail.message);
+        let msg2 = typeof $event.detail.message === 'string' ? $event.detail.message : ($event.detail[0] ? $event.detail[0].message : $event.detail.message);
         Swal.fire({
-            title: 'Selesai & Simpan Validasi',
-            html: msg,
-            icon: 'warning',
+            title: 'Selesai & Simpan Data',
+            html: msg2,
+            icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
             cancelButtonColor: '#d33',
@@ -816,6 +831,18 @@
             if (result.isConfirmed) {
                 $wire.forceSubmit();
             }
+        });
+     "
+     x-on:swal-success.window="
+        let msg3 = typeof $event.detail.message === 'string' ? $event.detail.message : ($event.detail[0] ? $event.detail[0].message : $event.detail.message);
+        Swal.fire({
+            title: 'Berhasil!',
+            text: msg3,
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            window.location.reload();
         });
      ">
 </div>

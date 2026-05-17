@@ -100,19 +100,6 @@ class UsersTable
                         ->action(function ($record) {
                             $record->update(['status' => 'active']);
 
-                            if ($record->nohp) {
-                                \App\Services\ZenzivaService::sendWhatsApp(
-                                    $record->nohp,
-                                    "Halo {$record->name}, akun Anda di Sisdik Bintuni telah AKTIF. Silakan masuk ke sistem menggunakan email dan password Anda. Terima kasih."
-                                );
-                            }
-
-                            try {
-                                Mail::to($record->email)->send(new OperatorVerified($record));
-                            } catch (\Exception $e) {
-                                // Silent fail if mail not configured, or handle as needed
-                            }
-
                             Notification::make()
                                 ->title('Pengguna Berhasil Diverifikasi')
                                 ->body('Status pengguna telah diubah menjadi aktif.')
@@ -129,13 +116,6 @@ class UsersTable
                         ->modalDescription('Apakah Anda yakin ingin menonaktifkan pengguna ini? Pengguna yang dinonaktifkan tidak dapat masuk ke sistem.')
                         ->action(function ($record) {
                             $record->update(['status' => 'rejected']);
-
-                            if ($record->nohp) {
-                                \App\Services\ZenzivaService::sendWhatsApp(
-                                    $record->nohp,
-                                    "Halo {$record->name}, mohon maaf, permohonan pengaktifan akun Anda di Sisdik Bintuni DITOLAK atau dinonaktifkan oleh Admin Dinas. Silakan hubungi admin untuk informasi lebih lanjut."
-                                );
-                            }
 
                             Notification::make()
                                 ->title('Pengguna Dinonaktifkan')

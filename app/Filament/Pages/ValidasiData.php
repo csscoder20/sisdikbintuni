@@ -20,6 +20,7 @@ use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\WithPagination;
+use Livewire\Attributes\Url;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ValidasiData extends Page
@@ -33,10 +34,12 @@ class ValidasiData extends Page
     protected static ?string $title = 'VALIDASI DATA';
     protected string $view = 'filament.pages.validasi-data';
 
+    #[Url]
     public int   $currentStep = 1;
-    public int   $totalSteps  = 11;
+    public int   $totalSteps  = 12;
     public array $stepStatuses = [];
     public array $bypassedSteps = [];
+    public bool  $isSubmitted = false;
 
     /* ------------------------------------------------------------------ */
     /* Required fields for Profil Sekolah (label => field)                 */
@@ -84,6 +87,15 @@ class ValidasiData extends Page
     /* ------------------------------------------------------------------ */
     public function mount(): void
     {
+        $id = $this->getSchoolId();
+        $month = (int) date('m');
+        $year  = (int) date('Y');
+        
+        $laporan = Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->first();
+        if ($laporan && $laporan->tanggal_submit) {
+            $this->isSubmitted = true;
+        }
+
         $this->computeStatuses();
     }
 
@@ -107,19 +119,50 @@ class ValidasiData extends Page
     protected function computeStatuses(): void
     {
         $id = $this->getSchoolId();
+        
+        $month = (int) date('m');
+        $year  = (int) date('Y');
+        $laporan = Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->first();
+
+        $s1  = $this->checkStep1($id);
+        $s2  = $this->checkStep2($id);
+        $s3  = $this->checkMapel($id);
+        $s4  = $this->checkStep3($id);
+        $s5  = $this->checkKeuangan($id);
+        $s6  = $this->checkStep4($id);
+        $s7  = $this->checkStep5($id);
+        $s8  = $this->checkPendidikanGtk($id);
+        $s9  = $this->checkRekeningGtk($id);
+        $s10 = $this->checkStep6($id);
+        $s11 = $this->checkStep7($id);
+
+        if ($laporan) {
+            if ($laporan->is_identitas_sekolah_valid) $s1 = true;
+            if ($laporan->is_kondisi_sarpras_valid) $s2 = true;
+            if ($laporan->is_mapel_valid) $s3 = true;
+            if ($laporan->is_siswa_rombel_valid) $s4 = true;
+            if ($laporan->is_keuangan_valid) $s5 = true;
+            if ($laporan->is_nominatif_siswa_valid) $s6 = true;
+            if ($laporan->is_nominatif_gtk_valid) $s7 = true;
+            if ($laporan->is_gtk_pendidikan_valid) $s8 = true;
+            if ($laporan->is_rekening_npwp_valid) $s9 = true;
+            if ($laporan->is_sebaran_jam_valid) $s10 = true;
+            if ($laporan->is_rekap_kehadiran_valid) $s11 = true;
+        }
 
         $this->stepStatuses = [
-            1  => $this->checkStep1($id),   // Profil
-            2  => $this->checkStep2($id),   // Sarpras
-            3  => $this->checkMapel($id),   // Mapel
-            4  => $this->checkStep3($id),   // Rombel
-            5  => $this->checkKeuangan($id),// Keuangan
-            6  => $this->checkStep4($id),   // Nominatif Siswa
-            7  => $this->checkStep5($id),   // Nominatif GTK
-            8  => $this->checkPendidikanGtk($id), // Riwayat Pendidikan
-            9  => $this->checkRekeningGtk($id),   // Rekening & NPWP
-            10 => $this->checkStep6($id),   // Sebaran Jam
-            11 => $this->checkStep7($id),   // Kehadiran GTK
+            1  => $s1,
+            2  => $s2,
+            3  => $s3,
+            4  => $s4,
+            5  => $s5,
+            6  => $s6,
+            7  => $s7,
+            8  => $s8,
+            9  => $s9,
+            10 => $s10,
+            11 => $s11,
+            12 => true, // Pernyataan selalu valid
         ];
 
         foreach ($this->bypassedSteps as $step) {
@@ -363,6 +406,8 @@ class ValidasiData extends Page
             return;
         }
 
+        $this->saveProgressToDatabase();
+
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
             $this->resetPage();
@@ -376,6 +421,7 @@ class ValidasiData extends Page
         }
         
         $this->computeStatuses();
+        $this->saveProgressToDatabase();
 
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
@@ -396,21 +442,23 @@ class ValidasiData extends Page
     /* ------------------------------------------------------------------ */
     public function submitValidasi(): void
     {
+        if ($this->isSubmitted) return;
+
         $this->computeStatuses();
 
-        if (!collect($this->stepStatuses)->every(fn($s) => $s)) {
-            $incompleteSteps = collect($this->stepStatuses)
-                ->filter(fn($s) => !$s)
-                ->keys()
-                ->map(fn($k) => $this->getStepLabels()[$k])
-                ->implode(', ');
-            
+        $incompleteSteps = collect($this->stepStatuses)
+            ->filter(fn($s, $k) => !$s && $k < 12)
+            ->keys()
+            ->map(fn($k) => $this->getStepLabels()[$k])
+            ->implode(', ');
+
+        if (!empty($incompleteSteps)) {
             $msg = "Masih ada langkah yang belum valid: <b>{$incompleteSteps}</b>.<br><br>Apakah Anda yakin ingin menyelesaikan validasi dengan data yang ada?";
             $this->dispatch('swal-confirm-submit', message: $msg);
             return;
         }
 
-        $this->forceSubmit();
+        $this->dispatch('swal-confirm-submit', message: 'Apakah Anda yakin semua data yang dimasukkan sudah benar? Data akan disimpan sebagai laporan resmi.');
     }
 
     public function forceSubmit(): void
@@ -420,7 +468,24 @@ class ValidasiData extends Page
         }
         
         $this->computeStatuses();
-        $id    = $this->getSchoolId();
+        $this->saveProgressToDatabase();
+
+        $id = $this->getSchoolId();
+        $month = (int) date('m');
+        $year  = (int) date('Y');
+        
+        Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->update(['tanggal_submit' => now()]);
+
+        $period = Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
+
+        $this->dispatch('swal-success', message: "Semua langkah valid! data Anda sudah dikirim ke database sebagai laporan periode {$period}");
+    }
+
+    protected function saveProgressToDatabase(): void
+    {
+        $id = $this->getSchoolId();
+        if (!$id) return;
+        
         $month = (int) date('m');
         $year  = (int) date('Y');
 
@@ -429,21 +494,19 @@ class ValidasiData extends Page
             [
                 'is_identitas_sekolah_valid' => $this->stepStatuses[1] ?? false,
                 'is_kondisi_sarpras_valid'   => $this->stepStatuses[2] ?? false,
+                'is_mapel_valid'             => $this->stepStatuses[3] ?? false,
                 'is_siswa_rombel_valid'      => $this->stepStatuses[4] ?? false,
+                'is_keuangan_valid'          => $this->stepStatuses[5] ?? false,
                 'is_kondisi_siswa_valid'     => $this->stepStatuses[6] ?? false,
                 'is_nominatif_siswa_valid'   => $this->stepStatuses[6] ?? false,
                 'is_kondisi_gtk_valid'       => $this->stepStatuses[7] ?? false,
                 'is_nominatif_gtk_valid'     => $this->stepStatuses[7] ?? false,
+                'is_gtk_pendidikan_valid'    => $this->stepStatuses[8] ?? false,
+                'is_rekening_npwp_valid'     => $this->stepStatuses[9] ?? false,
                 'is_sebaran_jam_valid'       => $this->stepStatuses[10] ?? false,
                 'is_rekap_kehadiran_valid'   => $this->stepStatuses[11] ?? false,
             ]
         );
-
-        Notification::make()
-            ->title('Validasi Disimpan!')
-            ->body('Data periode ' . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y') . ' berhasil divalidasi dan disimpan ke database.')
-            ->success()
-            ->send();
     }
 
     /* ------------------------------------------------------------------ */
@@ -819,6 +882,7 @@ class ValidasiData extends Page
             9  => 'Rekening & NPWP',
             10 => 'Sebaran Jam Mengajar',
             11 => 'Kehadiran GTK',
+            12 => 'Pernyataan',
         ];
     }
 

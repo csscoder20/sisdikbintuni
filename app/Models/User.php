@@ -20,6 +20,60 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
     use SoftDeletes;
     use HasRoles, \App\Traits\HasActivityLog, Notifiable;
 
+    protected static function booted()
+    {
+        static::updated(function ($user) {
+            if (app()->runningInConsole()) {
+                return;
+            }
+
+            if ($user->isDirty('status')) {
+                $oldStatus = $user->getOriginal('status');
+                $newStatus = $user->status;
+
+                if ($newStatus === 'active' && $oldStatus !== 'active') {
+                    // Send WhatsApp if phone number exists
+                    if ($user->nohp) {
+                        try {
+                            \App\Services\ZenzivaService::sendWhatsApp(
+                                $user->nohp,
+                                "Halo {$user->name}, akun Anda di Sisdik Bintuni telah AKTIF. Silakan masuk ke sistem menggunakan email dan password Anda. Terima kasih."
+                            );
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::warning('Gagal mengirim WA verifikasi: ' . $e->getMessage());
+                        }
+                    }
+
+                    // Send Email
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OperatorVerified($user));
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::warning('Gagal mengirim email verifikasi: ' . $e->getMessage());
+                    }
+                } elseif ($newStatus === 'rejected' && $oldStatus !== 'rejected') {
+                    // Send WhatsApp if phone number exists
+                    if ($user->nohp) {
+                        try {
+                            \App\Services\ZenzivaService::sendWhatsApp(
+                                $user->nohp,
+                                "Halo {$user->name}, mohon maaf, permohonan pengaktifan akun Anda di Sisdik Bintuni DITOLAK atau dinonaktifkan oleh Admin Dinas. Silakan hubungi admin untuk informasi lebih lanjut."
+                            );
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::warning('Gagal mengirim WA penolakan: ' . $e->getMessage());
+                        }
+                    }
+
+                    // Send Email
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OperatorRejected($user));
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::warning('Gagal mengirim email penolakan: ' . $e->getMessage());
+                    }
+                }
+            }
+        });
+    }
+
     protected $fillable = [
         'name',
         'email',

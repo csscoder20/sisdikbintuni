@@ -7,21 +7,56 @@
         @page { size: A4 portrait; margin: 1cm; }
         @page landscape_page { size: A4 landscape; margin: 1cm; }
         
-        body { font-family: 'Helvetica', sans-serif; font-size: 11px; color: #333; line-height: 1.4; margin: 0; padding: 0; }
-        
         .landscape-section {
             page: landscape_page;
             display: block;
-            page-break-before: always;
+            break-before: page;
             clear: both;
         }
         
-        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; margin: 5px 0; text-transform: uppercase; }
-        .header p { margin: 2px 0; font-size: 10px; }
+        body { font-family: 'Helvetica', sans-serif; font-size: 11px; color: #333; line-height: 1.4; margin: 0; padding: 0; }
         
-        .section { margin-bottom: 30px; page-break-inside: avoid; }
+        
+        .header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 2px solid #000; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+        }
+        .logo-left, .logo-right {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+        }
+        .header-text {
+            text-align: center;
+            flex: 1;
+        }
+        .header-text h1 { font-size: 13px; margin: 3px 0; text-transform: uppercase; font-weight: bold; }
+        .header-text p { margin: 2px 0; font-size: 9px; }
+        
+        .section { margin-bottom: 30px; }
+        tr { page-break-inside: avoid; break-inside: avoid; }
         .section-header { background: #eee; padding: 5px 10px; font-weight: bold; font-size: 12px; border: 1px solid #ccc; margin-bottom: 10px; }
+        
+        .sarpras-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .sarpras-table th, .sarpras-table td {
+            border: 1px solid #000;
+            padding: 4px 6px;
+            font-size: 9px;
+            vertical-align: middle;
+        }
+        .sarpras-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            text-align: center;
+        }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         table, th, td { border: 1px solid #000; }
@@ -33,8 +68,8 @@
         
         .page-break { page-break-after: always; }
         
-        .wide-table { font-size: 8px !important; }
-        .wide-table th, .wide-table td { padding: 2px; }
+        .wide-table { font-size: 9px !important; }
+        .wide-table th, .wide-table td { padding: 4px; }
 
         .signature-table { border: none; width: 100%; margin-top: 50px; }
         .signature-table td { border: none; width: 50%; text-align: center; }
@@ -43,12 +78,26 @@
 </head>
 <body>
     <div class="header">
-        <h1>Pemerintah Kabupaten Teluk Bintuni</h1>
-        <h1>Dinas Pendidikan, Kebudayaan, Pemuda dan Olahraga</h1>
-        <h1>{{ $sekolah->nama }}</h1>
-        <p>Email: {{ $sekolah->email ?? '-' }} | NPSN: {{ $sekolah->npsn }}</p>
-        <p style="font-weight: bold; margin-top: 10px; font-size: 12px; text-decoration: underline;">LAPORAN BULANAN SEKOLAH</p>
-        <p>Periode: {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
+        @if(!empty($dinasLogo))
+            <img src="{{ $dinasLogo }}" class="logo-left" alt="Logo Dinas">
+        @else
+            <div style="width: 65px;"></div>
+        @endif
+        
+        <div class="header-text">
+            <h1>Pemerintah Kabupaten Teluk Bintuni</h1>
+            <h1>Dinas Pendidikan, Kebudayaan, Pemuda dan Olahraga</h1>
+            <h1>{{ $sekolah->nama }}</h1>
+            <p>Email: {{ $sekolah->email ?? '-' }} | NPSN: {{ $sekolah->npsn }}</p>
+            <p style="font-weight: bold; margin-top: 10px; font-size: 12px; text-decoration: underline;">LAPORAN BULANAN SEKOLAH</p>
+            <p>Periode: {{ $periode }}</p>
+        </div>
+
+        @if(!empty($sekolahLogo))
+            <img src="{{ $sekolahLogo }}" class="logo-right" alt="Logo Sekolah">
+        @else
+            <div style="width: 65px;"></div>
+        @endif
     </div>
 
     @php $sectionCounter = 0; @endphp
@@ -78,31 +127,59 @@
                 @elseif (isset($data['type']) && $data['type'] === 'rekap_gtk_matrix')
                     @include('pdf.sections.rekap-gtk', ['data' => $data['data']])
                 @elseif ($key === 'kondisi_sarpras')
-                    <table class="wide-table">
+                    <table class="sarpras-table">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Keadaan Fisik</th>
-                                <th>Jumlah</th>
-                                <th>Baik</th>
-                                <th>Rusak</th>
-                                <th>Milik</th>
-                                <th>Bukan</th>
+                                <th rowspan="2" style="width: 30px; text-align: center; vertical-align: middle;">No</th>
+                                <th rowspan="2" style="text-align: left; vertical-align: middle;">Keadaan Fisik</th>
+                                <th rowspan="2" style="width: 60px; text-align: center; vertical-align: middle;">Jumlah</th>
+                                <th colspan="2" style="text-align: center;">Tingkat Kerusakan</th>
+                                <th colspan="2" style="text-align: center;">Status Kepemilikan</th>
+                            </tr>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">Baik</th>
+                                <th style="width: 50px; text-align: center;">Rusak</th>
+                                <th style="width: 60px; text-align: center;">Milik</th>
+                                <th style="width: 80px; text-align: center;">Bukan Milik</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $totalJumlah = 0;
+                                $totalBaik = 0;
+                                $totalRusak = 0;
+                            @endphp
                             @foreach ($data as $idx => $item)
+                                @php
+                                    $jumlah = intval($item['details']['Jumlah'] ?? 0);
+                                    $baik = intval($item['details']['Tingkat Kerusakan_Baik'] ?? 0);
+                                    $rusak = intval($item['details']['Tingkat Kerusakan_Rusak'] ?? 0);
+                                    
+                                    $totalJumlah += $jumlah;
+                                    $totalBaik += $baik;
+                                    $totalRusak += $rusak;
+                                @endphp
                                 <tr>
-                                    <td>{{ $idx + 1 }}</td>
+                                    <td style="text-align: center;">{{ $idx + 1 }}</td>
                                     <td>{{ $item['label'] }}</td>
-                                    <td>{{ $item['details']['Jumlah'] }}</td>
-                                    <td>{{ $item['details']['Tingkat Kerusakan_Baik'] }}</td>
-                                    <td>{{ $item['details']['Tingkat Kerusakan_Rusak'] }}</td>
-                                    <td>{{ $item['details']['Status Kepemilikan_Milik'] }}</td>
-                                    <td>{{ $item['details']['Status Kepemilikan_Bukan Milik'] }}</td>
+                                    <td style="text-align: center;">{{ $jumlah === 0 ? '-' : $jumlah }}</td>
+                                    <td style="text-align: center;">{{ $baik === 0 ? '-' : $baik }}</td>
+                                    <td style="text-align: center;">{{ $rusak === 0 ? '-' : $rusak }}</td>
+                                    <td style="text-align: center;">{{ $item['details']['Status Kepemilikan_Milik'] ?? '-' }}</td>
+                                    <td style="text-align: center;">{{ $item['details']['Status Kepemilikan_Bukan Milik'] ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
+                        <tfoot>
+                            <tr style="font-weight: bold; background-color: #f2f2f2;">
+                                <td colspan="2" style="text-align: center; font-weight: bold;">Total</td>
+                                <td style="text-align: center; font-weight: bold;">{{ $totalJumlah }}</td>
+                                <td style="text-align: center; font-weight: bold;">{{ $totalBaik }}</td>
+                                <td style="text-align: center; font-weight: bold;">{{ $totalRusak }}</td>
+                                <td style="background-color: #f2f2f2;"></td>
+                                <td style="background-color: #f2f2f2;"></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 @else
                     @php

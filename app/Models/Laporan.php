@@ -34,6 +34,9 @@ class Laporan extends Model
         'is_gtk_status_valid',
         'is_gtk_umur_valid',
         'is_gtk_pendidikan_valid',
+        'is_mapel_valid',
+        'is_keuangan_valid',
+        'is_rekening_npwp_valid',
     ];
 
     protected $casts = [
@@ -57,6 +60,9 @@ class Laporan extends Model
         'is_gtk_status_valid' => 'boolean',
         'is_gtk_umur_valid' => 'boolean',
         'is_gtk_pendidikan_valid' => 'boolean',
+        'is_mapel_valid' => 'boolean',
+        'is_keuangan_valid' => 'boolean',
+        'is_rekening_npwp_valid' => 'boolean',
         'tanggal_submit' => 'datetime',
         'verified_at' => 'datetime',
     ];

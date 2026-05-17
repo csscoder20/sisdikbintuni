@@ -130,23 +130,53 @@ class ListSiswas extends ListRecords
                     ];
 
                     $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));
-                    $filename = 'nominatif-siswa-' . now()->format('Y-m-d-His');
+                    $sekolah = filament()->getTenant();
+                    $filename = 'Daftar Nominatif Siswa - ' . ($sekolah?->nama ?? 'Sekolah');
 
                     if ($data['format'] === 'xlsx') {
                         return \Maatwebsite\Excel\Facades\Excel::download(
-                            new \App\Exports\DynamicExport($records, $selectedColumns, filament()->getTenant(), 'DAFTAR NOMINATIF SISWA'),
+                            new \App\Exports\DynamicExport($records, $selectedColumns, $sekolah, 'DAFTAR NOMINATIF SISWA ' . strtoupper($sekolah?->nama ?? '')),
                             $filename . '.xlsx'
                         );
                     }
 
-                    $pdf = Pdf::loadView('pdf.siswa-nominatif', [
+                    $columnCount = count($data['columns']);
+                    $fontSize = '9pt';
+                    if ($columnCount <= 5) {
+                        $fontSize = '9.5pt';
+                    } elseif ($columnCount <= 8) {
+                        $fontSize = '8pt';
+                    } elseif ($columnCount <= 12) {
+                        $fontSize = '7pt';
+                    } elseif ($columnCount <= 16) {
+                        $fontSize = '6pt';
+                    } else {
+                        $fontSize = '5pt';
+                    }
+
+                    $html = view('pdf.siswa-nominatif', [
                         'records' => $records,
                         'columns' => $selectedColumns,
                         'sekolah' => filament()->getTenant(),
-                    ])->setPaper('a4', count($data['columns']) > 7 ? 'landscape' : 'portrait');
+                        'fontSize' => $fontSize,
+                    ])->render();
+
+                    $browsershot = \Spatie\Browsershot\Browsershot::html($html)
+                        ->setNodeBinary('C:\Program Files\nodejs\node.exe')
+                        ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
+                        ->preferCssPageSize()
+                        ->format('A4')
+                        ->showBackground()
+                        ->noSandbox();
+
+                    if ($columnCount > 7) {
+                        $browsershot->landscape();
+                    }
+
+                    $pdfContent = $browsershot->pdf();
 
                     return response()->streamDownload(
-                        fn () => print($pdf->output()),
+                        fn () => print($pdfContent),
                         $filename . '.pdf'
                     );
                 }),

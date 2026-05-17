@@ -4,7 +4,7 @@
     <title>Nominatif GTK</title>
     <style>
         @page {
-            margin: 1cm;
+            margin: 0.4cm;
         }
         body {
             font-family: Arial, sans-serif;
@@ -14,13 +14,14 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size: 9pt;
+            font-size: {{ $fontSize ?? '9pt' }};
         }
         th, td {
             border: 1px solid #000;
-            padding: 5px;
-            text-align: left;
+            padding: 4px 3px;
+            text-align: center;
             word-wrap: break-word;
+            vertical-align: middle;
         }
         th {
             background-color: #1F4E78;
@@ -59,7 +60,7 @@
         </div>
     </div>
 
-    <h2>DAFTAR NOMINATIF GURU DAN TENAGA KEPENDIDIKAN</h2>
+    <h2>DAFTAR NOMINATIF GURU DAN TENAGA KEPENDIDIKAN {{ strtoupper($sekolah?->nama ?? '') }}</h2>
     <div class="header-info">
         &nbsp;
     </div>
@@ -69,7 +70,7 @@
             <tr>
                 <th style="width: 30px;">NO</th>
                 @foreach($columns as $key => $label)
-                    <th>{{ strtoupper($label) }}</th>
+                    <th style="{{ $key === 'nama' ? 'text-align: left;' : '' }}">{{ strtoupper($label) }}</th>
                 @endforeach
             </tr>
         </thead>
@@ -96,7 +97,7 @@
                                 $value = \Carbon\Carbon::parse($value)->format('d/m/Y');
                             }
                         @endphp
-                        <td>{{ $value ?? '-' }}</td>
+                        <td style="{{ $key === 'nama' ? 'text-align: left;' : '' }}">{{ $value ?? '-' }}</td>
                     @endforeach
                 </tr>
             @endforeach

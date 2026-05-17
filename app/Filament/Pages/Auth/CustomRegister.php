@@ -93,6 +93,12 @@ class CustomRegister extends BaseRegister
             'sekolah_id' => $sekolahId,
         ]);
 
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OperatorRegistered($user));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal mengirim email registrasi operator: ' . $e->getMessage());
+        }
+
         event(new Registered($user));
 
         // Skip automatic login after registration
