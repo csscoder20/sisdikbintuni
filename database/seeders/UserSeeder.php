@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         // 🔹 OPERATOR 1
         $op1 = User::create([
             'name' => 'Operator Sekolah 1',
-            'email' => 'operator1@sisdik.com',
+            'email' => 'operator1@dikporabintuni.com',
             'password' => Hash::make('password'),
             'status' => 'active',
             'email_verified_at' => now(),
@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
         // 🔹 OPERATOR 3
         $op3 = User::create([
             'name' => 'Operator Sekolah 3',
-            'email' => 'operator3@sisdik.com',
+            'email' => 'operator3@dikporabintuni.com',
             'password' => Hash::make('password'),
             'status' => 'active',
             'email_verified_at' => now(),

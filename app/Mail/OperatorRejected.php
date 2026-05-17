@@ -30,7 +30,7 @@ class OperatorRejected extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Status Akun Operator - SISDIK BINTUNI',
+            subject: 'Status Akun Operator - DIKPORA BINTUNI',
         );
     }
 

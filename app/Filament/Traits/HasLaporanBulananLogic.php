@@ -116,11 +116,15 @@ trait HasLaporanBulananLogic
         $month = (int) date('m');
         $year = (int) date('Y');
 
-        // Fetch the report for the current period
-        $laporan = Laporan::where('sekolah_id', $schoolId)
-            ->where('bulan', $month)
-            ->where('tahun', $year)
-            ->first();
+        if ($this->selectedLaporanId) {
+            $laporan = Laporan::where('sekolah_id', $schoolId)->find($this->selectedLaporanId);
+        } else {
+            // Fetch the report for the current period
+            $laporan = Laporan::where('sekolah_id', $schoolId)
+                ->where('bulan', $month)
+                ->where('tahun', $year)
+                ->first();
+        }
 
         // Initialize status based on Laporan record columns
         foreach ($this->checklist as $key => $label) {

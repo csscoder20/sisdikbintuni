@@ -102,7 +102,7 @@ class CetakLaporanResource extends Resource
                     ->color('success')
                     ->visible(fn (Sekolah $record) => $record->getValidationProgress()['percentage'] === 100)
                     ->modalHeading(fn (Sekolah $record) => "Pratinjau Laporan - " . $record->nama)
-                    ->modalWidth('full')
+                    ->modalWidth('5xl')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Tutup')
                     ->extraModalFooterActions([

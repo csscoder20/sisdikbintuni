@@ -3,7 +3,7 @@
 
 Halo **{{ $user->name }}**,
 
-Kami ingin menginformasikan mengenai status pendaftaran/akun Anda di **SISDIK BINTUNI**.
+Kami ingin menginformasikan mengenai status pendaftaran/akun Anda di **DIKPORA BINTUNI**.
 
 Mohon maaf, permohonan pengaktifan akun Anda saat ini **ditangguhkan, ditolak, atau dinonaktifkan** oleh Admin Dinas Pendidikan, Pemuda, dan Olahraga Kabupaten Teluk Bintuni.
 

@@ -17,11 +17,16 @@ class CetakLaporanController extends Controller
         $this->schoolId = $sekolah->id;
         $this->isPreview = true;
         
-        // Find latest report to get validated status
-        $laporan = Laporan::where('sekolah_id', $sekolah->id)
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
-            ->first();
+        $laporanId = request('laporan_id');
+        if ($laporanId) {
+            $laporan = Laporan::where('sekolah_id', $sekolah->id)->find($laporanId);
+        } else {
+            // Find latest report to get validated status
+            $laporan = Laporan::where('sekolah_id', $sekolah->id)
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->first();
+        }
             
         $this->selectedLaporanId = $laporan?->id;
         

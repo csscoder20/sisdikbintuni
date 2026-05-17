@@ -3,7 +3,7 @@
 
 Halo **{{ $user->name }}**,
 
-Terima kasih telah mendaftar sebagai Operator Sekolah di **SISDIK BINTUNI**. Pendaftaran akun Anda telah kami terima dan saat ini sedang berada dalam proses peninjauan dan verifikasi oleh Admin Dinas Pendidikan, Pemuda, dan Olahraga Kabupaten Teluk Bintuni.
+Terima kasih telah mendaftar sebagai Operator Sekolah di **DIKPORA BINTUNI**. Pendaftaran akun Anda telah kami terima dan saat ini sedang berada dalam proses peninjauan dan verifikasi oleh Admin Dinas Pendidikan, Pemuda, dan Olahraga Kabupaten Teluk Bintuni.
 
 Berikut adalah rincian akun yang Anda daftarkan:
 

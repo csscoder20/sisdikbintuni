@@ -30,7 +30,7 @@ class OperatorRegistered extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pendaftaran Akun Operator - SISDIK BINTUNI',
+            subject: 'Pendaftaran Akun Operator - DIKPORA BINTUNI',
         );
     }
 

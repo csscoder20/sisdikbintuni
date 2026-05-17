@@ -51,9 +51,9 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: transparent;
             padding: 0;
-            max-height: 85vh;
+            max-height: 60vh;
             overflow-y: auto;
-            overflow-x: hidden;
+            overflow-x: auto;
             color: #1f2937;
         }
 
@@ -154,6 +154,41 @@
             .header-content { flex-direction: column; text-align: center; }
             .logo-img { height: 40px; }
             .signature-grid { flex-direction: column; gap: 40px; align-items: center; }
+        }
+
+        /* 3. Custom Scrollbar Styling (Highly Visible) */
+        .report-preview-container::-webkit-scrollbar,
+        .report-preview-container *::-webkit-scrollbar,
+        .landscape-section::-webkit-scrollbar {
+            width: 12px !important;
+            height: 12px !important;
+            display: block !important;
+        }
+        .report-preview-container::-webkit-scrollbar-track,
+        .report-preview-container *::-webkit-scrollbar-track,
+        .landscape-section::-webkit-scrollbar-track {
+            background: #f3f4f6 !important;
+            border-radius: 6px !important;
+        }
+        .report-preview-container::-webkit-scrollbar-thumb,
+        .report-preview-container *::-webkit-scrollbar-thumb,
+        .landscape-section::-webkit-scrollbar-thumb {
+            background: #9ca3af !important;
+            border-radius: 6px !important;
+            border: 3px solid #f3f4f6 !important;
+        }
+        .report-preview-container::-webkit-scrollbar-thumb:hover,
+        .report-preview-container *::-webkit-scrollbar-thumb:hover,
+        .landscape-section::-webkit-scrollbar-thumb:hover {
+            background: #6b7280 !important;
+        }
+
+        /* Firefox Support */
+        .report-preview-container,
+        .report-preview-container *,
+        .landscape-section {
+            scrollbar-width: auto !important;
+            scrollbar-color: #9ca3af #f3f4f6 !important;
         }
     </style>
 

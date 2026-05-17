@@ -12,9 +12,9 @@ class OperatorSekolahSeeder extends Seeder
     public function run()
     {
         // Ambil user operator
-        $op1 = User::where('email', 'operator1@sisdik.com')->first();
+        $op1 = User::where('email', 'operator1@dikporabintuni.com')->first();
         $op2 = User::where('email', 'smknegeri1bintuni@gmail.com')->first();
-        $op3 = User::where('email', 'operator3@sisdik.com')->first();
+        $op3 = User::where('email', 'operator3@dikporabintuni.com')->first();
 
         // Ambil sekolah (berdasarkan urutan)
         $sekolah1 = Sekolah::where('npsn', '69879192')->first(); // SMA NEGERI KAITARO

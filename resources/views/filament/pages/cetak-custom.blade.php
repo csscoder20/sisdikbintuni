@@ -1,11 +1,24 @@
 <x-filament-panels::page>
-    <form wire:submit="submit">
-        {{ $this->form }}
+    <div class="space-y-6" x-data x-init="
+        let activeTab = '';
+        $nextTick(() => {
+            let activeEl = $el.querySelector('button[aria-selected=true]');
+            if (activeEl) {
+                activeTab = activeEl.innerText.trim();
+            }
+        });
         
-        <div class="mt-6 flex justify-end">
-            <x-filament::button type="submit" size="lg">
-                Proses Cetak Laporan
-            </x-filament::button>
-        </div>
-    </form>
+        document.addEventListener('click', (e) => {
+            let button = e.target.closest('button[role=tab]');
+            if (button) {
+                let tabName = button.innerText.trim();
+                if (tabName && tabName !== activeTab) {
+                    activeTab = tabName;
+                    $wire.resetOtherTabFilters(tabName);
+                }
+            }
+        });
+    ">
+        {{ $this->form }}
+    </div>
 </x-filament-panels::page>

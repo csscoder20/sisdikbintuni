@@ -18,6 +18,7 @@ use App\Filament\Pages\DinasDashboard;
 use App\Filament\Pages\SuperAdminDashboard;
 use App\Filament\Pages\SekolahPage;
 use App\Filament\Pages\CetakCustom;
+use App\Filament\Pages\RiwayatLaporan;
 use App\Filament\Resources\CetakLaporan\CetakLaporanResource;
 use Filament\Facades\Filament;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -130,6 +131,7 @@ class AdminPanelProvider extends PanelProvider
                 SekolahPage::class,
                 CetakCustom::class,
                 CustomProfile::class,
+                RiwayatLaporan::class,
             ])
             ->navigationGroups([
                 'Data Sekolah',

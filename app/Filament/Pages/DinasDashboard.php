@@ -5,9 +5,12 @@ namespace App\Filament\Pages;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Panel;
 use Illuminate\Contracts\Support\Htmlable;
+use App\Filament\Traits\HasLaporanBulananLogic;
 
 class DinasDashboard extends BaseDashboard
 {
+    use HasLaporanBulananLogic;
+
     protected static ?string $navigationLabel = 'Dasbor';
 
     public static function canAccess(): bool
@@ -18,6 +21,24 @@ class DinasDashboard extends BaseDashboard
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-home';
+    }
+
+    public function mount()
+    {
+        $selectedId = session('dinas_selected_sekolah_id');
+        if ($selectedId) {
+            $this->schoolId = $selectedId;
+            $this->initializeLaporanBulanan();
+        }
+    }
+
+    public function getView(): string
+    {
+        $selectedId = session('dinas_selected_sekolah_id');
+        if ($selectedId) {
+            return 'filament.pages.laporan-bulanan';
+        }
+        return parent::getView();
     }
 
     public function getTitle(): string | Htmlable
