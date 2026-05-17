@@ -23,8 +23,10 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
     protected $fillable = [
         'name',
         'email',
+        'nohp',
         'password',
         'status',
+        'sekolah_id',
     ];
 
     protected $hidden = [
@@ -103,10 +105,82 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
 
     public function getFilamentAvatarUrl(): ?string
     {
-        if ($this->sekolah?->logo) {
-            return \Illuminate\Support\Facades\Storage::disk('public')->url($this->sekolah->logo);
+        // === Gunakan logo sekolah jika tersedia (khusus operator) ===
+        $logoPath = $this->sekolah?->logo;
+        if ($logoPath) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($logoPath);
         }
 
-        return null;
+        // === Fallback: Identicon Generator — GitHub-style, 100% mandiri, tanpa DB, tanpa storage, tanpa internet ===
+        $seed = $this->email ?? $this->name ?? 'user';
+        $hash = md5(strtolower(trim($seed)));
+
+        // Warna foreground dari byte pertama hash (dipastikan cukup jenuh & gelap)
+        $r = hexdec(substr($hash, 0, 2));
+        $g = hexdec(substr($hash, 2, 2));
+        $b = hexdec(substr($hash, 4, 2));
+        // Kurangi kecerahan agar kontras di background terang
+        $r = (int) ($r * 0.6 + 20);
+        $g = (int) ($g * 0.6 + 20);
+        $b = (int) ($b * 0.6 + 20);
+        $fgColor = sprintf('#%02x%02x%02x', min(200, $r), min(200, $g), min(200, $b));
+
+        // Warna background — versi muda dari foreground
+        $bgR = (int) ($r * 0.2 + 230);
+        $bgG = (int) ($g * 0.2 + 230);
+        $bgB = (int) ($b * 0.2 + 230);
+        $bgColor = sprintf('#%02x%02x%02x', min(255, $bgR), min(255, $bgG), min(255, $bgB));
+
+        // === Grid 5x5 simetris kiri-kanan (seperti GitHub identicon) ===
+        $gridSize   = 5;
+        $cellPx     = 16;          // piksel per sel
+        $padding    = 12;          // padding dalam SVG
+        $innerSize  = $gridSize * $cellPx;
+        $totalSize  = $innerSize + $padding * 2;   // = 80 + 24 = 104
+        $cornerRadius = (int) ($totalSize / 2);    // lingkaran penuh
+
+        $rects = '';
+        for ($row = 0; $row < $gridSize; $row++) {
+            for ($col = 0; $col < (int) ceil($gridSize / 2); $col++) {
+                // Ambil bit dari hash — setiap karakter hex = 0–15
+                $hashIndex = $row * (int) ceil($gridSize / 2) + $col;
+                $bit       = hexdec($hash[$hashIndex % strlen($hash)]) % 2;
+
+                if ($bit === 1) {
+                    $x         = $padding + $col * $cellPx;
+                    $y         = $padding + $row * $cellPx;
+                    $mirrorCol = $gridSize - 1 - $col;
+                    $mx        = $padding + $mirrorCol * $cellPx;
+
+                    $rects .= "<rect x=\"$x\" y=\"$y\" width=\"$cellPx\" height=\"$cellPx\" fill=\"$fgColor\"/>";
+                    if ($col !== $mirrorCol) {
+                        $rects .= "<rect x=\"$mx\" y=\"$y\" width=\"$cellPx\" height=\"$cellPx\" fill=\"$fgColor\"/>";
+                    }
+                }
+            }
+        }
+
+        $svg = <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {$totalSize} {$totalSize}" width="{$totalSize}" height="{$totalSize}">
+  <rect width="{$totalSize}" height="{$totalSize}" rx="{$cornerRadius}" fill="{$bgColor}"/>
+  {$rects}
+</svg>
+SVG;
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
+    public function getSekolahIdAttribute()
+    {
+        return $this->operatorSekolah?->sekolah_id;
+    }
+
+    public function setSekolahIdAttribute($value)
+    {
+        if ($value) {
+            $this->operatorSekolah()->updateOrCreate([], ['sekolah_id' => $value]);
+        } else {
+            $this->operatorSekolah()?->delete();
+        }
     }
 }

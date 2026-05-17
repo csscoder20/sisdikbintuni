@@ -32,8 +32,8 @@ use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
 use App\Filament\Pages\Auth\CustomRequestPasswordReset;
 use App\Filament\Pages\KeadaanGtk;
-
 use App\Filament\Pages\KeadaanSiswa;
+use App\Filament\Pages\CustomProfile;
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
 use App\Filament\Resources\Gtks\GtkResource;
@@ -93,6 +93,10 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->sidebarWidth('16rem')
             ->userMenuItems([
+                'profile' => MenuItem::make()
+                    ->label('Pengaturan Akun')
+                    ->url(fn () => CustomProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
                 MenuItem::make()
                     ->label('Kunjungi Web')
                     ->url('/')
@@ -125,6 +129,7 @@ class AdminPanelProvider extends PanelProvider
                 DinasDashboard::class,
                 SekolahPage::class,
                 CetakCustom::class,
+                CustomProfile::class,
             ])
             ->navigationGroups([
                 'Data Sekolah',
@@ -186,7 +191,8 @@ class AdminPanelProvider extends PanelProvider
                 \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])") .
                     '<link rel="icon" type="image/png" href="/favicon.png?v=20260507b">' .
                     '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=20260507b">' .
-                    '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">'
+                    '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">' .
+                    (request()->routeIs('filament.*.auth.*') ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '')
             )
             ->renderHook('panels::table.container.after', function () {
                 return <<<'HTML'
@@ -257,6 +263,12 @@ class AdminPanelProvider extends PanelProvider
             ->emailVerification()
 
             ->userMenuItems([
+                'profile' => MenuItem::make()
+                    ->label('Pengaturan Akun')
+                    ->url(fn () => auth()->check() && auth()->user()->sekolah
+                        ? CustomProfile::getUrl(tenant: auth()->user()->sekolah)
+                        : '#')
+                    ->icon('heroicon-o-user-circle'),
                 MenuItem::make()
                     ->label('Kunjungi Web')
                     ->url('/')
@@ -323,6 +335,7 @@ class AdminPanelProvider extends PanelProvider
                 KeadaanGtk::class,
                 KeadaanSiswa::class,
                 \App\Filament\Pages\ValidasiData::class,
+                CustomProfile::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
@@ -335,7 +348,8 @@ class AdminPanelProvider extends PanelProvider
                 \Illuminate\Support\Facades\Blade::render("@vite(['resources/css/app.css'])") .
                     '<link rel="icon" type="image/png" href="/favicon.png?v=20260507b">' .
                     '<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=20260507b">' .
-                    '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">'
+                    '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">' .
+                    (request()->routeIs('filament.*.auth.*') ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '')
             )
             ->renderHook('panels::table.container.after', function () {
                 return <<<'HTML'

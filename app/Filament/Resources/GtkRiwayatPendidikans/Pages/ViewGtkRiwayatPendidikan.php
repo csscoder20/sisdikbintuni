@@ -22,3 +22,4 @@ class ViewGtkRiwayatPendidikan extends ViewRecord
         ];
     }
 }
+

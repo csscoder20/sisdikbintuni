@@ -137,6 +137,7 @@ class GtkRiwayatPendidikansTable
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
+                        ->modalFooterActions([])
                         ->icon(Heroicon::OutlinedPencilSquare),
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),

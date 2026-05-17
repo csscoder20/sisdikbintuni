@@ -41,6 +41,10 @@ class CustomRegister extends BaseRegister
                     ->searchable(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
+                \Filament\Schemas\Components\View::make('filament.components.captcha'),
+                \Filament\Forms\Components\Hidden::make('captcha_token')
+                    ->extraAttributes(['data-captcha-token' => 'true'])
+                    ->required(),
             ]);
     }
 
@@ -50,6 +54,22 @@ class CustomRegister extends BaseRegister
             $this->rateLimit(2);
         } catch (TooManyRequestsException $exception) {
             $this->getRateLimitedNotification($exception)?->send();
+
+            return null;
+        }
+
+        try {
+            \Illuminate\Support\Facades\Validator::make(
+                ['captcha_token' => $this->form->getState()['captcha_token'] ?? null],
+                ['captcha_token' => ['required', new \App\Rules\Captcha]],
+                ['captcha_token.required' => 'Selesaikan captcha terlebih dahulu.']
+            )->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Notification::make()
+                ->title('Gagal Validasi Captcha')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
 
             return null;
         }

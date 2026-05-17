@@ -71,6 +71,7 @@ class UserResource extends Resource
                     ->schema([
                         TextEntry::make('name')->label('Nama Lengkap')->placeholder('-'),
                         TextEntry::make('email')->label('Alamat Surel')->placeholder('-'),
+                        TextEntry::make('nohp')->label('Nomor WA')->placeholder('-'),
                         TextEntry::make('roles_ringkas')
                             ->label('Peran')
                             ->state(fn (User $record): ?string => $record->roles->pluck('name')->implode(', ') ?: null)

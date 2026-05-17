@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use App\Filament\Resources\GtkKeuangan\Schemas\GtkKeuanganForm;
 use App\Filament\Resources\GtkKeuangan\Tables\GtkKeuangansTable;
+use Filament\Infolists\Components\TextEntry;
 
 use App\Filament\Traits\HasDinasFilter;
 
@@ -32,6 +33,40 @@ class GtkKeuanganResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return GtkKeuanganForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('nama')
+                    ->label('Nama GTK')
+                    ->prefix(': ')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('nama_bank_gaji')
+                    ->label('Bank Rekening Gaji')
+                    ->prefix(': ')
+                    ->placeholder('-'),
+                TextEntry::make('no_rek_gaji')
+                    ->label('Nomor Rekening Gaji')
+                    ->prefix(': ')
+                    ->placeholder('-'),
+                TextEntry::make('nama_bank_tunjangan')
+                    ->label('Bank Rekening Tunjangan')
+                    ->prefix(': ')
+                    ->placeholder('-'),
+                TextEntry::make('no_rek_tunjangan')
+                    ->label('Nomor Rekening Tunjangan')
+                    ->prefix(': ')
+                    ->placeholder('-'),
+                TextEntry::make('npwp')
+                    ->label('NPWP')
+                    ->prefix(': ')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table

@@ -84,14 +84,6 @@ class CetakLaporanResource extends Resource
                             ->icon('heroicon-m-document-arrow-down')
                             ->url(fn (Sekolah $record) => route('cetak-laporan.pdf', $record))
                             ->openUrlInNewTab(),
-                        \Filament\Actions\Action::make('print')
-                            ->label('Cetak Laporan')
-                            ->color('success')
-                            ->icon('heroicon-m-printer')
-                            ->extraAttributes([
-                                'x-on:click' => 'window.print()',
-                                'onclick' => 'window.print()',
-                            ]),
                     ])
                     ->modalContent(fn (Sekolah $record) => view('livewire.report-preview-container', ['schoolId' => $record->id])),
             ]);

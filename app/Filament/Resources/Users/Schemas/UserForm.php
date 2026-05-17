@@ -20,9 +20,12 @@ class UserForm
                     ->label('Alamat Surel')
                     ->email()
                     ->required(),
-                Select::make('sekolah')
+                TextInput::make('nohp')
+                    ->label('Nomor WA')
+                    ->tel(),
+                Select::make('sekolah_id')
                     ->label('Asal Sekolah')
-                    ->relationship('sekolah', 'nama')
+                    ->options(\App\Models\Sekolah::pluck('nama', 'id'))
                     ->searchable()
                     ->preload(),
                 Select::make('roles')

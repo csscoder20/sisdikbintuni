@@ -4,13 +4,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Laporan Bulanan - {{ $sekolah->nama }}</title>
     <style>
-        @page { size: a4; margin: 1cm; }
+        @page { size: A4 portrait; margin: 1cm; }
+        @page landscape_page { size: A4 landscape; margin: 1cm; }
         
         body { font-family: 'Helvetica', sans-serif; font-size: 11px; color: #333; line-height: 1.4; margin: 0; padding: 0; }
         
         .landscape-section {
+            page: landscape_page;
             display: block;
             page-break-before: always;
+            clear: both;
         }
         
         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }

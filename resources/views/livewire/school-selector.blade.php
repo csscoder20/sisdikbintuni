@@ -25,10 +25,11 @@
 
     <!-- Dropdown Menu -->
     <div x-show="open" 
+         x-cloak
          x-transition:enter="transition ease-out duration-100"
          x-transition:enter-start="opacity-0 transform scale-95"
          x-transition:enter-end="opacity-100 transform scale-100"
-         style="position: absolute; top: 110%; left: 0; width: 320px; background-color: white; border: 1px solid #d1d5db; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; padding: 8px;">
+         style="display: none; position: absolute; top: 110%; left: 0; width: 320px; background-color: white; border: 1px solid #d1d5db; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; padding: 8px;">
         
         <!-- Search Input -->
         <div style="margin-bottom: 8px; position: relative;">

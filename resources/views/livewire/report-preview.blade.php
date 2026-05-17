@@ -49,7 +49,7 @@
         /* 2. Screen Styles */
         .report-preview-container {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: #e5e7eb; /* Soft gray desk background */
+            background-color: transparent;
             padding: 0;
             max-height: 85vh;
             overflow-y: auto;
@@ -60,10 +60,10 @@
         .document-paper {
             background: white;
             width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            border-radius: 4px;
+            max-width: none;
+            margin: 0;
+            box-shadow: none;
+            border-radius: 0;
             overflow: hidden;
         }
 

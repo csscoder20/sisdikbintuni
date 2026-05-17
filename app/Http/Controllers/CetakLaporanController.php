@@ -41,20 +41,8 @@ class CetakLaporanController extends Controller
             }
         }
 
-        // Check if any wide sections are included to determine orientation
-        // Since dompdf has trouble with mixed orientation in a single file,
-        // we set the WHOLE document to landscape if wide tables are present.
-        $isWideReport = false;
-        $wideSections = ['nominatif_gtk', 'nominatif_siswa', 'riwayat_pendidikan_gtk', 'rekening_npwp_gtk'];
-        foreach ($wideSections as $section) {
-            if ($this->checklistStatus[$section] ?? false) {
-                $isWideReport = true;
-                break;
-            }
-        }
-
         $pdf = Pdf::loadView('pdf.report-pdf', $data)
-            ->setPaper('a4', $isWideReport ? 'landscape' : 'portrait');
+            ->setPaper('a4', 'portrait');
 
         return $pdf->download("Laporan_Bulanan_{$sekolah->npsn}.pdf");
     }
