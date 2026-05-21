@@ -68,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;">
                         <img src="' . asset('storage/logo/logo-bintuni.png') . '" style="height: 5rem; width: auto; object-fit: contain;">
                         <div style="font-size: 1rem; line-height: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: inherit;">
-                            Sistem Pelaporan Bulanan <span style="color: #ea580c;">SMA/SMK</span>
+                            Sistem Pelaporan Bulanan <span style="color: #ea580c;">Satuan Pendidikan</span>
                         </div>
                     </div>
                 ')
@@ -82,7 +82,7 @@ class AdminPanelProvider extends PanelProvider
                         <img src="' . asset('assets/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
                     <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
-                        Sistem Pelaporan Bulanan<span style="color: #3b82f6;"> SMA/SMK</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
+                        Sistem Pelaporan Bulanan<span style="color: #3b82f6;"> Satuan Pendidikan</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
                     </span>
                 </div>
             '))
@@ -287,7 +287,7 @@ class AdminPanelProvider extends PanelProvider
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;">
                         <img src="' . asset('storage/logo/logo-bintuni.png') . '" style="height: 5rem; width: auto; object-fit: contain;">
                         <div style="font-size: 1rem; line-height: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: inherit;">
-                            Sistem Pelaporan Bulanan <span style="color: #10b981;">SMA/SMK</span>
+                            Sistem Pelaporan Bulanan <span style="color: #10b981;">Satuan Pendidikan</span>
                         </div>
                     </div>
                 ')
@@ -301,7 +301,7 @@ class AdminPanelProvider extends PanelProvider
                         <img src="' . asset('storage/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
                     <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
-                        Sistem Pelaporan Bulanan<span style="color: #10b981;"> SMA/SMK</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
+                        Sistem Pelaporan Bulanan<span style="color: #10b981;"> Satuan Pendidikan</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
                     </span>
                 </div>
             '))

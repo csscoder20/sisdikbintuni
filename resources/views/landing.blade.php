@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEM PELAPORAN BULANAN SMA/SMK - KABUPATEN TELUK BINTUNI</title>
+    <title>SISTEM PELAPORAN BULANAN SATUAN PENDIDIKAN - KABUPATEN TELUK BINTUNI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Leaflet CSS & JS -->
@@ -27,7 +27,7 @@
     <header class="hero-gradient text-white">
         <div class="container mx-auto px-6 py-16 text-center">
             <img src="/assets/logo/logo-bintuni.png" alt="Logo Bintuni" class="h-24 mx-auto mb-6">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Sistem Pelaporan Bulanan SMA/SMK</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Sistem Pelaporan Bulanan Satuan Pendidikan</h1>
             <p class="text-xl mb-8 opacity-90">Dinas Pendidikan, Kebudayaan, Pemuda dan Olahraga Kabupaten Teluk Bintuni</p>
             <div class="flex justify-center gap-4">
                 <a target="_blank" href="/login" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
