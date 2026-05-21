@@ -145,5 +145,38 @@
             @endforelse
         </tbody>
     </table>
+
+    @php
+        $dateString = \Carbon\Carbon::now()->translatedFormat('d F Y');
+        if (isset($sekolah) && $sekolah) {
+            $kepsek = \App\Models\Gtk::where('sekolah_id', $sekolah->id)
+                ->where('jenis_gtk', 'Kepala Sekolah')
+                ->first();
+            $titleSign = 'Kepala ' . $sekolah->nama;
+            $namaSign = $kepsek?->nama ?? '..........................';
+            $nipSign = $kepsek?->nip ?? '..........................';
+        } else {
+            $titleSign = 'Kepala Sekolah';
+            $namaSign = '..........................';
+            $nipSign = '..........................';
+        }
+    @endphp
+    <table style="width: 100%; border: none !important; margin-top: 30px; font-size: 10pt; background: transparent !important;">
+        <tr style="background: transparent !important;">
+            <td style="border: none !important; width: 50%; background: transparent !important;"></td>
+            <td style="border: none !important; width: 50%; text-align: left; background: transparent !important; padding: 0;">
+                <p style="margin: 0 0 50px 0; line-height: 1.5; text-align: left; background: transparent !important;">
+                    Bintuni, {{ $dateString }}<br>
+                    {{ $titleSign }}
+                </p>
+                <p style="margin: 0; font-weight: bold; text-align: left; background: transparent !important;">
+                    {{ $namaSign }}
+                </p>
+                <p style="margin: 0; margin-top: 5px; text-align: left; background: transparent !important;">
+                    NIP. {{ $nipSign }}
+                </p>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

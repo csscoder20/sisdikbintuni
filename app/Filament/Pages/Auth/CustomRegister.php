@@ -99,6 +99,17 @@ class CustomRegister extends BaseRegister
             \Illuminate\Support\Facades\Log::warning('Gagal mengirim email registrasi operator: ' . $e->getMessage());
         }
 
+        // Kirim notifikasi ke semua Admin Dinas
+        try {
+            $adminDinasList = \App\Models\User::role('admin_dinas')->get();
+            foreach ($adminDinasList as $admin) {
+                \Illuminate\Support\Facades\Mail::to($admin->email)
+                    ->send(new \App\Mail\AdminNewOperator($user));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal mengirim email notifikasi ke admin dinas: ' . $e->getMessage());
+        }
+
         event(new Registered($user));
 
         // Skip automatic login after registration

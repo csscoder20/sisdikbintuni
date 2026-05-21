@@ -317,19 +317,48 @@
             @endforeach
         </div>
 
+        @php
+            $schoolId = $this->getSchoolId();
+            $sekolah = \App\Models\Sekolah::find($schoolId);
+            $kepsek = \App\Models\Gtk::where('sekolah_id', $schoolId)
+                ->where('jenis_gtk', 'Kepala Sekolah')
+                ->first();
+            
+            $laporanId = $this->selectedLaporanId;
+            if ($laporanId) {
+                $laporan = \App\Models\Laporan::find($laporanId);
+            } else {
+                $laporan = \App\Models\Laporan::where('sekolah_id', $schoolId)
+                    ->orderBy('tahun', 'desc')
+                    ->orderBy('bulan', 'desc')
+                    ->first();
+            }
+            
+            $dateString = '';
+            if ($laporan) {
+                if ($laporan->tanggal_submit) {
+                    $dateString = \Carbon\Carbon::parse($laporan->tanggal_submit)->translatedFormat('d F Y');
+                } else {
+                    $reportDate = \Carbon\Carbon::createFromDate($laporan->tahun, $laporan->bulan, 1);
+                    if ($reportDate->isCurrentMonth()) {
+                        $dateString = \Carbon\Carbon::now()->translatedFormat('d F Y');
+                    } else {
+                        $dateString = $reportDate->endOfMonth()->translatedFormat('d F Y');
+                    }
+                }
+            } else {
+                $dateString = \Carbon\Carbon::now()->translatedFormat('d F Y');
+            }
+        @endphp
         <div class="signature-grid">
+            <div class="sig-box"></div>
             <div class="sig-box">
-                <p>Mengetahui,<br>Kepala Sekolah</p>
+                <p style="margin: 0;">Bintuni, {{ $dateString }}<br>Kepala {{ $sekolah?->nama ?? 'Sekolah' }}</p>
                 <div class="sig-space"></div>
-                @php $kepsek = \App\Models\Gtk::where('sekolah_id', $this->getSchoolId())->where('jenis_gtk', 'kepala_sekolah')->first(); @endphp
                 <div class="sig-name">{{ $kepsek?->nama ?? '..........................' }}</div>
-                <div class="sig-title">NIP. {{ $kepsek?->nip ?? '..........................' }}</div>
-            </div>
-            <div class="sig-box">
-                <p>Bintuni, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>Operator Sekolah</p>
-                <div class="sig-space"></div>
-                <div class="sig-name">{{ auth()->user()->name }}</div>
-                <div class="sig-title">Divalidasi secara sistem</div>
+                <div class="sig-title" style="margin-top: 2px;">
+                    NIP. {{ $kepsek?->nip ?? '..........................' }}
+                </div>
             </div>
         </div>
     </div>

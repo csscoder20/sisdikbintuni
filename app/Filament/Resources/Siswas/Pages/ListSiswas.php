@@ -131,6 +131,9 @@ class ListSiswas extends ListRecords
 
                     $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));
                     $sekolah = filament()->getTenant();
+                    if (!$sekolah && session('dinas_selected_sekolah_id')) {
+                        $sekolah = \App\Models\Sekolah::find(session('dinas_selected_sekolah_id'));
+                    }
                     $filename = 'Daftar Nominatif Siswa - ' . ($sekolah?->nama ?? 'Sekolah');
 
                     if ($data['format'] === 'xlsx') {
@@ -157,7 +160,7 @@ class ListSiswas extends ListRecords
                     $html = view('pdf.siswa-nominatif', [
                         'records' => $records,
                         'columns' => $selectedColumns,
-                        'sekolah' => filament()->getTenant(),
+                        'sekolah' => $sekolah,
                         'fontSize' => $fontSize,
                     ])->render();
 

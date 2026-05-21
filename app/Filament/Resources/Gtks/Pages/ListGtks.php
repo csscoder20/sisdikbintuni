@@ -133,6 +133,9 @@ class ListGtks extends ListRecords
 
                     $selectedColumns = array_intersect_key($allColumns, array_flip($data['columns']));
                     $sekolah = filament()->getTenant();
+                    if (!$sekolah && session('dinas_selected_sekolah_id')) {
+                        $sekolah = \App\Models\Sekolah::find(session('dinas_selected_sekolah_id'));
+                    }
                     $filename = 'Daftar Nominatif GTK - ' . ($sekolah?->nama ?? 'Sekolah');
 
                     if ($data['format'] === 'xlsx') {
@@ -159,7 +162,7 @@ class ListGtks extends ListRecords
                     $html = view('pdf.gtk-nominatif', [
                         'records' => $records,
                         'columns' => $selectedColumns,
-                        'sekolah' => filament()->getTenant(),
+                        'sekolah' => $sekolah,
                         'fontSize' => $fontSize,
                     ])->render();
 

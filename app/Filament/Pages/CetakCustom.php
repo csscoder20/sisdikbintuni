@@ -941,6 +941,7 @@ class CetakCustom extends Page implements HasForms
             'records' => $records,
             'columns' => $selectedColumns,
             'fontSize' => $fontSize,
+            'sekolah' => null,
         ])->render();
 
         $browsershot = Browsershot::html($html)
@@ -1095,12 +1096,18 @@ class CetakCustom extends Page implements HasForms
             $fontSize = '5pt';
         }
 
+        $sekolah = null;
+        if (!empty($state['siswa_sekolah']) && count($state['siswa_sekolah']) === 1) {
+            $sekolah = Sekolah::find($state['siswa_sekolah'][0]);
+        }
+
         $html = view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH UNTUK SISWA',
             'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
             'records' => $records,
             'columns' => $selectedColumns,
             'fontSize' => $fontSize,
+            'sekolah' => $sekolah,
         ])->render();
 
         $browsershot = Browsershot::html($html)
@@ -1299,12 +1306,18 @@ class CetakCustom extends Page implements HasForms
             $fontSize = '5pt';
         }
 
+        $sekolah = null;
+        if (!empty($state['gtk_sekolah']) && count($state['gtk_sekolah']) === 1) {
+            $sekolah = Sekolah::find($state['gtk_sekolah'][0]);
+        }
+
         $html = view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH UNTUK GTK',
             'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
             'records' => $records,
             'columns' => $selectedColumns,
             'fontSize' => $fontSize,
+            'sekolah' => $sekolah,
         ])->render();
 
         $browsershot = Browsershot::html($html)
@@ -1425,12 +1438,18 @@ class CetakCustom extends Page implements HasForms
             $fontSize = '5pt';
         }
 
+        $sekolah = null;
+        if (!empty($state['sarpras_sekolah']) && count($state['sarpras_sekolah']) === 1) {
+            $sekolah = Sekolah::find($state['sarpras_sekolah'][0]);
+        }
+
         $html = view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH UNTUK SARPRAS',
             'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
             'records' => $records,
             'columns' => $selectedColumns,
             'fontSize' => $fontSize,
+            'sekolah' => $sekolah,
         ])->render();
 
         $browsershot = Browsershot::html($html)

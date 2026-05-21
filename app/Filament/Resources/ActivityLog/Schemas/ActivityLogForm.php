@@ -1,6 +1,4 @@
 <?php
-// FILE: d:\laragon\www\sisdikbintuni\app\Filament\Resources\ActivityLog\Schemas\ActivityLogForm.php
-
 namespace App\Filament\Resources\ActivityLog\Schemas;
 
 use Filament\Forms\Components\KeyValue;

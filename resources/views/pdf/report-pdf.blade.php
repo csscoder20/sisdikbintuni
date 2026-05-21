@@ -220,18 +220,33 @@
 
     <table class="signature-table">
         <tr>
+            <td></td>
             <td>
-                <p>Mengetahui,<br>Kepala Sekolah</p>
+                @php
+                    $kepsek = \App\Models\Gtk::where('sekolah_id', $sekolah->id)
+                        ->where('jenis_gtk', 'Kepala Sekolah')
+                        ->first();
+                    
+                    $dateString = '';
+                    if (isset($laporan) && $laporan) {
+                        if ($laporan->tanggal_submit) {
+                            $dateString = \Carbon\Carbon::parse($laporan->tanggal_submit)->translatedFormat('d F Y');
+                        } else {
+                            $reportDate = \Carbon\Carbon::createFromDate($laporan->tahun, $laporan->bulan, 1);
+                            if ($reportDate->isCurrentMonth()) {
+                                $dateString = \Carbon\Carbon::now()->translatedFormat('d F Y');
+                            } else {
+                                $dateString = $reportDate->endOfMonth()->translatedFormat('d F Y');
+                            }
+                        }
+                    } else {
+                        $dateString = \Carbon\Carbon::now()->translatedFormat('d F Y');
+                    }
+                @endphp
+                <p>Bintuni, {{ $dateString }}<br>Kepala {{ $sekolah->nama }}</p>
                 <div class="sig-space"></div>
-                @php $kepsek = \App\Models\Gtk::where('sekolah_id', $sekolah->id)->where('jenis_gtk', 'kepala_sekolah')->first(); @endphp
                 <p><strong>{{ $kepsek?->nama ?? '..........................' }}</strong></p>
                 <p>NIP. {{ $kepsek?->nip ?? '..........................' }}</p>
-            </td>
-            <td>
-                <p>Bintuni, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>Operator Sekolah</p>
-                <div class="sig-space"></div>
-                <p><strong>{{ auth()->user()->name }}</strong></p>
-                <p>Divalidasi secara sistem</p>
             </td>
         </tr>
     </table>

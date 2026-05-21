@@ -69,6 +69,7 @@ class CetakLaporanController extends Controller
             'dinasLogo' => $dinasLogoBase64,
             'sekolahLogo' => $sekolahLogoBase64,
             'periode' => $periode,
+            'laporan' => $laporan,
         ];
 
         foreach ($this->checklist as $key => $label) {
