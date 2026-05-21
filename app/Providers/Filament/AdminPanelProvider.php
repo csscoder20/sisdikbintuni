@@ -32,6 +32,7 @@ use Filament\Support\Enums\Width;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
 use App\Filament\Pages\Auth\CustomRequestPasswordReset;
+use App\Filament\Pages\Auth\CustomResetPassword;
 use App\Filament\Pages\KeadaanGtk;
 use App\Filament\Pages\KeadaanSiswa;
 use App\Filament\Pages\CustomProfile;
@@ -56,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('dinas')
             ->path('admin')
-            ->passwordReset(CustomRequestPasswordReset::class)
+            ->passwordReset(CustomRequestPasswordReset::class, CustomResetPassword::class)
             ->emailVerification()
 
             ->darkMode(false)
@@ -261,7 +262,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications()
             ->profile()
-            ->passwordReset(CustomRequestPasswordReset::class)
+            ->passwordReset(CustomRequestPasswordReset::class, CustomResetPassword::class)
             ->emailVerification()
 
             ->userMenuItems([

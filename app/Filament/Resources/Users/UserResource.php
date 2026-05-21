@@ -70,7 +70,7 @@ class UserResource extends Resource
                     ->columns(2)
                     ->schema([
                         TextEntry::make('name')->label('Nama Lengkap')->placeholder('-'),
-                        TextEntry::make('email')->label('Alamat Surel')->placeholder('-'),
+                        TextEntry::make('email')->label('Alamat Email')->placeholder('-'),
                         TextEntry::make('nohp')->label('Nomor WA')->placeholder('-'),
                         TextEntry::make('roles_ringkas')
                             ->label('Peran')
@@ -85,7 +85,7 @@ class UserResource extends Resource
                                 default => $state ?: '-',
                             }),
                         TextEntry::make('sekolah.nama')->label('Asal Sekolah')->placeholder('-'),
-                        TextEntry::make('email_verified_at')->label('Surel Terverifikasi Pada')->dateTime('d/m/Y H:i')->placeholder('-'),
+                        TextEntry::make('email_verified_at')->label('Email Terverifikasi Pada')->dateTime('d/m/Y H:i')->placeholder('-'),
                     ]),
             ]);
     }

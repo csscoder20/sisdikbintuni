@@ -37,7 +37,7 @@ class UsersTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Alamat Surel')
+                    ->label('Alamat Email')
                     ->searchable(),
                 TextColumn::make('nohp')
                     ->label('Nomor WA')

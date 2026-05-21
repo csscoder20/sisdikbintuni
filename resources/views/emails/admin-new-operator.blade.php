@@ -17,7 +17,7 @@ Terdapat pendaftaran akun operator baru yang memerlukan tindakan verifikasi dari
 
 Silakan segera masuk ke panel Admin Dinas untuk meninjau dan memverifikasi akun operator ini.
 
-<x-mail::button :url="config('app.url') . '/admin/users'" color="success">
+<x-mail::button :url="config('app.url') . '/admin/dinas'" color="success">
 Verifikasi Sekarang
 </x-mail::button>
 

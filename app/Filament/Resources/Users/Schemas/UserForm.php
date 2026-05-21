@@ -17,7 +17,7 @@ class UserForm
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('email')
-                    ->label('Alamat Surel')
+                    ->label('Alamat Email')
                     ->email()
                     ->required(),
                 TextInput::make('nohp')

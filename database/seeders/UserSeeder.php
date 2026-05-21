@@ -31,40 +31,5 @@ class UserSeeder extends Seeder
         ]);
 
         $adminDinas->assignRole('admin_dinas');
-
-        // 🔹 OPERATOR 1
-        $op1 = User::create([
-            'name' => 'Operator Sekolah 1',
-            'email' => 'operator1@dikporabintuni.com',
-            'password' => Hash::make('password'),
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
-
-        $op1->assignRole('operator');
-
-        // 🔹 OPERATOR 2
-        $op2 = User::create([
-            'name' => 'Operator SMK Negeri 1 Bintuni',
-            'email' => 'smknegeri1bintuni@gmail.com',
-            'password' => Hash::make('password'),
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
-
-        $op2->assignRole('operator');
-
-        // 🔹 OPERATOR 3
-        $op3 = User::create([
-            'name' => 'Operator Sekolah 3',
-            'email' => 'operator3@dikporabintuni.com',
-            'password' => Hash::make('password'),
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
-
-        $op3->assignRole('operator');
-
-         
     }
 }

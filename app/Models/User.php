@@ -20,8 +20,22 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
     use SoftDeletes;
     use HasRoles, \App\Traits\HasActivityLog, Notifiable;
 
+    public ?int $sekolah_id_temp = null;
+    public bool $sekolah_id_temp_set = false;
+
     protected static function booted()
     {
+        static::saved(function ($user) {
+            if ($user->sekolah_id_temp_set) {
+                $user->sekolah_id_temp_set = false;
+                if ($user->sekolah_id_temp) {
+                    $user->operatorSekolah()->updateOrCreate([], ['sekolah_id' => $user->sekolah_id_temp]);
+                } else {
+                    $user->operatorSekolah()?->delete();
+                }
+            }
+        });
+
         static::updated(function ($user) {
             if (app()->runningInConsole()) {
                 return;
@@ -62,6 +76,10 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $appends = [
+        'sekolah_id',
     ];
 
     public function operatorSekolah()
@@ -147,15 +165,15 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
 
     public function getSekolahIdAttribute()
     {
+        if ($this->sekolah_id_temp_set) {
+            return $this->sekolah_id_temp;
+        }
         return $this->operatorSekolah?->sekolah_id;
     }
 
     public function setSekolahIdAttribute($value)
     {
-        if ($value) {
-            $this->operatorSekolah()->updateOrCreate([], ['sekolah_id' => $value]);
-        } else {
-            $this->operatorSekolah()?->delete();
-        }
+        $this->sekolah_id_temp = $value ? (int) $value : null;
+        $this->sekolah_id_temp_set = true;
     }
 }
