@@ -31,11 +31,11 @@ class CustomRegister extends BaseRegister
                 Select::make('sekolah_id')
                     ->label('Asal Sekolah')
                     ->options(Sekolah::query()
-                        ->whereNotIn('id', \App\Models\OperatorSekolah::pluck('sekolah_id'))
-                        ->where(function ($query) {
-                            $query->where('nama', 'ilike', '%sma%')
-                                ->orWhere('nama', 'ilike', '%smk%');
-                        })
+                        // ->whereNotIn('id', \App\Models\OperatorSekolah::pluck('sekolah_id'))
+                        // ->where(function ($query) {
+                        //     $query->where('nama', 'ilike', '%sma%')
+                        //         ->orWhere('nama', 'ilike', '%smk%');
+                        // })
                         ->pluck('nama', 'id'))
                     ->required()
                     ->searchable(),
