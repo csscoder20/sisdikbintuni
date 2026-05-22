@@ -10,8 +10,27 @@ class GtkPendidikanSeeder extends Seeder
 {
     public function run()
     {
-        $jurusan = ['Pendidikan Matematika', 'Bahasa Indonesia', 'IPA', 'Manajemen', 'Teknik Informatika'];
-        $kampus = ['Universitas Cenderawasih', 'Universitas Papua', 'Universitas Negeri Makassar', 'Universitas Hasanuddin'];
+        $jurusan = [
+            'Pendidikan Matematika',
+            'Pendidikan Bahasa Indonesia',
+            'Pendidikan Bahasa Inggris',
+            'Pendidikan Biologi',
+            'Pendidikan Ekonomi',
+            'Pendidikan Sejarah',
+            'Bimbingan dan Konseling',
+            'Administrasi Pendidikan',
+            'Manajemen Pendidikan',
+            'Teknik Informatika',
+        ];
+        $kampus = [
+            'Universitas Papua',
+            'Universitas Cenderawasih',
+            'Universitas Negeri Makassar',
+            'Universitas Hasanuddin',
+            'Universitas Pattimura',
+            'Universitas Negeri Manado',
+            'Universitas Terbuka',
+        ];
 
         $gtks = Gtk::all();
 
@@ -76,7 +95,10 @@ class GtkPendidikanSeeder extends Seeder
                 $data['gelar_belakang'] = 'M.Pd';
             }
 
-            GtkPendidikan::create($data);
+            GtkPendidikan::updateOrCreate(
+                ['gtk_id' => $gtk->id],
+                $data
+            );
         }
     }
 }

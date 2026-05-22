@@ -40,7 +40,7 @@ class SchoolSelector extends Component
         }
 
         $sekolahs = Sekolah::query()
-            ->when($this->search, fn($q) => $q->where('nama', 'like', "%{$this->search}%"))
+            ->when($this->search, fn($q) => $q->where('nama', 'ilike', "%{$this->search}%"))
             ->orderBy('nama')
             ->get();
 

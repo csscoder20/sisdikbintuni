@@ -67,6 +67,7 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'nohp',
         'password',
         'status',

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Mengajar extends Model
 {
     use SoftDeletes;
+
+    protected $with = ['gtk', 'rombel', 'mapel'];
+
     protected $table = 'gtk_mengajar';
 
     protected $fillable = [

@@ -20,10 +20,13 @@ class LaporanSiswaSeeder extends Seeder
 
             foreach ($rombels as $rombel) {
 
-                LaporanSiswa::create([
-                    'laporan_id' => $laporan->id,
-                    'rombel_id' => $rombel->id,
-                ]);
+                LaporanSiswa::updateOrCreate(
+                    [
+                        'laporan_id' => $laporan->id,
+                        'rombel_id' => $rombel->id,
+                    ],
+                    []
+                );
             }
         }
     }

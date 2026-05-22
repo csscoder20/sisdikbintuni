@@ -39,6 +39,7 @@ class Sekolah extends Model
         'tanggal_sk_yayasan',
         'akreditasi',
         'jenjang',
+        'status_sekolah',
         'status_tanah',
         'luas_tanah',
         'email',

@@ -13,45 +13,29 @@ class RombelSeeder extends Seeder
         $sekolahs = Sekolah::all();
 
         foreach ($sekolahs as $sekolah) {
+            $rombels = $sekolah->jenjang === 'smk'
+                ? [
+                    ['X TKJ 1', 10], ['X AKL 1', 10], ['X OTKP 1', 10], ['X TBSM 1', 10],
+                    ['XI TKJ 1', 11], ['XI AKL 1', 11], ['XI OTKP 1', 11], ['XI TBSM 1', 11],
+                    ['XII TKJ 1', 12], ['XII AKL 1', 12], ['XII OTKP 1', 12], ['XII TBSM 1', 12],
+                ]
+                : [
+                    ['X MIPA 1', 10], ['X MIPA 2', 10], ['X IPS 1', 10], ['X Bahasa', 10],
+                    ['XI MIPA 1', 11], ['XI MIPA 2', 11], ['XI IPS 1', 11], ['XI Bahasa', 11],
+                    ['XII MIPA 1', 12], ['XII MIPA 2', 12], ['XII IPS 1', 12], ['XII Bahasa', 12],
+                ];
 
-            // Kelas X
-            Rombel::create([
-                'sekolah_id' => $sekolah->id,
-                'nama' => 'Kelas X IPA 1',
-                'tingkat' => 10,
-            ]);
-
-            Rombel::create([
-                'sekolah_id' => $sekolah->id,
-                'nama' => 'Kelas X IPS 1',
-                'tingkat' => 10,
-            ]);
-
-            // Kelas XI
-            Rombel::create([
-                'sekolah_id' => $sekolah->id,
-                'nama' => 'Kelas XI IPA 1',
-                'tingkat' => 11,
-            ]);
-
-            Rombel::create([
-                'sekolah_id' => $sekolah->id,
-                'nama' => 'Kelas XI IPS 1',
-                'tingkat' => 11,
-            ]);
-
-            // Kelas XII
-            Rombel::create([
-                'sekolah_id' => $sekolah->id,
-                'nama' => 'Kelas XII IPA 1',
-                'tingkat' => 12,
-            ]);
-
-            Rombel::create([
-                'sekolah_id' => $sekolah->id,
-                'nama' => 'Kelas XII IPS 1',
-                'tingkat' => 12,
-            ]);
+            foreach ($rombels as [$nama, $tingkat]) {
+                Rombel::updateOrCreate(
+                    [
+                        'sekolah_id' => $sekolah->id,
+                        'nama' => $nama,
+                    ],
+                    [
+                        'tingkat' => $tingkat,
+                    ]
+                );
+            }
         }
     }
 }

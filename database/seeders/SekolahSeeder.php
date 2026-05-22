@@ -286,10 +286,17 @@ class SekolahSeeder extends Seeder
                     ],
                 ];
 
-        foreach ($data as $item) {
-            Sekolah::create([
-                'nama' => $item['nama'],
+        foreach ($data as $index => $item) {
+            $tahunBerdiri = 1985 + ($index % 32);
+            $namaRekening = 'BOP ' . $item['nama'];
+            $emailSlug = strtolower(str_replace([' ', '.', '-'], ['', '', ''], $item['nama']));
+
+            Sekolah::updateOrCreate([
                 'npsn' => $item['npsn'],
+            ], [
+                'nama' => $item['nama'],
+                'nss' => '301' . $item['npsn'] . str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT),
+                'npwp' => str_pad((string) (920600000000000 + $index + 1), 15, '0', STR_PAD_LEFT),
                 'jenjang' => $item['jenjang'],
                 'status_sekolah' => $item['status_sekolah'],
 
@@ -300,6 +307,22 @@ class SekolahSeeder extends Seeder
 
                 'alamat' => $item['alamat'],
                 'akreditasi' => $item['akreditasi'],
+                'tahun_berdiri' => $tahunBerdiri,
+                'nomor_sk_pendirian' => 'SK/' . ($tahunBerdiri + 100) . '/DIKPORA-TB/' . $tahunBerdiri,
+                'tanggal_sk_pendirian' => $tahunBerdiri . '-07-01',
+                'nama_yayasan' => $item['status_sekolah'] === 'swasta' ? 'Yayasan Pendidikan ' . ucwords(strtolower(str_replace(['SMAS ', 'SMA '], '', $item['nama']))) : 'Pemerintah Kabupaten Teluk Bintuni',
+                'alamat_yayasan' => $item['status_sekolah'] === 'swasta' ? $item['alamat'] . ', ' . $item['kecamatan'] : 'Jl. Raya Bintuni, Kabupaten Teluk Bintuni',
+                'nomor_sk_yayasan' => $item['status_sekolah'] === 'swasta' ? 'YYS/' . str_pad((string) ($index + 21), 3, '0', STR_PAD_LEFT) . '/TB/' . $tahunBerdiri : 'PEMDA/TB/' . $tahunBerdiri,
+                'tanggal_sk_yayasan' => $item['status_sekolah'] === 'swasta' ? $tahunBerdiri . '-08-15' : $tahunBerdiri . '-07-01',
+                'status_tanah' => $index % 5 === 0 ? 'ulayat' : 'shm',
+                'luas_tanah' => 4500 + (($index + 1) * 650),
+                'email' => $emailSlug . '@dikporabintuni.com',
+                'nama_rekening_bop' => $namaRekening,
+                'nomor_rekening_bop' => str_pad((string) (7010000000 + $index * 9173), 10, '0', STR_PAD_LEFT),
+                'nama_bank_bop' => 'Bank Papua',
+                'nama_rekening_bosp' => 'BOSP ' . $item['nama'],
+                'nomor_rekening_bosp' => str_pad((string) (8010000000 + $index * 9173), 10, '0', STR_PAD_LEFT),
+                'nama_bank_bosp' => 'Bank Papua',
                 'latitude' => $item['latitude'],
                 'longitude' => $item['longitude'],
             ]);

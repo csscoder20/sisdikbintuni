@@ -21,22 +21,29 @@ class KelulusanSeeder extends Seeder
 
                 $tahun = $tahunSekarang - $i;
 
-                $peserta = rand(50, 200);
+                $kelasAkhir = \App\Models\Siswa::where('sekolah_id', $sekolah->id)
+                    ->whereHas('rombel', fn ($query) => $query->where('tingkat', 12))
+                    ->count();
 
-                $lulus = rand($peserta - 10, $peserta); // hampir semua lulus
+                $peserta = max(50, $kelasAkhir + (($i - 3) * 7));
+                $lulus = max(0, $peserta - ($sekolah->id + $i) % 8);
 
                 $persentase = ($lulus / $peserta) * 100;
 
-                $lanjutPT = rand(0, $lulus);
+                $lanjutPT = (int) round($lulus * (0.28 + (($sekolah->id + $i) % 18) / 100));
 
-                Kelulusan::create([
-                    'sekolah_id' => $sekolah->id,
-                    'tahun' => $tahun,
-                    'jumlah_peserta_ujian' => $peserta,
-                    'jumlah_lulus' => $lulus,
-                    'persentase_kelulusan' => round($persentase, 2),
-                    'jumlah_lanjut_pt' => $lanjutPT,
-                ]);
+                Kelulusan::updateOrCreate(
+                    [
+                        'sekolah_id' => $sekolah->id,
+                        'tahun' => $tahun,
+                    ],
+                    [
+                        'jumlah_peserta_ujian' => $peserta,
+                        'jumlah_lulus' => $lulus,
+                        'persentase_kelulusan' => round($persentase, 2),
+                        'jumlah_lanjut_pt' => $lanjutPT,
+                    ]
+                );
             }
         }
     }

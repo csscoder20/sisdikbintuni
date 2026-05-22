@@ -2,122 +2,89 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\LaporanSiswa;
 use App\Models\LaporanSiswaKategori;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class LaporanSiswaKategoriSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        $laporanSiswas = LaporanSiswa::all();
+        $laporanSiswas = LaporanSiswa::with(['rombel.siswa', 'laporan'])->get();
 
-        foreach ($laporanSiswas as $ls) {
+        foreach ($laporanSiswas as $laporanSiswa) {
+            $siswas = $laporanSiswa->rombel?->siswa ?? collect();
+            $periodEnd = Carbon::create($laporanSiswa->laporan->tahun, $laporanSiswa->laporan->bulan, 1)->endOfMonth();
 
-            // ========================
-            // 🔹 UMUR (13 - 23)
-            // ========================
             for ($umur = 13; $umur <= 23; $umur++) {
-
-                $l = rand(0, 5);
-                $p = rand(0, 5);
-
-                LaporanSiswaKategori::create([
-                    'laporan_siswa_id' => $ls->id,
-                    'jenis_kategori' => 'umur',
-                    'sub_kategori' => (string)$umur,
-                    'laki_laki' => $l,
-                    'perempuan' => $p,
-                    'total' => $l + $p,
-                ]);
+                $rows = $siswas->filter(fn ($siswa) => $siswa->tanggal_lahir && Carbon::parse($siswa->tanggal_lahir)->diffInYears($periodEnd) === $umur);
+                $this->writeGenderCategory($laporanSiswa->id, 'umur', (string) $umur, $rows);
             }
 
-            // ========================
-            // 🔹 AGAMA
-            // ========================
-            $agamas = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu', 'Lainnya'];
+            foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $agamaKey) {
+                $rows = $siswas->filter(function ($siswa) use ($agamaKey) {
+                    $agama = strtolower((string) $siswa->agama);
 
-            foreach ($agamas as $agama) {
-
-                $l = rand(5, 15);
-                $p = rand(5, 15);
-
-                LaporanSiswaKategori::create([
-                    'laporan_siswa_id' => $ls->id,
-                    'jenis_kategori' => 'agama',
-                    'sub_kategori' => $agama,
-                    'laki_laki' => $l,
-                    'perempuan' => $p,
-                    'total' => $l + $p,
-                ]);
+                    return match ($agamaKey) {
+                        'islam' => str_contains($agama, 'islam'),
+                        'kristen' => str_contains($agama, 'kristen'),
+                        'katolik' => str_contains($agama, 'katolik'),
+                        'hindu' => str_contains($agama, 'hindu'),
+                        'buddha' => str_contains($agama, 'buddha') || str_contains($agama, 'budha'),
+                        'khonghucu' => str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu'),
+                    };
+                });
+                $this->writeGenderCategory($laporanSiswa->id, 'agama', $agamaKey, $rows);
             }
 
-            // ========================
-            // 🔹 ASAL DAERAH
-            // ========================
-            $daerah = ['Papua', 'Non Papua'];
+            foreach (['papua', 'non_papua'] as $daerahKey) {
+                $rows = $siswas->filter(function ($siswa) use ($daerahKey) {
+                    $daerah = strtolower((string) $siswa->daerah_asal);
+                    $isPapua = str_contains($daerah, 'papua') && ! str_contains($daerah, 'non');
 
-            foreach ($daerah as $d) {
-
-                $l = rand(10, 20);
-                $p = rand(10, 20);
-
-                LaporanSiswaKategori::create([
-                    'laporan_siswa_id' => $ls->id,
-                    'jenis_kategori' => 'asal_daerah',
-                    'sub_kategori' => $d,
-                    'laki_laki' => $l,
-                    'perempuan' => $p,
-                    'total' => $l + $p,
-                ]);
+                    return $daerahKey === 'papua' ? $isPapua : ! $isPapua;
+                });
+                $this->writeGenderCategory($laporanSiswa->id, 'asal_daerah', $daerahKey, $rows);
             }
 
-            // ========================
-            // 🔹 DISABILITAS
-            // ========================
-            $disabilitas = [
-                'Tuna Netra',
-                'Tuna Rungu',
-                'Tuna Wicara',
-                'Tuna Daksa',
-                'Tuna Grahita',
-                'Lainnya'
-            ];
-
-            foreach ($disabilitas as $d) {
-
-                $l = rand(0, 2);
-                $p = rand(0, 2);
-
-                LaporanSiswaKategori::create([
-                    'laporan_siswa_id' => $ls->id,
-                    'jenis_kategori' => 'disabilitas',
-                    'sub_kategori' => $d,
-                    'laki_laki' => $l,
-                    'perempuan' => $p,
-                    'total' => $l + $p,
-                ]);
+            foreach (['tidak', 'tuna_netra', 'tuna_rungu', 'tuna_wicara', 'tuna_daksa', 'tuna_grahita', 'tuna_lainnya'] as $disabilitas) {
+                $this->writeGenderCategory(
+                    $laporanSiswa->id,
+                    'disabilitas',
+                    $disabilitas,
+                    $siswas->where('disabilitas', $disabilitas)
+                );
             }
 
-            // ========================
-            // 🔹 BEASISWA
-            // ========================
-            $beasiswa = ['KIP', 'Beasiswa Pemda', 'Lainnya'];
-
-            foreach ($beasiswa as $b) {
-
-                $l = rand(0, 10);
-                $p = rand(0, 10);
-
-                LaporanSiswaKategori::create([
-                    'laporan_siswa_id' => $ls->id,
-                    'jenis_kategori' => 'beasiswa',
-                    'sub_kategori' => $b,
-                    'laki_laki' => $l,
-                    'perempuan' => $p,
-                    'total' => $l + $p,
-                ]);
+            foreach (['tidak', 'beasiswa_pemerintah_pusat', 'beasiswa_pemerintah_daerah', 'beasisswa_swasta', 'beasiswa_khusus', 'beasiswa_afirmasi', 'beasiswa_lainnya'] as $beasiswa) {
+                $this->writeGenderCategory(
+                    $laporanSiswa->id,
+                    'beasiswa',
+                    $beasiswa,
+                    $siswas->where('beasiswa', $beasiswa)
+                );
             }
         }
+    }
+
+    private function writeGenderCategory(int $laporanSiswaId, string $jenisKategori, string $subKategori, iterable $rows): void
+    {
+        $rows = collect($rows);
+        $laki = $rows->filter(fn ($siswa) => str_starts_with((string) $siswa->jenis_kelamin, 'L'))->count();
+        $perempuan = $rows->filter(fn ($siswa) => str_starts_with((string) $siswa->jenis_kelamin, 'P'))->count();
+
+        LaporanSiswaKategori::updateOrCreate(
+            [
+                'laporan_siswa_id' => $laporanSiswaId,
+                'jenis_kategori' => $jenisKategori,
+                'sub_kategori' => $subKategori,
+            ],
+            [
+                'laki_laki' => $laki,
+                'perempuan' => $perempuan,
+                'total' => $laki + $perempuan,
+            ]
+        );
     }
 }

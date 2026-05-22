@@ -2,42 +2,46 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Sekolah;
 use App\Models\OperatorSekolah;
+use App\Models\Sekolah;
+use App\Models\User;
+use Database\Seeders\Concerns\RealisticDummyData;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class OperatorSekolahSeeder extends Seeder
 {
-    public function run()
+    use RealisticDummyData;
+
+    public function run(): void
     {
-        // Ambil user operator
-        $op1 = User::where('email', 'operator1@dikporabintuni.com')->first();
-        $op2 = User::where('email', 'smknegeri1bintuni@gmail.com')->first();
-        $op3 = User::where('email', 'operator3@dikporabintuni.com')->first();
+        foreach (Sekolah::all() as $index => $sekolah) {
+            $seed = 900000 + $index;
+            $gender = $index % 2 === 0 ? 'L' : 'P';
+            $name = $this->personName($gender, $seed, true);
+            $emailSlug = Str::slug(strtolower($sekolah->npsn));
 
-        // Ambil sekolah (berdasarkan urutan)
-        $sekolah1 = Sekolah::where('npsn', '69879192')->first(); // SMA NEGERI KAITARO
-        $sekolah2 = Sekolah::where('npsn', '60403490')->first(); // SMKN 1 BINTUNI
-        $sekolah3 = Sekolah::where('npsn', '60403660')->first(); // SMAN MERDEY
+            $user = User::updateOrCreate(
+                ['email' => $emailSlug . '@dikporabintuni.com'],
+                [
+                    'name' => $name,
+                    'nohp' => $this->phone($seed),
+                    'password' => Hash::make('password'),
+                    'status' => 'active',
+                    'email_verified_at' => now(),
+                ]
+            );
 
-        // Insert relasi
-        OperatorSekolah::create([
-            'user_id' => $op1->id,
-            'sekolah_id' => $sekolah1->id,
-            'status' => 'approved',
-        ]);
+            $user->syncRoles(['operator']);
 
-        OperatorSekolah::create([
-            'user_id' => $op2->id,
-            'sekolah_id' => $sekolah2->id,
-            'status' => 'approved',
-        ]);
-
-        OperatorSekolah::create([
-            'user_id' => $op3->id,
-            'sekolah_id' => $sekolah3->id,
-            'status' => 'approved',
-        ]);
+            OperatorSekolah::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'sekolah_id' => $sekolah->id,
+                    'status' => 'approved',
+                ]
+            );
+        }
     }
 }

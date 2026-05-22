@@ -2,59 +2,54 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\LaporanSiswa;
 use App\Models\LaporanSiswaRekap;
+use Illuminate\Database\Seeder;
 
 class LaporanSiswaRekapSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $laporanSiswaId = 1;
+        $laporanSiswas = LaporanSiswa::with('rombel.siswa')->get();
 
-        $data = [
-            [
-                'kategori' => 'awal_bulan',
-                'laki_laki' => 12,
-                'perempuan' => 17,
-            ],
-            [
-                'kategori' => 'mutasi_masuk',
-                'laki_laki' => 1,
-                'perempuan' => 2,
-            ],
-            [
-                'kategori' => 'mutasi_keluar',
-                'laki_laki' => 0,
-                'perempuan' => 1,
-            ],
-            [
-                'kategori' => 'putus_sekolah',
-                'laki_laki' => 0,
-                'perempuan' => 0,
-            ],
-            [
-                'kategori' => 'mengulang',
-                'laki_laki' => 1,
-                'perempuan' => 0,
-            ],
-            [
-                'kategori' => 'akhir_bulan',
-                'laki_laki' => 14,
-                'perempuan' => 18,
-            ],
-        ];
+        foreach ($laporanSiswas as $laporanSiswa) {
+            $siswas = $laporanSiswa->rombel?->siswa ?? collect();
 
-        foreach ($data as $item) {
-            LaporanSiswaRekap::create([
-                'laporan_siswa_id' => $laporanSiswaId,
-                'kategori' => $item['kategori'],
-                'laki_laki' => $item['laki_laki'],
-                'perempuan' => $item['perempuan'],
-                'total' => $item['laki_laki'] + $item['perempuan'],
+            $categories = [
+                'mutasi_masuk' => $siswas->where('status', 'mutasi_masuk'),
+                'mutasi_keluar' => $siswas->where('status', 'mutasi_keluar'),
+                'putus_sekolah' => $siswas->where('status', 'putus_sekolah'),
+                'mengulang' => $siswas->where('status', 'mengulang'),
+            ];
+
+            $akhirBulan = $siswas->filter(fn ($siswa) => in_array($siswa->status, ['aktif', 'mutasi_masuk', 'mengulang'], true));
+            $awalBulan = $akhirBulan
+                ->reject(fn ($siswa) => $siswa->status === 'mutasi_masuk')
+                ->merge($categories['mutasi_keluar'])
+                ->merge($categories['putus_sekolah']);
+
+            $categories = array_merge([
+                'awal_bulan' => $awalBulan,
+            ], $categories, [
+                'akhir_bulan' => $akhirBulan,
             ]);
+
+            foreach ($categories as $kategori => $rows) {
+                $laki = $rows->filter(fn ($siswa) => str_starts_with((string) $siswa->jenis_kelamin, 'L'))->count();
+                $perempuan = $rows->filter(fn ($siswa) => str_starts_with((string) $siswa->jenis_kelamin, 'P'))->count();
+
+                LaporanSiswaRekap::updateOrCreate(
+                    [
+                        'laporan_siswa_id' => $laporanSiswa->id,
+                        'kategori' => $kategori,
+                    ],
+                    [
+                        'laki_laki' => $laki,
+                        'perempuan' => $perempuan,
+                        'total' => $laki + $perempuan,
+                    ]
+                );
+            }
         }
     }
 }

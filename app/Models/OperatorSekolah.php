@@ -10,6 +10,7 @@ class OperatorSekolah extends Model
     protected $fillable = [
         'user_id',
         'sekolah_id',
+        'status',
     ];
 
     public function user()

@@ -18,10 +18,13 @@ class LaporanGtkSeeder extends Seeder
 
             foreach ($jenisGtk as $jenis) {
 
-                LaporanGtk::create([
-                    'laporan_id' => $laporan->id,
-                    'jenis_gtk' => $jenis,
-                ]);
+                LaporanGtk::updateOrCreate(
+                    [
+                        'laporan_id' => $laporan->id,
+                        'jenis_gtk' => $jenis,
+                    ],
+                    []
+                );
             }
         }
     }

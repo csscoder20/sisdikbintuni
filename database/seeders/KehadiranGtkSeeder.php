@@ -18,24 +18,53 @@ class KehadiranGtkSeeder extends Seeder
             $gtks = Gtk::where('sekolah_id', $laporan->sekolah_id)->get();
 
             foreach ($gtks as $gtk) {
+                $seed = $gtk->id + ($laporan->bulan * 31);
+                // Add per-school offset (~20) to work days
+                $schoolIndex = $gtk->sekolah_id;
+                $offset = ($schoolIndex % 5) * 5 + 10; // creates gaps of ~10-30 days
+                $hariKerja = 22 + ($seed % 5) + $offset;
+                $sakit = $seed % 7 === 0 ? 2 : ($seed % 5 === 0 ? 1 : 0);
+                $izin = $seed % 6 === 0 ? 1 : 0;
+                $alfa = $seed % 19 === 0 ? 1 : 0;
+                $hadir = max(0, $hariKerja - ($sakit + $izin + $alfa));
+                $dataHarian = [];
 
-                $hariKerja = rand(20, 26);
+                for ($hari = 1; $hari <= $hariKerja; $hari++) {
+                    $dataHarian[$hari] = 'H';
+                }
 
-                $sakit = rand(0, 2);
-                $izin = rand(0, 2);
-                $alfa = rand(0, 1);
+                if ($sakit > 0) {
+                    $dataHarian[3 + ($seed % 9)] = 'S';
+                }
 
-                $hadir = $hariKerja - ($sakit + $izin + $alfa);
+                if ($sakit > 1) {
+                    $dataHarian[10 + ($seed % 8)] = 'S';
+                }
 
-                KehadiranGtk::create([
-                    'gtk_id' => $gtk->id,
-                    'laporan_id' => $laporan->id,
-                    'hadir' => $hadir,
-                    'sakit' => $sakit,
-                    'izin' => $izin,
-                    'alfa' => $alfa,
-                    'hari_kerja' => $hariKerja,
-                ]);
+                if ($izin > 0) {
+                    $dataHarian[6 + ($seed % 11)] = 'I';
+                }
+
+                if ($alfa > 0) {
+                    $dataHarian[14 + ($seed % 7)] = 'A';
+                }
+
+                KehadiranGtk::updateOrCreate(
+                    [
+                        'gtk_id' => $gtk->id,
+                        'laporan_id' => $laporan->id,
+                    ],
+                    [
+                        'bulan' => $laporan->bulan,
+                        'tahun' => $laporan->tahun,
+                        'data_harian' => json_encode($dataHarian),
+                        'hadir' => $hadir,
+                        'sakit' => $sakit,
+                        'izin' => $izin,
+                        'alfa' => $alfa,
+                        'hari_kerja' => $hariKerja,
+                    ]
+                );
             }
         }
     }
