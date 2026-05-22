@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\LaporanGedung\Schemas;
 
+use Closure;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Facades\Filament;
 
@@ -31,18 +33,35 @@ class LaporanGedungForm
                 TextInput::make('jumlah_total')
                     ->label('Jumlah Total')
                     ->required()
-                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
                     ->default(0),
                 TextInput::make('jumlah_baik')
                     ->label('Jumlah Baik')
                     ->required()
-                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
                     ->default(0),
                 TextInput::make('jumlah_rusak')
                     ->label('Jumlah Rusak')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->default(0)
+                    ->rules([
+                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get): void {
+                            $total = $get('jumlah_total');
+                            $baik = $get('jumlah_baik');
+
+                            if ($total === null || $total === '' || $baik === null || $baik === '' || $value === null || $value === '') {
+                                return;
+                            }
+
+                            if (((int) $baik + (int) $value) !== (int) $total) {
+                                $fail('Jumlah Baik dan Jumlah Rusak harus sama dengan Jumlah Total.');
+                            }
+                        },
+                    ]),
                 Select::make('status_kepemilikan')
                     ->label('Status Kepemilikan')
                     ->options([

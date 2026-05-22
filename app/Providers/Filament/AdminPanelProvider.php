@@ -197,23 +197,8 @@ class AdminPanelProvider extends PanelProvider
                     '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">' .
                     (request()->routeIs('filament.*.auth.*') ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '')
             )
-            ->renderHook('panels::table.container.after', function () {
-                return <<<'HTML'
-                    <div wire:loading.delay class="fi-ta-loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/10 backdrop-blur-[1px]">
-                        <div class="p-3 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 flex items-center gap-3">
-                            <svg class="animate-spin h-5 w-5" style="color: rgb(var(--primary-600))" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Memuat data...</span>
-                        </div>
-                    </div>
-                HTML;
-            })
-
-
             ->renderHook('panels::body.end', function () {
-                return <<<'HTML'
+                return self::renderGlobalOperationLoader() . <<<'HTML'
                     <style>
                         .fi-ta-header-cell > * {
                             padding-top: 0px !important;
@@ -354,19 +339,6 @@ class AdminPanelProvider extends PanelProvider
                     '<link rel="apple-touch-icon" href="/favicon.png?v=20260507b">' .
                     (request()->routeIs('filament.*.auth.*') ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '')
             )
-            ->renderHook('panels::table.container.after', function () {
-                return <<<'HTML'
-                    <div wire:loading.delay class="fi-ta-loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/10 backdrop-blur-[1px]">
-                        <div class="p-3 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 flex items-center gap-3">
-                            <svg class="animate-spin h-5 w-5" style="color: rgb(var(--primary-600))" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Memuat data...</span>
-                        </div>
-                    </div>
-                HTML;
-            })
             ->renderHook('panels::body.start', function () {
                 if (!session()->has('impersonating_sekolah_id')) {
                     return '';
@@ -387,7 +359,7 @@ class AdminPanelProvider extends PanelProvider
             })
 
             ->renderHook('panels::body.end', function () {
-                return <<<'HTML'
+                return self::renderGlobalOperationLoader() . <<<'HTML'
                     <style>
                         .fi-sidebar-nav::-webkit-scrollbar {
                             display: none;
@@ -422,5 +394,384 @@ class AdminPanelProvider extends PanelProvider
                     </style>
                 HTML;
             });
+    }
+
+    protected static function renderGlobalOperationLoader(): string
+    {
+        return <<<'HTML'
+            <div id="app-operation-loader" aria-live="polite" aria-busy="true">
+                <div class="app-operation-loader-card">
+                    <svg class="app-operation-loader-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="app-operation-loader-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="app-operation-loader-path" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <div class="app-operation-loader-content">
+                        <div class="app-operation-loader-title" data-operation-loader-message>Memproses operasi...</div>
+                        <div class="app-operation-loader-subtitle" data-operation-loader-subtitle>Mohon tunggu, sistem sedang bekerja.</div>
+                        <div class="app-operation-loader-progress" data-operation-loader-progress hidden>
+                            <div class="app-operation-loader-progress-bar" data-operation-loader-progress-bar></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                #app-operation-loader {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1rem;
+                    background: rgba(15, 23, 42, 0.16);
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 160ms ease;
+                    backdrop-filter: blur(2px);
+                }
+
+                #app-operation-loader.is-visible {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
+                .app-operation-loader-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.875rem;
+                    width: min(100%, 24rem);
+                    border: 1px solid rgba(148, 163, 184, 0.35);
+                    border-radius: 0.75rem;
+                    background: #ffffff;
+                    padding: 1rem;
+                    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+                }
+
+                .dark .app-operation-loader-card {
+                    border-color: rgba(51, 65, 85, 0.85);
+                    background: #111827;
+                }
+
+                .app-operation-loader-spinner {
+                    width: 1.5rem;
+                    height: 1.5rem;
+                    flex: none;
+                    color: rgb(var(--primary-600));
+                    animation: app-operation-loader-spin 1s linear infinite;
+                }
+
+                .app-operation-loader-track {
+                    opacity: 0.25;
+                }
+
+                .app-operation-loader-path {
+                    opacity: 0.85;
+                }
+
+                .app-operation-loader-content {
+                    min-width: 0;
+                    flex: 1;
+                }
+
+                .app-operation-loader-title {
+                    color: #111827;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    line-height: 1.25rem;
+                }
+
+                .dark .app-operation-loader-title {
+                    color: #f9fafb;
+                }
+
+                .app-operation-loader-subtitle {
+                    margin-top: 0.125rem;
+                    color: #64748b;
+                    font-size: 0.78rem;
+                    line-height: 1.1rem;
+                }
+
+                .dark .app-operation-loader-subtitle {
+                    color: #cbd5e1;
+                }
+
+                .app-operation-loader-progress {
+                    height: 0.45rem;
+                    margin-top: 0.7rem;
+                    overflow: hidden;
+                    border-radius: 999px;
+                    background: #e5e7eb;
+                }
+
+                .dark .app-operation-loader-progress {
+                    background: #334155;
+                }
+
+                .app-operation-loader-progress-bar {
+                    width: 0%;
+                    height: 100%;
+                    border-radius: inherit;
+                    background: rgb(var(--primary-600));
+                    transition: width 140ms ease;
+                }
+
+                @keyframes app-operation-loader-spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+            </style>
+
+            <script>
+                (() => {
+                    if (window.__sisdikOperationLoaderInitialized) {
+                        return;
+                    }
+
+                    window.__sisdikOperationLoaderInitialized = true;
+
+                    const loader = document.getElementById('app-operation-loader');
+
+                    if (!loader) {
+                        return;
+                    }
+
+                    const message = loader.querySelector('[data-operation-loader-message]');
+                    const subtitle = loader.querySelector('[data-operation-loader-subtitle]');
+                    const progress = loader.querySelector('[data-operation-loader-progress]');
+                    const progressBar = loader.querySelector('[data-operation-loader-progress-bar]');
+                    let activeRequests = 0;
+                    let activeUploads = 0;
+                    let pendingMessage = '';
+                    let loaderArmedUntil = 0;
+                    let hideTimer = null;
+                    let directNavigationTimer = null;
+
+                    const setMessage = (text, detail = 'Mohon tunggu, sistem sedang bekerja.') => {
+                        message.textContent = text || 'Memproses operasi...';
+                        subtitle.textContent = detail;
+                    };
+
+                    const setProgress = (percent = null) => {
+                        if (percent === null || Number.isNaN(Number(percent))) {
+                            progress.hidden = true;
+                            progressBar.style.width = '0%';
+                            return;
+                        }
+
+                        progress.hidden = false;
+                        progressBar.style.width = `${Math.max(0, Math.min(100, Number(percent)))}%`;
+                    };
+
+                    const show = (text, detail) => {
+                        window.clearTimeout(hideTimer);
+                        setMessage(text || pendingMessage || 'Memproses operasi...', detail);
+                        loader.classList.add('is-visible');
+                    };
+
+                    const hideWhenIdle = () => {
+                        if (activeRequests > 0 || activeUploads > 0) {
+                            return;
+                        }
+
+                        hideTimer = window.setTimeout(() => {
+                            loader.classList.remove('is-visible');
+                            setProgress(null);
+                            pendingMessage = '';
+                            loaderArmedUntil = 0;
+                            window.clearTimeout(directNavigationTimer);
+                        }, 180);
+                    };
+
+                    const inferMessage = (value) => {
+                        const text = String(value || '').toLowerCase();
+
+                        if (text.includes('upload') || text.includes('unggah')) {
+                            return 'Mengunggah berkas...';
+                        }
+
+                        if (text.includes('import') || text.includes('impor')) {
+                            return 'Mengimpor data...';
+                        }
+
+                        if (
+                            text.includes('export') ||
+                            text.includes('ekspor') ||
+                            text.includes('download') ||
+                            text.includes('unduh') ||
+                            text.includes('cetak') ||
+                            text.includes('pdf') ||
+                            text.includes('excel')
+                        ) {
+                            return 'Menyiapkan berkas unduhan...';
+                        }
+
+                        if (
+                            text.includes('save') ||
+                            text.includes('simpan') ||
+                            text.includes('perbarui') ||
+                            text.includes('update')
+                        ) {
+                            return 'Menyimpan perubahan...';
+                        }
+
+                        return null;
+                    };
+
+                    const getTriggerText = (trigger) => [
+                        trigger.textContent,
+                        trigger.getAttribute('aria-label'),
+                        trigger.getAttribute('title'),
+                        trigger.getAttribute('href'),
+                    ].filter(Boolean).join(' ');
+
+                    const isPaginationTrigger = (trigger) => {
+                        const triggerText = getTriggerText(trigger).toLowerCase();
+                        const labelledAncestor = trigger.closest('[aria-label]');
+                        const ancestorLabel = labelledAncestor?.getAttribute('aria-label')?.toLowerCase() || '';
+                        const classText = [
+                            trigger.className,
+                            trigger.closest('nav')?.className,
+                            trigger.closest('[class]')?.className,
+                        ].filter(Boolean).join(' ').toLowerCase();
+
+                        return (
+                            ancestorLabel.includes('pagination') ||
+                            ancestorLabel.includes('halaman') ||
+                            classText.includes('pagination') ||
+                            triggerText.includes('sebelumnya') ||
+                            triggerText.includes('selanjutnya') ||
+                            triggerText.includes('previous') ||
+                            triggerText.includes('next') ||
+                            triggerText.includes('page ') ||
+                            triggerText.includes('halaman') ||
+                            triggerText.trim() === '«' ||
+                            triggerText.trim() === '»'
+                        );
+                    };
+
+                    const isInternalNavigationLink = (trigger, event) => {
+                        if (trigger.tagName !== 'A' || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                            return false;
+                        }
+
+                        if (trigger.target === '_blank' || trigger.hasAttribute('download')) {
+                            return false;
+                        }
+
+                        const href = trigger.getAttribute('href');
+                        if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+                            return false;
+                        }
+
+                        const url = new URL(trigger.href, window.location.href);
+                        const currentUrl = new URL(window.location.href);
+
+                        if (url.origin !== currentUrl.origin || url.href === currentUrl.href) {
+                            return false;
+                        }
+
+                        if (/\.(pdf|xlsx?|csv|docx?|zip)(\?|$)/i.test(url.pathname)) {
+                            return false;
+                        }
+
+                        return (
+                            trigger.closest('.fi-sidebar') ||
+                            trigger.closest('.fi-topbar') ||
+                            trigger.closest('.fi-breadcrumbs') ||
+                            url.pathname.startsWith('/admin')
+                        );
+                    };
+
+                    document.addEventListener('click', (event) => {
+                        const trigger = event.target.closest('button, a, [role="button"]');
+
+                        if (!trigger) {
+                            return;
+                        }
+
+                        pendingMessage = inferMessage(getTriggerText(trigger));
+
+                        if (!pendingMessage && isPaginationTrigger(trigger)) {
+                            pendingMessage = 'Memuat halaman...';
+                        }
+
+                        const isInternalNavigation = !pendingMessage && isInternalNavigationLink(trigger, event);
+
+                        if (isInternalNavigation) {
+                            pendingMessage = 'Membuka halaman...';
+                        }
+
+                        if (pendingMessage) {
+                            loaderArmedUntil = Date.now() + 3000;
+                        }
+
+                        if (isInternalNavigation) {
+                            window.clearTimeout(directNavigationTimer);
+                            directNavigationTimer = window.setTimeout(() => show(pendingMessage), 250);
+                        }
+                    }, true);
+
+                    document.addEventListener('livewire:init', () => {
+                        if (!window.Livewire?.hook) {
+                            return;
+                        }
+
+                        window.Livewire.hook('request', ({ payload, options, respond, succeed, fail }) => {
+                            const requestText = payload || options?.body || pendingMessage;
+                            const inferredMessage = inferMessage(requestText);
+                            const shouldShowLoader = pendingMessage && Date.now() <= loaderArmedUntil;
+                            const requestMessage = pendingMessage || inferredMessage || 'Memproses operasi...';
+                            let requestShowTimer = null;
+
+                            if (shouldShowLoader) {
+                                activeRequests++;
+                                requestShowTimer = window.setTimeout(() => show(requestMessage), 250);
+                            }
+
+                            let finished = false;
+                            const finish = () => {
+                                if (finished) {
+                                    return;
+                                }
+
+                                finished = true;
+                                window.clearTimeout(requestShowTimer);
+                                if (shouldShowLoader) {
+                                    activeRequests = Math.max(0, activeRequests - 1);
+                                }
+                                hideWhenIdle();
+                            };
+
+                            respond(finish);
+                            succeed(finish);
+                            fail(finish);
+                        });
+                    });
+
+                    window.addEventListener('livewire-upload-start', () => {
+                        activeUploads++;
+                        setProgress(0);
+                        show('Mengunggah berkas...', 'Progress upload sedang dihitung.');
+                    });
+
+                    window.addEventListener('livewire-upload-progress', (event) => {
+                        const percent = event.detail?.progress ?? 0;
+                        setProgress(percent);
+                        show('Mengunggah berkas...', `Upload berjalan ${percent}%.`);
+                    });
+
+                    const finishUpload = () => {
+                        activeUploads = Math.max(0, activeUploads - 1);
+                        hideWhenIdle();
+                    };
+
+                    window.addEventListener('livewire-upload-finish', finishUpload);
+                    window.addEventListener('livewire-upload-error', finishUpload);
+                    window.addEventListener('livewire-upload-cancel', finishUpload);
+                })();
+            </script>
+        HTML;
     }
 }
