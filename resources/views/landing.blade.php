@@ -71,7 +71,7 @@
         }
 
         #map {
-            background-color: #f8fafc;
+            background-color: #b0d8f2;
         }
 
         .apexcharts-canvas {
@@ -90,6 +90,10 @@
             height: 370px;
             overflow-y: auto;
         }
+
+        /* .bg-white.p-6.rounded-xl.shadow-md.border.border-gray-100.mb-16 {
+            background-color: #b0d8f2;
+        } */
     </style>
     <meta property="og:title" content="Lapbul Dikpora Bintuni" />
     <meta property="og:description" content="Aplikasi laporan bulanan Dikpora Bintuni" />
@@ -111,16 +115,12 @@
                     class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
                     <i class="fas fa-sign-in-alt mr-2"></i> LOGIN OPERATOR
                 </a>
-                <a href="#statistik"
-                    class="bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-8 rounded-full transition duration-300 backdrop-blur-sm">
-                    Lihat Statistik
-                </a>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-6 -mt-10">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {{-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-red-500">
                 <div class="text-gray-500 text-sm font-bold uppercase">Total Sekolah</div>
                 <div class="text-3xl font-bold text-gray-800">{{ number_format($totalSekolah) }}</div>
@@ -155,10 +155,10 @@
                 <div class="text-blue-500 text-xs font-semibold mt-2">Kategori Layak ({{ $layak }} dari total
                     {{ $totalRuang }} ruang/gedung)</div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Area Grafik -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {{-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">Jumlah GTK Berdasarkan
                     Status Kepegawaian</h3>
@@ -169,16 +169,17 @@
                     Berdasarkan Pendidikan Terakhir</h3>
                 <div id="chart-gtk-pendidikan"></div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Peta Sebaran Sekolah dengan Layout Sidebar -->
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-16">
-            <h3 class="text-lg font-bold text-gray-700 mb-6 border-l-4 border-purple-500 pl-3">Peta Sebaran Sekolah
+            <h3 class="text-lg font-bold text-gray-700 mb-6 border-l-4 border-purple-500 pl-3 text-center">Peta Sebaran
+                Sekolah
             </h3>
 
-            <div class="grid grid-cols-12 gap-6">
-                <!-- Sidebar Kiri: Info Box & Legenda -->
-                <div class="col-span-12 lg:col-span-2 flex flex-col gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                <!-- Kolom Kiri: Info Box & Legenda (3/12) -->
+                <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
                     <!-- Grid Info Box 2x2 -->
                     <div class="grid grid-cols-2 gap-3">
                         <div
@@ -238,15 +239,15 @@
                     </div>
                 </div>
 
-                <!-- Peta Tengah -->
-                <div class="col-span-12 lg:col-span-7">
-                    <div class="relative bg-gray-100 rounded-lg overflow-hidden shadow-md" id="map-container">
-                        <div id="map" class="w-full h-175 rounded-lg z-0 relative"></div>
+                <!-- Kolom Tengah: Peta (6/12) -->
+                <div class="col-span-12 lg:col-span-6">
+                    <div class="relative border-0 p-0 h-full" id="map-container">
+                        <div id="map" class="w-full h-175 rounded-lg z-0 relative border-0"></div>
                     </div>
                 </div>
 
-                <!-- Sidebar Kanan: Tabel Daftar Sekolah -->
-                <div class="col-span-12 lg:col-span-3">
+                <!-- Kolom Kanan: Tabel Daftar Sekolah (3/12) -->
+                <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
                     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                         <div class="bg-blue-600 text-white p-3">
                             <h4 class="text-sm font-bold uppercase">Daftar SMA/SMK</h4>
@@ -287,7 +288,7 @@
                     </div>
 
                     <!-- Sebaran Per Distrik -->
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mt-6">
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                         <div class="bg-blue-600 text-white p-3">
                             <h4 class="text-sm font-bold uppercase">Sebaran Per Distrik</h4>
                         </div>
