@@ -788,8 +788,8 @@
                     L.geoJSON(geojson, {
                         interactive: false,
                         style: {
-                            color: '#ecf0f6',
-                            weight: 5,
+                            color: '#374151',
+                            weight: 1,
                             fillOpacity: 0
                         }
                     }).addTo(map);
