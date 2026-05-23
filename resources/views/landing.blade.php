@@ -92,22 +92,18 @@
         </div>
 
         <!-- Area Grafik -->
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-yellow-500 pl-3">Grafik GTK Berdasarkan
-                Status Kepegawaian di Setiap Sekolah</h3>
-            <div id="chart-gtk-sekolah" class="w-full"></div>
-        </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">Grafik Kondisi Sarana
-                Prasarana di Setiap Sekolah</h3>
-            <div id="chart-sarpras-sekolah" class="w-full"></div>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-12">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Grafik Jumlah Siswa
-                (Laki-laki & Perempuan) di Setiap Sekolah</h3>
-            <div id="chart-siswa-sekolah" class="w-full"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">Jumlah GTK Berdasarkan
+                    Status Kepegawaian</h3>
+                <div id="chart-gtk-status" class="w-full flex justify-center"></div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Jumlah Guru
+                    Berdasarkan Pendidikan Terakhir</h3>
+                <div id="chart-gtk-pendidikan" class="w-full flex justify-center"></div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16" id="statistik">
@@ -578,8 +574,9 @@
                         text: undefined // Tidak perlu judul di sumbu Y karena sudah ada nama sekolah
                     },
                 },
+                colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#64748B'],
                 legend: {
-                    position: 'top',
+                    position: 'bottom'
                 },
                 tooltip: {
                     y: {
@@ -589,8 +586,8 @@
                     }
                 }
             };
-            var chartGtk = new ApexCharts(document.querySelector("#chart-gtk-sekolah"), optionsGtk);
-            chartGtk.render();
+            var chartGtkStatus = new ApexCharts(document.querySelector("#chart-gtk-status"), optionsGtkStatus);
+            chartGtkStatus.render();
 
             // --- Konfigurasi Grafik Sarpras per Sekolah ---
             var grafikSarprasData = @json($grafikSarprasSekolah);
