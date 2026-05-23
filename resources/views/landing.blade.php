@@ -70,6 +70,10 @@
             width: 100%;
         }
 
+        #map {
+            background-color: #f8fafc;
+        }
+
         .apexcharts-canvas {
             margin: 0 auto;
         }
@@ -166,91 +170,6 @@
                 <div id="chart-gtk-pendidikan"></div>
             </div>
         </div>
-
-        {{-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16" id="statistik">
-            <!-- Tabel Sebaran Sekolah -->
-            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-600 pl-3">Sebaran Sekolah per
-                    Distrik</h3>
-                <div class="overflow-x-auto h-96">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-white shadow-sm">
-                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
-                                <th class="py-3 px-4 border-b">No</th>
-                                <th class="py-3 px-4 border-b">Distrik / Kecamatan</th>
-                                <th class="py-3 px-4 border-b text-center">SMA</th>
-                                <th class="py-3 px-4 border-b text-center">SMK</th>
-                                <th class="py-3 px-4 border-b text-center">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-700 text-sm">
-                            @forelse($sebaranSekolah as $index => $sebaran)
-                                <tr class="hover:bg-gray-50 border-b last:border-b-0">
-                                    <td class="py-3 px-4">{{ $index + 1 }}</td>
-                                    <td class="py-3 px-4">{{ $sebaran->kecamatan ?: 'Tidak Diketahui' }}</td>
-                                    <td class="py-3 px-4 text-center">
-                                        <span class="text-blue-600 font-bold">{{ $sebaran->sma }}</span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center">
-                                        <span class="text-purple-600 font-bold">{{ $sebaran->smk }}</span>
-                                    </td>
-                                    <td class="py-3 px-4 text-center">
-                                        <span
-                                            class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full font-bold">{{ $sebaran->total }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="py-4 text-center text-gray-500">Belum ada数据</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Tabel Daftar Sekolah -->
-            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Daftar Sekolah SMA/SMK
-                </h3>
-                <div class="overflow-x-auto h-96">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-white shadow-sm">
-                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
-                                <th class="py-3 px-4 border-b">No</th>
-                                <th class="py-3 px-4 border-b">Nama Sekolah</th>
-                                <th class="py-3 px-4 border-b">Status</th>
-                                <th class="py-3 px-4 border-b">Kecamatan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-700 text-sm">
-                            @forelse($daftarSekolah as $index => $sekolah)
-                                <tr class="hover:bg-gray-50 border-b last:border-b-0">
-                                    <td class="py-3 px-4">{{ $index + 1 }}</td>
-                                    <td class="py-3 px-4 font-semibold text-gray-800">{{ $sekolah->nama }}</td>
-                                    <td class="py-3 px-4">
-                                        @if (strtolower($sekolah->status_sekolah) == 'negeri')
-                                            <span
-                                                class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Negeri</span>
-                                        @elseif(strtolower($sekolah->status_sekolah) == 'swasta')
-                                            <span
-                                                class="bg-orange-100 text-orange-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Swasta</span>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td class="py-3 px-4">{{ $sekolah->kecamatan ?: '-' }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="py-4 text-center text-gray-500">Belum ada data</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div> --}}
 
         <!-- Peta Sebaran Sekolah dengan Layout Sidebar -->
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-16">
@@ -420,50 +339,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Inisialisasi Peta - Titik Tengah diatur di sekitar Kabupaten Teluk Bintuni
             var map = L.map('map').setView([-1.8841, 133.3283], 8);
-
-            // Tambahkan Tile Layer dari OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-
-            // Masker putih di luar Kabupaten Teluk Bintuni
-            fetch('{{ asset('assets/geo/92.06_Teluk_Bintuni.geojson') }}')
-                .then(res => res.json())
-                .then(geojson => {
-                    var outer = [
-                        [
-                            [-90, -180],
-                            [-90, 180],
-                            [90, 180],
-                            [90, -180]
-                        ]
-                    ];
-
-                    geojson.features.forEach(function(feature) {
-                        var holes = [];
-                        if (feature.geometry.type === 'Polygon') {
-                            holes.push(L.GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 1)[
-                                0]);
-                        } else if (feature.geometry.type === 'MultiPolygon') {
-                            feature.geometry.coordinates.forEach(function(poly) {
-                                holes.push(L.GeoJSON.coordsToLatLngs(poly, 2)[0]);
-                            });
-                        }
-
-                        var mask = L.polygon([outer[0]].concat(holes), {
-                            color: 'transparent',
-                            weight: 0,
-                            fillColor: '#ffffff',
-                            fillOpacity: 1,
-                            interactive: false,
-                        }).addTo(map);
-                        mask.bringToBack();
-                    });
-                })
-                .catch(error => {
-                    console.error('Gagal memuat GeoJSON kabupaten:', error);
-                });
 
             // Fetch GeoJSON Kecamatan Teluk Bintuni untuk menampilkan setiap kecamatan dengan warna berbeda
             fetch('{{ asset('assets/geo/92.06_kecamatan.geojson') }}')
@@ -637,7 +512,7 @@
                     formatter: function(val, opts) {
                         var name = opts.w.globals.labels[opts.seriesIndex];
                         var count = opts.w.globals.series[opts.seriesIndex];
-                        return count + ' (' + val.toFixed(1) + '%)';
+                        return name + ' ' + count + ' (' + val.toFixed(1) + '%)';
                     }
                 },
                 tooltip: {
@@ -694,7 +569,7 @@
                     formatter: function(val, opts) {
                         var name = opts.w.globals.labels[opts.seriesIndex];
                         var count = opts.w.globals.series[opts.seriesIndex];
-                        return count + ' (' + val.toFixed(1) + '%)';
+                        return name + ' ' + count + ' (' + val.toFixed(1) + '%)';
                     }
                 },
                 tooltip: {
@@ -913,7 +788,7 @@
                     L.geoJSON(geojson, {
                         interactive: false,
                         style: {
-                            color: '#0000FF',
+                            color: '#ecf0f6',
                             weight: 5,
                             fillOpacity: 0
                         }
