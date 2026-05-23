@@ -26,11 +26,11 @@ Route::get('/', function () {
         ->orderBy('nama')
         ->get();
 
-    
+
     // Sebaran Sekolah SMA/SMK per Kecamatan
     $sebaranSekolah = \App\Models\Sekolah::whereIn('jenjang', ['SMA', 'SMK', 'sma', 'smk'])
         ->select(
-            'kecamatan', 
+            'kecamatan',
             \Illuminate\Support\Facades\DB::raw('count(*) as total'),
             \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN LOWER(jenjang) = 'sma' THEN 1 ELSE 0 END) as sma"),
             \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN LOWER(jenjang) = 'smk' THEN 1 ELSE 0 END) as smk")
@@ -54,7 +54,7 @@ Route::get('/', function () {
     $grafikGtkPendidikan = [];
     foreach ($pendidikan as $p) {
         $count = \App\Models\Gtk::whereIn('jenis_gtk', ['Guru', 'Kepala Sekolah'])
-            ->where(function($query) use ($p) {
+            ->where(function ($query) use ($p) {
                 $query->where('pendidikan_terakhir', 'like', $p . '%')
                     ->orWhere('pendidikan_terakhir', 'like', substr($p, 0, 1) . '-' . substr($p, 1) . '%');
             })
@@ -64,7 +64,48 @@ Route::get('/', function () {
         }
     }
 
-    return view('landing', compact('totalSiswa', 'totalGtk', 'kondisiRuang', 'totalSekolah', 'daftarSekolah', 'sebaranSekolah', 'grafikGtkStatus', 'grafikGtkPendidikan'));
+    // Grafik GTK per Sekolah
+    $grafikGtkSekolah = \Illuminate\Support\Facades\DB::table('gtk')
+        ->join('sekolah', 'gtk.sekolah_id', '=', 'sekolah.id')
+        ->select(
+            'sekolah.nama as sekolah_nama',
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN gtk.status_kepegawaian = 'PNS' THEN 1 ELSE 0 END) as pns"),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN gtk.status_kepegawaian = 'CPNS' THEN 1 ELSE 0 END) as cpns"),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN gtk.status_kepegawaian = 'PPPK' THEN 1 ELSE 0 END) as pppk"),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN gtk.status_kepegawaian = 'GTY/PTY' THEN 1 ELSE 0 END) as gty_pty"),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN gtk.status_kepegawaian = 'Kontrak' THEN 1 ELSE 0 END) as kontrak"),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN gtk.status_kepegawaian = 'Honorer Sekolah' THEN 1 ELSE 0 END) as honorer")
+        )
+        ->groupBy('sekolah.id', 'sekolah.nama')
+        ->orderBy('sekolah.nama')
+        ->get();
+
+    // Grafik Sarpras per Sekolah
+    $grafikSarprasSekolah = \Illuminate\Support\Facades\DB::table('laporan_gedung')
+        ->join('laporan', 'laporan_gedung.laporan_id', '=', 'laporan.id')
+        ->join('sekolah', 'laporan.sekolah_id', '=', 'sekolah.id')
+        ->select(
+            'sekolah.nama as sekolah_nama',
+            \Illuminate\Support\Facades\DB::raw('SUM(laporan_gedung.jumlah_baik) as baik'),
+            \Illuminate\Support\Facades\DB::raw('SUM(laporan_gedung.jumlah_rusak) as rusak')
+        )
+        ->groupBy('sekolah.id', 'sekolah.nama')
+        ->orderBy('sekolah.nama')
+        ->get();
+
+    // Grafik Siswa per Sekolah
+    $grafikSiswaSekolah = \Illuminate\Support\Facades\DB::table('siswa')
+        ->join('sekolah', 'siswa.sekolah_id', '=', 'sekolah.id')
+        ->select(
+            'sekolah.nama as sekolah_nama',
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN siswa.jenis_kelamin LIKE 'L%' THEN 1 ELSE 0 END) as laki_laki"),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN siswa.jenis_kelamin LIKE 'P%' THEN 1 ELSE 0 END) as perempuan")
+        )
+        ->groupBy('sekolah.id', 'sekolah.nama')
+        ->orderBy('sekolah.nama')
+        ->get();
+
+    return view('landing', compact('totalSiswa', 'totalGtk', 'kondisiRuang', 'totalSekolah', 'daftarSekolah', 'sebaranSekolah', 'grafikGtkStatus', 'grafikGtkPendidikan', 'grafikGtkSekolah', 'grafikSarprasSekolah', 'grafikSiswaSekolah'));
 });
 
 Route::get('/admin', function () {

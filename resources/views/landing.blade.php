@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
@@ -23,6 +23,68 @@
 
         .hero-gradient {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .leaflet-control.legend {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            padding: 12px 14px;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 280px;
+            overflow-y: auto;
+            width: 220px;
+        }
+
+        .leaflet-control.legend .legend-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .leaflet-control.legend .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .leaflet-control.legend .legend-color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
+        }
+
+        .leaflet-control.legend .legend-name {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        /* Perbaikan untuk container grafik */
+        #chart-gtk-status,
+        #chart-gtk-pendidikan {
+            min-height: 400px;
+            width: 100%;
+        }
+
+        .apexcharts-canvas {
+            margin: 0 auto;
+        }
+
+        .h-87\.5 {
+            height: 350px;
+        }
+
+        .h-175 {
+            height: 800px;
+        }
+
+        div#legend-kecamatan {
+            height: 370px;
+            overflow-y: auto;
         }
     </style>
     <meta property="og:title" content="Lapbul Dikpora Bintuni" />
@@ -92,21 +154,20 @@
         </div>
 
         <!-- Area Grafik -->
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">Jumlah GTK Berdasarkan
                     Status Kepegawaian</h3>
-                <div id="chart-gtk-status" class="w-full flex justify-center"></div>
+                <div id="chart-gtk-status"></div>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Jumlah Guru
                     Berdasarkan Pendidikan Terakhir</h3>
-                <div id="chart-gtk-pendidikan" class="w-full flex justify-center"></div>
+                <div id="chart-gtk-pendidikan"></div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16" id="statistik">
+        {{-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16" id="statistik">
             <!-- Tabel Sebaran Sekolah -->
             <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-600 pl-3">Sebaran Sekolah per
@@ -140,7 +201,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-4 text-center text-gray-500">Belum ada data</td>
+                                    <td colspan="5" class="py-4 text-center text-gray-500">Belum ada数据</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -189,7 +250,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Peta Sebaran Sekolah dengan Layout Sidebar -->
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-16">
@@ -239,7 +300,7 @@
                     </div>
 
                     <!-- Legenda Peta -->
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300 flex-grow">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300 grow">
                         <div class="text-xs font-bold text-gray-800 mb-3 uppercase">LEGENDA</div>
                         <div class="space-y-2 mb-3 pb-3 border-b">
                             <div class="flex items-center gap-2">
@@ -253,35 +314,15 @@
                                 <span class="text-xs text-gray-700">Sekolah Swasta</span>
                             </div>
                         </div>
-                        <div class="text-xs font-bold text-gray-800 mb-2 uppercase">Batas Wilayah</div>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-3">
-                                <!-- SVG kotak dengan stroke tebal agar sesuai batas kabupaten di peta -->
-                                <svg width="48" height="18" viewBox="0 0 48 18"
-                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <rect x="1.5" y="1.5" rx="4" ry="4" width="45"
-                                        height="15" fill="#0093dd" stroke="#0b5fa5" stroke-width="3" />
-                                </svg>
-                                <span class="text-xs text-gray-700">Kabupaten</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <!-- Garis putus kecamatan, dibuat sedikit lebih tebal -->
-                                <svg width="48" height="14" viewBox="0 0 48 14"
-                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <line x1="0" y1="7" x2="48" y2="7"
-                                        stroke="#FF8C3D" stroke-width="4" stroke-dasharray="8,5"
-                                        stroke-linecap="round" />
-                                </svg>
-                                <span class="text-xs text-gray-700">Kecamatan</span>
-                            </div>
-                        </div>
+                        <div class="text-xs font-bold text-gray-800 mb-3 uppercase">Legenda Kecamatan</div>
+                        <div id="legend-kecamatan" class="space-y-2 mb-3 text-xs text-gray-700"></div>
                     </div>
                 </div>
 
                 <!-- Peta Tengah -->
                 <div class="col-span-12 lg:col-span-7">
                     <div class="relative bg-gray-100 rounded-lg overflow-hidden shadow-md" id="map-container">
-                        <div id="map" class="w-full h-[700px] rounded-lg z-0 relative"></div>
+                        <div id="map" class="w-full h-175 rounded-lg z-0 relative"></div>
                     </div>
                 </div>
 
@@ -291,7 +332,7 @@
                         <div class="bg-blue-600 text-white p-3">
                             <h4 class="text-sm font-bold uppercase">Daftar SMA/SMK</h4>
                         </div>
-                        <div class="h-[350px] overflow-y-auto">
+                        <div class="h-87.5 overflow-y-auto">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead class="sticky top-0 bg-gray-50 shadow-sm">
                                     <tr class="border-b">
@@ -364,7 +405,7 @@
                     </div>
                 </div>
             </div>
-
+        </div>
     </main>
 
     <footer class="bg-gray-900 text-white py-12">
@@ -386,32 +427,120 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Fetch GeoJSON Teluk Bintuni untuk mendapatkan bounds
-            fetch('/assets/geo/92.06_Teluk_Bintuni.geojson')
+            // Masker putih di luar Kabupaten Teluk Bintuni
+            fetch('{{ asset('assets/geo/92.06_Teluk_Bintuni.geojson') }}')
                 .then(res => res.json())
                 .then(geojson => {
-                    // Hitung bounds dari GeoJSON
-                    var bounds = L.geoJSON(geojson).getBounds();
-                    // Set max bounds peta agar tidak bisa pan keluar dari kabupaten
-                    map.setMaxBounds(bounds.pad(0.05)); // 0.05 = padding 5%
-                    // Batasi zoom minimum agar selalu menampilkan seluruh kabupaten
-                    map.setMinZoom(9);
+                    var outer = [
+                        [
+                            [-90, -180],
+                            [-90, 180],
+                            [90, 180],
+                            [90, -180]
+                        ]
+                    ];
+
+                    geojson.features.forEach(function(feature) {
+                        var holes = [];
+                        if (feature.geometry.type === 'Polygon') {
+                            holes.push(L.GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 1)[
+                                0]);
+                        } else if (feature.geometry.type === 'MultiPolygon') {
+                            feature.geometry.coordinates.forEach(function(poly) {
+                                holes.push(L.GeoJSON.coordsToLatLngs(poly, 2)[0]);
+                            });
+                        }
+
+                        var mask = L.polygon([outer[0]].concat(holes), {
+                            color: 'transparent',
+                            weight: 0,
+                            fillColor: '#ffffff',
+                            fillOpacity: 1,
+                            interactive: false,
+                        }).addTo(map);
+                        mask.bringToBack();
+                    });
+                })
+                .catch(error => {
+                    console.error('Gagal memuat GeoJSON kabupaten:', error);
+                });
+
+            // Fetch GeoJSON Kecamatan Teluk Bintuni untuk menampilkan setiap kecamatan dengan warna berbeda
+            fetch('{{ asset('assets/geo/92.06_kecamatan.geojson') }}')
+                .then(res => res.json())
+                .then(geojson => {
+                    var kecamatanColors = {};
+                    var features = geojson.features || [];
+                    var distinctNames = [];
+                    features.forEach(function(feature) {
+                        var name = feature.properties?.nm_kecamatan || feature.properties?.nama ||
+                            feature.properties?.name || 'Unknown';
+                        if (!distinctNames.includes(name)) {
+                            distinctNames.push(name);
+                        }
+                    });
+                    distinctNames.sort();
+
+                    function getColorByKecamatan(name) {
+                        if (!name) {
+                            return '#6B7280';
+                        }
+                        if (!kecamatanColors[name]) {
+                            var index = distinctNames.indexOf(name);
+                            var hue = Math.round((index * 360) / Math.max(distinctNames.length, 1));
+                            kecamatanColors[name] = 'hsl(' + hue + ', 66%, 60%)';
+                        }
+                        return kecamatanColors[name];
+                    }
+
+                    var geoLayer = L.geoJSON(geojson, {
+                        style: function(feature) {
+                            var kecamatanName = feature.properties?.nm_kecamatan || feature
+                                .properties?.nama || feature.properties?.name;
+                            var fillColor = getColorByKecamatan(kecamatanName);
+                            return {
+                                color: '#111827',
+                                weight: 2,
+                                opacity: 0.8,
+                                fillColor: fillColor,
+                                fillOpacity: 0.45
+                            };
+                        },
+                        onEachFeature: function(feature, layer) {
+                            var kecamatanName = feature.properties?.nm_kecamatan || feature
+                                .properties?.nama || feature.properties?.name;
+                            if (kecamatanName) {
+                                layer.bindPopup(`<strong>${kecamatanName}</strong>`);
+                            }
+                        }
+                    }).addTo(map);
+
+                    var legendContainer = document.querySelector('#legend-kecamatan');
+                    if (legendContainer) {
+                        legendContainer.innerHTML = '';
+                        distinctNames.forEach(function(kecamatanName) {
+                            var color = getColorByKecamatan(kecamatanName);
+                            var item = document.createElement('div');
+                            item.className = 'flex items-center gap-2';
+                            item.innerHTML =
+                                '<span class="w-4 h-4 rounded-sm border border-slate-300" style="background:' +
+                                color +
+                                '; display: inline-block; min-width: 1rem; min-height: 1rem;"></span>' +
+                                '<span class="text-xs text-gray-700">' + kecamatanName + '</span>';
+                            legendContainer.appendChild(item);
+                        });
+                    }
+
+                    var bounds = geoLayer.getBounds();
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds.pad(0.05));
+                        map.setMaxBounds(bounds.pad(0.05));
+                        map.setMinZoom(9);
+                    }
                 })
                 .catch(error => {
                     console.error('Gagal memuat GeoJSON untuk bounds:', error);
                 });
-
-            // Tambahkan layer putih untuk menutupi area di luar kabupaten
-            var whiteBackground = L.rectangle([
-                [-90, -180],
-                [90, 180]
-            ], {
-                color: 'white',
-                weight: 0,
-                fillColor: 'white',
-                fillOpacity: 1
-            }).addTo(map);
-            whiteBackground.bringToBack();
 
             // Definisi Custom Icon Marker Leaflet
             var greenIcon = new L.Icon({
@@ -436,10 +565,9 @@
             var schools = @json($daftarSekolah);
 
             schools.forEach(function(school) {
-                // Asumsikan di tabel schools ada field 'latitude' dan 'longitude'
                 if (school.latitude && school.longitude) {
                     var status = school.status_sekolah ? school.status_sekolah.toLowerCase() : '';
-                    var markerIcon = greenIcon; // Default icon
+                    var markerIcon = greenIcon;
 
                     if (status === 'negeri') {
                         markerIcon = greenIcon;
@@ -471,389 +599,329 @@
                 }
             });
 
-            // --- Konfigurasi Grafik GTK per Sekolah ---
-            var grafikGtkData = @json($grafikGtkSekolah);
-            var categoriesGtk = grafikGtkData.map(function(item) {
-                return item.sekolah_nama;
-            });
-            var seriesGtk = [{
-                    name: 'PNS',
-                    data: grafikGtkData.map(function(item) {
-                        return item.pns;
-                    })
-                },
-                {
-                    name: 'CPNS',
-                    data: grafikGtkData.map(function(item) {
-                        return item.cpns;
-                    })
-                },
-                {
-                    name: 'PPPK',
-                    data: grafikGtkData.map(function(item) {
-                        return item.pppk;
-                    })
-                },
-                {
-                    name: 'GTY/PTY',
-                    data: grafikGtkData.map(function(item) {
-                        return item.gty_pty;
-                    })
-                },
-                {
-                    name: 'Kontrak',
-                    data: grafikGtkData.map(function(item) {
-                        return item.kontrak;
-                    })
-                },
-                {
-                    name: 'Honorer Sekolah',
-                    data: grafikGtkData.map(function(item) {
-                        return item.honorer;
-                    })
+            // ========== PERBAIKAN GRAFIK PIE ==========
+            // Render Chart Status Kepegawaian
+            var statusData = @json($grafikGtkStatus);
+            var statusLabels = [];
+            var statusValues = [];
+
+            if (statusData && statusData.length > 0) {
+                for (var i = 0; i < statusData.length; i++) {
+                    if (statusData[i].total > 0) {
+                        statusLabels.push(statusData[i].status);
+                        statusValues.push(statusData[i].total);
+                    }
                 }
-            ];
+            }
 
-            // Hitung tinggi dinamis untuk memberikan ruang bagi nama sekolah yang panjang
-            var chartHeight = Math.max(400, categoriesGtk.length * 30);
-            document.querySelector("#chart-gtk-sekolah").style.height = chartHeight + 'px';
+            if (statusLabels.length === 0) {
+                statusLabels = ['Tidak ada data'];
+                statusValues = [1];
+            }
 
-            var optionsGtk = {
-                series: seriesGtk,
+            var optionsStatus = {
+                series: statusValues,
                 chart: {
-                    type: 'bar',
-                    height: chartHeight,
-                    stacked: true,
-                    toolbar: {
-                        show: true
-                    }
+                    type: 'pie',
+                    height: 380,
+                    width: '100%'
                 },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        legend: {
-                            position: 'bottom',
-                            offsetX: -10,
-                            offsetY: 0
-                        }
-                    }
-                }],
-                plotOptions: {
-                    bar: {
-                        horizontal: true, // Mengubah grafik menjadi horizontal
-                        borderRadius: 2,
-                        dataLabels: {
-                            total: {
-                                enabled: true,
-                                style: {
-                                    fontSize: '13px',
-                                    fontWeight: 900
-                                }
-                            }
-                        }
-                    },
-                },
-                stroke: {
-                    width: 1,
-                    colors: ['#fff']
-                },
-                xaxis: {
-                    categories: categoriesGtk, // Nama sekolah (sekarang di sumbu Y)
-                    title: {
-                        text: 'Jumlah GTK' // Label untuk sumbu X (nilai)
-                    },
-                    labels: {
-                        formatter: function(val) {
-                            // Memastikan nilai pada sumbu X adalah bilangan bulat
-                            return val.toFixed(0);
-                        }
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: undefined // Tidak perlu judul di sumbu Y karena sudah ada nama sekolah
-                    },
-                },
-                colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#64748B'],
+                labels: statusLabels,
+                colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'],
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    fontSize: '13px'
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val, opts) {
+                        var name = opts.w.globals.labels[opts.seriesIndex];
+                        var count = opts.w.globals.series[opts.seriesIndex];
+                        return count + ' (' + val.toFixed(1) + '%)';
+                    }
                 },
                 tooltip: {
                     y: {
                         formatter: function(val) {
-                            return val + " orang";
+                            return val + ' orang';
+                        }
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        expandOnClick: true,
+                        dataLabels: {
+                            offset: -20
                         }
                     }
                 }
             };
-            var chartGtkStatus = new ApexCharts(document.querySelector("#chart-gtk-status"), optionsGtkStatus);
-            chartGtkStatus.render();
+
+            // Render Chart Pendidikan
+            var pendidikanData = @json($grafikGtkPendidikan);
+            var pendidikanLabels = [];
+            var pendidikanValues = [];
+
+            if (pendidikanData && pendidikanData.length > 0) {
+                for (var i = 0; i < pendidikanData.length; i++) {
+                    if (pendidikanData[i].total > 0) {
+                        pendidikanLabels.push(pendidikanData[i].pendidikan);
+                        pendidikanValues.push(pendidikanData[i].total);
+                    }
+                }
+            }
+
+            if (pendidikanLabels.length === 0) {
+                pendidikanLabels = ['Tidak ada data'];
+                pendidikanValues = [1];
+            }
+
+            var optionsPendidikan = {
+                series: pendidikanValues,
+                chart: {
+                    type: 'pie',
+                    height: 380,
+                    width: '100%'
+                },
+                labels: pendidikanLabels,
+                colors: ['#06B6D4', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'],
+                legend: {
+                    position: 'bottom',
+                    fontSize: '13px'
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val, opts) {
+                        var name = opts.w.globals.labels[opts.seriesIndex];
+                        var count = opts.w.globals.series[opts.seriesIndex];
+                        return count + ' (' + val.toFixed(1) + '%)';
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val + ' orang';
+                        }
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        expandOnClick: true,
+                        dataLabels: {
+                            offset: -20
+                        }
+                    }
+                }
+            };
+
+            // Render grafik
+            try {
+                var chartStatus = new ApexCharts(document.querySelector('#chart-gtk-status'), optionsStatus);
+                chartStatus.render();
+                console.log('Chart Status berhasil dirender');
+            } catch (e) {
+                console.error('Error chart status:', e);
+            }
+
+            try {
+                var chartPendidikan = new ApexCharts(document.querySelector('#chart-gtk-pendidikan'),
+                    optionsPendidikan);
+                chartPendidikan.render();
+                console.log('Chart Pendidikan berhasil dirender');
+            } catch (e) {
+                console.error('Error chart pendidikan:', e);
+            }
 
             // --- Konfigurasi Grafik Sarpras per Sekolah ---
             var grafikSarprasData = @json($grafikSarprasSekolah);
-            var categoriesSarpras = grafikSarprasData.map(function(item) {
-                return item.sekolah_nama;
-            });
-            var seriesSarpras = [{
-                    name: 'Kondisi Baik',
-                    data: grafikSarprasData.map(function(item) {
-                        return item.baik;
-                    })
-                },
-                {
-                    name: 'Kondisi Rusak',
-                    data: grafikSarprasData.map(function(item) {
-                        return item.rusak;
-                    })
-                }
-            ];
-
-            var chartHeightSarpras = Math.max(400, categoriesSarpras.length * 30);
-            document.querySelector("#chart-sarpras-sekolah").style.height = chartHeightSarpras + 'px';
-
-            var optionsSarpras = {
-                series: seriesSarpras,
-                chart: {
-                    type: 'bar',
-                    height: chartHeightSarpras,
-                    stacked: true,
-                    toolbar: {
-                        show: true
+            if (grafikSarprasData && grafikSarprasData.length > 0) {
+                var categoriesSarpras = grafikSarprasData.map(function(item) {
+                    return item.sekolah_nama;
+                });
+                var seriesSarpras = [{
+                        name: 'Kondisi Baik',
+                        data: grafikSarprasData.map(function(item) {
+                            return item.baik;
+                        })
+                    },
+                    {
+                        name: 'Kondisi Rusak',
+                        data: grafikSarprasData.map(function(item) {
+                            return item.rusak;
+                        })
                     }
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 2,
-                        dataLabels: {
-                            total: {
-                                enabled: true,
-                                style: {
-                                    fontSize: '13px',
-                                    fontWeight: 900
+                ];
+
+                var chartHeightSarpras = Math.max(400, categoriesSarpras.length * 30);
+                var sarprasContainer = document.querySelector("#chart-sarpras-sekolah");
+                if (sarprasContainer) {
+                    sarprasContainer.style.height = chartHeightSarpras + 'px';
+
+                    var optionsSarpras = {
+                        series: seriesSarpras,
+                        chart: {
+                            type: 'bar',
+                            height: chartHeightSarpras,
+                            stacked: true,
+                            toolbar: {
+                                show: true
+                            }
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: true,
+                                borderRadius: 2,
+                                dataLabels: {
+                                    total: {
+                                        enabled: true,
+                                        style: {
+                                            fontSize: '13px',
+                                            fontWeight: 900
+                                        }
+                                    }
+                                }
+                            },
+                        },
+                        colors: ['#10B981', '#EF4444'],
+                        stroke: {
+                            width: 1,
+                            colors: ['#fff']
+                        },
+                        xaxis: {
+                            categories: categoriesSarpras,
+                            title: {
+                                text: 'Jumlah Ruang/Gedung'
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(0);
+                                }
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: undefined
+                            }
+                        },
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function(val) {
+                                    return val + " ruang";
                                 }
                             }
                         }
-                    },
-                },
-                colors: ['#10B981', '#EF4444'], // Hijau untuk Baik, Merah untuk Rusak
-                stroke: {
-                    width: 1,
-                    colors: ['#fff']
-                },
-                xaxis: {
-                    categories: categoriesSarpras,
-                    title: {
-                        text: 'Jumlah Ruang/Gedung'
-                    },
-                    labels: {
-                        formatter: function(val) {
-                            return val.toFixed(0);
-                        }
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: undefined
-                    }
-                },
-                legend: {
-                    position: 'top'
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return val + " ruang";
-                        }
-                    }
+                    };
+                    var chartSarpras = new ApexCharts(sarprasContainer, optionsSarpras);
+                    chartSarpras.render();
                 }
-            };
-            var chartSarpras = new ApexCharts(document.querySelector("#chart-sarpras-sekolah"), optionsSarpras);
-            chartSarpras.render();
+            }
 
             // --- Konfigurasi Grafik Siswa per Sekolah ---
             var grafikSiswaData = @json($grafikSiswaSekolah);
-            var categoriesSiswa = grafikSiswaData.map(function(item) {
-                return item.sekolah_nama;
-            });
-            var seriesSiswa = [{
-                    name: 'Laki-laki',
-                    data: grafikSiswaData.map(function(item) {
-                        return item.laki_laki;
-                    })
-                },
-                {
-                    name: 'Perempuan',
-                    data: grafikSiswaData.map(function(item) {
-                        return item.perempuan;
-                    })
-                }
-            ];
-
-            var chartHeightSiswa = Math.max(400, categoriesSiswa.length * 30);
-            document.querySelector("#chart-siswa-sekolah").style.height = chartHeightSiswa + 'px';
-
-            var optionsSiswa = {
-                series: seriesSiswa,
-                chart: {
-                    type: 'bar',
-                    height: chartHeightSiswa,
-                    stacked: true,
-                    toolbar: {
-                        show: true
+            if (grafikSiswaData && grafikSiswaData.length > 0) {
+                var categoriesSiswa = grafikSiswaData.map(function(item) {
+                    return item.sekolah_nama;
+                });
+                var seriesSiswa = [{
+                        name: 'Laki-laki',
+                        data: grafikSiswaData.map(function(item) {
+                            return item.laki_laki;
+                        })
+                    },
+                    {
+                        name: 'Perempuan',
+                        data: grafikSiswaData.map(function(item) {
+                            return item.perempuan;
+                        })
                     }
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 2,
-                        dataLabels: {
-                            total: {
-                                enabled: true,
-                                style: {
-                                    fontSize: '13px',
-                                    fontWeight: 900
+                ];
+
+                var chartHeightSiswa = Math.max(400, categoriesSiswa.length * 30);
+                var siswaContainer = document.querySelector("#chart-siswa-sekolah");
+                if (siswaContainer) {
+                    siswaContainer.style.height = chartHeightSiswa + 'px';
+
+                    var optionsSiswa = {
+                        series: seriesSiswa,
+                        chart: {
+                            type: 'bar',
+                            height: chartHeightSiswa,
+                            stacked: true,
+                            toolbar: {
+                                show: true
+                            }
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: true,
+                                borderRadius: 2,
+                                dataLabels: {
+                                    total: {
+                                        enabled: true,
+                                        style: {
+                                            fontSize: '13px',
+                                            fontWeight: 900
+                                        }
+                                    }
+                                }
+                            },
+                        },
+                        colors: ['#3B82F6', '#EC4899'],
+                        stroke: {
+                            width: 1,
+                            colors: ['#fff']
+                        },
+                        xaxis: {
+                            categories: categoriesSiswa,
+                            title: {
+                                text: 'Jumlah Siswa'
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(0);
+                                }
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: undefined
+                            }
+                        },
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function(val) {
+                                    return val + " orang";
                                 }
                             }
                         }
-                    },
-                },
-                colors: ['#3B82F6', '#EC4899'], // Biru untuk Laki-laki, Pink untuk Perempuan
-                stroke: {
-                    width: 1,
-                    colors: ['#fff']
-                },
-                xaxis: {
-                    categories: categoriesSiswa,
-                    title: {
-                        text: 'Jumlah Siswa'
-                    },
-                    labels: {
-                        formatter: function(val) {
-                            return val.toFixed(0);
-                        }
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: undefined
-                    }
-                },
-                legend: {
-                    position: 'top'
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return val + " orang";
-                        }
-                    }
+                    };
+                    var chartSiswa = new ApexCharts(siswaContainer, optionsSiswa);
+                    chartSiswa.render();
                 }
-            };
-            var chartSiswa = new ApexCharts(document.querySelector("#chart-siswa-sekolah"), optionsSiswa);
-            chartSiswa.render();
+            }
 
             // Tambahkan GeoJSON Batas Kabupaten Teluk Bintuni
             fetch('/assets/geo/92.06_Teluk_Bintuni.geojson')
                 .then(res => res.json())
                 .then(geojson => {
-                    // Tampilkan batas kabupaten dengan garis luar lebih tebal
                     L.geoJSON(geojson, {
                         interactive: false,
                         style: {
-                            color: '#0b5fa5', // warna garis luar lebih gelap
-                            weight: 5, // ketebalan garis diperbesar
-                            fillColor: '#0093dd',
-                            fillOpacity: 0.18
+                            color: '#0000FF',
+                            weight: 5,
+                            fillOpacity: 0
                         }
                     }).addTo(map);
                     console.log('GeoJSON Bintuni berhasil dimuat');
                 })
                 .catch(error => {
                     console.error('Gagal memuat GeoJSON Bintuni:', error);
-                });
-
-            // Hitung jumlah sekolah per kecamatan
-            var sekolah_per_kecamatan = {};
-            schools.forEach(function(school) {
-                var kecamatan = school.kecamatan || 'Tidak Diketahui';
-                if (!sekolah_per_kecamatan[kecamatan]) {
-                    sekolah_per_kecamatan[kecamatan] = 0;
-                }
-                sekolah_per_kecamatan[kecamatan]++;
-            });
-
-            // Tambahkan GeoJSON Batas Kecamatan dengan Warna Berbeda
-            var warna_kecamatan = {
-                'Bintuni': '#FF6B35',
-                'Merdey': '#FF8C3D',
-                'Babo': '#FFA845',
-                'Aranday': '#FFC44D',
-                'Moskona Selatan': '#FFE055',
-                'Moskona Utara': '#E8D961',
-                'Wamesa': '#D0D46D',
-                'Fafurwar': '#B8BF79',
-                'Tembuni': '#A0AA85',
-                'Kuri': '#8895A0',
-                'Manimeri': '#7087B8',
-                'Tuhiba': '#5879CF',
-                'Dataran Beimes': '#406BE7',
-                'Sumuri': '#285DFF',
-                'Kaitaro': '#004FFF',
-                'Aroba': '#0047E0',
-                'Masyeta': '#003FC1',
-                'Biscoop': '#0037A2',
-                'Tomu': '#002F83',
-                'Kamundan': '#002764',
-                'Weriagar': '#001F45'
-            };
-
-            fetch('/assets/geo/92.06_kecamatan.geojson')
-                .then(res => res.json())
-                .then(geojson => {
-                    L.geoJSON(geojson, {
-                        style: function(feature) {
-                            var nama = feature.properties.nm_kecamatan;
-                            return {
-                                color: warna_kecamatan[nama] || '#888888',
-                                weight: 2,
-                                fillOpacity: 0.5,
-                                fillColor: warna_kecamatan[nama] || '#888888',
-                                dashArray: '5, 5'
-                            };
-                        },
-                        onEachFeature: function(feature, layer) {
-                            var nama = feature.properties.nm_kecamatan;
-                            var jumlah = sekolah_per_kecamatan[nama] || 0;
-                            var content = '<div class="p-2"><strong style="font-size: 14px;">' +
-                                nama +
-                                '</strong><br><span style="font-size: 13px; color: #555;">Sekolah: ' +
-                                jumlah + '</span></div>';
-                            layer.bindPopup(content);
-                        }
-                    }).addTo(map);
-                    console.log('GeoJSON Kecamatan berhasil dimuat');
-                })
-                .catch(error => {
-                    console.error('Gagal memuat GeoJSON Kecamatan:', error);
-                });
-
-            // Tambahkan GeoJSON Batas Kelurahan
-            fetch('/assets/geo/92.06_kelurahan.geojson')
-                .then(res => res.json())
-                .then(geojson => {
-                    L.geoJSON(geojson, {
-                        style: {
-                            color: '#4CAF50',
-                            weight: 1,
-                            fillOpacity: 0,
-                            dashArray: '2, 2'
-                        }
-                    }).addTo(map);
-                    console.log('GeoJSON Kelurahan berhasil dimuat');
-                })
-                .catch(error => {
-                    console.error('Gagal memuat GeoJSON Kelurahan:', error);
                 });
         });
     </script>
