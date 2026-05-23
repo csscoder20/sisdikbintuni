@@ -512,7 +512,7 @@
                     formatter: function(val, opts) {
                         var name = opts.w.globals.labels[opts.seriesIndex];
                         var count = opts.w.globals.series[opts.seriesIndex];
-                        return name + ' ' + count + ' (' + val.toFixed(1) + '%)';
+                        return count + ' (' + val.toFixed(1) + '%)';
                     }
                 },
                 tooltip: {
@@ -569,7 +569,7 @@
                     formatter: function(val, opts) {
                         var name = opts.w.globals.labels[opts.seriesIndex];
                         var count = opts.w.globals.series[opts.seriesIndex];
-                        return name + ' ' + count + ' (' + val.toFixed(1) + '%)';
+                        return count + ' (' + val.toFixed(1) + '%)';
                     }
                 },
                 tooltip: {
