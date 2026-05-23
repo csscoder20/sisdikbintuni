@@ -71,19 +71,16 @@
         </div>
 
         <!-- Area Grafik -->
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-yellow-500 pl-3">Grafik GTK Berdasarkan Status Kepegawaian di Setiap Sekolah</h3>
-            <div id="chart-gtk-sekolah" class="w-full"></div>
-        </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">Grafik Kondisi Sarana Prasarana di Setiap Sekolah</h3>
-            <div id="chart-sarpras-sekolah" class="w-full"></div>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-12">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Grafik Jumlah Siswa (Laki-laki & Perempuan) di Setiap Sekolah</h3>
-            <div id="chart-siswa-sekolah" class="w-full"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-blue-500 pl-3">Jumlah GTK Berdasarkan Status Kepegawaian</h3>
+                <div id="chart-gtk-status" class="w-full flex justify-center"></div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-green-500 pl-3">Jumlah Guru Berdasarkan Pendidikan Terakhir</h3>
+                <div id="chart-gtk-pendidikan" class="w-full flex justify-center"></div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16" id="statistik">
@@ -248,175 +245,51 @@
                 }
             });
 
-            // --- Konfigurasi Grafik GTK per Sekolah ---
-            var grafikGtkData = @json($grafikGtkSekolah);
-            var categoriesGtk = grafikGtkData.map(function(item) { return item.sekolah_nama; });
-            var seriesGtk = [
-                { name: 'PNS', data: grafikGtkData.map(function(item) { return item.pns; }) },
-                { name: 'CPNS', data: grafikGtkData.map(function(item) { return item.cpns; }) },
-                { name: 'PPPK', data: grafikGtkData.map(function(item) { return item.pppk; }) },
-                { name: 'GTY/PTY', data: grafikGtkData.map(function(item) { return item.gty_pty; }) },
-                { name: 'Kontrak', data: grafikGtkData.map(function(item) { return item.kontrak; }) },
-                { name: 'Honorer Sekolah', data: grafikGtkData.map(function(item) { return item.honorer; }) }
-            ];
-
-            // Hitung tinggi dinamis untuk memberikan ruang bagi nama sekolah yang panjang
-            var chartHeight = Math.max(400, categoriesGtk.length * 30);
-            document.querySelector("#chart-gtk-sekolah").style.height = chartHeight + 'px';
-
-            var optionsGtk = {
-                series: seriesGtk,
+            // --- Konfigurasi Grafik GTK berdasarkan Status ---
+            var grafikGtkStatusData = @json($grafikGtkStatus);
+            var optionsGtkStatus = {
+                series: grafikGtkStatusData.map(function(item) { return item.total; }),
+                labels: grafikGtkStatusData.map(function(item) { return item.status; }),
                 chart: {
-                    type: 'bar',
-                    height: chartHeight,
-                    stacked: true,
-                    toolbar: {
-                        show: true
-                    }
+                    type: 'pie',
+                    height: 350
                 },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        legend: {
-                            position: 'bottom',
-                            offsetX: -10,
-                            offsetY: 0
-                        }
-                    }
-                }],
-                plotOptions: {
-                    bar: {
-                        horizontal: true, // Mengubah grafik menjadi horizontal
-                        borderRadius: 2,
-                        dataLabels: {
-                            total: {
-                                enabled: true,
-                                style: {
-                                    fontSize: '13px',
-                                    fontWeight: 900
-                                }
-                            }
-                        }
-                    },
-                },
-                stroke: {
-                    width: 1,
-                    colors: ['#fff']
-                },
-                xaxis: {
-                    categories: categoriesGtk, // Nama sekolah (sekarang di sumbu Y)
-                    title: {
-                        text: 'Jumlah GTK' // Label untuk sumbu X (nilai)
-                    },
-                    labels: {
-                        formatter: function (val) {
-                            // Memastikan nilai pada sumbu X adalah bilangan bulat
-                            return val.toFixed(0);
-                        }
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: undefined // Tidak perlu judul di sumbu Y karena sudah ada nama sekolah
-                    },
-                },
+                colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#64748B'],
                 legend: {
-                    position: 'top',
+                    position: 'bottom'
                 },
-                tooltip: {
-                    y: {
-                        formatter: function (val) {
-                            return val + " orang";
-                        }
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val, opts) {
+                        return opts.w.config.series[opts.seriesIndex] + " (" + val.toFixed(1) + "%)";
                     }
                 }
             };
-            var chartGtk = new ApexCharts(document.querySelector("#chart-gtk-sekolah"), optionsGtk);
-            chartGtk.render();
+            var chartGtkStatus = new ApexCharts(document.querySelector("#chart-gtk-status"), optionsGtkStatus);
+            chartGtkStatus.render();
 
-            // --- Konfigurasi Grafik Sarpras per Sekolah ---
-            var grafikSarprasData = @json($grafikSarprasSekolah);
-            var categoriesSarpras = grafikSarprasData.map(function(item) { return item.sekolah_nama; });
-            var seriesSarpras = [
-                { name: 'Kondisi Baik', data: grafikSarprasData.map(function(item) { return item.baik; }) },
-                { name: 'Kondisi Rusak', data: grafikSarprasData.map(function(item) { return item.rusak; }) }
-            ];
-
-            var chartHeightSarpras = Math.max(400, categoriesSarpras.length * 30);
-            document.querySelector("#chart-sarpras-sekolah").style.height = chartHeightSarpras + 'px';
-
-            var optionsSarpras = {
-                series: seriesSarpras,
+            // --- Konfigurasi Grafik GTK berdasarkan Pendidikan ---
+            var grafikGtkPendidikanData = @json($grafikGtkPendidikan);
+            var optionsGtkPendidikan = {
+                series: grafikGtkPendidikanData.map(function(item) { return item.total; }),
+                labels: grafikGtkPendidikanData.map(function(item) { return item.pendidikan; }),
                 chart: {
-                    type: 'bar',
-                    height: chartHeightSarpras,
-                    stacked: true,
-                    toolbar: { show: true }
+                    type: 'pie',
+                    height: 350
                 },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 2,
-                        dataLabels: {
-                            total: { enabled: true, style: { fontSize: '13px', fontWeight: 900 } }
-                        }
-                    },
+                colors: ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6'],
+                legend: {
+                    position: 'bottom'
                 },
-                colors: ['#10B981', '#EF4444'], // Hijau untuk Baik, Merah untuk Rusak
-                stroke: { width: 1, colors: ['#fff'] },
-                xaxis: {
-                    categories: categoriesSarpras,
-                    title: { text: 'Jumlah Ruang/Gedung' },
-                    labels: { formatter: function (val) { return val.toFixed(0); } }
-                },
-                yaxis: { title: { text: undefined } },
-                legend: { position: 'top' },
-                tooltip: { y: { formatter: function (val) { return val + " ruang"; } } }
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val, opts) {
+                        return opts.w.config.series[opts.seriesIndex] + " (" + val.toFixed(1) + "%)";
+                    }
+                }
             };
-            var chartSarpras = new ApexCharts(document.querySelector("#chart-sarpras-sekolah"), optionsSarpras);
-            chartSarpras.render();
-
-            // --- Konfigurasi Grafik Siswa per Sekolah ---
-            var grafikSiswaData = @json($grafikSiswaSekolah);
-            var categoriesSiswa = grafikSiswaData.map(function(item) { return item.sekolah_nama; });
-            var seriesSiswa = [
-                { name: 'Laki-laki', data: grafikSiswaData.map(function(item) { return item.laki_laki; }) },
-                { name: 'Perempuan', data: grafikSiswaData.map(function(item) { return item.perempuan; }) }
-            ];
-
-            var chartHeightSiswa = Math.max(400, categoriesSiswa.length * 30);
-            document.querySelector("#chart-siswa-sekolah").style.height = chartHeightSiswa + 'px';
-
-            var optionsSiswa = {
-                series: seriesSiswa,
-                chart: {
-                    type: 'bar',
-                    height: chartHeightSiswa,
-                    stacked: true,
-                    toolbar: { show: true }
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 2,
-                        dataLabels: {
-                            total: { enabled: true, style: { fontSize: '13px', fontWeight: 900 } }
-                        }
-                    },
-                },
-                colors: ['#3B82F6', '#EC4899'], // Biru untuk Laki-laki, Pink untuk Perempuan
-                stroke: { width: 1, colors: ['#fff'] },
-                xaxis: {
-                    categories: categoriesSiswa,
-                    title: { text: 'Jumlah Siswa' },
-                    labels: { formatter: function (val) { return val.toFixed(0); } }
-                },
-                yaxis: { title: { text: undefined } },
-                legend: { position: 'top' },
-                tooltip: { y: { formatter: function (val) { return val + " orang"; } } }
-            };
-            var chartSiswa = new ApexCharts(document.querySelector("#chart-siswa-sekolah"), optionsSiswa);
-            chartSiswa.render();
+            var chartGtkPendidikan = new ApexCharts(document.querySelector("#chart-gtk-pendidikan"), optionsGtkPendidikan);
+            chartGtkPendidikan.render();
         });
     </script>
 </body>
