@@ -66,6 +66,11 @@ class DinasDashboard extends BaseDashboard
         return 'Dashboard Dinas Pendidikan';
     }
 
+    public function getColumns(): int | array
+    {
+        return 4;
+    }
+
     public function getWidgets(): array
     {
         $selectedId = session('dinas_selected_sekolah_id');
@@ -84,7 +89,10 @@ class DinasDashboard extends BaseDashboard
             \App\Filament\Widgets\AdminDinasStatsOverview::class,
             \App\Filament\Widgets\DinasSarprasChart::class,
             \App\Filament\Widgets\DinasSiswaChart::class,
+            \App\Filament\Widgets\DinasSiswaDaerahChart::class,
+            \App\Filament\Widgets\DinasSiswaAgamaChart::class,
             \App\Filament\Widgets\DinasGtkStatusChart::class,
+            \App\Filament\Widgets\DinasGtkPendidikanChart::class,
             // \App\Filament\Widgets\GtkStatusKepegawaianChart::class,
             // \App\Filament\Widgets\GuruPendidikanChart::class,
             // \App\Filament\Widgets\LaporanTerbaruWidget::class,

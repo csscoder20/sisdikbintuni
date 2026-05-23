@@ -5,10 +5,10 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 
-class DinasSiswaChart extends ChartWidget
+class DinasSiswaDaerahChart extends ChartWidget
 {
-    protected ?string $heading = 'Grafik Jumlah Siswa (Laki-laki & Perempuan) di Setiap Sekolah';
-    protected static ?int $sort = 3;
+    protected ?string $heading = 'Grafik Jumlah Siswa Berdasarkan Daerah Asal di Setiap Sekolah';
+    protected static ?int $sort = 4;
     protected int | string | array $columnSpan = 2;
     protected ?string $maxHeight = '600px';
 
@@ -21,8 +21,8 @@ class DinasSiswaChart extends ChartWidget
             })
             ->select(
                 'sekolah.nama as sekolah_nama',
-                DB::raw("SUM(CASE WHEN LOWER(siswa.jenis_kelamin) IN ('laki-laki', 'l') THEN 1 ELSE 0 END) as laki_laki"),
-                DB::raw("SUM(CASE WHEN LOWER(siswa.jenis_kelamin) IN ('perempuan', 'p') THEN 1 ELSE 0 END) as perempuan")
+                DB::raw("SUM(CASE WHEN LOWER(siswa.daerah_asal) = 'papua' THEN 1 ELSE 0 END) as papua"),
+                DB::raw("SUM(CASE WHEN LOWER(siswa.daerah_asal) = 'non papua' THEN 1 ELSE 0 END) as non_papua")
             )
             ->whereIn('sekolah.jenjang', ['SMA', 'SMK', 'sma', 'smk'])
             ->whereNull('sekolah.deleted_at')
@@ -33,14 +33,14 @@ class DinasSiswaChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Laki-laki',
-                    'data' => $data->pluck('laki_laki')->toArray(),
-                    'backgroundColor' => '#3B82F6', // Biru
+                    'label' => 'Papua',
+                    'data' => $data->pluck('papua')->toArray(),
+                    'backgroundColor' => '#F59E0B', // Amber
                 ],
                 [
-                    'label' => 'Perempuan',
-                    'data' => $data->pluck('perempuan')->toArray(),
-                    'backgroundColor' => '#EC4899', // Merah Muda
+                    'label' => 'Non Papua',
+                    'data' => $data->pluck('non_papua')->toArray(),
+                    'backgroundColor' => '#10B981', // Emerald
                 ],
             ],
             'labels' => $data->pluck('sekolah_nama')->map(fn($nama) => strtoupper($nama))->toArray(),

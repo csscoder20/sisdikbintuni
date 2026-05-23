@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 class DinasGtkStatusChart extends ChartWidget
 {
     protected ?string $heading = 'Grafik GTK Berdasarkan Status Kepegawaian di Setiap Sekolah';
-    protected static ?int $sort = 4;
-    protected int | string | array $columnSpan = 'full';
+    protected static ?int $sort = 6;
+    protected int | string | array $columnSpan = 2;
     protected ?string $maxHeight = '600px';
 
     protected function getData(): array
