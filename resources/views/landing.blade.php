@@ -173,7 +173,7 @@
 
         <!-- Peta Sebaran Sekolah dengan Layout Sidebar -->
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-16">
-            <h3 class="text-lg font-bold text-gray-700 mb-6 border-l-4 border-purple-500 pl-3 text-center">Peta Sebaran
+            <h3 class="text-lg font-bold text-gray-700 mb-6 text-center">Peta Sebaran
                 Sekolah
             </h3>
 
