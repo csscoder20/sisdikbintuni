@@ -17,6 +17,9 @@ class OperatorDashboard extends BaseDashboard
     protected static ?int $navigationSort = 1;
     protected string $view = 'filament.pages.laporan-bulanan';
 
+    public int $laporanCurrentPage = 1;
+    public int $laporanPerPage = 5;
+
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->hasRole(['operator', 'super_admin', 'admin_dinas']);
@@ -29,7 +32,44 @@ class OperatorDashboard extends BaseDashboard
 
     public function getRiwayatLaporanDashboard()
     {
-        return collect($this->getValidatedLaporanList())->take(5);
+        $allLaporan = collect($this->getValidatedLaporanList());
+        $skip = ($this->laporanCurrentPage - 1) * $this->laporanPerPage;
+
+        return $allLaporan->slice($skip, $this->laporanPerPage);
+    }
+
+    public function getRiwayatLaporanTotal()
+    {
+        return collect($this->getValidatedLaporanList())->count();
+    }
+
+    public function getRiwayatLaporanLastPage()
+    {
+        $total = $this->getRiwayatLaporanTotal();
+        return (int) ceil($total / $this->laporanPerPage);
+    }
+
+    public function goToLaporanPage(int $page)
+    {
+        $lastPage = $this->getRiwayatLaporanLastPage();
+
+        if ($page < 1) {
+            $this->laporanCurrentPage = 1;
+        } elseif ($page > $lastPage) {
+            $this->laporanCurrentPage = $lastPage;
+        } else {
+            $this->laporanCurrentPage = $page;
+        }
+    }
+
+    public function nextLaporanPage()
+    {
+        $this->goToLaporanPage($this->laporanCurrentPage + 1);
+    }
+
+    public function prevLaporanPage()
+    {
+        $this->goToLaporanPage($this->laporanCurrentPage - 1);
     }
 
     public function getOperatorActivityLogs()

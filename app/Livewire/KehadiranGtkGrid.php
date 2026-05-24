@@ -43,7 +43,7 @@ class KehadiranGtkGrid extends Component
     {
         $date = Carbon::create($this->tahun, $this->bulan, 1);
         $daysInMonth = $date->daysInMonth;
-        
+
         $this->days = [];
         for ($i = 1; $i <= $daysInMonth; $i++) {
             $currentDate = Carbon::create($this->tahun, $this->bulan, $i);
@@ -52,6 +52,11 @@ class KehadiranGtkGrid extends Component
                 'is_sunday' => $currentDate->isSunday(),
             ];
         }
+    }
+
+    protected function getSchoolId(): ?int
+    {
+        return filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id');
     }
 
     protected function loadAttendance($gtks)
@@ -64,12 +69,12 @@ class KehadiranGtkGrid extends Component
         $this->attendanceData = [];
         foreach ($gtks as $gtk) {
             $gtkRecords = $records->where('gtk_id', $gtk->id);
-            
+
             for ($i = 1; $i <= 31; $i++) {
-                $record = $gtkRecords->filter(function($r) use ($i) {
+                $record = $gtkRecords->filter(function ($r) use ($i) {
                     return $r->tgl_presensi->day === $i;
                 })->first();
-                
+
                 $this->attendanceData[$gtk->id][$i] = $record ? $record->presensi : '';
             }
         }
@@ -85,7 +90,7 @@ class KehadiranGtkGrid extends Component
 
         $dateStr = $date->format('Y-m-d');
         $laporanId = $this->getActiveLaporanId();
-        $gtks = Gtk::where('sekolah_id', filament()->getTenant()->id)->get();
+        $gtks = Gtk::where('sekolah_id', $this->getSchoolId())->get();
 
         // Determine if any record already set as Libur for this day
         $isCurrentlyHoliday = GtkKehadiran::whereIn('gtk_id', $gtks->pluck('id'))
@@ -117,7 +122,7 @@ class KehadiranGtkGrid extends Component
             ->send();
     }
 
-            public function updateAttendance($gtkId, $day, $value)
+    public function updateAttendance($gtkId, $day, $value)
     {
         $value = strtoupper(trim($value));
         if (!in_array($value, ['H', 'I', 'S', 'A', 'L'])) {
@@ -150,7 +155,7 @@ class KehadiranGtkGrid extends Component
     }
     protected function getActiveLaporanId(): ?int
     {
-        $sekolahId = filament()->getTenant()?->id;
+        $sekolahId = $this->getSchoolId();
         if (! $sekolahId) {
             return null;
         }
@@ -199,13 +204,13 @@ class KehadiranGtkGrid extends Component
 
     public function render()
     {
-        $query = Gtk::where('sekolah_id', filament()->getTenant()?->id)
+        $query = Gtk::where('sekolah_id', $this->getSchoolId())
             ->orderBy('id');
-            
-        $gtks = ($this->perPage === 'all') 
-            ? $query->paginate($query->count()) 
+
+        $gtks = ($this->perPage === 'all')
+            ? $query->paginate($query->count())
             : $query->paginate((int) $this->perPage);
-        
+
         $this->loadAttendance($gtks->getCollection());
 
         return view('livewire.kehadiran-gtk-grid', [

@@ -130,12 +130,12 @@ trait HasLaporanBulananLogic
         foreach ($this->checklist as $key => $label) {
             $column = "is_{$key}_valid";
             $status = $laporan ? ($laporan->$column ?? false) : false;
-            
+
             // Fallback dynamic check
             if (!$status) {
                 $status = $this->isSectionDataValid($key, $schoolId);
             }
-            
+
             $this->checklistStatus[$key] = $status;
         }
 
@@ -223,7 +223,7 @@ trait HasLaporanBulananLogic
 
     protected function getNominatifGtkData($schoolId)
     {
-                $gtkList = Gtk::where('sekolah_id', $schoolId)->orderBy('id', 'asc')->get();
+        $gtkList = Gtk::where('sekolah_id', $schoolId)->orderBy('id', 'asc')->get();
 
 
         return $gtkList->map(function ($gtk) {
@@ -259,13 +259,13 @@ trait HasLaporanBulananLogic
 
         return $gtkList->map(function ($gtk) {
             $p = $gtk->pendidikan->first();
-            
+
             $gd = $p->gelar_depan ?? '';
             if ($gd && !str_ends_with($gd, '.')) $gd .= '.';
-            
+
             $gb = $p->gelar_belakang ?? '';
             if ($gb && !str_ends_with($gb, '.')) $gb .= '.';
-            
+
             return [
                 'label' => $gtk->nama ?? 'Tidak tersedia',
                 'details' => [
@@ -283,7 +283,7 @@ trait HasLaporanBulananLogic
 
     protected function getRekeningNpwpGtkData($schoolId)
     {
-                $gtkList = Gtk::where('sekolah_id', $schoolId)->orderBy('id', 'asc')->get();
+        $gtkList = Gtk::where('sekolah_id', $schoolId)->orderBy('id', 'asc')->get();
 
 
         return $gtkList->map(function ($gtk) {
@@ -345,12 +345,24 @@ trait HasLaporanBulananLogic
                     $akhir = $getRekap('akhir_bulan');
                     return [
                         'nama_rombel' => $rombel->nama,
-                        'awal_bulan_l' => $awal['l'], 'awal_bulan_p' => $awal['p'], 'awal_bulan_jml' => $awal['jml'],
-                        'mutasi_l' => $mutasi_masuk['l'], 'mutasi_p' => $mutasi_masuk['p'], 'mutasi_jml' => $mutasi_jml ?? ($mutasi_masuk['l'] + $mutasi_masuk['p']),
-                        'mutasi_keluar_l' => $mutasi_keluar['l'], 'mutasi_keluar_p' => $mutasi_keluar['p'], 'mutasi_keluar_jml' => $mutasi_keluar['jml'],
-                        'putus_sekolah_l' => $putus['l'], 'putus_sekolah_p' => $putus['p'], 'putus_sekolah_jml' => $putus['jml'],
-                        'mengulang_l' => $mengulang['l'], 'mengulang_p' => $mengulang['p'], 'mengulang_jml' => $mengulang['jml'],
-                        'akhir_bulan_l' => $akhir['l'], 'akhir_bulan_p' => $akhir['p'], 'akhir_bulan_jml' => $akhir['jml'],
+                        'awal_bulan_l' => $awal['l'],
+                        'awal_bulan_p' => $awal['p'],
+                        'awal_bulan_jml' => $awal['jml'],
+                        'mutasi_l' => $mutasi_masuk['l'],
+                        'mutasi_p' => $mutasi_masuk['p'],
+                        'mutasi_jml' => $mutasi_jml ?? ($mutasi_masuk['l'] + $mutasi_masuk['p']),
+                        'mutasi_keluar_l' => $mutasi_keluar['l'],
+                        'mutasi_keluar_p' => $mutasi_keluar['p'],
+                        'mutasi_keluar_jml' => $mutasi_keluar['jml'],
+                        'putus_sekolah_l' => $putus['l'],
+                        'putus_sekolah_p' => $putus['p'],
+                        'putus_sekolah_jml' => $putus['jml'],
+                        'mengulang_l' => $mengulang['l'],
+                        'mengulang_p' => $mengulang['p'],
+                        'mengulang_jml' => $mengulang['jml'],
+                        'akhir_bulan_l' => $akhir['l'],
+                        'akhir_bulan_p' => $akhir['p'],
+                        'akhir_bulan_jml' => $akhir['jml'],
                     ];
                 }
                 return ['nama_rombel' => $rombel->nama, 'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0, 'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0, 'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0, 'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0, 'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0, 'akhir_bulan_l' => 0, 'akhir_bulan_p' => 0, 'akhir_bulan_jml' => 0];
@@ -366,13 +378,23 @@ trait HasLaporanBulananLogic
             $laporanSiswas = \App\Models\LaporanSiswa::where('laporan_id', $laporanId)->with('kategori')->get()->keyBy('rombel_id');
             return $rombels->map(function ($rombel) use ($laporanSiswas) {
                 $item = ['nama_rombel' => $rombel->nama];
-                for ($age = 13; $age <= 23; $age++) { $px = 'umur_' . $age; $item[$px . '_l'] = 0; $item[$px . '_p'] = 0; $item[$px . '_jml'] = 0; }
+                for ($age = 13; $age <= 23; $age++) {
+                    $px = 'umur_' . $age;
+                    $item[$px . '_l'] = 0;
+                    $item[$px . '_p'] = 0;
+                    $item[$px . '_jml'] = 0;
+                }
                 $ls = $laporanSiswas->get($rombel->id);
                 if ($ls) {
                     $umurKats = $ls->kategori->where('jenis_kategori', 'umur')->groupBy('sub_kategori');
                     foreach ($umurKats as $sub => $group) {
                         $age = (int) $sub;
-                        if ($age >= 13 && $age <= 23) { $px = 'umur_' . $age; $item[$px . '_l'] = $group->sum('laki_laki'); $item[$px . '_p'] = $group->sum('perempuan'); $item[$px . '_jml'] = $group->sum('total'); }
+                        if ($age >= 13 && $age <= 23) {
+                            $px = 'umur_' . $age;
+                            $item[$px . '_l'] = $group->sum('laki_laki');
+                            $item[$px . '_p'] = $group->sum('perempuan');
+                            $item[$px . '_jml'] = $group->sum('total');
+                        }
                     }
                 }
                 return $item;
@@ -380,11 +402,21 @@ trait HasLaporanBulananLogic
         }
         return $rombels->map(function ($rombel) {
             $item = ['nama_rombel' => $rombel->nama];
-            for ($age = 13; $age <= 23; $age++) { $px = 'umur_' . $age; $item[$px . '_l'] = 0; $item[$px . '_p'] = 0; $item[$px . '_jml'] = 0; }
+            for ($age = 13; $age <= 23; $age++) {
+                $px = 'umur_' . $age;
+                $item[$px . '_l'] = 0;
+                $item[$px . '_p'] = 0;
+                $item[$px . '_jml'] = 0;
+            }
             $siswas = $rombel->siswa()->whereNotNull('tanggal_lahir')->get();
             foreach ($siswas as $s) {
                 $age = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
-                if ($age >= 13 && $age <= 23) { $px = 'umur_' . $age; if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$px . '_l']++; else $item[$px . '_p']++; $item[$px . '_jml']++; }
+                if ($age >= 13 && $age <= 23) {
+                    $px = 'umur_' . $age;
+                    if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$px . '_l']++;
+                    else $item[$px . '_p']++;
+                    $item[$px . '_jml']++;
+                }
             }
             return $item;
         });
@@ -397,18 +429,33 @@ trait HasLaporanBulananLogic
             $laporanSiswas = \App\Models\LaporanSiswa::where('laporan_id', $laporanId)->with('kategori')->get()->keyBy('rombel_id');
             return $rombels->map(function ($rombel) use ($laporanSiswas) {
                 $item = ['nama_rombel' => $rombel->nama];
-                foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) { $item[$ag . '_l'] = 0; $item[$ag . '_p'] = 0; $item[$ag . '_jml'] = 0; }
+                foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) {
+                    $item[$ag . '_l'] = 0;
+                    $item[$ag . '_p'] = 0;
+                    $item[$ag . '_jml'] = 0;
+                }
                 $ls = $laporanSiswas->get($rombel->id);
                 if ($ls) {
                     $agamaKats = $ls->kategori->where('jenis_kategori', 'agama')->groupBy('sub_kategori');
-                    foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) { $group = $agamaKats->get($ag); if ($group) { $item[$ag . '_l'] = $group->sum('laki_laki'); $item[$ag . '_p'] = $group->sum('perempuan'); $item[$ag . '_jml'] = $group->sum('total'); } }
+                    foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) {
+                        $group = $agamaKats->get($ag);
+                        if ($group) {
+                            $item[$ag . '_l'] = $group->sum('laki_laki');
+                            $item[$ag . '_p'] = $group->sum('perempuan');
+                            $item[$ag . '_jml'] = $group->sum('total');
+                        }
+                    }
                 }
                 return $item;
             });
         }
         return $rombels->map(function ($rombel) {
             $item = ['nama_rombel' => $rombel->nama];
-            foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) { $item[$ag . '_l'] = 0; $item[$ag . '_p'] = 0; $item[$ag . '_jml'] = 0; }
+            foreach (['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'khonghucu'] as $ag) {
+                $item[$ag . '_l'] = 0;
+                $item[$ag . '_p'] = 0;
+                $item[$ag . '_jml'] = 0;
+            }
             foreach ($rombel->siswa()->get() as $s) {
                 $agama = strtolower($s->agama ?? '');
                 $field = null;
@@ -418,7 +465,11 @@ trait HasLaporanBulananLogic
                 elseif (str_contains($agama, 'hindu')) $field = 'hindu';
                 elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $field = 'buddha';
                 elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $field = 'khonghucu';
-                if ($field) { if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$field . '_l']++; else $item[$field . '_p']++; $item[$field . '_jml']++; }
+                if ($field) {
+                    if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$field . '_l']++;
+                    else $item[$field . '_p']++;
+                    $item[$field . '_jml']++;
+                }
             }
             return $item;
         });
@@ -434,7 +485,14 @@ trait HasLaporanBulananLogic
                 $ls = $laporanSiswas->get($rombel->id);
                 if ($ls) {
                     $daerahKats = $ls->kategori->where('jenis_kategori', 'asal_daerah')->groupBy('sub_kategori');
-                    foreach (['papua', 'non_papua'] as $sub) { $group = $daerahKats->get($sub); if ($group) { $item[$sub . '_l'] = $group->sum('laki_laki'); $item[$sub . '_p'] = $group->sum('perempuan'); $item[$sub . '_jml'] = $group->sum('total'); } }
+                    foreach (['papua', 'non_papua'] as $sub) {
+                        $group = $daerahKats->get($sub);
+                        if ($group) {
+                            $item[$sub . '_l'] = $group->sum('laki_laki');
+                            $item[$sub . '_p'] = $group->sum('perempuan');
+                            $item[$sub . '_jml'] = $group->sum('total');
+                        }
+                    }
                 }
                 return $item;
             });
@@ -444,7 +502,9 @@ trait HasLaporanBulananLogic
             foreach ($rombel->siswa()->get() as $s) {
                 $daerah = strtolower($s->daerah_asal ?? '');
                 $cat = (str_contains($daerah, 'papua') && !str_contains($daerah, 'non')) ? 'papua' : 'non_papua';
-                if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$cat . '_l']++; else $item[$cat . '_p']++; $item[$cat . '_jml']++;
+                if (str_starts_with(strtoupper($s->jenis_kelamin), 'L')) $item[$cat . '_l']++;
+                else $item[$cat . '_p']++;
+                $item[$cat . '_jml']++;
             }
             return $item;
         });
@@ -504,12 +564,17 @@ trait HasLaporanBulananLogic
     protected function getGtkAgamaCollection($laporanId, $schoolId)
     {
         $agamas = ['islam', 'kristen_protestan', 'katolik', 'hindu', 'budha', 'konghucu'];
-        
+
         if ($laporanId) {
             $laporanGtks = \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->get();
             if ($laporanGtks->isNotEmpty()) {
-                return $laporanGtks->sortBy(function($lg) {
-                    return match($lg->jenis_gtk) { 'kepala_sekolah' => 1, 'guru' => 2, 'tenaga_administrasi' => 3, default => 4 };
+                return $laporanGtks->sortBy(function ($lg) {
+                    return match ($lg->jenis_gtk) {
+                        'kepala_sekolah' => 1,
+                        'guru' => 2,
+                        'tenaga_administrasi' => 3,
+                        default => 4
+                    };
                 })->map(function ($lg) use ($agamas) {
                     $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
                     foreach ($agamas as $ag) {
@@ -527,16 +592,16 @@ trait HasLaporanBulananLogic
         return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(function ($type) use ($gtks, $agamas) {
             $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
             $typeGtks = $gtks->filter(fn($g) => strtolower(str_replace(' ', '_', $g->jenis_gtk)) === $type);
-            
+
             foreach ($agamas as $ag) {
                 $search = str_replace('_protestan', '', $ag);
-                $agGtks = $typeGtks->filter(function($g) use ($search) {
+                $agGtks = $typeGtks->filter(function ($g) use ($search) {
                     $agama = strtolower($g->agama ?? '');
                     if ($search === 'budha') return str_contains($agama, 'budha') || str_contains($agama, 'buddha');
                     if ($search === 'kristen') return str_contains($agama, 'kristen') || str_contains($agama, 'protestan');
                     return str_contains($agama, $search);
                 });
-                
+
                 $row->{$ag . '_l'} = $agGtks->filter(fn($g) => stripos($g->jenis_kelamin, 'L') === 0)->count();
                 $row->{$ag . '_p'} = $agGtks->filter(fn($g) => stripos($g->jenis_kelamin, 'P') === 0)->count();
                 $row->{$ag . '_jml'} = $row->{$ag . '_l'} + $row->{$ag . '_p'};
@@ -550,8 +615,13 @@ trait HasLaporanBulananLogic
         if ($laporanId) {
             $laporanGtks = \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->get();
             if ($laporanGtks->isNotEmpty()) {
-                return $laporanGtks->sortBy(function($lg) {
-                    return match($lg->jenis_gtk) { 'kepala_sekolah' => 1, 'guru' => 2, 'tenaga_administrasi' => 3, default => 4 };
+                return $laporanGtks->sortBy(function ($lg) {
+                    return match ($lg->jenis_gtk) {
+                        'kepala_sekolah' => 1,
+                        'guru' => 2,
+                        'tenaga_administrasi' => 3,
+                        default => 4
+                    };
                 })->map(function ($lg) {
                     $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
                     foreach (['papua', 'non_papua'] as $d) {
@@ -568,9 +638,9 @@ trait HasLaporanBulananLogic
         return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(function ($type) use ($gtks) {
             $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
             $typeGtks = $gtks->filter(fn($g) => strtolower(str_replace(' ', '_', $g->jenis_gtk)) === $type);
-            
+
             foreach (['papua', 'non_papua'] as $d) {
-                $dGtks = $typeGtks->filter(function($g) use ($d) {
+                $dGtks = $typeGtks->filter(function ($g) use ($d) {
                     $daerah = strtolower($g->daerah_asal ?? '');
                     if ($d === 'papua') return str_contains($daerah, 'papua') && !str_contains($daerah, 'non');
                     return str_contains($daerah, 'non') || !str_contains($daerah, 'papua');
@@ -586,15 +656,22 @@ trait HasLaporanBulananLogic
     protected function getGtkStatusCollection($laporanId, $schoolId)
     {
         $cols = ['gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d', 'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d', 'gol_iii_a', 'gol_iii_b', 'gol_iii_c', 'gol_iii_d', 'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e', 'pppk', 'honorer_sekolah'];
-        
+
         if ($laporanId) {
             $laporanGtks = \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->get();
             if ($laporanGtks->isNotEmpty()) {
-                return $laporanGtks->sortBy(function($lg) {
-                    return match($lg->jenis_gtk) { 'kepala_sekolah' => 1, 'guru' => 2, 'tenaga_administrasi' => 3, default => 4 };
+                return $laporanGtks->sortBy(function ($lg) {
+                    return match ($lg->jenis_gtk) {
+                        'kepala_sekolah' => 1,
+                        'guru' => 2,
+                        'tenaga_administrasi' => 3,
+                        default => 4
+                    };
                 })->map(function ($lg) use ($cols) {
                     $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
-                    foreach ($cols as $c) { $row->{$c} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'status_kepegawaian' && $k->sub_kategori === $c)?->jumlah ?? 0); }
+                    foreach ($cols as $c) {
+                        $row->{$c} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'status_kepegawaian' && $k->sub_kategori === $c)?->jumlah ?? 0);
+                    }
                     return $row;
                 });
             }
@@ -604,15 +681,15 @@ trait HasLaporanBulananLogic
         return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(function ($type) use ($gtks, $cols) {
             $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
             $typeGtks = $gtks->filter(fn($g) => strtolower(str_replace(' ', '_', $g->jenis_gtk)) === $type);
-            
+
             foreach ($cols as $c) {
-                $statusGtks = $typeGtks->filter(function($g) use ($c) {
+                $statusGtks = $typeGtks->filter(function ($g) use ($c) {
                     $status = strtolower($g->status_kepegawaian ?? '');
                     $pangkat = strtolower($g->pangkat_gol_terakhir ?? '');
-                    
+
                     if ($c === 'pppk') return str_contains($status, 'pppk');
                     if ($c === 'honorer_sekolah') return str_contains($status, 'honorer') || str_contains($status, 'sekolah') || str_contains($status, 'kontrak');
-                    
+
                     $target = str_replace('gol_', '', $c);
                     $target = str_replace('_', '/', $target);
                     return $pangkat === $target;
@@ -626,12 +703,17 @@ trait HasLaporanBulananLogic
     protected function getGtkUmurCollection($laporanId, $schoolId)
     {
         $ranges = ['umur_20_29', 'umur_30_39', 'umur_40_49', 'umur_50_59', 'umur_60_ke_atas'];
-        
+
         if ($laporanId) {
             $laporanGtks = \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->get();
             if ($laporanGtks->isNotEmpty()) {
-                return $laporanGtks->sortBy(function($lg) {
-                    return match($lg->jenis_gtk) { 'kepala_sekolah' => 1, 'guru' => 2, 'tenaga_administrasi' => 3, default => 4 };
+                return $laporanGtks->sortBy(function ($lg) {
+                    return match ($lg->jenis_gtk) {
+                        'kepala_sekolah' => 1,
+                        'guru' => 2,
+                        'tenaga_administrasi' => 3,
+                        default => 4
+                    };
                 })->map(function ($lg) use ($ranges) {
                     $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
                     foreach ($ranges as $r) {
@@ -648,9 +730,9 @@ trait HasLaporanBulananLogic
         return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(function ($type) use ($gtks, $ranges) {
             $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
             $typeGtks = $gtks->filter(fn($g) => strtolower(str_replace(' ', '_', $g->jenis_gtk)) === $type);
-            
+
             foreach ($ranges as $r) {
-                $rangeGtks = $typeGtks->filter(function($g) use ($r) {
+                $rangeGtks = $typeGtks->filter(function ($g) use ($r) {
                     if (!$g->tanggal_lahir) return false;
                     $age = \Carbon\Carbon::parse($g->tanggal_lahir)->age;
                     if ($r === 'umur_20_29') return $age >= 20 && $age <= 29;
@@ -671,15 +753,22 @@ trait HasLaporanBulananLogic
     protected function getGtkPendidikanCollection($laporanId, $schoolId)
     {
         $cols = ['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'];
-        
+
         if ($laporanId) {
             $laporanGtks = \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->get();
             if ($laporanGtks->isNotEmpty()) {
-                return $laporanGtks->sortBy(function($lg) {
-                    return match($lg->jenis_gtk) { 'kepala_sekolah' => 1, 'guru' => 2, 'tenaga_administrasi' => 3, default => 4 };
+                return $laporanGtks->sortBy(function ($lg) {
+                    return match ($lg->jenis_gtk) {
+                        'kepala_sekolah' => 1,
+                        'guru' => 2,
+                        'tenaga_administrasi' => 3,
+                        default => 4
+                    };
                 })->map(function ($lg) use ($cols) {
                     $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
-                    foreach ($cols as $c) { $row->{$c} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'pendidikan' && $k->sub_kategori === $c)?->jumlah ?? 0); }
+                    foreach ($cols as $c) {
+                        $row->{$c} = ($lg->kategori->first(fn($k) => $k->jenis_kategori === 'pendidikan' && $k->sub_kategori === $c)?->jumlah ?? 0);
+                    }
                     return $row;
                 });
             }
@@ -689,9 +778,9 @@ trait HasLaporanBulananLogic
         return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(function ($type) use ($gtks, $cols) {
             $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
             $typeGtks = $gtks->filter(fn($g) => strtolower(str_replace(' ', '_', $g->jenis_gtk)) === $type);
-            
+
             foreach ($cols as $c) {
-                $eduGtks = $typeGtks->filter(function($g) use ($c) {
+                $eduGtks = $typeGtks->filter(function ($g) use ($c) {
                     $edu = strtoupper($g->pendidikan_terakhir ?? '');
                     if ($c === 'slta') return str_contains($edu, 'SMA') || str_contains($edu, 'SMK') || str_contains($edu, 'SLTA');
                     if ($c === 'di') return str_contains($edu, 'D1') || str_contains($edu, 'D-1');
@@ -710,8 +799,13 @@ trait HasLaporanBulananLogic
         if ($laporanId) {
             $laporanGtks = \App\Models\LaporanGtk::with('kategori')->where('laporan_id', $laporanId)->get();
             if ($laporanGtks->isNotEmpty()) {
-                return $laporanGtks->sortBy(function($lg) {
-                    return match($lg->jenis_gtk) { 'kepala_sekolah' => 1, 'guru' => 2, 'tenaga_administrasi' => 3, default => 4 };
+                return $laporanGtks->sortBy(function ($lg) {
+                    return match ($lg->jenis_gtk) {
+                        'kepala_sekolah' => 1,
+                        'guru' => 2,
+                        'tenaga_administrasi' => 3,
+                        default => 4
+                    };
                 })->map(function ($lg) {
                     $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($lg->jenis_gtk)];
                     $row->laki_laki = $lg->kategori->where('jenis_kategori', 'agama')->where('sub_kategori', 'LIKE', '%_l')->sum('jumlah');
@@ -726,7 +820,7 @@ trait HasLaporanBulananLogic
         return collect(['kepala_sekolah', 'guru', 'tenaga_administrasi'])->map(function ($type) use ($gtks) {
             $row = (object) ['jenis_gtk' => $this->getJenisGtkLabel($type)];
             $typeGtks = $gtks->filter(fn($g) => strtolower(str_replace(' ', '_', $g->jenis_gtk)) === $type);
-            
+
             $row->laki_laki = $typeGtks->filter(fn($g) => stripos($g->jenis_kelamin, 'L') === 0)->count();
             $row->perempuan = $typeGtks->filter(fn($g) => stripos($g->jenis_kelamin, 'P') === 0)->count();
             $row->total = $row->laki_laki + $row->perempuan;
@@ -736,7 +830,12 @@ trait HasLaporanBulananLogic
 
     protected function getJenisGtkLabel($type)
     {
-        return match ($type) { 'kepala_sekolah' => 'Kepala Sekolah', 'tenaga_administrasi' => 'Tenaga Administrasi', 'guru' => 'Guru', default => ucfirst($type) };
+        return match ($type) {
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'tenaga_administrasi' => 'Tenaga Administrasi',
+            'guru' => 'Guru',
+            default => ucfirst($type)
+        };
     }
 
     protected function getNominatifSiswaData($schoolId)
@@ -767,21 +866,21 @@ trait HasLaporanBulananLogic
     protected function getKondisiSarprasData($schoolId)
     {
         $laporanId = $this->selectedLaporanId;
-        
+
         $query = LaporanGedung::query();
         if ($laporanId) {
             $query->where('laporan_id', $laporanId);
         } else {
-            $query->whereHas('laporan', function($q) use ($schoolId) {
+            $query->whereHas('laporan', function ($q) use ($schoolId) {
                 $q->where('sekolah_id', $schoolId);
             });
         }
-        
+
         $sarpasList = $query->get();
 
         // Fallback to latest available sarpras data for the school if selected report has none
         if ($sarpasList->isEmpty()) {
-            $sarpasList = LaporanGedung::whereHas('laporan', function($q) use ($schoolId) {
+            $sarpasList = LaporanGedung::whereHas('laporan', function ($q) use ($schoolId) {
                 $q->where('sekolah_id', $schoolId);
             })->orderBy('laporan_id', 'desc')->get();
         }
@@ -909,7 +1008,7 @@ trait HasLaporanBulananLogic
     protected function getSebaranJamData($schoolId)
     {
         $mengajars = Mengajar::with(['gtk', 'rombel', 'mapel'])
-            ->whereHas('gtk', function($q) use ($schoolId) {
+            ->whereHas('gtk', function ($q) use ($schoolId) {
                 $q->where('sekolah_id', $schoolId);
             })->orderBy('gtk_id', 'asc')->get();
 
@@ -918,7 +1017,7 @@ trait HasLaporanBulananLogic
         return $grouped->map(function ($items) {
             $first = $items->first();
             $gtkName = $first->gtk->nama ?? 'Tidak tersedia';
-            
+
             return [
                 'label' => $gtkName,
                 'details' => [
@@ -934,19 +1033,35 @@ trait HasLaporanBulananLogic
 
     protected function getRekapKehadiranData($schoolId)
     {
-                $kehadiran = KehadiranGtk::whereHas('gtk', function($q) use ($schoolId) {
-            $q->where('sekolah_id', $schoolId);
-        })->orderBy('gtk_id', 'asc')->get();
+        $laporanId = $this->selectedLaporanId;
+        if (!$laporanId) {
+            $laporanId = Laporan::where('sekolah_id', $schoolId)
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->value('id');
+        }
 
+        // Get ALL GTK from school
+        $gtks = Gtk::where('sekolah_id', $schoolId)
+            ->orderBy('id', 'asc')
+            ->get();
 
-        return $kehadiran->map(function ($k) {
+        // Get kehadiran data for selected period and index by gtk_id
+        $kehadiranMap = KehadiranGtk::where('laporan_id', $laporanId)
+            ->get()
+            ->keyBy('gtk_id');
+
+        // Combine all GTK with their attendance data (if exists)
+        return $gtks->map(function ($gtk) use ($kehadiranMap) {
+            $kehadiran = $kehadiranMap->get($gtk->id);
+
             return [
-                'label' => $k->gtk->nama ?? 'Tidak tersedia',
+                'label' => $gtk->nama,
                 'details' => [
-                    'Hari Kerja' => $k->hari_kerja ?? 0,
-                    'Sakit' => $k->sakit ?? 0,
-                    'Izin' => $k->izin ?? 0,
-                    'Alpa' => $k->alfa ?? 0,
+                    'Hari Kerja' => $kehadiran?->hari_kerja ?? 0,
+                    'Sakit' => $kehadiran?->sakit ?? 0,
+                    'Izin' => $kehadiran?->izin ?? 0,
+                    'Alpa' => $kehadiran?->alfa ?? 0,
                 ]
             ];
         })->toArray();
@@ -954,7 +1069,20 @@ trait HasLaporanBulananLogic
 
     protected function getKelulusanData($schoolId)
     {
-        $kelulusans = Kelulusan::where('sekolah_id', $schoolId)->get();
+        $laporanId = $this->selectedLaporanId;
+        if (!$laporanId) {
+            $laporanId = Laporan::where('sekolah_id', $schoolId)
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->value('id');
+        }
+
+        $laporan = Laporan::find($laporanId);
+        $tahun = $laporan?->tahun;
+
+        $kelulusans = Kelulusan::where('sekolah_id', $schoolId)
+            ->where('tahun', $tahun)
+            ->get();
 
         return $kelulusans->map(function ($k) {
             return [

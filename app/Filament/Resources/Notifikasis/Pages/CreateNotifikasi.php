@@ -6,6 +6,7 @@ use App\Filament\Resources\Notifikasis\NotifikasiResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 use App\Models\User;
+use Filament\Actions\Action;
 
 class CreateNotifikasi extends CreateRecord
 {
@@ -50,5 +51,21 @@ class CreateNotifikasi extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
+
+    protected function getCreateFormAction(): Action
+    {
+        return Action::make('create')
+            ->label('Kirim Pemberitahuan')
+            ->submit('create')
+            ->keyBindings(['mod+s']);
     }
 }

@@ -15,7 +15,7 @@ class NotifikasiForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Informasi Pemberitahuan')
+            Section::make('Detail Pemberitahuan')
                 ->schema([
                     TextInput::make('subject')
                         ->label('Subject / Judul')
@@ -25,6 +25,21 @@ class NotifikasiForm
                     RichEditor::make('content')
                         ->label('Isi Pesan')
                         ->required()
+                        ->extraInputAttributes(['style' => 'min-height: 250px'])
+                        ->disableToolbarButtons([
+                            'attachFiles',
+                            'codeBlock',
+                            'italic',
+                            'link',
+                            'orderedList',
+                            'redo',
+                            'strike',
+                            'underline',
+                            'undo',
+                            'table',
+                            'subscript',
+                            'superscript',
+                        ])
                         ->columnSpanFull(),
                 ])->columns(2),
 
@@ -39,13 +54,13 @@ class NotifikasiForm
                         ])
                         ->required()
                         ->live(),
-                    
+
                     Select::make('target_ids')
                         ->label('Pilih Sekolah')
                         ->multiple()
                         ->options(Sekolah::pluck('nama', 'id'))
                         ->required()
-                        ->visible(fn ($get) => $get('recipient_type') === 'schools')
+                        ->visible(fn($get) => $get('recipient_type') === 'schools')
                         ->searchable()
                         ->preload(),
 
@@ -54,7 +69,7 @@ class NotifikasiForm
                         ->multiple()
                         ->options(User::whereHas('roles', fn($q) => $q->where('name', 'operator'))->pluck('name', 'id'))
                         ->required()
-                        ->visible(fn ($get) => $get('recipient_type') === 'users')
+                        ->visible(fn($get) => $get('recipient_type') === 'users')
                         ->searchable()
                         ->preload(),
                 ]),

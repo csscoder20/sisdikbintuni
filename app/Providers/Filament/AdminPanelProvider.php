@@ -359,7 +359,9 @@ class AdminPanelProvider extends PanelProvider
 
         <div class="custom-topbar-user-wrapper">
             <span class="custom-topbar-user-name">{{ $name }}</span>
-            <span class="custom-topbar-user-role">{{ $role }}</span>
+            <span class="custom-topbar-user-role text-capitalize">
+                {{ $role }}
+            </span>
         </div>
     ', [
             'name' => self::getTopbarDisplayName(),
@@ -373,14 +375,14 @@ class AdminPanelProvider extends PanelProvider
         $user = auth()->user();
 
         if ($user->hasRole('super_admin')) {
-            return 'Super Administrator';
+            return 'Super Admin';
         }
 
         if ($user->hasRole('admin_dinas')) {
             return 'Admin Dinas';
         }
 
-        if ($user->hasRole('operator_sekolah')) {
+        if ($user->hasRole('operator')) {
             return 'Operator Sekolah';
         }
 

@@ -83,7 +83,7 @@ class CetakLaporanResource extends Resource
                             ->orWhere('provinsi', 'like', "%{$search}%");
                     }),
                 TextColumn::make('laporan_status')
-                    ->label('Progress Validasi')
+                    ->label('Progres Validasi')
                     ->state(function (Sekolah $record) {
                         $stats = $record->getValidationProgress();
                         return "{$stats['done']}/{$stats['total']} (" . $stats['percentage'] . "%)";
