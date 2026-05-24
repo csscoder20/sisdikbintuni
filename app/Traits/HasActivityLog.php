@@ -35,13 +35,19 @@ trait HasActivityLog
 
     protected static function recordActivity(Model $model, string $event, string $description, array $properties = null): void
     {
+        $properties = $properties ?? [];
+
+        if (session()->has('access_location')) {
+            $properties['access_location'] = session('access_location');
+        }
+
         ActivityLog::create([
             'user_id' => Auth::id(),
             'event' => $event,
             'description' => $description,
             'subject_type' => get_class($model),
             'subject_id' => $model->getKey(),
-            'properties' => $properties,
+            'properties' => ! empty($properties) ? $properties : null,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'created_at' => now(),

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('sekolah_id')->constrained('sekolah')->cascadeOnDelete();
             $table->integer('bulan');
             $table->integer('tahun');
-            $table->enum('status', ['draft','submitted','verified'])->default('draft');
+            $table->enum('status', ['draft', 'submitted', 'verified', 'valid', 'invalid'])->default('draft');
             $table->timestamp('tanggal_submit')->nullable();
             $table->timestamps();
             $table->timestamp('verified_at')->nullable();
@@ -43,7 +43,7 @@ return new class extends Migration
             $table->boolean('is_gtk_pendidikan_valid')->default(false);
             $table->softDeletes();
 
-            $table->unique(['sekolah_id','bulan','tahun']);
+            $table->unique(['sekolah_id', 'bulan', 'tahun']);
         });
     }
 

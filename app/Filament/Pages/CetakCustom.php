@@ -60,7 +60,7 @@ class CetakCustom extends Page implements HasForms
     private function withAllOption(array|\Closure $optionsSource): array|\Closure
     {
         if (is_callable($optionsSource)) {
-            return function() use ($optionsSource) {
+            return function () use ($optionsSource) {
                 $options = $optionsSource();
                 return ['all' => 'Pilih Semua (Semua)'] + $options;
             };
@@ -72,10 +72,10 @@ class CetakCustom extends Page implements HasForms
     {
         return function ($state, $get, $set) use ($filterField, $targetField, $columnKey, $optionsSource) {
             $state = $state ?? [];
-            
+
             // Resolve options if it's a closure
             $options = is_callable($optionsSource) ? $optionsSource() : $optionsSource;
-            
+
             // Check if 'all' was selected
             if (in_array('all', $state)) {
                 // Get all other keys (excluding 'all')
@@ -83,7 +83,7 @@ class CetakCustom extends Page implements HasForms
                 $set($filterField, $allKeys);
                 $state = $allKeys;
             }
-            
+
             // Auto-select column in CheckboxList
             if (!empty($state)) {
                 $current = $get($targetField) ?? [];
@@ -921,19 +921,7 @@ class CetakCustom extends Page implements HasForms
         $selectedColumns = array_intersect_key(static::getSekolahColumns(), array_flip($state['sekolah_columns'] ?? []));
         $columnCount = count($selectedColumns);
 
-        // Dynamically determine font size
-        $fontSize = '9pt';
-        if ($columnCount <= 5) {
-            $fontSize = '9.5pt';
-        } elseif ($columnCount <= 8) {
-            $fontSize = '8pt';
-        } elseif ($columnCount <= 12) {
-            $fontSize = '7pt';
-        } elseif ($columnCount <= 16) {
-            $fontSize = '6pt';
-        } else {
-            $fontSize = '5pt';
-        }
+        $fontSize = $this->calculateFontSize($columnCount);
 
         $html = view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH SEKABUPATEN TELUK BINTUNI',
@@ -944,17 +932,7 @@ class CetakCustom extends Page implements HasForms
             'sekolah' => null,
         ])->render();
 
-        $browsershot = Browsershot::html($html)
-            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-            ->preferCssPageSize()
-            ->format('A4')
-            ->showBackground()
-            ->noSandbox();
-
-        if ($columnCount > 7) {
-            $browsershot->landscape();
-        }
+        $browsershot = $this->configureBrowsershot($html, $columnCount);
 
         $pdfContent = $browsershot->pdf();
         $filename = 'Laporan Bulanan Sekolah Sekabupaten Teluk Bintuni - ' . now()->translatedFormat('F Y');
@@ -1082,19 +1060,7 @@ class CetakCustom extends Page implements HasForms
         $selectedColumns = array_intersect_key(static::getSiswaColumns(), array_flip($state['siswa_columns'] ?? []));
         $columnCount = count($selectedColumns);
 
-        // Dynamically determine font size
-        $fontSize = '9pt';
-        if ($columnCount <= 5) {
-            $fontSize = '9.5pt';
-        } elseif ($columnCount <= 8) {
-            $fontSize = '8pt';
-        } elseif ($columnCount <= 12) {
-            $fontSize = '7pt';
-        } elseif ($columnCount <= 16) {
-            $fontSize = '6pt';
-        } else {
-            $fontSize = '5pt';
-        }
+        $fontSize = $this->calculateFontSize($columnCount);
 
         $sekolah = null;
         if (!empty($state['siswa_sekolah']) && count($state['siswa_sekolah']) === 1) {
@@ -1110,17 +1076,7 @@ class CetakCustom extends Page implements HasForms
             'sekolah' => $sekolah,
         ])->render();
 
-        $browsershot = Browsershot::html($html)
-            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-            ->preferCssPageSize()
-            ->format('A4')
-            ->showBackground()
-            ->noSandbox();
-
-        if ($columnCount > 7) {
-            $browsershot->landscape();
-        }
+        $browsershot = $this->configureBrowsershot($html, $columnCount);
 
         $pdfContent = $browsershot->pdf();
         $filename = 'Laporan Bulanan Sekolah Untuk Siswa - ' . now()->translatedFormat('F Y');
@@ -1292,19 +1248,7 @@ class CetakCustom extends Page implements HasForms
         $selectedColumns = array_intersect_key(static::getGtkColumns(), array_flip($state['gtk_columns'] ?? []));
         $columnCount = count($selectedColumns);
 
-        // Dynamically determine font size
-        $fontSize = '9pt';
-        if ($columnCount <= 5) {
-            $fontSize = '9.5pt';
-        } elseif ($columnCount <= 8) {
-            $fontSize = '8pt';
-        } elseif ($columnCount <= 12) {
-            $fontSize = '7pt';
-        } elseif ($columnCount <= 16) {
-            $fontSize = '6pt';
-        } else {
-            $fontSize = '5pt';
-        }
+        $fontSize = $this->calculateFontSize($columnCount);
 
         $sekolah = null;
         if (!empty($state['gtk_sekolah']) && count($state['gtk_sekolah']) === 1) {
@@ -1320,17 +1264,7 @@ class CetakCustom extends Page implements HasForms
             'sekolah' => $sekolah,
         ])->render();
 
-        $browsershot = Browsershot::html($html)
-            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-            ->preferCssPageSize()
-            ->format('A4')
-            ->showBackground()
-            ->noSandbox();
-
-        if ($columnCount > 7) {
-            $browsershot->landscape();
-        }
+        $browsershot = $this->configureBrowsershot($html, $columnCount);
 
         $pdfContent = $browsershot->pdf();
         $filename = 'Laporan Bulanan Sekolah Untuk GTK - ' . now()->translatedFormat('F Y');
@@ -1424,19 +1358,7 @@ class CetakCustom extends Page implements HasForms
         $selectedColumns = array_intersect_key(static::getSarprasColumns(), array_flip($state['sarpras_columns'] ?? []));
         $columnCount = count($selectedColumns);
 
-        // Dynamically determine font size
-        $fontSize = '9pt';
-        if ($columnCount <= 5) {
-            $fontSize = '9.5pt';
-        } elseif ($columnCount <= 8) {
-            $fontSize = '8pt';
-        } elseif ($columnCount <= 12) {
-            $fontSize = '7pt';
-        } elseif ($columnCount <= 16) {
-            $fontSize = '6pt';
-        } else {
-            $fontSize = '5pt';
-        }
+        $fontSize = $this->calculateFontSize($columnCount);
 
         $sekolah = null;
         if (!empty($state['sarpras_sekolah']) && count($state['sarpras_sekolah']) === 1) {
@@ -1452,17 +1374,7 @@ class CetakCustom extends Page implements HasForms
             'sekolah' => $sekolah,
         ])->render();
 
-        $browsershot = Browsershot::html($html)
-            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-            ->preferCssPageSize()
-            ->format('A4')
-            ->showBackground()
-            ->noSandbox();
-
-        if ($columnCount > 7) {
-            $browsershot->landscape();
-        }
+        $browsershot = $this->configureBrowsershot($html, $columnCount);
 
         $pdfContent = $browsershot->pdf();
         $filename = 'Laporan Bulanan Sekolah Untuk Sarpras - ' . now()->translatedFormat('F Y');
@@ -1471,5 +1383,32 @@ class CetakCustom extends Page implements HasForms
             fn() => print($pdfContent),
             $filename . '.pdf'
         );
+    }
+
+    protected function calculateFontSize(int $columnCount): string
+    {
+        if ($columnCount <= 5) return '9.5pt';
+        if ($columnCount <= 8) return '8pt';
+        if ($columnCount <= 12) return '7pt';
+        if ($columnCount <= 16) return '6pt';
+        return '5pt';
+    }
+
+    protected function configureBrowsershot(string $html, int $columnCount): Browsershot
+    {
+        $browsershot = Browsershot::html($html)
+            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
+            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
+            ->preferCssPageSize()
+            ->format('A4')
+            ->showBackground()
+            ->waitUntilNetworkIdle()
+            ->noSandbox();
+
+        if ($columnCount > 7) {
+            $browsershot->landscape();
+        }
+
+        return $browsershot;
     }
 }

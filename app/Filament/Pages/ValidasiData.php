@@ -41,6 +41,22 @@ class ValidasiData extends Page
     public array $bypassedSteps = [];
     public bool  $isSubmitted = false;
 
+    /**
+     * Mengontrol apakah menu navigasi ini muncul di sidebar.
+     */
+    public static function shouldRegisterNavigation(): bool
+    {
+        try {
+            $panelId = Filament::getCurrentPanel()?->getId();
+            if ($panelId === 'dinas') {
+                return !empty(session('dinas_selected_sekolah_id'));
+            }
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     /* ------------------------------------------------------------------ */
     /* Required fields for Profil Sekolah (label => field)                 */
     /* ------------------------------------------------------------------ */
@@ -90,9 +106,9 @@ class ValidasiData extends Page
         $id = $this->getSchoolId();
         $month = (int) date('m');
         $year  = (int) date('Y');
-        
+
         $laporan = Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->first();
-        if ($laporan && $laporan->tanggal_submit) {
+        if ($laporan && ($laporan->status === 'valid' || $laporan->tanggal_submit)) {
             $this->isSubmitted = true;
         }
 
@@ -113,13 +129,19 @@ class ValidasiData extends Page
         if ($tenant instanceof Sekolah) {
             return $tenant->id;
         }
+
+        // Ambil ID sekolah dari session jika di panel dinas
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            return session('dinas_selected_sekolah_id');
+        }
+
         return auth()->user()?->sekolah?->id;
     }
 
     protected function computeStatuses(): void
     {
         $id = $this->getSchoolId();
-        
+
         $month = (int) date('m');
         $year  = (int) date('Y');
         $laporan = Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->first();
@@ -280,7 +302,7 @@ class ValidasiData extends Page
     protected function checkStep7(?int $id): bool
     {
         if (!$id) return false;
-        
+
         $gtks = Gtk::where('sekolah_id', $id)->get();
         if ($gtks->isEmpty()) return false;
 
@@ -399,7 +421,7 @@ class ValidasiData extends Page
     public function nextStep(): void
     {
         $this->computeStatuses();
-        
+
         if (!($this->stepStatuses[$this->currentStep] ?? false)) {
             $msg = $this->getMissingMessageForStep($this->currentStep);
             $this->dispatch('swal-confirm-next', message: $msg);
@@ -419,7 +441,7 @@ class ValidasiData extends Page
         if (!in_array($this->currentStep, $this->bypassedSteps)) {
             $this->bypassedSteps[] = $this->currentStep;
         }
-        
+
         $this->computeStatuses();
         $this->saveProgressToDatabase();
 
@@ -466,15 +488,23 @@ class ValidasiData extends Page
         if (!in_array($this->currentStep, $this->bypassedSteps)) {
             $this->bypassedSteps[] = $this->currentStep;
         }
-        
+
         $this->computeStatuses();
         $this->saveProgressToDatabase();
 
         $id = $this->getSchoolId();
         $month = (int) date('m');
         $year  = (int) date('Y');
-        
-        Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->update(['tanggal_submit' => now()]);
+
+        Laporan::where('sekolah_id', $id)
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->update([
+                'status' => 'valid',
+                'tanggal_submit' => now(),
+            ]);
+
+        $this->isSubmitted = true;
 
         $period = Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
 
@@ -485,7 +515,7 @@ class ValidasiData extends Page
     {
         $id = $this->getSchoolId();
         if (!$id) return;
-        
+
         $month = (int) date('m');
         $year  = (int) date('Y');
 
@@ -556,7 +586,10 @@ class ValidasiData extends Page
         $items = array_slice($rows, $offset, $perPage);
 
         return new \Illuminate\Pagination\LengthAwarePaginator(
-            $items, count($rows), $perPage, $page,
+            $items,
+            count($rows),
+            $perPage,
+            $page,
             ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
         );
     }
@@ -790,7 +823,7 @@ class ValidasiData extends Page
             $query->where('jenjang', $sekolah->jenjang);
         }
         $query->withExists(['mengajars' => function ($q) use ($id) {
-            $q->whereHas('gtk', fn ($sq) => $sq->where('sekolah_id', $id));
+            $q->whereHas('gtk', fn($sq) => $sq->where('sekolah_id', $id));
         }]);
         return $query->orderBy('id', 'asc')->paginate(10);
     }
@@ -830,8 +863,8 @@ class ValidasiData extends Page
                             $fields = ['thn_tamat_s1', 'jurusan_s1', 'perguruan_tinggi_s1'];
                             foreach ($fields as $f) {
                                 $sq->orWhereNull($f)
-                                   ->orWhere($f, '')
-                                   ->orWhere($f, '-');
+                                    ->orWhere($f, '')
+                                    ->orWhere($f, '-');
                             }
                         });
                     });

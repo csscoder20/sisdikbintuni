@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Gtk;
-use Filament\Widgets\ChartWidget;
 
 class GuruPendidikanChart extends ChartWidget
 {
@@ -17,7 +16,7 @@ class GuruPendidikanChart extends ChartWidget
 
         foreach ($pendidikan as $p) {
             $data[] = Gtk::whereIn('jenis_gtk', ['Guru', 'Kepala Sekolah'])
-                ->where(function($query) use ($p) {
+                ->where(function ($query) use ($p) {
                     $query->where('pendidikan_terakhir', 'like', $p . '%')
                         ->orWhere('pendidikan_terakhir', 'like', substr($p, 0, 1) . '-' . substr($p, 1) . '%');
                 })

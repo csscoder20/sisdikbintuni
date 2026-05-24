@@ -18,17 +18,17 @@ class CetakLaporanResource extends Resource
 
     protected static ?string $slug = 'cetak-laporan-bulanan';
 
-    protected static ?string $navigationLabel = 'Cetak Laporan Bulanan';
+    protected static ?string $navigationLabel = 'Progres Pelaporan';
 
     protected static ?string $modelLabel = 'Cetak Laporan';
 
-    protected static ?string $pluralModelLabel = 'Cetak Laporan Bulanan';
+    protected static ?string $pluralModelLabel = 'Progres Pelaporan';
 
     protected static ?int $navigationSort = 1;
 
     protected static string | \UnitEnum | null $navigationGroup = 'Cetak';
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedPrinter;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::PresentationChartLine;
 
     public static function canViewAny(): bool
     {
@@ -50,7 +50,7 @@ class CetakLaporanResource extends Resource
                 TextColumn::make('jenjang')
                     ->label('Jenjang')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => strtoupper($state)),
+                    ->formatStateUsing(fn($state) => strtoupper($state)),
                 TextColumn::make('periode')
                     ->label('Periode Laporan')
                     ->state(function (Sekolah $record) {
@@ -100,8 +100,8 @@ class CetakLaporanResource extends Resource
                     ->label('Cetak Laporan')
                     ->icon('heroicon-o-printer')
                     ->color('success')
-                    ->visible(fn (Sekolah $record) => $record->getValidationProgress()['percentage'] === 100)
-                    ->modalHeading(fn (Sekolah $record) => "Pratinjau Laporan - " . $record->nama)
+                    ->visible(fn(Sekolah $record) => $record->getValidationProgress()['percentage'] === 100)
+                    ->modalHeading(fn(Sekolah $record) => "Pratinjau Laporan - " . $record->nama)
                     ->modalWidth('5xl')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Tutup')
@@ -110,10 +110,10 @@ class CetakLaporanResource extends Resource
                             ->label('Download PDF')
                             ->color('info')
                             ->icon('heroicon-m-document-arrow-down')
-                            ->url(fn (Sekolah $record) => route('cetak-laporan.pdf', $record))
+                            ->url(fn(Sekolah $record) => route('cetak-laporan.pdf', $record))
                             ->openUrlInNewTab(),
                     ])
-                    ->modalContent(fn (Sekolah $record) => view('livewire.report-preview-container', ['schoolId' => $record->id])),
+                    ->modalContent(fn(Sekolah $record) => view('livewire.report-preview-container', ['schoolId' => $record->id])),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 
 class DinasSarprasChart extends ChartWidget

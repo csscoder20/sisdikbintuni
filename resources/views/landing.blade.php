@@ -113,7 +113,7 @@
             <div class="flex justify-center gap-4">
                 <a target="_blank" href="/login"
                     class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
-                    <i class="fas fa-sign-in-alt mr-2"></i> LOGIN OPERATOR
+                    <i class="fas fa-sign-in-alt mr-2"></i> MASUK
                 </a>
             </div>
         </div>

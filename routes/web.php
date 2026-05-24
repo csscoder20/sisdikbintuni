@@ -160,3 +160,4 @@ Route::get('/stop-impersonating', function () {
 })->name('stop-impersonating');
 
 Route::get('/cetak-laporan/{sekolah}/pdf', [\App\Http\Controllers\CetakLaporanController::class, 'downloadPdf'])->name('cetak-laporan.pdf')->middleware('auth');
+Route::post('/activity-log/access-location', [\App\Http\Controllers\ActivityLogAccessLocationController::class, 'store'])->name('activity-log.access-location')->middleware('auth');

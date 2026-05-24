@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 
 class DinasSiswaDaerahChart extends ChartWidget
@@ -17,7 +16,7 @@ class DinasSiswaDaerahChart extends ChartWidget
         $data = DB::table('sekolah')
             ->leftJoin('siswa', function ($join) {
                 $join->on('sekolah.id', '=', 'siswa.sekolah_id')
-                     ->whereNull('siswa.deleted_at');
+                    ->whereNull('siswa.deleted_at');
             })
             ->select(
                 'sekolah.nama as sekolah_nama',

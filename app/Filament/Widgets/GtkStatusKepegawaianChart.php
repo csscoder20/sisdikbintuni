@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Gtk;
-use Filament\Widgets\ChartWidget;
 
 class GtkStatusKepegawaianChart extends ChartWidget
 {
@@ -13,7 +12,7 @@ class GtkStatusKepegawaianChart extends ChartWidget
     protected function getData(): array
     {
         $statuses = ['PNS', 'CPNS', 'PPPK', 'GTY/PTY', 'Kontrak', 'Honorer Sekolah'];
-        
+
         $guruData = [];
         $tendikData = [];
 

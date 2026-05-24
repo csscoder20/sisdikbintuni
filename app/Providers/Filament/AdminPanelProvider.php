@@ -19,6 +19,10 @@ use App\Filament\Pages\SuperAdminDashboard;
 use App\Filament\Pages\SekolahPage;
 use App\Filament\Pages\CetakCustom;
 use App\Filament\Pages\RiwayatLaporan;
+use App\Filament\Pages\KeadaanGtk;
+use App\Filament\Pages\KeadaanSiswa;
+use App\Filament\Pages\ValidasiData;
+use App\Filament\Pages\CustomProfile;
 use App\Filament\Resources\CetakLaporan\CetakLaporanResource;
 use Filament\Facades\Filament;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -33,9 +37,7 @@ use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Auth\CustomRegister;
 use App\Filament\Pages\Auth\CustomRequestPasswordReset;
 use App\Filament\Pages\Auth\CustomResetPassword;
-use App\Filament\Pages\KeadaanGtk;
-use App\Filament\Pages\KeadaanSiswa;
-use App\Filament\Pages\CustomProfile;
+use App\Filament\Pages\HelpGuide;
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
 use App\Filament\Resources\Gtks\GtkResource;
@@ -73,10 +75,6 @@ class AdminPanelProvider extends PanelProvider
                         </div>
                     </div>
                 ')
-
-
-
-
                 : new \Illuminate\Support\HtmlString('
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
@@ -97,7 +95,7 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()
                     ->label('Pengaturan Akun')
-                    ->url(fn () => CustomProfile::getUrl())
+                    ->url(fn() => CustomProfile::getUrl())
                     ->icon('heroicon-o-user-circle'),
                 MenuItem::make()
                     ->label('Kunjungi Web')
@@ -125,6 +123,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Resources\GtkJamAjars\GtkJamAjarResource::class,
                 \App\Filament\Resources\KehadiranGtk\KehadiranGtkResource::class,
                 \App\Filament\Resources\CetakLaporan\CetakLaporanResource::class,
+                \App\Filament\Resources\ActivityLog\ActivityLogResource::class,
             ])
             ->pages([
                 SuperAdminDashboard::class,
@@ -133,12 +132,15 @@ class AdminPanelProvider extends PanelProvider
                 CetakCustom::class,
                 CustomProfile::class,
                 RiwayatLaporan::class,
+                \App\Filament\Pages\ValidasiData::class,
+                HelpGuide::class,
             ])
             ->navigationGroups([
                 'Data Sekolah',
                 'Data Siswa',
                 'Data GTK',
                 'Data Master',
+                'Validasi/Verifikasi',
                 'Cetak',
                 'Sistem',
             ])
@@ -162,10 +164,34 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+
+            // 1. SCHOOL SELECTOR (paling kiri setelah breadcrumbs)
             ->renderHook(
                 'panels::global-search.before',
                 fn(): string => \Illuminate\Support\Facades\Blade::render('<livewire:school-selector />'),
             )
+
+            // 2. HELP GUIDE (di antara school selector dan notifikasi)
+            ->renderHook(
+                'panels::global-search.after',
+                fn(): string => \Illuminate\Support\Facades\Blade::render('
+                    <div class="flex items-center gap-x-2">
+                        <a href="' . HelpGuide::getUrl() . '"
+                            class="flex items-center justify-center rounded-full w-9 h-9 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition"
+                            title="Panduan Penggunaan">
+                            <x-filament::icon
+                                icon="heroicon-o-question-mark-circle"
+                                class="w-6 h-6 text-gray-400 dark:text-gray-400" />
+                        </a>
+                    </div>
+                ')
+            )
+
+            ->renderHook(
+                'panels::user-menu.before',
+                fn(): string => self::renderTopbarUserName()
+            )
+
             ->renderHook(
                 'panels::auth.login.form.after',
                 fn(): string => filament()->hasRegistration()
@@ -188,6 +214,7 @@ class AdminPanelProvider extends PanelProvider
                         </a>
                    </p>'
             )
+
             ->renderHook(
                 'panels::head.done',
                 fn(): string =>
@@ -222,6 +249,165 @@ class AdminPanelProvider extends PanelProvider
             });
     }
 
+    protected static function renderTopbarUserName(): string
+    {
+        if (!auth()->check()) {
+            return '';
+        }
+
+        $user = auth()->user();
+        $avatarUrl = $user->avatar_url ?? $user->profile_photo_url ?? null;
+
+        return \Illuminate\Support\Facades\Blade::render('
+        <style>
+            /* Reset user menu trigger styling */
+            .fi-topbar .fi-user-menu-trigger {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.75rem !important;
+                padding: 5px !important;
+                background: transparent !important;
+                border-radius: 40px !important;
+                border: 1px solid #e2e8f0 !important;
+                transition: all 0.2s ease !important;
+            }
+            
+            .fi-topbar .fi-user-menu-trigger:hover {
+                background: #f8fafc !important;
+                border-color: #cbd5e1 !important;
+            }
+            
+            /* Avatar styling */
+            .fi-topbar .fi-user-menu-trigger .fi-avatar,
+            .fi-topbar .fi-user-menu-trigger .fi-user-avatar {
+                width: 30px !important;
+                height: 30px !important;
+                border-radius: 50% !important;
+                overflow: hidden !important;
+                flex-shrink: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Avatar fallback text */
+            .fi-topbar .fi-user-menu-trigger .fi-avatar span,
+            .fi-topbar .fi-user-menu-trigger .fi-user-avatar span {
+                font-size: 14px !important;
+                font-weight: 600 !important;
+                color: white !important;
+            }
+            
+            /* Avatar image */
+            .fi-topbar .fi-user-menu-trigger .fi-avatar img,
+            .fi-topbar .fi-user-menu-trigger .fi-user-avatar img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+            }
+            
+            /* Name wrapper */
+            .custom-topbar-user-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+                margin-left: 5px !important;
+            }
+            
+            /* User name */
+            .custom-topbar-user-name {
+                font-size: 0.875rem;
+                font-weight: 600;
+                line-height: 1.2;
+                color: #1e293b;
+                white-space: nowrap;
+            }
+            
+            /* User role */
+            .custom-topbar-user-role {
+                font-size: 0.7rem;
+                font-weight: 500;
+                line-height: 1.2;
+                color: #64748b;
+                white-space: nowrap;
+            }
+            
+            /* Hide original user menu text */
+            .fi-topbar .fi-user-menu-trigger .fi-user-menu-trigger-text {
+                display: none !important;
+            }
+            
+            /* Dark mode styles */
+            .dark .fi-topbar .fi-user-menu-trigger {
+                border-color: #334155 !important;
+            }
+            
+            .dark .fi-topbar .fi-user-menu-trigger:hover {
+                background: #1e293b !important;
+                border-color: #475569 !important;
+            }
+            
+            .dark .custom-topbar-user-name {
+                color: #f1f5f9 !important;
+            }
+            
+            .dark .custom-topbar-user-role {
+                color: #94a3b8 !important;
+            }
+        </style>
+
+        <div class="custom-topbar-user-wrapper">
+            <span class="custom-topbar-user-name">{{ $name }}</span>
+            <span class="custom-topbar-user-role">{{ $role }}</span>
+        </div>
+    ', [
+            'name' => self::getTopbarDisplayName(),
+            'role' => self::getUserRole(),
+            'avatarUrl' => $avatarUrl,
+        ]);
+    }
+
+    protected static function getUserRole(): string
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('super_admin')) {
+            return 'Super Administrator';
+        }
+
+        if ($user->hasRole('admin_dinas')) {
+            return 'Admin Dinas';
+        }
+
+        if ($user->hasRole('operator_sekolah')) {
+            return 'Operator Sekolah';
+        }
+
+        return $user->roles->first()?->name ?? 'User';
+    }
+
+    protected static function getTopbarDisplayName(): string
+    {
+        $user = auth()->user();
+
+        // Try to get full name from user
+        $name = trim((string) ($user->name ?? ''));
+
+        // If name is empty, try to get from sekolah or username
+        if (empty($name)) {
+            $name = trim((string) ($user->username ?? ''));
+        }
+
+        if (empty($name)) {
+            $name = trim((string) ($user->email ?? 'User'));
+        }
+
+        // Limit to 2-3 words for better display
+        $parts = preg_split('/\s+/', $name) ?: [];
+        return implode(' ', array_slice(array_filter($parts), 0, 2));
+    }
+
     public function register(): void
     {
         parent::register();
@@ -253,7 +439,7 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()
                     ->label('Pengaturan Akun')
-                    ->url(fn () => auth()->check() && auth()->user()->sekolah
+                    ->url(fn() => auth()->check() && auth()->user()->sekolah
                         ? CustomProfile::getUrl(tenant: auth()->user()->sekolah)
                         : '#')
                     ->icon('heroicon-o-user-circle'),
@@ -277,10 +463,6 @@ class AdminPanelProvider extends PanelProvider
                         </div>
                     </div>
                 ')
-
-
-
-
                 : new \Illuminate\Support\HtmlString('
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
@@ -324,12 +506,35 @@ class AdminPanelProvider extends PanelProvider
                 KeadaanSiswa::class,
                 \App\Filament\Pages\ValidasiData::class,
                 CustomProfile::class,
+                HelpGuide::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+
+            // HELP GUIDE untuk panel sekolah (di antara breadcrumbs dan notifikasi)
+            ->renderHook(
+                'panels::global-search.after',
+                fn(): string => \Illuminate\Support\Facades\Blade::render('
+                    <div class="flex items-center gap-x-2">
+                        <a href="' . HelpGuide::getUrl() . '"
+                            class="flex items-center justify-center rounded-full w-9 h-9 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition"
+                            title="Panduan Penggunaan">
+                            <x-filament::icon
+                                icon="heroicon-o-question-mark-circle"
+                                class="w-6 h-6 text-gray-400 dark:text-gray-400" />
+                        </a>
+                    </div>
+                ')
+            )
+
+            ->renderHook(
+                'panels::user-menu.before',
+                fn(): string => \App\Providers\Filament\AdminPanelProvider::renderTopbarUserName()
+            )
+
             ->renderHook(
                 'panels::head.done',
                 fn(): string =>
@@ -359,7 +564,7 @@ class AdminPanelProvider extends PanelProvider
             })
 
             ->renderHook('panels::body.end', function () {
-                return self::renderGlobalOperationLoader() . <<<'HTML'
+                return \App\Providers\Filament\AdminPanelProvider::renderGlobalOperationLoader() . <<<'HTML'
                     <style>
                         .fi-sidebar-nav::-webkit-scrollbar {
                             display: none;

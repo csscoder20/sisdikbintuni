@@ -27,20 +27,21 @@ class ActivityLogResource extends Resource
     protected static ?string $model = ActivityLog::class;
 
     protected static ?string $modelLabel = 'Log Aktivitas';
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $pluralModelLabel = 'Log Aktivitas';
 
     protected static string | \UnitEnum | null $navigationGroup = 'Sistem';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedListBullet;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::ClipboardDocumentList;
 
     protected static ?string $recordTitleAttribute = 'description';
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && 
-               auth()->user()->isSuperAdmin() && 
-               filament()->getCurrentPanel()?->getId() === 'dinas';
+        return auth()->check() &&
+            (auth()->user()->isSuperAdmin() || auth()->user()->hasRole('admin_dinas')) &&
+            filament()->getCurrentPanel()?->getId() === 'dinas';
     }
 
 

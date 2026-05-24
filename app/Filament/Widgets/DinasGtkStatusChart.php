@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 
 class DinasGtkStatusChart extends ChartWidget
@@ -17,7 +16,7 @@ class DinasGtkStatusChart extends ChartWidget
         $data = DB::table('sekolah')
             ->leftJoin('gtk', function ($join) {
                 $join->on('sekolah.id', '=', 'gtk.sekolah_id')
-                     ->whereNull('gtk.deleted_at');
+                    ->whereNull('gtk.deleted_at');
             })
             ->select(
                 'sekolah.nama as sekolah_nama',
@@ -39,32 +38,32 @@ class DinasGtkStatusChart extends ChartWidget
                 [
                     'label' => 'PNS',
                     'data' => $data->pluck('pns')->toArray(),
-                    'backgroundColor' => '#3B82F6', 
+                    'backgroundColor' => '#3B82F6',
                 ],
                 [
                     'label' => 'CPNS',
                     'data' => $data->pluck('cpns')->toArray(),
-                    'backgroundColor' => '#10B981', 
+                    'backgroundColor' => '#10B981',
                 ],
                 [
                     'label' => 'PPPK',
                     'data' => $data->pluck('pppk')->toArray(),
-                    'backgroundColor' => '#F59E0B', 
+                    'backgroundColor' => '#F59E0B',
                 ],
                 [
                     'label' => 'GTY/PTY',
                     'data' => $data->pluck('gty_pty')->toArray(),
-                    'backgroundColor' => '#EF4444', 
+                    'backgroundColor' => '#EF4444',
                 ],
                 [
                     'label' => 'Kontrak',
                     'data' => $data->pluck('kontrak')->toArray(),
-                    'backgroundColor' => '#8B5CF6', 
+                    'backgroundColor' => '#8B5CF6',
                 ],
                 [
                     'label' => 'Honorer Sekolah',
                     'data' => $data->pluck('honorer')->toArray(),
-                    'backgroundColor' => '#64748B', 
+                    'backgroundColor' => '#64748B',
                 ],
             ],
             'labels' => $data->pluck('sekolah_nama')->map(fn($nama) => strtoupper($nama))->toArray(),

@@ -31,6 +31,7 @@ class UserResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     protected static ?string $recordTitleAttribute = 'name';
+    protected static ?int $navigationSort = 1;
 
     public static function getEloquentQuery(): Builder
     {
@@ -50,9 +51,9 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && 
-               !auth()->user()->hasRole('operator') && 
-               filament()->getCurrentPanel()?->getId() === 'dinas';
+        return auth()->check() &&
+            !auth()->user()->hasRole('operator') &&
+            filament()->getCurrentPanel()?->getId() === 'dinas';
     }
 
 
@@ -74,11 +75,11 @@ class UserResource extends Resource
                         TextEntry::make('nohp')->label('Nomor WA')->placeholder('-'),
                         TextEntry::make('roles_ringkas')
                             ->label('Peran')
-                            ->state(fn (User $record): ?string => $record->roles->pluck('name')->implode(', ') ?: null)
+                            ->state(fn(User $record): ?string => $record->roles->pluck('name')->implode(', ') ?: null)
                             ->placeholder('-'),
                         TextEntry::make('status')
                             ->label('Status')
-                            ->formatStateUsing(fn (?string $state): string => match ($state) {
+                            ->formatStateUsing(fn(?string $state): string => match ($state) {
                                 'active' => 'Aktif',
                                 'pending' => 'Menunggu Verifikasi',
                                 'rejected' => 'Tidak Aktif',

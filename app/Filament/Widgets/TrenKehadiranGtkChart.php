@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\KehadiranGtk;
 use App\Models\Laporan;
-use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
 class TrenKehadiranGtkChart extends ChartWidget
@@ -24,13 +23,13 @@ class TrenKehadiranGtkChart extends ChartWidget
             $year = (int) $date->format('Y');
 
             $laporanIds = Laporan::where('bulan', $month)->where('tahun', $year)->pluck('id');
-            
+
             if ($laporanIds->isEmpty()) {
                 $avg = 0;
             } else {
                 $totalHadir = KehadiranGtk::whereIn('laporan_id', $laporanIds)->sum('hadir');
                 $totalHariKerja = KehadiranGtk::whereIn('laporan_id', $laporanIds)->sum('hari_kerja');
-                
+
                 $avg = $totalHariKerja > 0 ? ($totalHadir / $totalHariKerja) * 100 : 0;
             }
 

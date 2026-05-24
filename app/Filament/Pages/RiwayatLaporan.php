@@ -1,22 +1,25 @@
 <?php
- 
+
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use App\Models\Sekolah;
 use App\Models\Laporan;
 use Livewire\WithPagination;
+use Filament\Support\Icons\Heroicon;
+
 
 class RiwayatLaporan extends Page
 {
+
     use WithPagination;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clock';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::Printer;
 
     protected string $view = 'filament.pages.riwayat-laporan';
 
-    protected static ?string $navigationLabel = 'Riwayat Laporan';
+    protected static ?string $navigationLabel = 'Cetak Laporan Bulanan';
 
-    protected static ?string $title = 'Riwayat Laporan Bulanan';
+    protected static ?string $title = 'Cetak Laporan Bulanan';
 
     protected static ?int $navigationSort = 3;
 
@@ -43,7 +46,7 @@ class RiwayatLaporan extends Page
     {
         $currentMonth = (int) date('m');
         $currentYear = (int) date('Y');
-        
+
         if ($currentMonth >= 7) {
             $this->tahunAjaran = $currentYear . '/' . ($currentYear + 1);
         } else {
@@ -70,11 +73,11 @@ class RiwayatLaporan extends Page
         if (empty($this->tahunAjaran) || !str_contains($this->tahunAjaran, '/')) {
             return [];
         }
-        
+
         [$year1, $year2] = explode('/', $this->tahunAjaran);
         $year1 = (int) $year1;
         $year2 = (int) $year2;
-        
+
         return [
             ['month' => 7, 'year' => $year1, 'label' => 'JULI ' . $year1],
             ['month' => 8, 'year' => $year1, 'label' => 'AGUSTUS ' . $year1],
@@ -109,7 +112,7 @@ class RiwayatLaporan extends Page
             $searchTerm = '%' . strtolower($this->search) . '%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->whereRaw('LOWER(nama) LIKE ?', [$searchTerm])
-                  ->orWhereRaw('LOWER(npsn) LIKE ?', [$searchTerm]);
+                    ->orWhereRaw('LOWER(npsn) LIKE ?', [$searchTerm]);
             });
         }
 
@@ -122,20 +125,20 @@ class RiwayatLaporan extends Page
         if (empty($this->tahunAjaran) || !str_contains($this->tahunAjaran, '/')) {
             return [];
         }
-        
+
         [$year1, $year2] = explode('/', $this->tahunAjaran);
         $year1 = (int) $year1;
         $year2 = (int) $year2;
-        
+
         $laporans = Laporan::whereIn('tahun', [$year1, $year2])
             ->get();
-            
+
         $grouped = [];
         foreach ($laporans as $laporan) {
             $key = "{$laporan->sekolah_id}_{$laporan->tahun}_{$laporan->bulan}";
             $grouped[$key] = $laporan;
         }
-        
+
         return $grouped;
     }
 }

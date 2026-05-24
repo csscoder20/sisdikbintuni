@@ -20,11 +20,11 @@ class NotifikasiResource extends Resource
 
     protected static ?string $slug = 'notifikasi';
 
-    protected static ?string $modelLabel = 'Notifikasi';
+    protected static ?string $modelLabel = 'Pemberitahuan';
 
-    protected static ?string $pluralModelLabel = 'Notifikasi';
+    protected static ?string $pluralModelLabel = 'Pemberitahuan';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static string | \UnitEnum | null $navigationGroup = 'Sistem';
 
@@ -32,7 +32,7 @@ class NotifikasiResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Megaphone;
 
-        public static function getEloquentQuery(): Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
@@ -52,9 +52,9 @@ class NotifikasiResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && 
-               !auth()->user()->hasRole('operator') && 
-               filament()->getCurrentPanel()?->getId() === 'dinas';
+        return auth()->check() &&
+            !auth()->user()->hasRole('operator') &&
+            filament()->getCurrentPanel()?->getId() === 'dinas';
     }
 
 
