@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Gtk;
 use App\Models\GtkKehadiran;
 use App\Models\KehadiranGtk;
+use App\Support\ValidationPeriod;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Carbon;
@@ -19,6 +20,20 @@ class KehadiranGtkGrid extends Component
     public $days = [];
     public $attendanceData = []; // [gtk_id][day] => value (H, I, S, A)
     public $perPage = 10;
+
+    public function isValidationPeriodLocked(): bool
+    {
+        return ValidationPeriod::isLockedForOperatorPanel();
+    }
+
+    protected function notifyValidationPeriodLocked(): void
+    {
+        Notification::make()
+            ->title('Data tidak dapat disimpan.')
+            ->body('Periode validasi sedang ditutup oleh Admin Dinas.')
+            ->danger()
+            ->send();
+    }
 
     public function mount()
     {
@@ -84,6 +99,11 @@ class KehadiranGtkGrid extends Component
 
     public function toggleHoliday($day)
     {
+        if ($this->isValidationPeriodLocked()) {
+            $this->notifyValidationPeriodLocked();
+            return;
+        }
+
         // Reuse existing setHoliday logic (which was removed). Implement toggle behavior here.
         $date = Carbon::create($this->tahun, $this->bulan, $day);
         if ($date->isSunday()) return;
@@ -124,6 +144,11 @@ class KehadiranGtkGrid extends Component
 
     public function updateAttendance($gtkId, $day, $value)
     {
+        if ($this->isValidationPeriodLocked()) {
+            $this->notifyValidationPeriodLocked();
+            return;
+        }
+
         $value = strtoupper(trim($value));
         if (!in_array($value, ['H', 'I', 'S', 'A', 'L'])) {
             $value = null;
@@ -215,6 +240,7 @@ class KehadiranGtkGrid extends Component
 
         return view('livewire.kehadiran-gtk-grid', [
             'gtks' => $gtks,
+            'locked' => $this->isValidationPeriodLocked(),
         ]);
     }
 }

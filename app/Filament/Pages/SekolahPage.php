@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Sekolah;
+use App\Support\ValidationPeriod;
 use App\Models\WilayahKabBintuni;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -410,6 +411,15 @@ class SekolahPage extends Page implements HasSchemas
 
     public function save(): void
     {
+        if (ValidationPeriod::isLockedForOperatorPanel()) {
+            Notification::make()
+                ->title('Periode validasi sedang ditutup.')
+                ->body(ValidationPeriod::lockMessage())
+                ->danger()
+                ->send();
+            return;
+        }
+
         $sekolah = $this->getSekolah();
 
         if (! $sekolah) {

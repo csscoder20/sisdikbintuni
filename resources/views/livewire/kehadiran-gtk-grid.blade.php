@@ -1,5 +1,21 @@
-<div x-data="{}" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;">
+<div
+    x-data="{
+        lockedAlert() {
+            Swal.fire({
+                title: 'Data tidak dapat disimpan',
+                text: 'Periode validasi sedang ditutup oleh Admin Dinas.',
+                icon: 'warning',
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Mengerti'
+            })
+        }
+    }"
+    style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;"
+>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @php
+        $locked = $locked ?? false;
+    @endphp
 
     <style>
         .grid-header {
@@ -146,6 +162,23 @@
             cursor: not-allowed;
             color: white;
             font-weight: bold;
+        }
+        .att-input[readonly] {
+            cursor: not-allowed;
+            opacity: .75;
+        }
+        .locked-notice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            background: #fef2f2;
+            color: #991b1b;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
         .total-col {
             width: 60px;
@@ -337,6 +370,13 @@
         </div>
     </div>
 
+    @if($locked)
+        <div class="locked-notice">
+            <x-filament::icon icon="heroicon-o-no-symbol" style="width: 18px; height: 18px; flex: none;" />
+            <span>Periode validasi sedang ditutup. Pengisian kehadiran GTK sementara tidak dapat disimpan.</span>
+        </div>
+    @endif
+
     <div class="table-wrapper">
         <table class="att-table">
             <thead>
@@ -359,7 +399,7 @@
                                 @endphp
                                 <button 
                                     type="button"
-                                    x-on:click="
+                                    x-on:click="@if($locked) lockedAlert() @else
                                         Swal.fire({
                                             title: '{{ $isHoliday ? 'Hapus Libur Massal?' : 'Tandai Libur Massal?' }}',
                                             text: '{{ $isHoliday ? 'Status Libur (L) akan dihapus dari semua GTK pada tanggal ini.' : 'Semua GTK akan ditandai Libur (L) pada tanggal ini.' }}',
@@ -375,7 +415,7 @@
                                                 $wire.toggleHoliday({{ $d['day'] }})
                                             }
                                         })
-                                    "
+                                    @endif"
                                     class="btn-set-holiday"
                                     title="{{ $isHoliday ? 'Hapus Libur Massal' : 'Set Libur Massal' }}"
                                     style="{{ $isHoliday ? 'color: #ef4444;' : '' }}"
@@ -425,8 +465,14 @@
                                     maxlength="1"
                                     wire:key="att-{{ $gtk->id }}-{{ $d['day'] }}"
                                     @if($d['is_sunday']) disabled placeholder=" " @endif
+                                    @if($locked && !$d['is_sunday']) readonly @endif
                                     oninput="this.value = this.value.toUpperCase().replace(/[^HISAL]/g, '')"
-                                    onchange="@this.updateAttendance({{ $gtk->id }}, {{ $d['day'] }}, this.value)"
+                                    @if($locked)
+                                        x-on:click="lockedAlert()"
+                                        x-on:keydown.prevent="lockedAlert()"
+                                    @else
+                                        onchange="@this.updateAttendance({{ $gtk->id }}, {{ $d['day'] }}, this.value)"
+                                    @endif
                                 >
                             </td>
                         @endforeach
@@ -530,7 +576,9 @@
         </div>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span style="font-style: italic;">Data tersimpan otomatis saat Anda mengisi kode kehadiran.</span>
+            <span style="font-style: italic;">
+                {{ $locked ? 'Data tidak dapat disimpan karena periode validasi sedang ditutup.' : 'Data tersimpan otomatis saat Anda mengisi kode kehadiran.' }}
+            </span>
         </div>
     </div>
 </div>

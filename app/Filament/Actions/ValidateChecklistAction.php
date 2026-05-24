@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Support\ValidationPeriod;
 
 class ValidateChecklistAction
 {
@@ -55,13 +56,13 @@ class ValidateChecklistAction
             ->label(fn($livewire) => $statusResolver($livewire) ? 'Valid' : 'Validasi')
             ->icon(fn($livewire) => $statusResolver($livewire) ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle')
             ->color(fn($livewire) => $statusResolver($livewire) ? 'gray' : 'warning')
-            ->disabled(fn($livewire) => $statusResolver($livewire))
+            ->disabled(fn($livewire) => ValidationPeriod::isLockedForOperatorPanel() || $statusResolver($livewire))
             ->requiresConfirmation(function ($livewire) use ($type, $hasDataChecker, $statusResolver) {
                 $hasData = $hasDataChecker ? app()->call($hasDataChecker) : true;
                 return $hasData && ! $statusResolver($livewire);
             })
             ->extraAttributes(fn($livewire) => [
-                'style' => ($statusResolver)($livewire) ? 'cursor: not-allowed !important;' : '',
+                'style' => (ValidationPeriod::isLockedForOperatorPanel() || ($statusResolver)($livewire)) ? 'cursor: not-allowed !important;' : '',
                 'title' => ($statusResolver)($livewire) ? 'Data ini sudah divalidasi' : '',
                 'id' => "btn-validate-{$name}",
                 'wire:loading.attr' => 'data-dummy',
@@ -76,6 +77,16 @@ class ValidateChecklistAction
                 return $hasData ? 'Apakah Anda yakin seluruh data sudah benar? Tindakan ini tidak dapat dibatalkan.' : '';
             })
             ->action(function (Action $action) use ($type, $hasDataChecker, $missingDataTitle, $missingDataBody) {
+                if (ValidationPeriod::isLockedForOperatorPanel()) {
+                    Notification::make()
+                        ->title('Periode validasi sedang ditutup.')
+                        ->body(ValidationPeriod::lockMessage())
+                        ->danger()
+                        ->send();
+
+                    $action->halt();
+                }
+
                 if ($hasDataChecker && !app()->call($hasDataChecker)) {
                     Notification::make()
                         ->title($missingDataTitle)

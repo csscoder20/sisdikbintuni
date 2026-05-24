@@ -58,20 +58,24 @@
 .fi-pagination { padding: 15px 0; }
 .badge-valid{background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:999px;font-size:0.875rem;font-weight:600;}
 .badge-invalid{background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:999px;font-size:0.875rem;font-weight:600;}
+.vd-locked .alert-err a,
+.vd-locked .alert-warn a{display:none;}
 </style>
 
 
-<div class="vd">
 @php
     $cur      = $this->currentStep;
     $total    = $this->totalSteps;
     $labels   = $this->getStepLabels();
     $statuses = $this->stepStatuses;
+    $locked   = $this->isValidationPeriodLocked();
     $isValid  = $statuses[$cur] ?? false;
     $allValid = collect($statuses)->every(fn($s) => $s);
     $icons  = [1=>'🏫',2=>'🏗️',3=>'📚',4=>'👥',5=>'💰',6=>'👧',7=>'👨‍🏫',8=>'🎓',9=>'💳',10=>'⏰',11=>'📋'];
     $colors = [1=>'#dbeafe',2=>'#fef3c7',3=>'#ede9fe',4=>'#f3e8ff',5=>'#dcfce7',6=>'#fce7f3',7=>'#fee2e2',8=>'#ffedd5',9=>'#e0e7ff',10=>'#ccfbf1',11=>'#e0f2fe'];
 @endphp
+
+<div class="vd {{ $locked ? 'vd-locked' : '' }}">
 
 {{-- Top: stepper --}}
 <div class="vd-top">
@@ -769,12 +773,17 @@
                 "Data yang saya masukkan sudah benar dan data akan direkam sebagai laporan resmi<br>periode bulan {{ \Carbon\Carbon::now()->translatedFormat('F') }} tahun {{ \Carbon\Carbon::now()->translatedFormat('Y') }}."
             </p>
             
-            <p style="font-size: 0.85rem; color: #64748b;">Klik tombol <b>Selesai & Simpan Validasi</b> di bawah jika Anda setuju.</p>
+            @if($locked)
+                <p style="font-size: 0.85rem; color: #991b1b; font-weight: 600;">Periode validasi sedang ditutup oleh Admin Dinas.</p>
+            @else
+                <p style="font-size: 0.85rem; color: #64748b;">Klik tombol <b>Selesai & Simpan Validasi</b> di bawah jika Anda setuju.</p>
+            @endif
         </div>
     @endif
 
     </div>{{-- end vd-cb --}}
 
+    @unless($locked)
     {{-- Footer actions --}}
     <div class="vd-footer">
         <button wire:click="prevStep" class="btn btn-back" {{ $cur <= 1 ? 'disabled' : '' }}>← Kembali</button>
@@ -794,6 +803,7 @@
             @endif
         @endif
     </div>
+    @endunless
 
 </div>{{-- end vd-card --}}
 </div>{{-- end vd --}}

@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
 use Filament\Actions\Imports\Importer;
 use Illuminate\Support\Str;
+use App\Support\ValidationPeriod;
 
 class ExcelImportAction extends Action
 {
@@ -52,6 +53,16 @@ class ExcelImportAction extends Action
                 'x-transition' => '',
             ]))
             ->action(function (array $data) {
+                if (ValidationPeriod::isLockedForOperatorPanel()) {
+                    Notification::make()
+                        ->title('Periode validasi sedang ditutup.')
+                        ->body(ValidationPeriod::lockMessage())
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
                 $filePath = storage_path('app/private/' . $data['file']);
                 // Dispatch the import job to the queue for asynchronous processing
                 ImportExcelJob::dispatch($filePath, $this->importerClass);

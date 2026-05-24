@@ -13,6 +13,7 @@ use App\Models\Mengajar;
 use App\Models\Rombel;
 use App\Models\Sekolah;
 use App\Models\Siswa;
+use App\Support\ValidationPeriod;
 use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
 use Filament\Facades\Filament;
@@ -464,6 +465,15 @@ class ValidasiData extends Page
     /* ------------------------------------------------------------------ */
     public function submitValidasi(): void
     {
+        if (ValidationPeriod::isLockedForOperatorPanel()) {
+            Notification::make()
+                ->title('Periode validasi sedang ditutup.')
+                ->body(ValidationPeriod::lockMessage())
+                ->danger()
+                ->send();
+            return;
+        }
+
         if ($this->isSubmitted) return;
 
         $this->computeStatuses();
@@ -485,6 +495,15 @@ class ValidasiData extends Page
 
     public function forceSubmit(): void
     {
+        if (ValidationPeriod::isLockedForOperatorPanel()) {
+            Notification::make()
+                ->title('Periode validasi sedang ditutup.')
+                ->body(ValidationPeriod::lockMessage())
+                ->danger()
+                ->send();
+            return;
+        }
+
         if (!in_array($this->currentStep, $this->bypassedSteps)) {
             $this->bypassedSteps[] = $this->currentStep;
         }
@@ -922,6 +941,11 @@ class ValidasiData extends Page
     public function getTitle(): string|Htmlable
     {
         return 'Validasi Data — ' . $this->getCurrentPeriod();
+    }
+
+    public function isValidationPeriodLocked(): bool
+    {
+        return ValidationPeriod::isLockedForOperatorPanel();
     }
 
     protected function getHeaderActions(): array

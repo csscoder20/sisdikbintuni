@@ -171,6 +171,11 @@ class AdminPanelProvider extends PanelProvider
                 fn(): string => \Illuminate\Support\Facades\Blade::render('<livewire:school-selector />'),
             )
 
+            ->renderHook(
+                'panels::global-search.after',
+                fn(): string => \Illuminate\Support\Facades\Blade::render('<livewire:validation-period-toggle />'),
+            )
+
             // 2. HELP GUIDE (di antara school selector dan notifikasi)
             ->renderHook(
                 'panels::global-search.after',
@@ -308,11 +313,17 @@ class AdminPanelProvider extends PanelProvider
             
             /* Name wrapper */
             .custom-topbar-user-wrapper {
-                display: flex;
+                display: none;
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 2px;
                 margin-left: 5px !important;
+            }
+
+            @media (min-width: 768px) {
+                .custom-topbar-user-wrapper {
+                    display: flex;
+                }
             }
             
             /* User name */
@@ -547,12 +558,14 @@ class AdminPanelProvider extends PanelProvider
                     (request()->routeIs('filament.*.auth.*') ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '')
             )
             ->renderHook('panels::body.start', function () {
+                $content = \App\Providers\Filament\AdminPanelProvider::renderValidationPeriodClosedNotice();
+
                 if (!session()->has('impersonating_sekolah_id')) {
-                    return '';
+                    return $content;
                 }
                 $sekolah = \App\Models\Sekolah::find(session('impersonating_sekolah_id'));
                 $namaSekolah = $sekolah?->nama ?? 'Sekolah';
-                return \Illuminate\Support\Facades\Blade::render('
+                return $content . \Illuminate\Support\Facades\Blade::render('
                     <div style="background-color: transparent; color: #ea580c; padding: 8px 12px; text-align: center; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 40; box-shadow: none; width: 100%; pointer-events: none;">
                         <span style="display: flex; align-items: center; gap: 8px;">
                             <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -601,6 +614,40 @@ class AdminPanelProvider extends PanelProvider
                     </style>
                 HTML;
             });
+    }
+
+    public static function renderValidationPeriodClosedNotice(): string
+    {
+        if (! \App\Support\ValidationPeriod::isLockedForOperatorPanel()) {
+            return '';
+        }
+
+        return \Illuminate\Support\Facades\Blade::render('
+            <style>
+                [data-validation-period-notice] {
+                    z-index: 10;
+                }
+
+                .fi-dropdown-panel {
+                    z-index: 80 !important;
+                }
+            </style>
+            <div data-validation-period-notice style="position: sticky; top: 0; width: 100%; padding: 8px 44px 8px 16px; background: #fef2f2; border-bottom: 1px solid #fecaca; color: #991b1b;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; line-height: 1.25rem; text-align: center;">
+                    <x-filament::icon icon="heroicon-o-no-symbol" style="width: 18px; height: 18px; flex: none;" />
+                    <span>Periode validasi sudah ditutup oleh Admin Dinas. Aksi tambah, edit, hapus, upload, dan validasi sementara tidak dapat dilakukan di sisi Operator.</span>
+                </div>
+                <button
+                    type="button"
+                    aria-label="Tutup pemberitahuan"
+                    title="Tutup"
+                    onclick="this.closest(\'[data-validation-period-notice]\').remove();"
+                    style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 9999px; background: transparent; color: #991b1b; cursor: pointer;"
+                >
+                    <x-filament::icon icon="heroicon-o-x-mark" style="width: 18px; height: 18px;" />
+                </button>
+            </div>
+        ');
     }
 
     protected static function renderGlobalOperationLoader(): string
