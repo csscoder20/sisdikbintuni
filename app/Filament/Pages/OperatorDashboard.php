@@ -20,6 +20,9 @@ class OperatorDashboard extends BaseDashboard
     public int $laporanCurrentPage = 1;
     public int $laporanPerPage = 5;
 
+    public int $activityLogCurrentPage = 1;
+    public int $activityLogPerPage = 5;
+
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->hasRole(['operator', 'super_admin', 'admin_dinas']);
@@ -74,11 +77,49 @@ class OperatorDashboard extends BaseDashboard
 
     public function getOperatorActivityLogs()
     {
-        return ActivityLog::query()
+        $allLogs = ActivityLog::query()
             ->where('user_id', Auth::id())
             ->latest('created_at')
-            ->limit(5)
             ->get();
+
+        $skip = ($this->activityLogCurrentPage - 1) * $this->activityLogPerPage;
+        return $allLogs->slice($skip, $this->activityLogPerPage);
+    }
+
+    public function getActivityLogTotal()
+    {
+        return ActivityLog::query()
+            ->where('user_id', Auth::id())
+            ->count();
+    }
+
+    public function getActivityLogLastPage()
+    {
+        $total = $this->getActivityLogTotal();
+        return (int) ceil($total / $this->activityLogPerPage);
+    }
+
+    public function goToActivityLogPage(int $page)
+    {
+        $lastPage = $this->getActivityLogLastPage();
+
+        if ($page < 1) {
+            $this->activityLogCurrentPage = 1;
+        } elseif ($page > $lastPage) {
+            $this->activityLogCurrentPage = $lastPage;
+        } else {
+            $this->activityLogCurrentPage = $page;
+        }
+    }
+
+    public function nextActivityLogPage()
+    {
+        $this->goToActivityLogPage($this->activityLogCurrentPage + 1);
+    }
+
+    public function prevActivityLogPage()
+    {
+        $this->goToActivityLogPage($this->activityLogCurrentPage - 1);
     }
 
     public function getActivityLogAccessLocation(ActivityLog $log): string
