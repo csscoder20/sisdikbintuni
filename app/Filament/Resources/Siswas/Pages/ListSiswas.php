@@ -49,9 +49,9 @@ class ListSiswas extends ListRecords
                 ->modalFooterActions([])
                 ->createAnother(false),
             Action::make('export')
-                ->label('Export')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
+                ->label('Expor Data')
+                // ->icon('heroicon-o-arrow-down-tray')
+                ->color('warning')
                 ->modalHeading('Export Nominatif Siswa')
                 ->modalDescription('Pilih format file dan kolom yang ingin Anda sertakan.')
                 ->modalSubmitActionLabel('Export Sekarang')
@@ -179,7 +179,7 @@ class ListSiswas extends ListRecords
                     $pdfContent = $browsershot->pdf();
 
                     return response()->streamDownload(
-                        fn () => print($pdfContent),
+                        fn() => print($pdfContent),
                         $filename . '.pdf'
                     );
                 }),

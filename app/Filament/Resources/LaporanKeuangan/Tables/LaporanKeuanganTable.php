@@ -61,12 +61,12 @@ class LaporanKeuanganTable
 
                         $query = \App\Models\LaporanKeuangan::query()
                             ->whereHas('laporan', fn($q) => $q->where('sekolah_id', $sekolahId))
-                            ->where(function($q) use ($record) {
+                            ->where(function ($q) use ($record) {
                                 $q->where('tanggal', '<', $record->tanggal)
-                                  ->orWhere(function($q2) use ($record) {
-                                      $q2->where('tanggal', '=', $record->tanggal)
-                                          ->where('id', '<=', $record->id);
-                                  });
+                                    ->orWhere(function ($q2) use ($record) {
+                                        $q2->where('tanggal', '=', $record->tanggal)
+                                            ->where('id', '<=', $record->id);
+                                    });
                             });
 
                         return $query->sum('saldo');
@@ -92,13 +92,13 @@ class LaporanKeuanganTable
                         if (!empty($data['value'])) {
                             return $query->where('laporan_id', $data['value']);
                         }
-                        
+
                         $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
                         $latestLaporan = \App\Models\Laporan::where('sekolah_id', $sekolahId)
                             ->orderBy('tahun', 'desc')
                             ->orderBy('bulan', 'desc')
                             ->first();
-                            
+
                         if ($latestLaporan) {
                             return $query->where('laporan_id', $latestLaporan->id);
                         }
@@ -128,6 +128,5 @@ class LaporanKeuanganTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
-
     }
 }

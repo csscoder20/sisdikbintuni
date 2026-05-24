@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Jobs\ImportExcelJob;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -39,7 +40,7 @@ class ExcelImportAction extends Action
                     ->preserveFilenames()
                     ->live(),
             ])
-            ->modalSubmitAction(fn ($action) => $action->extraAttributes([
+            ->modalSubmitAction(fn($action) => $action->extraAttributes([
                 'x-data' => '{
                     get hasFile() {
                         let state = $wire.mountedActionsData?.[0]?.file || $wire.mountedTableActionsData?.[0]?.file || null;
@@ -201,10 +202,10 @@ class ExcelImportAction extends Action
         }
 
         $columns = $this->importerClass::getColumns();
-        
+
         // Try to map headers from Row 1
         $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string)$s));
-        
+
         $columnMap = [];
         $matchCount = 0;
         foreach ($columns as $column) {
@@ -212,11 +213,12 @@ class ExcelImportAction extends Action
             $normalizedLabel = $normalize($label);
             $normalizedName = $normalize($column->getName());
             $normalizedGuesses = collect($column->getGuesses())->map($normalize);
-            
-            $index = $headerRow->search(fn($h) => 
-                $normalize($h) === $normalizedLabel || 
-                $normalize($h) === $normalizedName ||
-                $normalizedGuesses->contains($normalize($h))
+
+            $index = $headerRow->search(
+                fn($h) =>
+                $normalize($h) === $normalizedLabel ||
+                    $normalize($h) === $normalizedName ||
+                    $normalizedGuesses->contains($normalize($h))
             );
             if ($index !== false) {
                 $columnMap[$column->getName()] = $index;
@@ -240,10 +242,11 @@ class ExcelImportAction extends Action
                 $normalizedName = $normalize($column->getName());
                 $normalizedGuesses = collect($column->getGuesses())->map($normalize);
 
-                $index = $secondRow->search(fn($h) => 
-                    $normalize($h) === $normalizedLabel || 
-                    $normalize($h) === $normalizedName ||
-                    $normalizedGuesses->contains($normalize($h))
+                $index = $secondRow->search(
+                    fn($h) =>
+                    $normalize($h) === $normalizedLabel ||
+                        $normalize($h) === $normalizedName ||
+                        $normalizedGuesses->contains($normalize($h))
                 );
                 if ($index !== false) {
                     $secondRowMap[$column->getName()] = $index;
@@ -296,7 +299,7 @@ class ExcelImportAction extends Action
 
                 // Instantiate importer
                 $importer = new $this->importerClass($importMock, $importerColumnMap, $options);
-                
+
                 // Process the row using __invoke
                 // We pass the raw row data, and __invoke handles remapping via columnMap
                 $importer($row->toArray());
@@ -308,13 +311,13 @@ class ExcelImportAction extends Action
                 $errorCount++;
                 $errors = collect($e->errors())->flatten()->toArray();
                 $errorMsg = implode(', ', $errors);
-                
+
                 $rowOffset = str_contains($this->importerClass, 'GtkImporter') ? 3 : 2;
-                
+
                 if (count($failureDetails) < 10) {
                     $failureDetails[] = "Baris " . ($rowIndex + $rowOffset) . ": " . $errorMsg;
                 }
-                
+
                 \Log::error("Validation error at row " . ($rowIndex + $rowOffset) . ": " . $errorMsg);
             } catch (\Exception $e) {
                 $errorCount++;
@@ -329,7 +332,7 @@ class ExcelImportAction extends Action
 
 
         $body = "Berhasil mengimpor {$successCount} baris.";
-        
+
         if ($errorCount > 0) {
             $body .= " <br><span class='text-danger'>Gagal mengimpor {$errorCount} baris.</span>";
             $body .= "<div class='mt-2 text-xs text-gray-600 dark:text-gray-400 font-mono space-y-1'>";

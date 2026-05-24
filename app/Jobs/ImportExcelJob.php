@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Log;
 
 class ImportExcelJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable,\n        \Illuminate\Queue\SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable;
+    use \Illuminate\Queue\SerializesModels;
 
     protected string $filePath;
     protected string $importerClass;
@@ -67,7 +68,7 @@ class ImportExcelJob implements ShouldQueue
         // Detect instruction row and skip
         if ($rows->isNotEmpty()) {
             $secondRow = $rows->first();
-            $isInstruction = $secondRow->contains(fn($value) => {
+            $isInstruction = $secondRow->contains(function ($value) {
                 $str = strtolower((string) $value);
                 return str_contains($str, 'diisi dengan') || str_contains($str, 'wajib diisi') || str_contains($str, 'contoh:');
             });
@@ -76,7 +77,7 @@ class ImportExcelJob implements ShouldQueue
             }
         }
 
-        $columns = $this->importerClass::getColumns();
+        $columns = call_user_func([$this->importerClass, 'getColumns']);
         $normalize = fn($s) => strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $s));
         $columnMap = [];
         $matchCount = 0;
@@ -252,4 +253,3 @@ class ImportExcelJob implements ShouldQueue
         }
     }
 }
-?>

@@ -27,7 +27,7 @@ class ListGtks extends ListRecords
                 ->importer(GtkImporter::class)
                 ->label('Impor Data GTK')
                 ->modalHeading('Impor Data Guru & Tenaga Kependidikan')
-                ->modalDescription(fn () => new \Illuminate\Support\HtmlString(
+                ->modalDescription(fn() => new \Illuminate\Support\HtmlString(
                     \Illuminate\Support\Facades\Blade::render(
                         <<<'BLADE'
                         <div class="text-sm space-y-2">
@@ -52,8 +52,8 @@ class ListGtks extends ListRecords
                 ->createAnother(false),
             Action::make('export')
                 ->label('Export')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
+                // ->icon('heroicon-o-arrow-down-tray')
+                ->color('warning')
                 ->modalHeading('Export Nominatif GTK')
                 ->modalDescription('Pilih format file dan kolom yang ingin Anda sertakan.')
                 ->modalSubmitActionLabel('Export Sekarang')
@@ -181,7 +181,7 @@ class ListGtks extends ListRecords
                     $pdfContent = $browsershot->pdf();
 
                     return response()->streamDownload(
-                        fn () => print($pdfContent),
+                        fn() => print($pdfContent),
                         $filename . '.pdf'
                     );
                 }),
