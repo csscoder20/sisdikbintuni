@@ -111,7 +111,7 @@ class LaporanKeuanganTable
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                     ViewAction::make()
-                        ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
+                        ->modalWidth(\Filament\Support\Enums\Width::Medium)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
                         ->icon(Heroicon::OutlinedPencilSquare),

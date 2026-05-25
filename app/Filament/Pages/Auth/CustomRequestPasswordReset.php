@@ -65,7 +65,7 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
             },
         );
 
-        // Flash SweetAlert message
+        // Flash notification message untuk ditampilkan di halaman login
         session()->flash('swal_message', [
             'title' => 'Atur Ulang Kata Sandi',
             'text' => 'Kami telah mengirimkan tautan atur ulang kata sandi ke email Anda.<br>Jika akun Anda tidak terdaftar, Anda tidak akan menerima email.',

@@ -111,10 +111,17 @@
             <p class="text-xl mb-8 opacity-90">Dinas Pendidikan, Kebudayaan, Pemuda dan Olahraga Kabupaten Teluk Bintuni
             </p>
             <div class="flex justify-center gap-4">
-                <a target="_blank" href="/login"
-                    class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
-                    <i class="fas fa-sign-in-alt mr-2"></i> MASUK
-                </a>
+                @auth
+                    <a target="_blank" href="{{ url('/admin') }}"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 border border-green-700 px-8 rounded-full transition duration-300 shadow-lg">
+                        <i class="fas fa-user-shield mr-2"></i> AKSES PANEL ADMIN
+                    </a>
+                @else
+                    <a target="_blank" href="{{ url('/login') }}"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">
+                        <i class="fas fa-sign-in-alt mr-2"></i> MASUK
+                    </a>
+                @endauth
             </div>
         </div>
     </header>

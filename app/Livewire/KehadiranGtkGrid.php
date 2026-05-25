@@ -142,6 +142,35 @@ class KehadiranGtkGrid extends Component
             ->send();
     }
 
+    public function markAllPresent($day)
+    {
+        if ($this->isValidationPeriodLocked()) {
+            $this->notifyValidationPeriodLocked();
+            return;
+        }
+
+        $date = Carbon::create($this->tahun, $this->bulan, $day);
+        if ($date->isSunday()) return;
+
+        $dateStr = $date->format('Y-m-d');
+        $laporanId = $this->getActiveLaporanId();
+        $gtks = Gtk::where('sekolah_id', $this->getSchoolId())->get();
+
+        foreach ($gtks as $gtk) {
+            GtkKehadiran::updateOrCreate(
+                ['gtk_id' => $gtk->id, 'tgl_presensi' => $dateStr],
+                ['presensi' => 'H', 'laporan_id' => $laporanId]
+            );
+            $this->syncMonthlySummary($gtk->id);
+            $this->attendanceData[$gtk->id][$day] = 'H';
+        }
+
+        Notification::make()
+            ->title("Semua GTK ditandai Hadir pada tanggal {$day}")
+            ->success()
+            ->send();
+    }
+
     public function updateAttendance($gtkId, $day, $value)
     {
         if ($this->isValidationPeriodLocked()) {

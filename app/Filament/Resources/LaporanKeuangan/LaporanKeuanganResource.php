@@ -49,6 +49,44 @@ class LaporanKeuanganResource extends Resource
         return LaporanKeuanganForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->inlineLabel()
+            ->components([
+                TextEntry::make('tanggal')
+                    ->label('Tanggal Transaksi')
+                    ->date('d F Y')
+                    ->prefix(': ')
+                    ->placeholder('-'),
+                TextEntry::make('jenis_transaksi')
+                    ->label('Jenis Transaksi')
+                    ->prefix(': ')
+                    ->placeholder('-')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => $state === 'debit' ? 'Debit (Uang Masuk)' : 'Kredit (Uang Keluar)')
+                    ->color(fn($state) => $state === 'debit' ? 'success' : 'danger'),
+                TextEntry::make('nominal')
+                    ->label('Nominal')
+                    ->prefix(': ')
+                    ->money('idr')
+                    ->placeholder('-'),
+                TextEntry::make('laporan.bulan')
+                    ->label('Periode')
+                    ->prefix(': ')
+                    ->placeholder('-')
+                    ->formatStateUsing(function ($record) {
+                        if (!$record->laporan) return '-';
+                        $namaBulan = \Carbon\Carbon::create()->month($record->laporan->bulan)->translatedFormat('F');
+                        return "{$namaBulan} {$record->laporan->tahun}";
+                    }),
+                TextEntry::make('keterangan')
+                    ->label('Keterangan')
+                    ->prefix(': ')
+                    ->placeholder('-'),
+            ])->columns(1);
+    }
+
     public static function table(Table $table): Table
     {
         return LaporanKeuanganTable::configure($table);

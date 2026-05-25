@@ -1,18 +1,168 @@
 <div
     x-data="{
+        showLockedDialog: false,
+        showHolidayDialog: false,
+        showHadirDialog: false,
+        showActionDialog: false,
+        holidayDay: null,
+        hadirDay: null,
+        actionDay: null,
+        isHolidayActive: false,
+        actionIsHoliday: false,
         lockedAlert() {
-            Swal.fire({
-                title: 'Data tidak dapat disimpan',
-                text: 'Periode validasi sedang ditutup oleh Admin Dinas.',
-                icon: 'warning',
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Mengerti'
-            })
+            this.showLockedDialog = true;
+        },
+        confirmHoliday(day, isHoliday) {
+            this.holidayDay = day;
+            this.isHolidayActive = isHoliday;
+            this.showHolidayDialog = true;
+        },
+        doToggleHoliday() {
+            this.showHolidayDialog = false;
+            $wire.toggleHoliday(this.holidayDay);
+        },
+        confirmHadir(day) {
+            this.hadirDay = day;
+            this.showHadirDialog = true;
+        },
+        doMarkAllPresent() {
+            this.showHadirDialog = false;
+            $wire.markAllPresent(this.hadirDay);
+        },
+        openActionDialog(day, isHoliday) {
+            this.actionDay = day;
+            this.actionIsHoliday = isHoliday;
+            this.showActionDialog = true;
         }
     }"
     style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;"
 >
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- Dialog: Periode Terkunci --}}
+    <template x-teleport="body">
+        <div
+            x-show="showLockedDialog"
+            x-cloak
+            style="position: fixed; inset: 0; z-index: 9999;"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+        >
+            <div style="position: absolute; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px);"></div>
+            
+            {{-- Centering wrapper --}}
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; pointer-events: none;">
+                {{-- Dialog Panel --}}
+                <div style="position: relative; background: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 1.5rem; max-width: 26rem; width: 100%; pointer-events: auto;"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                >
+                    {{-- Close Button (X) --}}
+                    <button
+                        type="button"
+                        x-on:click="showLockedDialog = false"
+                        style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px; border: none; background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.15s ease-in-out;"
+                        onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.color='#4b5563';"
+                        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#9ca3af';"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.15rem; height: 1.15rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+                        <div style="width: 3.5rem; height: 3.5rem; border-radius: 9999px; background: #fef9c3; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ca8a04" style="width: 1.75rem; height: 1.75rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; text-align: center;">Data tidak dapat disimpan</h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0; line-height: 1.5; text-align: center;">Periode validasi sedang ditutup oleh Admin Dinas.</p>
+                    </div>
+                    <div style="width: 100%;">
+                        <button type="button" x-on:click="showLockedDialog = false"
+                            style="width: 100%; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: none; background: #ef4444; color: white; cursor: pointer; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
+                            onmouseover="this.style.filter='brightness(92%)'; this.style.transform='scale(1.02)';"
+                            onmouseout="this.style.filter='none'; this.style.transform='none';">
+                            Mengerti
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    {{-- Dialog: Konfirmasi Toggle Libur Massal --}}
+    <template x-teleport="body">
+        <div
+            x-show="showHolidayDialog"
+            x-cloak
+            style="position: fixed; inset: 0; z-index: 9999;"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+        >
+            <div style="position: absolute; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px);"></div>
+            
+            {{-- Centering wrapper --}}
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; pointer-events: none;">
+                {{-- Dialog Panel --}}
+                <div style="position: relative; background: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 1.5rem; max-width: 26rem; width: 100%; pointer-events: auto;"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                >
+                    {{-- Close Button (X) --}}
+                    <button
+                        type="button"
+                        x-on:click="showHolidayDialog = false"
+                        style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px; border: none; background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.15s ease-in-out;"
+                        onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.color='#4b5563';"
+                        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#9ca3af';"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.15rem; height: 1.15rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+                        <div style="width: 3.5rem; height: 3.5rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;"
+                            :style="isHolidayActive ? 'background:#fee2e2;' : 'background:#fef9c3;'">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.75rem; height: 1.75rem;"
+                                :style="isHolidayActive ? 'color:#dc2626;' : 'color:#ca8a04;'">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; text-align: center;"
+                            x-text="isHolidayActive ? 'Hapus Libur Massal?' : 'Tandai Libur Massal?'"></h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0; line-height: 1.5; text-align: center;"
+                            x-text="isHolidayActive ? 'Status Libur (L) akan dihapus dari semua GTK pada tanggal ini.' : 'Semua GTK akan ditandai Libur (L) pada tanggal ini.'"></p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; width: 100%;">
+                        <button type="button" x-on:click="showHolidayDialog = false"
+                            style="flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; color: #1f2937; cursor: pointer; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
+                            onmouseover="this.style.backgroundColor='#f9fafb'; this.style.transform='scale(1.02)';"
+                            onmouseout="this.style.backgroundColor='#ffffff'; this.style.transform='none';">
+                            Batal
+                        </button>
+                        <button type="button" x-on:click="doToggleHoliday()"
+                            style="flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: none; cursor: pointer; color: white !important; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
+                            :style="{ backgroundColor: isHolidayActive ? '#ef4444' : '#f97316', color: 'white' }"
+                            onmouseover="this.style.filter='brightness(92%)'; this.style.transform='scale(1.02)';"
+                            onmouseout="this.style.filter='none'; this.style.transform='none';"
+                            x-text="isHolidayActive ? 'Ya, Hapus Libur' : 'Ya, Tandai Libur'"
+                        ></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
     @php
         $locked = $locked ?? false;
     @endphp
@@ -399,25 +549,9 @@
                                 @endphp
                                 <button 
                                     type="button"
-                                    x-on:click="@if($locked) lockedAlert() @else
-                                        Swal.fire({
-                                            title: '{{ $isHoliday ? 'Hapus Libur Massal?' : 'Tandai Libur Massal?' }}',
-                                            text: '{{ $isHoliday ? 'Status Libur (L) akan dihapus dari semua GTK pada tanggal ini.' : 'Semua GTK akan ditandai Libur (L) pada tanggal ini.' }}',
-                                            icon: '{{ $isHoliday ? 'warning' : 'question' }}',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '{{ $isHoliday ? '#ef4444' : '#fb923c' }}',
-                                            cancelButtonColor: '#94a3b8',
-                                            confirmButtonText: '{{ $isHoliday ? 'Ya, Hapus Libur' : 'Ya, Tandai Libur' }}',
-                                            cancelButtonText: 'Batal',
-                                            reverseButtons: true
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                $wire.toggleHoliday({{ $d['day'] }})
-                                            }
-                                        })
-                                    @endif"
+                                    x-on:click="@if($locked) lockedAlert() @else openActionDialog({{ $d['day'] }}, {{ $isHoliday ? 'true' : 'false' }}) @endif"
                                     class="btn-set-holiday"
-                                    title="{{ $isHoliday ? 'Hapus Libur Massal' : 'Set Libur Massal' }}"
+                                    title="Opsi Kehadiran Massal"
                                     style="{{ $isHoliday ? 'color: #ef4444;' : '' }}"
                                 >
                                     @if($isHoliday)
@@ -580,5 +714,174 @@
                 {{ $locked ? 'Data tidak dapat disimpan karena periode validasi sedang ditutup.' : 'Data tersimpan otomatis saat Anda mengisi kode kehadiran.' }}
             </span>
         </div>
-    </div>
+    {{-- Dialog: Pilih Aksi Massal --}}
+    <template x-teleport="body">
+        <div
+            x-show="showActionDialog"
+            x-cloak
+            style="position: fixed; inset: 0; z-index: 9998;"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+        >
+            <div style="position: absolute; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px);" x-on:click="showActionDialog = false"></div>
+            
+            {{-- Centering wrapper --}}
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; pointer-events: none;">
+                {{-- Dialog Panel --}}
+                <div style="position: relative; background: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 1.75rem; max-width: 28rem; width: 100%; pointer-events: auto;"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                >
+                    {{-- Close Button (X) --}}
+                    <button
+                        type="button"
+                        x-on:click="showActionDialog = false"
+                        style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px; border: none; background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.15s ease-in-out;"
+                        onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.color='#4b5563';"
+                        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#9ca3af';"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.15rem; height: 1.15rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div style="margin-bottom: 1.5rem; text-align: center;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: #1f2937; margin: 0 0 0.25rem;">Pilih Aksi Kehadiran Massal</h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Silakan pilih aksi untuk seluruh GTK pada Tanggal <span style="font-weight: 700; color: #111827;" x-text="actionDay"></span></p>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        {{-- Opsi 1: Hadir Semua --}}
+                        <button
+                            type="button"
+                            x-on:click="showActionDialog = false; confirmHadir(actionDay)"
+                            style="display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1rem; border-radius: 0.5rem; border: 1px solid #bbf7d0; background: #f0fdf4; cursor: pointer; text-align: left; transition: all 0.2s;"
+                            onmouseover="this.style.borderColor='#86efac'; this.style.backgroundColor='#e6fced'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(22, 163, 74, 0.08)';"
+                            onmouseout="this.style.borderColor='#bbf7d0'; this.style.backgroundColor='#f0fdf4'; this.style.transform='none'; this.style.boxShadow='none';"
+                        >
+                            <div style="flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 9999px; background: #dcfce7; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#15803d" style="width: 1.25rem; height: 1.25rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span style="display: block; font-size: 0.95rem; font-weight: 700; color: #166534;">Tandai Hadir Semua</span>
+                                <span style="display: block; font-size: 0.78rem; color: #15803d; margin-top: 0.15rem;">Set status Hadir (H) untuk seluruh GTK.</span>
+                            </div>
+                        </button>
+
+                        {{-- Opsi 2: Hapus Libur Massal (Hanya muncul jika saat ini statusnya Libur) --}}
+                        <div x-show="actionIsHoliday" style="width: 100%;">
+                            <button
+                                type="button"
+                                x-on:click="showActionDialog = false; confirmHoliday(actionDay, true)"
+                                style="display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1rem; border-radius: 0.5rem; border: 1px solid #fecaca; background: #fef2f2; cursor: pointer; text-align: left; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='#fca5a5'; this.style.backgroundColor='#fee2e2'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(220, 38, 38, 0.08)';"
+                                onmouseout="this.style.borderColor='#fecaca'; this.style.backgroundColor='#fef2f2'; this.style.transform='none'; this.style.boxShadow='none';"
+                            >
+                                <div style="flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 9999px; background: #fee2e2; display: flex; align-items: center; justify-content: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#991b1b" style="width: 1.25rem; height: 1.25rem;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span style="display: block; font-size: 0.95rem; font-weight: 700; color: #991b1b;">Hapus Libur Massal</span>
+                                    <span style="display: block; font-size: 0.78rem; color: #b91c1c; margin-top: 0.15rem;">Hapus penanda Libur (L) dari semua GTK.</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        {{-- Opsi 3: Set Libur Massal (Hanya muncul jika saat ini statusnya BUKAN Libur) --}}
+                        <div x-show="!actionIsHoliday" style="width: 100%;">
+                            <button
+                                type="button"
+                                x-on:click="showActionDialog = false; confirmHoliday(actionDay, false)"
+                                style="display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1rem; border-radius: 0.5rem; border: 1px solid #fef08a; background: #fffbeb; cursor: pointer; text-align: left; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='#fde68a'; this.style.backgroundColor='#fef9c3'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(202, 138, 4, 0.08)';"
+                                onmouseout="this.style.borderColor='#fef08a'; this.style.backgroundColor='#fffbeb'; this.style.transform='none'; this.style.boxShadow='none';"
+                            >
+                                <div style="flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 9999px; background: #fef9c3; display: flex; align-items: center; justify-content: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#854d0e" style="width: 1.25rem; height: 1.25rem;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span style="display: block; font-size: 0.95rem; font-weight: 700; color: #854d0e;">Set Libur Massal</span>
+                                    <span style="display: block; font-size: 0.78rem; color: #a16207; margin-top: 0.15rem;">Tandai Libur (L) untuk semua GTK.</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    {{-- Dialog: Konfirmasi Tandai Hadir Semua --}}
+    <template x-teleport="body">
+        <div
+            x-show="showHadirDialog"
+            x-cloak
+            style="position: fixed; inset: 0; z-index: 9999;"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+        >
+            <div style="position: absolute; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px);"></div>
+            
+            {{-- Centering wrapper --}}
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; pointer-events: none;">
+                {{-- Dialog Panel --}}
+                <div style="position: relative; background: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 1.5rem; max-width: 26rem; width: 100%; pointer-events: auto;"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                >
+                    {{-- Close Button (X) --}}
+                    <button
+                        type="button"
+                        x-on:click="showHadirDialog = false"
+                        style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px; border: none; background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.15s ease-in-out;"
+                        onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.color='#4b5563';"
+                        onmouseout="this.style.backgroundColor='transparent'; this.style.color='#9ca3af';"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.15rem; height: 1.15rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+                        <div style="width: 3.5rem; height: 3.5rem; border-radius: 9999px; background: #eff6ff; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#3b82f6" style="width: 1.75rem; height: 1.75rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; text-align: center;">Tandai Hadir Semua GTK?</h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin: 0; line-height: 1.5; text-align: center;">Semua GTK akan ditandai Hadir (H) pada tanggal ini.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; width: 100%;">
+                        <button type="button" x-on:click="showHadirDialog = false"
+                            style="flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; color: #1f2937; cursor: pointer; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
+                            onmouseover="this.style.backgroundColor='#f9fafb'; this.style.transform='scale(1.02)';"
+                            onmouseout="this.style.backgroundColor='#ffffff'; this.style.transform='none';">
+                            Batal
+                        </button>
+                        <button type="button" x-on:click="doMarkAllPresent()"
+                            style="flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: none; cursor: pointer; color: white !important; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); background:#16a34a;"
+                            onmouseover="this.style.filter='brightness(92%)'; this.style.transform='scale(1.02)';"
+                            onmouseout="this.style.filter='none'; this.style.transform='none';"
+                        >Ya, Tandai Hadir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>

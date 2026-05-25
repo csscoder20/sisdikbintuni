@@ -129,6 +129,30 @@ class CustomLogin extends BaseLogin
             ]);
     }
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (session()->has('swal_message')) {
+            $swal = session()->pull('swal_message');
+
+            $color = match ($swal['icon'] ?? 'info') {
+                'error'   => 'danger',
+                'warning' => 'warning',
+                'success' => 'success',
+                default   => 'info',
+            };
+
+            Notification::make()
+                ->title($swal['title'])
+                ->body($swal['text'])
+                ->color($color)
+                ->$color()
+                ->persistent()
+                ->send();
+        }
+    }
+
     public function content(Schema $schema): Schema
     {
         return $schema
@@ -137,31 +161,6 @@ class CustomLogin extends BaseLogin
                 $this->getFormContentComponent(),
                 $this->getMultiFactorChallengeFormContentComponent(),
                 RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER),
-                \Filament\Schemas\Components\Html::make(function () {
-                    if (session()->has('swal_message')) {
-                        $swal = session('swal_message');
-                        $title = addslashes($swal['title']);
-                        $text = addslashes($swal['text']);
-                        $icon = addslashes($swal['icon']);
-                        
-                        return '
-                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                        <script>
-                            setTimeout(() => {
-                                if (typeof Swal !== "undefined") {
-                                    Swal.fire({
-                                        title: "<span style=\"font-size: 1.125rem; font-weight: 600; color: #111827;\">" + "' . $title . '" + "</span>",
-                                        html: "<span style=\"font-size: 0.875rem; color: #4b5563;\">" + "' . $text . '" + "</span>",
-                                        icon: "' . $icon . '",
-                                        confirmButtonText: "OK",
-                                        confirmButtonColor: "#ea580c"
-                                    });
-                                }
-                            }, 500);
-                        </script>';
-                    }
-                    return '';
-                }),
             ]);
     }
 }
