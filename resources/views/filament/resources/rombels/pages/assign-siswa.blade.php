@@ -1,93 +1,154 @@
 <x-filament-panels::page>
-    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;" x-data="{ dragging: false }">
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;" x-data="{ dragging: false, draggedIds: [] }">
         {{-- Panel 1: Enrolled (LEFT) --}}
-        <div style="flex: 1; min-width: 350px; background: white; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; overflow: hidden;">
+        <div
+            style="flex: 1; min-width: 350px; background: white; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; overflow: hidden;">
             {{-- Card Header --}}
             <div style="padding: 20px 24px; border-bottom: 1px solid #f3f4f6;">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
                     <div>
-                        <h3 style="font-weight: 800; font-size: 1.125rem; color: #10b981; margin: 0;">Siswa di {{ $record->nama }}</h3>
-                        <p style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: 2px;">Tahun Ajaran {{ $tahunAjaran }} • Aktif: {{ $assignedCount }}</p>
+                        <h3 style="font-weight: 800; font-size: 1.125rem; color: #10b981; margin: 0;">Siswa di
+                            {{ $record->nama }}</h3>
+                        <p style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: 2px;">Tahun Ajaran
+                            {{ $tahunAjaran }} • Aktif: {{ $assignedCount }}
+                            @if (count($selectedAssigned) > 0)
+                                <span
+                                    style="color: #10b981; font-weight: 700; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 8px;">✓
+                                    {{ count($selectedAssigned) }} dipilih</span>
+                            @endif
+                            <span x-show="draggedIds.length > 0" style="color: #10b981; font-weight: 700;">• Drag: <span
+                                    x-text="draggedIds.length"></span></span>
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button type="button" wire:click="selectAllAssigned"
+                            style="padding: 6px 12px; border-radius: 8px; border: 1px solid #d1fae5; background: {{ count($selectedAssigned) == $assignedSiswa->count() ? '#d1fae5' : '#f0fdf4' }}; color: #10b981; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#d1fae5';"
+                            onmouseout="this.style.background='{{ count($selectedAssigned) == $assignedSiswa->count() ? '#d1fae5' : '#f0fdf4' }}';"
+                            title="Pilih semua siswa dalam halaman ini">
+                            <x-heroicon-m-check-circle
+                                style="width: 14px; height: 14px; display: inline; margin-right: 4px;" />
+                            Pilih Semua
+                        </button>
+                        @if (count($selectedAssigned) > 0)
+                            <button type="button" wire:click="deselectAllAssigned"
+                                style="padding: 6px 12px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #ef4444; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='#ef4444'; this.style.color='#fff';"
+                                onmouseout="this.style.background='#fef2f2'; this.style.color='#ef4444';"
+                                title="Batalkan semua pilihan">
+                                <x-heroicon-m-x-circle
+                                    style="width: 14px; height: 14px; display: inline; margin-right: 4px;" />
+                                Batal Semua
+                            </button>
+                        @endif
                     </div>
                 </div>
-                
+
                 {{-- Integrated Search --}}
                 <div style="position: relative;">
                     <x-filament::input.wrapper prefix-icon="heroicon-m-magnifying-glass">
-                        <x-filament::input
-                            type="text"
-                            placeholder="Cari dalam rombel..."
-                            wire:model.live.debounce.500ms="searchAssigned"
-                        />
+                        <x-filament::input type="text" placeholder="Cari dalam rombel..."
+                            wire:model.live.debounce.500ms="searchAssigned" />
                     </x-filament::input.wrapper>
                 </div>
             </div>
 
             {{-- Card Body --}}
-            <div 
-                style="min-height: 450px; max-height: 600px; overflow-y: auto; padding: 24px; border: 2px dashed transparent; transition: all 0.3s;"
+            <div style="min-height: 450px; max-height: 600px; overflow-y: auto; padding: 24px; border: 2px dashed transparent; transition: all 0.3s;"
                 :style="dragging ? 'border-color: #10b981; background: rgba(16, 185, 129, 0.05);' : ''"
                 @dragover.prevent
                 @drop="
-                    const id = $event.dataTransfer.getData('siswaId');
-                    if (id) $wire.moveToRombel(id);
+                    const idsStr = $event.dataTransfer.getData('siswaIds');
+                    if (idsStr) {
+                        const ids = JSON.parse(idsStr);
+                        $wire.moveToRombel(ids);
+                    }
                     dragging = false;
-                "
-            >
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; padding: 10px 0;">
+                ">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; padding: 10px 0;">
                     @forelse($assignedSiswa as $siswa)
-                        <div 
-                            draggable="true"
-                            @dragstart="$event.dataTransfer.setData('siswaId', {{ $siswa->id }}); dragging = true"
-                            @dragend="dragging = false"
-                            class="group"
-                            style="display: flex; align-items: center; gap: 12px; padding: 12px; margin: 0 10px; background: white; border: 1px solid #f3f4f6; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); cursor: move; transition: all 0.2s;"
+                        <div draggable="true"
+                            @dragstart="
+                                const selected = {{ json_encode($selectedAssigned) }};
+                                let ids = [{{ $siswa->id }}];
+                                if (selected.includes({{ $siswa->id }})) {
+                                    ids = selected;
+                                }
+                                $event.dataTransfer.setData('siswaIds', JSON.stringify(ids));
+                                draggedIds = ids;
+                                dragging = true;
+                            "
+                            @dragend="dragging = false" class="group"
+                            style="display: flex; align-items: center; gap: 12px; padding: 12px; margin: 0 10px; background: {{ in_array($siswa->id, $selectedAssigned) ? '#f0fdf4' : 'white' }}; border: 2px solid {{ in_array($siswa->id, $selectedAssigned) ? '#10b981' : '#f3f4f6' }}; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s;"
                             onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)';"
-                            onmouseout="this.style.borderColor='#f3f4f6'; this.style.boxShadow='0 1px 2px 0 rgba(0, 0, 0, 0.05)';"
-                        >
-                            <div style="flex-shrink: 0; width: 36px; height: 36px; border-radius: 9999px; background: #f0fdfa; display: flex; align-items: center; justify-content: center; color: #10b981;">
-                                @if($siswa->jenis_kelamin === 'Laki-laki')
+                            onmouseout="this.style.borderColor='{{ in_array($siswa->id, $selectedAssigned) ? '#10b981' : '#f3f4f6' }}'; this.style.boxShadow='0 1px 2px 0 rgba(0, 0, 0, 0.05)';">
+                            <input type="checkbox" wire:model.live="selectedAssigned" value="{{ $siswa->id }}"
+                                style="flex-shrink: 0; cursor: pointer; width: 18px; height: 18px;" />
+
+                            <div
+                                style="flex-shrink: 0; width: 36px; height: 36px; border-radius: 9999px; background: #f0fdfa; display: flex; align-items: center; justify-content: center; color: #10b981;">
+                                @if ($siswa->jenis_kelamin === 'Laki-laki')
                                     <x-heroicon-m-user style="width: 18px; height: 18px;" />
                                 @else
                                     <x-heroicon-m-user-circle style="width: 18px; height: 18px;" />
                                 @endif
                             </div>
-                            
+
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 700; color: #1f2937; font-size: 0.8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <div
+                                    style="font-weight: 700; color: #1f2937; font-size: 0.8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     {{ $siswa->nama }}
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                                    <span style="font-size: 0.6875rem; color: #6b7280; font-weight: 500;">{{ $siswa->nisn ?? '-' }}</span>
-                                    <span style="font-size: 0.6875rem; font-weight: 700; color: {{ $siswa->jenis_kelamin === 'Laki-laki' ? '#0ea5e9' : '#ec4899' }};">
+                                    <span
+                                        style="font-size: 0.6875rem; color: #6b7280; font-weight: 500;">{{ $siswa->nisn ?? '-' }}</span>
+                                    <span
+                                        style="font-size: 0.6875rem; font-weight: 700; color: {{ $siswa->jenis_kelamin === 'Laki-laki' ? '#0ea5e9' : '#ec4899' }};">
                                         {{ $siswa->jenis_kelamin === 'Laki-laki' ? 'L' : 'P' }}
                                     </span>
                                 </div>
                             </div>
 
-                            <button 
-                                type="button"
-                                wire:click="removeFromRombel({{ $siswa->id }})"
+                            <button type="button" wire:click="removeFromRombel({{ $siswa->id }})"
                                 style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: none; background: #fef2f2; color: #ef4444; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
                                 onmouseover="this.style.background='#ef4444'; this.style.color='#fff';"
-                                onmouseout="this.style.background='#fef2f2'; this.style.color='#ef4444';"
-                            >
+                                onmouseout="this.style.background='#fef2f2'; this.style.color='#ef4444';">
                                 <x-heroicon-m-minus style="width: 16px; height: 16px;" />
                             </button>
                         </div>
                     @empty
-                        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: #d1d5db;">
-                            <x-heroicon-o-user-plus style="width: 56px; height: 56px; opacity: 0.2; margin-bottom: 12px;" />
+                        <div
+                            style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: #d1d5db;">
+                            <x-heroicon-o-user-plus
+                                style="width: 56px; height: 56px; opacity: 0.2; margin-bottom: 12px;" />
                             <p style="font-size: 0.875rem; font-weight: 500;">Belum ada siswa terpilih</p>
                         </div>
                     @endforelse
                 </div>
             </div>
 
-            {{-- Custom Resilient Pagination --}}
-            <div style="padding: 16px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; background: #fafafa;">
-                <span style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Hal. {{ $assignedSiswa->currentPage() }} / {{ $assignedSiswa->lastPage() }}</span>
+            {{-- Footer with Bulk Actions --}}
+            <div
+                style="padding: 16px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; background: #fafafa; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Hal.
+                        {{ $assignedSiswa->currentPage() }} / {{ $assignedSiswa->lastPage() }}</span>
+                    @if (count($selectedAssigned) > 0)
+                        <span
+                            style="font-size: 0.75rem; color: #10b981; font-weight: 700;">{{ count($selectedAssigned) }}
+                            dipilih</span>
+                    @endif
+                </div>
                 <div style="display: flex; gap: 8px;">
+                    @if (count($selectedAssigned) > 0)
+                        <button type="button" wire:click="bulkRemoveFromRombel"
+                            style="padding: 6px 12px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #ef4444; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#ef4444'; this.style.color='#fff';"
+                            onmouseout="this.style.background='#fef2f2'; this.style.color='#ef4444';">Hapus
+                            Terpilih</button>
+                    @endif
                     <button type="button" wire:click="previousPage('assignedPage')" @disabled($assignedSiswa->onFirstPage())
                         style="padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; background: white; font-size: 0.75rem; font-weight: 700; cursor: {{ $assignedSiswa->onFirstPage() ? 'not-allowed' : 'pointer' }}; opacity: {{ $assignedSiswa->onFirstPage() ? '0.5' : '1' }};">Prev</button>
                     <button type="button" wire:click="nextPage('assignedPage')" @disabled(!$assignedSiswa->hasMorePages())
@@ -97,93 +158,154 @@
         </div>
 
         {{-- Panel 2: Available (RIGHT) --}}
-        <div style="flex: 1; min-width: 350px; background: white; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; overflow: hidden;">
+        <div
+            style="flex: 1; min-width: 350px; background: white; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; overflow: hidden;">
             {{-- Card Header --}}
             <div style="padding: 20px 24px; border-bottom: 1px solid #f3f4f6;">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
                     <div>
-                        <h3 style="font-weight: 800; font-size: 1.125rem; color: #111827; margin: 0;">Siswa Belum Memiliki Rombel</h3>
-                        <p style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: 2px;">Tahun Ajaran {{ $tahunAjaran }} • Total: {{ $unassignedCount }}</p>
+                        <h3 style="font-weight: 800; font-size: 1.125rem; color: #111827; margin: 0;">Siswa Belum
+                            Memiliki Rombel</h3>
+                        <p style="font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: 2px;">Tahun Ajaran
+                            {{ $tahunAjaran }} • Total: {{ $unassignedCount }}
+                            @if (count($selectedUnassigned) > 0)
+                                <span
+                                    style="color: #f97316; font-weight: 700; background: #fef3c7; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-left: 8px;">✓
+                                    {{ count($selectedUnassigned) }} dipilih</span>
+                            @endif
+                            <span x-show="draggedIds.length > 0" style="color: #f97316; font-weight: 700;">• Drag: <span
+                                    x-text="draggedIds.length"></span></span>
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button type="button" wire:click="selectAllUnassigned"
+                            style="padding: 6px 12px; border-radius: 8px; border: 1px solid #fed7aa; background: {{ count($selectedUnassigned) == $unassignedSiswa->count() ? '#fed7aa' : '#fef3c7' }}; color: #b45309; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#fed7aa';"
+                            onmouseout="this.style.background='{{ count($selectedUnassigned) == $unassignedSiswa->count() ? '#fed7aa' : '#fef3c7' }}';"
+                            title="Pilih semua siswa dalam halaman ini">
+                            <x-heroicon-m-check-circle
+                                style="width: 14px; height: 14px; display: inline; margin-right: 4px;" />
+                            Pilih Semua
+                        </button>
+                        @if (count($selectedUnassigned) > 0)
+                            <button type="button" wire:click="deselectAllUnassigned"
+                                style="padding: 6px 12px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #ef4444; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='#ef4444'; this.style.color='#fff';"
+                                onmouseout="this.style.background='#fef2f2'; this.style.color='#ef4444';"
+                                title="Batalkan semua pilihan">
+                                <x-heroicon-m-x-circle
+                                    style="width: 14px; height: 14px; display: inline; margin-right: 4px;" />
+                                Batal Semua
+                            </button>
+                        @endif
                     </div>
                 </div>
-                
+
                 {{-- Integrated Search --}}
                 <div style="position: relative;">
                     <x-filament::input.wrapper prefix-icon="heroicon-m-magnifying-glass">
-                        <x-filament::input
-                            type="text"
-                            placeholder="Cari nama atau NISN..."
-                            wire:model.live.debounce.500ms="searchUnassigned"
-                        />
+                        <x-filament::input type="text" placeholder="Cari nama atau NISN..."
+                            wire:model.live.debounce.500ms="searchUnassigned" />
                     </x-filament::input.wrapper>
                 </div>
             </div>
 
             {{-- Card Body --}}
-            <div 
-                style="min-height: 450px; max-height: 600px; overflow-y: auto; padding: 24px; border: 2px dashed transparent; transition: all 0.3s;"
+            <div style="min-height: 450px; max-height: 600px; overflow-y: auto; padding: 24px; border: 2px dashed transparent; transition: all 0.3s;"
                 :style="dragging ? 'border-color: #f97316; background: rgba(249, 115, 22, 0.05);' : ''"
                 @dragover.prevent
                 @drop="
-                    const id = $event.dataTransfer.getData('siswaId');
-                    if (id) $wire.removeFromRombel(id);
+                    const idsStr = $event.dataTransfer.getData('siswaIds');
+                    if (idsStr) {
+                        const ids = JSON.parse(idsStr);
+                        $wire.removeFromRombel(ids);
+                    }
                     dragging = false;
-                "
-            >
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; padding: 10px 0;">
+                ">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; padding: 10px 0;">
                     @forelse($unassignedSiswa as $siswa)
-                        <div 
-                            draggable="true"
-                            @dragstart="$event.dataTransfer.setData('siswaId', {{ $siswa->id }}); dragging = true"
-                            @dragend="dragging = false"
-                            class="group"
-                            style="display: flex; align-items: center; gap: 12px; padding: 12px; margin: 0 10px; background: white; border: 1px solid #f3f4f6; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); cursor: move; transition: all 0.2s;"
+                        <div draggable="true"
+                            @dragstart="
+                                const selected = {{ json_encode($selectedUnassigned) }};
+                                let ids = [{{ $siswa->id }}];
+                                if (selected.includes({{ $siswa->id }})) {
+                                    ids = selected;
+                                }
+                                $event.dataTransfer.setData('siswaIds', JSON.stringify(ids));
+                                draggedIds = ids;
+                                dragging = true;
+                            "
+                            @dragend="dragging = false" class="group"
+                            style="display: flex; align-items: center; gap: 12px; padding: 12px; margin: 0 10px; background: {{ in_array($siswa->id, $selectedUnassigned) ? '#fef3c7' : 'white' }}; border: 2px solid {{ in_array($siswa->id, $selectedUnassigned) ? '#f97316' : '#f3f4f6' }}; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s;"
                             onmouseover="this.style.borderColor='#f97316'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)';"
-                            onmouseout="this.style.borderColor='#f3f4f6'; this.style.boxShadow='0 1px 2px 0 rgba(0, 0, 0, 0.05)';"
-                        >
-                            <div style="flex-shrink: 0; width: 36px; height: 36px; border-radius: 9999px; background: #f9fafb; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
-                                @if($siswa->jenis_kelamin === 'Laki-laki')
+                            onmouseout="this.style.borderColor='{{ in_array($siswa->id, $selectedUnassigned) ? '#f97316' : '#f3f4f6' }}'; this.style.boxShadow='0 1px 2px 0 rgba(0, 0, 0, 0.05)';">
+                            <input type="checkbox" wire:model.live="selectedUnassigned" value="{{ $siswa->id }}"
+                                style="flex-shrink: 0; cursor: pointer; width: 18px; height: 18px;" />
+
+                            <div
+                                style="flex-shrink: 0; width: 36px; height: 36px; border-radius: 9999px; background: #f9fafb; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+                                @if ($siswa->jenis_kelamin === 'Laki-laki')
                                     <x-heroicon-m-user style="width: 18px; height: 18px;" />
                                 @else
                                     <x-heroicon-m-user-circle style="width: 18px; height: 18px;" />
                                 @endif
                             </div>
-                            
+
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 700; color: #1f2937; font-size: 0.8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <div
+                                    style="font-weight: 700; color: #1f2937; font-size: 0.8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     {{ $siswa->nama }}
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                                    <span style="font-size: 0.6875rem; color: #6b7280; font-weight: 500;">{{ $siswa->nisn ?? '-' }}</span>
-                                    <span style="font-size: 0.6875rem; font-weight: 700; color: {{ $siswa->jenis_kelamin === 'Laki-laki' ? '#0ea5e9' : '#ec4899' }};">
+                                    <span
+                                        style="font-size: 0.6875rem; color: #6b7280; font-weight: 500;">{{ $siswa->nisn ?? '-' }}</span>
+                                    <span
+                                        style="font-size: 0.6875rem; font-weight: 700; color: {{ $siswa->jenis_kelamin === 'Laki-laki' ? '#0ea5e9' : '#ec4899' }};">
                                         {{ $siswa->jenis_kelamin === 'Laki-laki' ? 'L' : 'P' }}
                                     </span>
                                 </div>
                             </div>
 
-                            <button 
-                                type="button"
-                                wire:click="moveToRombel({{ $siswa->id }})"
+                            <button type="button" wire:click="moveToRombel({{ $siswa->id }})"
                                 style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: none; background: #f0fdf4; color: #22c55e; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
                                 onmouseover="this.style.background='#22c55e'; this.style.color='#fff';"
-                                onmouseout="this.style.background='#f0fdf4'; this.style.color='#22c55e';"
-                            >
+                                onmouseout="this.style.background='#f0fdf4'; this.style.color='#22c55e';">
                                 <x-heroicon-m-plus style="width: 16px; height: 16px;" />
                             </button>
                         </div>
                     @empty
-                        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: #d1d5db;">
-                            <x-heroicon-o-face-smile style="width: 56px; height: 56px; opacity: 0.2; margin-bottom: 12px;" />
+                        <div
+                            style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: #d1d5db;">
+                            <x-heroicon-o-face-smile
+                                style="width: 56px; height: 56px; opacity: 0.2; margin-bottom: 12px;" />
                             <p style="font-size: 0.875rem; font-weight: 500;">Tidak ada data yang cocok</p>
                         </div>
                     @endforelse
                 </div>
             </div>
 
-            {{-- Custom Resilient Pagination --}}
-            <div style="padding: 16px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; background: #fafafa;">
-                <span style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Hal. {{ $unassignedSiswa->currentPage() }} / {{ $unassignedSiswa->lastPage() }}</span>
+            {{-- Footer with Bulk Actions --}}
+            <div
+                style="padding: 16px; border-top: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; background: #fafafa; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Hal.
+                        {{ $unassignedSiswa->currentPage() }} / {{ $unassignedSiswa->lastPage() }}</span>
+                    @if (count($selectedUnassigned) > 0)
+                        <span
+                            style="font-size: 0.75rem; color: #f97316; font-weight: 700;">{{ count($selectedUnassigned) }}
+                            dipilih</span>
+                    @endif
+                </div>
                 <div style="display: flex; gap: 8px;">
+                    @if (count($selectedUnassigned) > 0)
+                        <button type="button" wire:click="bulkMoveToRombel"
+                            style="padding: 6px 12px; border-radius: 8px; border: 1px solid #bbf7d0; background: #f0fdf4; color: #22c55e; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#22c55e'; this.style.color='#fff';"
+                            onmouseout="this.style.background='#f0fdf4'; this.style.color='#22c55e';">Tambah
+                            Terpilih</button>
+                    @endif
                     <button type="button" wire:click="previousPage('unassignedPage')" @disabled($unassignedSiswa->onFirstPage())
                         style="padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; background: white; font-size: 0.75rem; font-weight: 700; cursor: {{ $unassignedSiswa->onFirstPage() ? 'not-allowed' : 'pointer' }}; opacity: {{ $unassignedSiswa->onFirstPage() ? '0.5' : '1' }};">Prev</button>
                     <button type="button" wire:click="nextPage('unassignedPage')" @disabled(!$unassignedSiswa->hasMorePages())

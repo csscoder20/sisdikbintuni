@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       
+
         $this->call([
             RoleSeeder::class,
             UserSeeder::class,
@@ -22,20 +22,20 @@ class DatabaseSeeder extends Seeder
             OperatorSekolahSeeder::class,
             MapelSeeder::class,
             RombelSeeder::class,
-            GtkSeeder::class,
-            GtkPendidikanSeeder::class,
+            // GtkSeeder::class,
+            // GtkPendidikanSeeder::class,
             SiswaSeeder::class,
             LaporanSeeder::class,
             LaporanGedungSeeder::class,
             LaporanSiswaSeeder::class,
             LaporanSiswaRekapSeeder::class,
             LaporanSiswaKategoriSeeder::class,
-            LaporanGtkSeeder::class,
-            LaporanGtkKategoriSeeder::class,
-            MengajarSeeder::class,
-            KehadiranGtkSeeder::class,
-            KelulusanSeeder::class,
-            LaporanKeuanganSeeder::class,
+            // LaporanGtkSeeder::class,
+            // LaporanGtkKategoriSeeder::class,
+            // MengajarSeeder::class,
+            // KehadiranGtkSeeder::class,
+            // KelulusanSeeder::class,
+            // LaporanKeuanganSeeder::class,
         ]);
     }
 }

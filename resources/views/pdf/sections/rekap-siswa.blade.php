@@ -1,5 +1,5 @@
 <div class="pdf-section-block">
-    @foreach (['Per Kelas' => 'perKelas', 'Per Umur' => 'perUmur', 'Per Agama' => 'perAgama', 'Per Daerah' => 'perDaerah'] as $title => $key)
+    @foreach (['Berdasarkan Kelas' => 'perKelas', 'Berdasarkan Umur' => 'perUmur', 'Berdasarkan Agama' => 'perAgama', 'Berdasarkan Daerah' => 'perDaerah', 'Berdasarkan Disabilitas' => 'disabilitas'] as $title => $key)
         @if (isset($data[$key]))
             @php
                 $columns = match ($key) {
@@ -18,10 +18,23 @@
                         'papua' => 'Papua',
                         'non_papua' => 'Non Papua',
                     ],
+                    'disabilitas' => [
+                        'tidak' => 'Tidak',
+                        'tuna_netra' => 'Tuna Netra',
+                        'tuna_rungu' => 'Tuna Rungu',
+                        'tuna_wicara' => 'Tuna Wicara',
+                        'tuna_daksa' => 'Tuna Daksa',
+                        'tuna_grahita' => 'Tuna Grahita',
+                        'tuna_lainnya' => 'Tuna Lainnya',
+                    ],
                     default => [],
                 };
 
-                $titleColspan = $key === 'perKelas' ? 20 : count($columns) * 3 + 5;
+                $titleColspan = match ($key) {
+                    'perKelas' => 20,
+                    'disabilitas' => 5,
+                    default => count($columns) * 3 + 5,
+                };
             @endphp
 
             <table class="wide-table" style="{{ $key === 'perUmur' ? 'font-size: 7px !important;' : '' }}">
@@ -68,6 +81,14 @@
                             <th style="text-align: center; background-color: #e5e7eb;">L</th>
                             <th style="text-align: center; background-color: #e5e7eb;">P</th>
                             <th style="text-align: center; background-color: #d1d5db;">JML</th>
+                        </tr>
+                    @elseif($key === 'disabilitas')
+                        <tr>
+                            <th style="width: 20px; text-align: center;">NO</th>
+                            <th style="min-width: 140px;">{{ strtoupper($title) }}</th>
+                            <th style="text-align: center;">L</th>
+                            <th style="text-align: center;">P</th>
+                            <th style="text-align: center; background-color: #eee;">JML</th>
                         </tr>
                     @endif
                 </thead>
@@ -136,6 +157,14 @@
                                     {{ $rowTotalP }}</td>
                                 <td style="text-align: center; background-color: #d1d5db; font-weight: bold;">
                                     {{ $rowTotalJml }}</td>
+                            </tr>
+                        @elseif($key === 'disabilitas')
+                            <tr>
+                                <td style="text-align: center;">{{ $idx + 1 }}</td>
+                                <td>{{ $row['jenis_disabilitas'] ?? '-' }}</td>
+                                <td style="text-align: center;">{{ $row['laki_laki'] ?? 0 }}</td>
+                                <td style="text-align: center;">{{ $row['perempuan'] ?? 0 }}</td>
+                                <td style="text-align: center; background-color: #eee;">{{ $row['total'] ?? 0 }}</td>
                             </tr>
                         @endif
                     @endforeach

@@ -526,7 +526,7 @@ trait HasLaporanBulananLogic
 
     protected function getSiswaBeasiswaCollection($laporanId, $schoolId)
     {
-        $categories = ['tidak' => 'Tidak', 'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat', 'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah', 'beasisswa_swasta' => 'Beasiswa Swasta', 'beasiswa_khusus' => 'Beasiswa Khusus', 'beasiswa_afirmasi' => 'Beasiswa Afirmasi', 'beasiswa_lainnya' => 'Beasiswa Lainnya'];
+        $categories = ['tidak' => 'Tidak', 'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat', 'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah', 'beasiswa_swasta' => 'Beasiswa Swasta', 'beasiswa_khusus' => 'Beasiswa Khusus', 'beasiswa_afirmasi' => 'Beasiswa Afirmasi', 'beasiswa_lainnya' => 'Beasiswa Lainnya'];
         if ($laporanId) {
             $counts = \App\Models\LaporanSiswaKategori::where('jenis_kategori', 'beasiswa')->whereHas('laporanSiswa', fn($q) => $q->where('laporan_id', $laporanId))->get()->groupBy('sub_kategori');
             return collect($categories)->map(fn($label, $key) => ['jenis_beasiswa' => $label, 'penerima_l' => ($counts->get($key) ?: collect())->sum('laki_laki'), 'penerima_p' => ($counts->get($key) ?: collect())->sum('perempuan'), 'penerima_jml' => ($counts->get($key) ?: collect())->sum('total'), 'keterangan' => ''])->values();

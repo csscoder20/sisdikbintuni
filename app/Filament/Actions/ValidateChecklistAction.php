@@ -17,8 +17,7 @@ class ValidateChecklistAction
         ?\Closure $hasDataChecker = null,
         string $missingDataTitle = 'Data Belum Ada',
         string $missingDataBody = 'Belum ada data pada tabel ini. Silakan tambahkan data terlebih dahulu sebelum melakukan validasi.',
-    ): Action
-    {
+    ): Action {
         $statusResolver = function ($livewire) use ($type) {
             // Prefer page-provided helper when available
             if (method_exists($livewire, 'getLaporanStatus')) {
@@ -27,13 +26,14 @@ class ValidateChecklistAction
 
             // Fallback: resolve current laporan for this tenant and check column
             $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
-            
+
             // Check if there is a selected laporan_id filter in the table
             $selectedLaporanId = null;
             if (method_exists($livewire, 'getTableFilterState')) {
                 try {
                     $selectedLaporanId = $livewire->getTableFilterState('laporan_id')['value'] ?? null;
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
             }
 
             if ($selectedLaporanId) {
@@ -105,7 +105,8 @@ class ValidateChecklistAction
                 if (method_exists($livewire, 'getTableFilterState')) {
                     try {
                         $selectedLaporanId = $livewire->getTableFilterState('laporan_id')['value'] ?? null;
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                    }
                 }
 
                 if ($selectedLaporanId) {
@@ -161,177 +162,7 @@ class ValidateChecklistAction
 
                 // If validating nominatif siswa, persist snapshot into laporan_siswa tables
                 if ($type === 'nominatif_siswa') {
-                    $rombels = \App\Models\Rombel::where('sekolah_id', $sekolahId)->get();
-
-                    foreach ($rombels as $rombel) {
-                        $laporanSiswa = \App\Models\LaporanSiswa::firstOrCreate([
-                            'laporan_id' => $laporan->id,
-                            'rombel_id' => $rombel->id,
-                        ]);
-
-                        $laki = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'L%')->count();
-                        $perempuan = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'P%')->count();
-                        $total = $laki + $perempuan;
-
-                        \App\Models\LaporanSiswaRekap::updateOrCreate(
-                            ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'akhir_bulan'],
-                            ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
-                        );
-
-                        $awalExists = \App\Models\LaporanSiswaRekap::where([
-                            'laporan_siswa_id' => $laporanSiswa->id,
-                            'kategori' => 'awal_bulan'
-                        ])->where('total', '>', 0)->exists();
-
-                        if (! $awalExists) {
-                            \App\Models\LaporanSiswaRekap::updateOrCreate(
-                                ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'awal_bulan'],
-                                ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
-                            );
-                        }
-
-                        $categoriesDisabilitas = [
-                            'tidak',
-                            'tuna_netra',
-                            'tuna_rungu',
-                            'tuna_wicara',
-                            'tuna_daksa',
-                            'tuna_grahita',
-                            'tuna_lainnya'
-                        ];
-
-                        foreach ($categoriesDisabilitas as $cat) {
-                            $c_l = $rombel->siswa()->where('disabilitas', $cat)->where('jenis_kelamin', 'LIKE', 'L%')->count();
-                            $c_p = $rombel->siswa()->where('disabilitas', $cat)->where('jenis_kelamin', 'LIKE', 'P%')->count();
-
-                            \App\Models\LaporanSiswaKategori::updateOrCreate(
-                                [
-                                    'laporan_siswa_id' => $laporanSiswa->id,
-                                    'jenis_kategori' => 'disabilitas',
-                                    'sub_kategori' => $cat
-                                ],
-                                [
-                                    'laki_laki' => $c_l,
-                                    'perempuan' => $c_p,
-                                    'total' => $c_l + $c_p
-                                ]
-                            );
-                        }
-
-                        $categoriesBeasiswa = [
-                            'tidak',
-                            'beasiswa_pemerintah_pusat',
-                            'beasiswa_pemerintah_daerah',
-                            'beasisswa_swasta',
-                            'beasiswa_khusus',
-                            'beasiswa_afirmasi',
-                            'beasiswa_lainnya'
-                        ];
-
-                        foreach ($categoriesBeasiswa as $cat) {
-                            $c_l = $rombel->siswa()->where('beasiswa', $cat)->where('jenis_kelamin', 'LIKE', 'L%')->count();
-                            $c_p = $rombel->siswa()->where('beasiswa', $cat)->where('jenis_kelamin', 'LIKE', 'P%')->count();
-
-                            \App\Models\LaporanSiswaKategori::updateOrCreate(
-                                [
-                                    'laporan_siswa_id' => $laporanSiswa->id,
-                                    'jenis_kategori' => 'beasiswa',
-                                    'sub_kategori' => $cat
-                                ],
-                                [
-                                    'laki_laki' => $c_l,
-                                    'perempuan' => $c_p,
-                                    'total' => $c_l + $c_p
-                                ]
-                            );
-                        }
-
-                        // --- Persist Umur per rombel (13..23) ---
-                        $siswasWithDob = $rombel->siswa()->whereNotNull('tanggal_lahir')->get();
-                        $ageCounts = [];
-                        for ($age = 13; $age <= 23; $age++) {
-                            $ageCounts[$age] = ['l' => 0, 'p' => 0, 't' => 0];
-                        }
-                        foreach ($siswasWithDob as $s) {
-                            $umur = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
-                            if ($umur >= 13 && $umur <= 23) {
-                                if (str_contains(strtolower($s->jenis_kelamin ?? ''), 'l')) $ageCounts[$umur]['l']++;
-                                else $ageCounts[$umur]['p']++;
-                                $ageCounts[$umur]['t']++;
-                            }
-                        }
-                        foreach ($ageCounts as $age => $cnt) {
-                            \App\Models\LaporanSiswaKategori::updateOrCreate([
-                                'laporan_siswa_id' => $laporanSiswa->id,
-                                'jenis_kategori' => 'umur',
-                                'sub_kategori' => (string) $age,
-                            ], [
-                                'laki_laki' => $cnt['l'],
-                                'perempuan' => $cnt['p'],
-                                'total' => $cnt['t'],
-                            ]);
-                        }
-
-                        // --- Persist Agama per rombel ---
-                        $agamaMap = [
-                            'islam' => 'islam',
-                            'kristen' => 'kristen',
-                            'katolik' => 'katolik',
-                            'hindu' => 'hindu',
-                            'buddha' => 'buddha',
-                            'khonghucu' => 'khonghucu',
-                        ];
-                        $agamaCounts = array_fill_keys(array_keys($agamaMap), ['l' => 0, 'p' => 0, 't' => 0]);
-                        $siswas = $rombel->siswa()->get();
-                        foreach ($siswas as $s) {
-                            $agama = strtolower($s->agama ?? '');
-                            $field = null;
-                            if (str_contains($agama, 'islam')) $field = 'islam';
-                            elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $field = 'kristen';
-                            elseif (str_contains($agama, 'katolik')) $field = 'katolik';
-                            elseif (str_contains($agama, 'hindu')) $field = 'hindu';
-                            elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $field = 'buddha';
-                            elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $field = 'khonghucu';
-
-                            if ($field) {
-                                if (str_contains(strtolower($s->jenis_kelamin ?? ''), 'l')) $agamaCounts[$field]['l']++;
-                                else $agamaCounts[$field]['p']++;
-                                $agamaCounts[$field]['t']++;
-                            }
-                        }
-                        foreach ($agamaCounts as $sub => $cnt) {
-                            \App\Models\LaporanSiswaKategori::updateOrCreate([
-                                'laporan_siswa_id' => $laporanSiswa->id,
-                                'jenis_kategori' => 'agama',
-                                'sub_kategori' => $sub,
-                            ], [
-                                'laki_laki' => $cnt['l'],
-                                'perempuan' => $cnt['p'],
-                                'total' => $cnt['t'],
-                            ]);
-                        }
-
-                        // --- Persist Daerah (papua / non_papua) per rombel ---
-                        $daerahCounts = ['papua' => ['l' => 0, 'p' => 0, 't' => 0], 'non_papua' => ['l' => 0, 'p' => 0, 't' => 0]];
-                        foreach ($siswas as $s) {
-                            $isPapua = str_contains(strtolower($s->daerah_asal ?? ''), 'papua') && !str_contains(strtolower($s->daerah_asal ?? ''), 'non');
-                            $key = $isPapua ? 'papua' : 'non_papua';
-                            if (str_contains(strtolower($s->jenis_kelamin ?? ''), 'l')) $daerahCounts[$key]['l']++;
-                            else $daerahCounts[$key]['p']++;
-                            $daerahCounts[$key]['t']++;
-                        }
-                        foreach ($daerahCounts as $sub => $cnt) {
-                            \App\Models\LaporanSiswaKategori::updateOrCreate([
-                                'laporan_siswa_id' => $laporanSiswa->id,
-                                'jenis_kategori' => 'asal_daerah',
-                                'sub_kategori' => $sub,
-                            ], [
-                                'laki_laki' => $cnt['l'],
-                                'perempuan' => $cnt['p'],
-                                'total' => $cnt['t'],
-                            ]);
-                        }
-                    }
+                    static::persistNominatifSiswaSnapshot($laporan);
                 }
 
                 if ($type === 'nominatif_gtk') {
@@ -347,7 +178,7 @@ class ValidateChecklistAction
 
                     $gtkGroups = \App\Models\Gtk::where('sekolah_id', $sekolahId)
                         ->get()
-                        ->groupBy(fn ($gtk) => $normalizeJenisGtk($gtk->jenis_gtk));
+                        ->groupBy(fn($gtk) => $normalizeJenisGtk($gtk->jenis_gtk));
 
                     $periodEndDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth();
                     $jenisGtkKeys = ['kepala_sekolah', 'guru', 'tenaga_administrasi'];
@@ -407,11 +238,25 @@ class ValidateChecklistAction
                         }
 
                         $statusCounts = array_fill_keys([
-                            'gol_i_a', 'gol_i_b', 'gol_i_c', 'gol_i_d',
-                            'gol_ii_a', 'gol_ii_b', 'gol_ii_c', 'gol_ii_d',
-                            'gol_iii_a', 'gol_iii_b', 'gol_iii_c', 'gol_iii_d',
-                            'gol_iv_a', 'gol_iv_b', 'gol_iv_c', 'gol_iv_d', 'gol_iv_e',
-                            'pppk', 'honorer_sekolah',
+                            'gol_i_a',
+                            'gol_i_b',
+                            'gol_i_c',
+                            'gol_i_d',
+                            'gol_ii_a',
+                            'gol_ii_b',
+                            'gol_ii_c',
+                            'gol_ii_d',
+                            'gol_iii_a',
+                            'gol_iii_b',
+                            'gol_iii_c',
+                            'gol_iii_d',
+                            'gol_iv_a',
+                            'gol_iv_b',
+                            'gol_iv_c',
+                            'gol_iv_d',
+                            'gol_iv_e',
+                            'pppk',
+                            'honorer_sekolah',
                         ], 0);
 
                         $pendidikanCounts = array_fill_keys(['slta', 'di', 'dii', 'diii', 's1', 's2', 's3'], 0);
@@ -514,7 +359,7 @@ class ValidateChecklistAction
 
                 if ($type === 'rekap_kehadiran') {
                     $gtkIds = \App\Models\Gtk::where('sekolah_id', $sekolahId)->pluck('id');
-                    
+
                     // Sync laporan_id ke KehadiranGtk (rekap bulanan)
                     \App\Models\KehadiranGtk::whereIn('gtk_id', $gtkIds)
                         ->where('bulan', $month)
@@ -545,5 +390,181 @@ class ValidateChecklistAction
                     // non-fatal: ignore if emit not available
                 }
             });
+    }
+
+    public static function persistNominatifSiswaSnapshot(Laporan $laporan): void
+    {
+        $sekolahId = $laporan->sekolah_id;
+        $rombels = \App\Models\Rombel::where('sekolah_id', $sekolahId)->get();
+
+        foreach ($rombels as $rombel) {
+            $laporanSiswa = \App\Models\LaporanSiswa::firstOrCreate([
+                'laporan_id' => $laporan->id,
+                'rombel_id' => $rombel->id,
+            ]);
+
+            $laki = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'L%')->count();
+            $perempuan = $rombel->siswa()->where('jenis_kelamin', 'LIKE', 'P%')->count();
+            $total = $laki + $perempuan;
+
+            \App\Models\LaporanSiswaRekap::updateOrCreate(
+                ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'akhir_bulan'],
+                ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
+            );
+
+            $awalExists = \App\Models\LaporanSiswaRekap::where([
+                'laporan_siswa_id' => $laporanSiswa->id,
+                'kategori' => 'awal_bulan'
+            ])->where('total', '>', 0)->exists();
+
+            if (! $awalExists) {
+                \App\Models\LaporanSiswaRekap::updateOrCreate(
+                    ['laporan_siswa_id' => $laporanSiswa->id, 'kategori' => 'awal_bulan'],
+                    ['laki_laki' => $laki, 'perempuan' => $perempuan, 'total' => $total]
+                );
+            }
+
+            $categoriesDisabilitas = [
+                'tidak',
+                'tuna_netra',
+                'tuna_rungu',
+                'tuna_wicara',
+                'tuna_daksa',
+                'tuna_grahita',
+                'tuna_lainnya'
+            ];
+
+            foreach ($categoriesDisabilitas as $cat) {
+                $c_l = $rombel->siswa()->where('disabilitas', $cat)->where('jenis_kelamin', 'LIKE', 'L%')->count();
+                $c_p = $rombel->siswa()->where('disabilitas', $cat)->where('jenis_kelamin', 'LIKE', 'P%')->count();
+
+                \App\Models\LaporanSiswaKategori::updateOrCreate(
+                    [
+                        'laporan_siswa_id' => $laporanSiswa->id,
+                        'jenis_kategori' => 'disabilitas',
+                        'sub_kategori' => $cat
+                    ],
+                    [
+                        'laki_laki' => $c_l,
+                        'perempuan' => $c_p,
+                        'total' => $c_l + $c_p
+                    ]
+                );
+            }
+
+            $categoriesBeasiswa = [
+                'tidak',
+                'beasiswa_pemerintah_pusat',
+                'beasiswa_pemerintah_daerah',
+                'beasiswa_swasta',
+                'beasiswa_khusus',
+                'beasiswa_afirmasi',
+                'beasiswa_lainnya'
+            ];
+
+            foreach ($categoriesBeasiswa as $cat) {
+                $c_l = $rombel->siswa()->where('beasiswa', $cat)->where('jenis_kelamin', 'LIKE', 'L%')->count();
+                $c_p = $rombel->siswa()->where('beasiswa', $cat)->where('jenis_kelamin', 'LIKE', 'P%')->count();
+
+                \App\Models\LaporanSiswaKategori::updateOrCreate(
+                    [
+                        'laporan_siswa_id' => $laporanSiswa->id,
+                        'jenis_kategori' => 'beasiswa',
+                        'sub_kategori' => $cat
+                    ],
+                    [
+                        'laki_laki' => $c_l,
+                        'perempuan' => $c_p,
+                        'total' => $c_l + $c_p
+                    ]
+                );
+            }
+
+            // --- Persist Umur per rombel (13..23) ---
+            $siswasWithDob = $rombel->siswa()->whereNotNull('tanggal_lahir')->get();
+            $ageCounts = [];
+            for ($age = 13; $age <= 23; $age++) {
+                $ageCounts[$age] = ['l' => 0, 'p' => 0, 't' => 0];
+            }
+            foreach ($siswasWithDob as $s) {
+                $umur = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
+                if ($umur >= 13 && $umur <= 23) {
+                    if (str_contains(strtolower($s->jenis_kelamin ?? ''), 'l')) $ageCounts[$umur]['l']++;
+                    else $ageCounts[$umur]['p']++;
+                    $ageCounts[$umur]['t']++;
+                }
+            }
+            foreach ($ageCounts as $age => $cnt) {
+                \App\Models\LaporanSiswaKategori::updateOrCreate([
+                    'laporan_siswa_id' => $laporanSiswa->id,
+                    'jenis_kategori' => 'umur',
+                    'sub_kategori' => (string) $age,
+                ], [
+                    'laki_laki' => $cnt['l'],
+                    'perempuan' => $cnt['p'],
+                    'total' => $cnt['t'],
+                ]);
+            }
+
+            // --- Persist Agama per rombel ---
+            $agamaMap = [
+                'islam' => 'islam',
+                'kristen' => 'kristen',
+                'katolik' => 'katolik',
+                'hindu' => 'hindu',
+                'buddha' => 'buddha',
+                'khonghucu' => 'khonghucu',
+            ];
+            $agamaCounts = array_fill_keys(array_keys($agamaMap), ['l' => 0, 'p' => 0, 't' => 0]);
+            $siswas = $rombel->siswa()->get();
+            foreach ($siswas as $s) {
+                $agama = strtolower($s->agama ?? '');
+                $field = null;
+                if (str_contains($agama, 'islam')) $field = 'islam';
+                elseif (str_contains($agama, 'kristen') || str_contains($agama, 'protestan')) $field = 'kristen';
+                elseif (str_contains($agama, 'katolik')) $field = 'katolik';
+                elseif (str_contains($agama, 'hindu')) $field = 'hindu';
+                elseif (str_contains($agama, 'budha') || str_contains($agama, 'buddha')) $field = 'buddha';
+                elseif (str_contains($agama, 'konghucu') || str_contains($agama, 'khonghucu')) $field = 'khonghucu';
+
+                if ($field) {
+                    if (str_contains(strtolower($s->jenis_kelamin ?? ''), 'l')) $agamaCounts[$field]['l']++;
+                    else $agamaCounts[$field]['p']++;
+                    $agamaCounts[$field]['t']++;
+                }
+            }
+            foreach ($agamaCounts as $sub => $cnt) {
+                \App\Models\LaporanSiswaKategori::updateOrCreate([
+                    'laporan_siswa_id' => $laporanSiswa->id,
+                    'jenis_kategori' => 'agama',
+                    'sub_kategori' => $sub,
+                ], [
+                    'laki_laki' => $cnt['l'],
+                    'perempuan' => $cnt['p'],
+                    'total' => $cnt['t'],
+                ]);
+            }
+
+            // --- Persist Daerah (papua / non_papua) per rombel ---
+            $daerahCounts = ['papua' => ['l' => 0, 'p' => 0, 't' => 0], 'non_papua' => ['l' => 0, 'p' => 0, 't' => 0]];
+            foreach ($siswas as $s) {
+                $isPapua = str_contains(strtolower($s->daerah_asal ?? ''), 'papua') && !str_contains(strtolower($s->daerah_asal ?? ''), 'non');
+                $key = $isPapua ? 'papua' : 'non_papua';
+                if (str_contains(strtolower($s->jenis_kelamin ?? ''), 'l')) $daerahCounts[$key]['l']++;
+                else $daerahCounts[$key]['p']++;
+                $daerahCounts[$key]['t']++;
+            }
+            foreach ($daerahCounts as $sub => $cnt) {
+                \App\Models\LaporanSiswaKategori::updateOrCreate([
+                    'laporan_siswa_id' => $laporanSiswa->id,
+                    'jenis_kategori' => 'asal_daerah',
+                    'sub_kategori' => $sub,
+                ], [
+                    'laki_laki' => $cnt['l'],
+                    'perempuan' => $cnt['p'],
+                    'total' => $cnt['t'],
+                ]);
+            }
+        }
     }
 }

@@ -5,9 +5,13 @@ namespace App\Filament\Pages;
 use App\Models\Gtk;
 use App\Models\GtkPendidikan;
 use App\Models\KehadiranGtk;
+use App\Filament\Actions\ValidateChecklistAction;
 use App\Models\Laporan;
 use App\Models\LaporanGedung;
 use App\Models\LaporanKeuangan;
+use App\Models\LaporanSiswa;
+use App\Models\LaporanSiswaKategori;
+use App\Models\LaporanSiswaRekap;
 use App\Models\Mapel;
 use App\Models\Mengajar;
 use App\Models\Rombel;
@@ -515,13 +519,14 @@ class ValidasiData extends Page
         $month = (int) date('m');
         $year  = (int) date('Y');
 
-        Laporan::where('sekolah_id', $id)
-            ->where('bulan', $month)
-            ->where('tahun', $year)
-            ->update([
-                'status' => 'valid',
-                'tanggal_submit' => now(),
-            ]);
+        $laporan = Laporan::updateOrCreate(
+            ['sekolah_id' => $id, 'bulan' => $month, 'tahun' => $year],
+            ['status' => 'valid', 'tanggal_submit' => now()]
+        );
+
+        if ($this->stepStatuses[6] ?? false) {
+            ValidateChecklistAction::persistNominatifSiswaSnapshot($laporan);
+        }
 
         $this->isSubmitted = true;
 

@@ -195,7 +195,7 @@
                                     @empty
                                         <tr>
                                             <td colspan="4"
-                                                style="padding: 1.5rem; text-align: center; color: #6b7280;">
+                                                style="font-size: 0.75rem; padding: 1.5rem; text-align: center; color: #6b7280;">
                                                 Belum ada riwayat pelaporan.
                                             </td>
                                         </tr>

@@ -247,7 +247,7 @@ class KeadaanSiswa extends Page
 
             $data = $rombels->map(function ($rombel) use ($laporanSiswas) {
                 $ls = $laporanSiswas->get($rombel->id);
-                
+
                 if ($ls) {
                     $rekaps = $ls->rekap->groupBy('kategori');
                     $getRekap = function ($cat) use ($rekaps) {
@@ -287,12 +287,24 @@ class KeadaanSiswa extends Page
                     return [
                         'rombel_id' => $rombel->id,
                         'nama_rombel' => $rombel->nama,
-                        'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0,
-                        'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0,
-                        'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0,
-                        'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0,
-                        'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0,
-                        'akhir_bulan_l' => 0, 'akhir_bulan_p' => 0, 'akhir_bulan_jml' => 0,
+                        'awal_bulan_l' => 0,
+                        'awal_bulan_p' => 0,
+                        'awal_bulan_jml' => 0,
+                        'mutasi_l' => 0,
+                        'mutasi_p' => 0,
+                        'mutasi_jml' => 0,
+                        'mutasi_keluar_l' => 0,
+                        'mutasi_keluar_p' => 0,
+                        'mutasi_keluar_jml' => 0,
+                        'putus_sekolah_l' => 0,
+                        'putus_sekolah_p' => 0,
+                        'putus_sekolah_jml' => 0,
+                        'mengulang_l' => 0,
+                        'mengulang_p' => 0,
+                        'mengulang_jml' => 0,
+                        'akhir_bulan_l' => 0,
+                        'akhir_bulan_p' => 0,
+                        'akhir_bulan_jml' => 0,
                     ];
                 }
             });
@@ -300,7 +312,7 @@ class KeadaanSiswa extends Page
             // Tambahkan data TANPA ROMBEL jika ada di snapshot (rombel_id null)
             $lsNone = $laporanSiswas->get(""); // keyBy('rombel_id') handles null as empty string key sometimes or check specifically
             if (!$lsNone) $lsNone = $laporanSiswas->get(null);
-            
+
             if ($lsNone) {
                 $rekaps = $lsNone->rekap->groupBy('kategori');
                 $getRekap = function ($cat) use ($rekaps) {
@@ -377,11 +389,21 @@ class KeadaanSiswa extends Page
             $data->push([
                 'rombel_id' => 'none',
                 'nama_rombel' => 'TANPA ROMBEL',
-                'awal_bulan_l' => 0, 'awal_bulan_p' => 0, 'awal_bulan_jml' => 0,
-                'mutasi_l' => 0, 'mutasi_p' => 0, 'mutasi_jml' => 0,
-                'mutasi_keluar_l' => 0, 'mutasi_keluar_p' => 0, 'mutasi_keluar_jml' => 0,
-                'putus_sekolah_l' => 0, 'putus_sekolah_p' => 0, 'putus_sekolah_jml' => 0,
-                'mengulang_l' => 0, 'mengulang_p' => 0, 'mengulang_jml' => 0,
+                'awal_bulan_l' => 0,
+                'awal_bulan_p' => 0,
+                'awal_bulan_jml' => 0,
+                'mutasi_l' => 0,
+                'mutasi_p' => 0,
+                'mutasi_jml' => 0,
+                'mutasi_keluar_l' => 0,
+                'mutasi_keluar_p' => 0,
+                'mutasi_keluar_jml' => 0,
+                'putus_sekolah_l' => 0,
+                'putus_sekolah_p' => 0,
+                'putus_sekolah_jml' => 0,
+                'mengulang_l' => 0,
+                'mengulang_p' => 0,
+                'mengulang_jml' => 0,
                 'akhir_bulan_l' => $noRombelL,
                 'akhir_bulan_p' => $noRombelP,
                 'akhir_bulan_jml' => $noRombelL + $noRombelP,
@@ -404,7 +426,9 @@ class KeadaanSiswa extends Page
                 $item = ['rombel_id' => $rombel->id, 'nama_rombel' => $rombel->nama];
                 for ($age = 13; $age <= 23; $age++) {
                     $prefix = 'umur_' . $age;
-                    $item[$prefix . '_l'] = 0; $item[$prefix . '_p'] = 0; $item[$prefix . '_jml'] = 0;
+                    $item[$prefix . '_l'] = 0;
+                    $item[$prefix . '_p'] = 0;
+                    $item[$prefix . '_jml'] = 0;
                 }
 
                 $ls = $laporanSiswas->get($rombel->id);
@@ -430,7 +454,9 @@ class KeadaanSiswa extends Page
             $item = ['rombel_id' => $rombel->id, 'nama_rombel' => $rombel->nama];
             for ($age = 13; $age <= 23; $age++) {
                 $prefix = 'umur_' . $age;
-                $item[$prefix . '_l'] = 0; $item[$prefix . '_p'] = 0; $item[$prefix . '_jml'] = 0;
+                $item[$prefix . '_l'] = 0;
+                $item[$prefix . '_p'] = 0;
+                $item[$prefix . '_jml'] = 0;
             }
 
             $siswas = $rombel->siswa()->whereNotNull('tanggal_lahir')->get();
@@ -450,7 +476,12 @@ class KeadaanSiswa extends Page
         $siswasNoR = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->whereNotNull('tanggal_lahir')->get();
         if ($siswasNoR->count() > 0) {
             $item = ['rombel_id' => 'none', 'nama_rombel' => 'TANPA ROMBEL'];
-            for ($age = 13; $age <= 23; $age++) { $prefix = 'umur_' . $age; $item[$prefix . '_l'] = 0; $item[$prefix . '_p'] = 0; $item[$prefix . '_jml'] = 0; }
+            for ($age = 13; $age <= 23; $age++) {
+                $prefix = 'umur_' . $age;
+                $item[$prefix . '_l'] = 0;
+                $item[$prefix . '_p'] = 0;
+                $item[$prefix . '_jml'] = 0;
+            }
             foreach ($siswasNoR as $s) {
                 $age = \Carbon\Carbon::parse($s->tanggal_lahir)->age;
                 if ($age >= 13 && $age <= 23) {
@@ -479,12 +510,24 @@ class KeadaanSiswa extends Page
                 $item = [
                     'rombel_id' => $rombel->id,
                     'nama_rombel' => $rombel->nama,
-                    'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0,
-                    'kristen_l' => 0, 'kristen_p' => 0, 'kristen_jml' => 0,
-                    'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0,
-                    'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0,
-                    'buddha_l' => 0, 'buddha_p' => 0, 'buddha_jml' => 0,
-                    'khonghucu_l' => 0, 'khonghucu_p' => 0, 'khonghucu_jml' => 0,
+                    'islam_l' => 0,
+                    'islam_p' => 0,
+                    'islam_jml' => 0,
+                    'kristen_l' => 0,
+                    'kristen_p' => 0,
+                    'kristen_jml' => 0,
+                    'katolik_l' => 0,
+                    'katolik_p' => 0,
+                    'katolik_jml' => 0,
+                    'hindu_l' => 0,
+                    'hindu_p' => 0,
+                    'hindu_jml' => 0,
+                    'buddha_l' => 0,
+                    'buddha_p' => 0,
+                    'buddha_jml' => 0,
+                    'khonghucu_l' => 0,
+                    'khonghucu_p' => 0,
+                    'khonghucu_jml' => 0,
                 ];
 
                 $ls = $laporanSiswas->get($rombel->id);
@@ -509,12 +552,24 @@ class KeadaanSiswa extends Page
             $item = [
                 'rombel_id' => $rombel->id,
                 'nama_rombel' => $rombel->nama,
-                'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0,
-                'kristen_l' => 0, 'kristen_p' => 0, 'kristen_jml' => 0,
-                'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0,
-                'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0,
-                'buddha_l' => 0, 'buddha_p' => 0, 'buddha_jml' => 0,
-                'khonghucu_l' => 0, 'khonghucu_p' => 0, 'khonghucu_jml' => 0,
+                'islam_l' => 0,
+                'islam_p' => 0,
+                'islam_jml' => 0,
+                'kristen_l' => 0,
+                'kristen_p' => 0,
+                'kristen_jml' => 0,
+                'katolik_l' => 0,
+                'katolik_p' => 0,
+                'katolik_jml' => 0,
+                'hindu_l' => 0,
+                'hindu_p' => 0,
+                'hindu_jml' => 0,
+                'buddha_l' => 0,
+                'buddha_p' => 0,
+                'buddha_jml' => 0,
+                'khonghucu_l' => 0,
+                'khonghucu_p' => 0,
+                'khonghucu_jml' => 0,
             ];
 
             $siswas = $rombel->siswa()->get();
@@ -541,13 +596,26 @@ class KeadaanSiswa extends Page
         $siswasNoR = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->get();
         if ($siswasNoR->count() > 0) {
             $item = [
-                'rombel_id' => 'none', 'nama_rombel' => 'TANPA ROMBEL',
-                'islam_l' => 0, 'islam_p' => 0, 'islam_jml' => 0,
-                'kristen_l' => 0, 'kristen_p' => 0, 'kristen_jml' => 0,
-                'katolik_l' => 0, 'katolik_p' => 0, 'katolik_jml' => 0,
-                'hindu_l' => 0, 'hindu_p' => 0, 'hindu_jml' => 0,
-                'buddha_l' => 0, 'buddha_p' => 0, 'buddha_jml' => 0,
-                'khonghucu_l' => 0, 'khonghucu_p' => 0, 'khonghucu_jml' => 0,
+                'rombel_id' => 'none',
+                'nama_rombel' => 'TANPA ROMBEL',
+                'islam_l' => 0,
+                'islam_p' => 0,
+                'islam_jml' => 0,
+                'kristen_l' => 0,
+                'kristen_p' => 0,
+                'kristen_jml' => 0,
+                'katolik_l' => 0,
+                'katolik_p' => 0,
+                'katolik_jml' => 0,
+                'hindu_l' => 0,
+                'hindu_p' => 0,
+                'hindu_jml' => 0,
+                'buddha_l' => 0,
+                'buddha_p' => 0,
+                'buddha_jml' => 0,
+                'khonghucu_l' => 0,
+                'khonghucu_p' => 0,
+                'khonghucu_jml' => 0,
             ];
             foreach ($siswasNoR as $s) {
                 $agama = strtolower($s->agama ?? '');
@@ -584,8 +652,12 @@ class KeadaanSiswa extends Page
                 $item = [
                     'rombel_id' => $rombel->id,
                     'nama_rombel' => $rombel->nama,
-                    'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0,
-                    'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0,
+                    'papua_l' => 0,
+                    'papua_p' => 0,
+                    'papua_jml' => 0,
+                    'non_papua_l' => 0,
+                    'non_papua_p' => 0,
+                    'non_papua_jml' => 0,
                 ];
 
                 $ls = $laporanSiswas->get($rombel->id);
@@ -610,8 +682,12 @@ class KeadaanSiswa extends Page
             $item = [
                 'rombel_id' => $rombel->id,
                 'nama_rombel' => $rombel->nama,
-                'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0,
-                'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0,
+                'papua_l' => 0,
+                'papua_p' => 0,
+                'papua_jml' => 0,
+                'non_papua_l' => 0,
+                'non_papua_p' => 0,
+                'non_papua_jml' => 0,
             ];
 
             $siswas = $rombel->siswa()->get();
@@ -629,9 +705,14 @@ class KeadaanSiswa extends Page
         $siswasNoR = Siswa::where('sekolah_id', $tenantId)->whereDoesntHave('rombel')->get();
         if ($siswasNoR->count() > 0) {
             $item = [
-                'rombel_id' => 'none', 'nama_rombel' => 'TANPA ROMBEL',
-                'papua_l' => 0, 'papua_p' => 0, 'papua_jml' => 0,
-                'non_papua_l' => 0, 'non_papua_p' => 0, 'non_papua_jml' => 0,
+                'rombel_id' => 'none',
+                'nama_rombel' => 'TANPA ROMBEL',
+                'papua_l' => 0,
+                'papua_p' => 0,
+                'papua_jml' => 0,
+                'non_papua_l' => 0,
+                'non_papua_p' => 0,
+                'non_papua_jml' => 0,
             ];
             foreach ($siswasNoR as $s) {
                 $daerah = strtolower($s->daerah_asal ?? '');
@@ -695,7 +776,7 @@ class KeadaanSiswa extends Page
             'tidak' => 'Tidak',
             'beasiswa_pemerintah_pusat' => 'Beasiswa Pemerintah Pusat',
             'beasiswa_pemerintah_daerah' => 'Beasiswa Pemerintah Daerah',
-            'beasisswa_swasta' => 'Beasiswa Swasta',
+            'beasiswa_swasta' => 'Beasiswa Swasta',
             'beasiswa_khusus' => 'Beasiswa Khusus',
             'beasiswa_afirmasi' => 'Beasiswa Afirmasi',
             'beasiswa_lainnya' => 'Beasiswa Lainnya'
