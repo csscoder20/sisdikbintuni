@@ -406,9 +406,9 @@
                             var item = document.createElement('div');
                             item.className = 'flex items-center gap-2';
                             item.innerHTML =
-                                '<span class="w-4 h-4 rounded-sm border border-slate-300" style="background:' +
-                                color +
-                                '; display: inline-block; min-width: 1rem; min-height: 1rem;"></span>' +
+                                '<span class="rounded-sm border border-slate-300" style="position: relative; overflow: hidden; background-color: #b0d8f2; display: inline-block; min-width: 1rem; min-height: 1rem; width: 1rem; height: 1rem;">' +
+                                '<span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color:' + color + '; opacity: 0.45;"></span>' +
+                                '</span>' +
                                 '<span class="text-xs text-gray-700">' + kecamatanName + '</span>';
                             legendContainer.appendChild(item);
                         });

@@ -231,7 +231,16 @@
 
                                     {{-- Page Numbers --}}
                                     <div style="display: flex; gap: 0.25rem;">
-                                        @for ($page = 1; $page <= $this->getRiwayatLaporanLastPage(); $page++)
+                                        @php
+                                            $lapLastPage = $this->getRiwayatLaporanLastPage();
+                                            $lapCurrentPage = $this->laporanCurrentPage;
+                                            $lapStartPage = max(1, $lapCurrentPage - 1);
+                                            $lapEndPage = min($lapLastPage, $lapStartPage + 2);
+                                            if ($lapEndPage - $lapStartPage < 2) {
+                                                $lapStartPage = max(1, $lapEndPage - 2);
+                                            }
+                                        @endphp
+                                        @for ($page = $lapStartPage; $page <= $lapEndPage; $page++)
                                             @if ($page === $this->laporanCurrentPage)
                                                 <button
                                                     style="padding: 0.5rem 0.75rem; background: #3b82f6; color: #ffffff; border: 1px solid #3b82f6; border-radius: 0.5rem; cursor: default; font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; min-width: 2.5rem;">
@@ -334,47 +343,67 @@
                     </div>
 
                     {{-- Activity Log Pagination --}}
-                    @if ($this->getActivityLogLastPage() > 1)
+                    @if ($this->getActivityLogTotal() > 0)
                         <div
-                            style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-                            {{-- Previous Button --}}
-                            <button wire:click="prevActivityLogPage" @disabled($this->activityLogCurrentPage === 1)
-                                style="padding: 0.5rem 0.75rem; background: @if ($this->activityLogCurrentPage === 1) #f3f4f6 @else #ffffff @endif; color: @if ($this->activityLogCurrentPage === 1) #d1d5db @else #374151 @endif; border: 1px solid @if ($this->activityLogCurrentPage === 1) #e5e7eb @else #d1d5db @endif; border-radius: 0.5rem; cursor: @if ($this->activityLogCurrentPage === 1) not-allowed @else pointer @endif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
-                                <svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                                Sebelumnya
-                            </button>
-
-                            {{-- Page Buttons --}}
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                @for ($page = 1; $page <= $this->getActivityLogLastPage(); $page++)
-                                    @if ($page === $this->activityLogCurrentPage)
-                                        <button
-                                            style="padding: 0.5rem 0.75rem; background: #3b82f6; color: #ffffff; border: 1px solid #3b82f6; border-radius: 0.5rem; cursor: default; font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; min-width: 2.5rem;">
-                                            {{ $page }}
-                                        </button>
-                                    @else
-                                        <button wire:click="goToActivityLogPage({{ $page }})"
-                                            style="padding: 0.5rem 0.75rem; background: #ffffff; color: #374151; border: 1px solid #d1d5db; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; min-width: 2.5rem; transition: all 0.2s;">
-                                            {{ $page }}
-                                        </button>
-                                    @endif
-                                @endfor
+                            style="display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                            <div style="font-size: 0.875rem; color: #6b7280; line-height: 1.25rem;">
+                                Menampilkan <span
+                                    style="font-weight: 600;">{{ ($this->activityLogCurrentPage - 1) * $this->activityLogPerPage + 1 }}</span>
+                                sampai <span
+                                    style="font-weight: 600;">{{ min($this->activityLogCurrentPage * $this->activityLogPerPage, $this->getActivityLogTotal()) }}</span>
+                                dari <span style="font-weight: 600;">{{ $this->getActivityLogTotal() }}</span>
+                                data
                             </div>
 
-                            {{-- Next Button --}}
-                            <button wire:click="nextActivityLogPage" @disabled($this->activityLogCurrentPage === $this->getActivityLogLastPage())
-                                style="padding: 0.5rem 0.75rem; background: @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) #f3f4f6 @else #ffffff @endif; color: @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) #d1d5db @else #374151 @endif; border: 1px solid @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) #e5e7eb @else #d1d5db @endif; border-radius: 0.5rem; cursor: @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) not-allowed @else pointer @endif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
-                                Selanjutnya
-                                <svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </button>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                {{-- Previous Button --}}
+                                <button wire:click="prevActivityLogPage" @disabled($this->activityLogCurrentPage === 1)
+                                    style="padding: 0.5rem 0.75rem; background: @if ($this->activityLogCurrentPage === 1) #f3f4f6 @else #ffffff @endif; color: @if ($this->activityLogCurrentPage === 1) #d1d5db @else #374151 @endif; border: 1px solid @if ($this->activityLogCurrentPage === 1) #e5e7eb @else #d1d5db @endif; border-radius: 0.5rem; cursor: @if ($this->activityLogCurrentPage === 1) not-allowed @else pointer @endif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                    <svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    Sebelumnya
+                                </button>
+
+                                {{-- Page Buttons --}}
+                                <div style="display: flex; gap: 0.25rem;">
+                                    @php
+                                        $logLastPage = $this->getActivityLogLastPage();
+                                        $logCurrentPage = $this->activityLogCurrentPage;
+                                        $logStartPage = max(1, $logCurrentPage - 1);
+                                        $logEndPage = min($logLastPage, $logStartPage + 2);
+                                        if ($logEndPage - $logStartPage < 2) {
+                                            $logStartPage = max(1, $logEndPage - 2);
+                                        }
+                                    @endphp
+                                    @for ($page = $logStartPage; $page <= $logEndPage; $page++)
+                                        @if ($page === $this->activityLogCurrentPage)
+                                            <button
+                                                style="padding: 0.5rem 0.75rem; background: #3b82f6; color: #ffffff; border: 1px solid #3b82f6; border-radius: 0.5rem; cursor: default; font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; min-width: 2.5rem;">
+                                                {{ $page }}
+                                            </button>
+                                        @else
+                                            <button wire:click="goToActivityLogPage({{ $page }})"
+                                                style="padding: 0.5rem 0.75rem; background: #ffffff; color: #374151; border: 1px solid #d1d5db; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; min-width: 2.5rem; transition: all 0.2s;">
+                                                {{ $page }}
+                                            </button>
+                                        @endif
+                                    @endfor
+                                </div>
+
+                                {{-- Next Button --}}
+                                <button wire:click="nextActivityLogPage" @disabled($this->activityLogCurrentPage === $this->getActivityLogLastPage())
+                                    style="padding: 0.5rem 0.75rem; background: @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) #f3f4f6 @else #ffffff @endif; color: @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) #d1d5db @else #374151 @endif; border: 1px solid @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) #e5e7eb @else #d1d5db @endif; border-radius: 0.5rem; cursor: @if ($this->activityLogCurrentPage === $this->getActivityLogLastPage()) not-allowed @else pointer @endif; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                    Selanjutnya
+                                    <svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     @endif
                 </div>
