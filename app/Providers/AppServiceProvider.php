@@ -6,6 +6,7 @@ use App\Support\ValidationPeriod;
 use Illuminate\Support\ServiceProvider;
 use Filament\Actions\Action;
 use Filament\Actions\Imports\ImportColumn;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Password::defaults(function () {
+            return Password::min(8)
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised();
+        });
+
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Auth\Events\Login::class,
             \App\Listeners\LogAuthenticationActivity::class

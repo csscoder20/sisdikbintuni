@@ -44,7 +44,8 @@ class CustomRegister extends BaseRegister
                 \Filament\Schemas\Components\View::make('filament.components.captcha'),
                 \Filament\Forms\Components\Hidden::make('captcha_token')
                     ->extraAttributes(['data-captcha-token' => 'true'])
-                    ->required(),
+                    ->required()
+                    ->rule(new \App\Rules\Captcha()),
             ]);
     }
 
@@ -54,22 +55,6 @@ class CustomRegister extends BaseRegister
             $this->rateLimit(2);
         } catch (TooManyRequestsException $exception) {
             $this->getRateLimitedNotification($exception)?->send();
-
-            return null;
-        }
-
-        try {
-            \Illuminate\Support\Facades\Validator::make(
-                ['captcha_token' => $this->form->getState()['captcha_token'] ?? null],
-                ['captcha_token' => ['required', new \App\Rules\Captcha]],
-                ['captcha_token.required' => 'Selesaikan captcha terlebih dahulu.']
-            )->validate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Notification::make()
-                ->title('Gagal Validasi Captcha')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
 
             return null;
         }
@@ -115,21 +100,26 @@ class CustomRegister extends BaseRegister
         // Skip automatic login after registration
         // Filament::auth()->login($user);
 
-        session()->flash('swal_message', [
-            'title' => 'Pendaftaran Berhasil',
-            'text' => 'Akun Anda telah berhasil didaftarkan. Harap tunggu verifikasi dari Admin Dinas sebelum Anda dapat masuk ke panel.',
-            'icon' => 'success',
-        ]);
+        // Tampilkan modal sukses di tengah halaman
+        $this->mountAction('registrationSuccess');
 
+        return null;
+    }
 
-
-        // Redirect to login page using the correct RegistrationResponse contract
-        return new class implements RegistrationResponse {
-            public function toResponse($request)
-            {
-                return redirect()->route('filament.dinas.auth.login');
-            }
-        };
+    public function registrationSuccessAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('registrationSuccess')
+            ->modalHeading('Pendaftaran Berhasil! 🎉')
+            ->modalIcon('heroicon-o-check-circle')
+            ->modalIconColor('success')
+            ->modalWidth('md')
+            ->modalDescription(
+                'Akun Anda telah berhasil didaftarkan. Harap tunggu verifikasi dari Admin Dinas sebelum Anda dapat masuk ke panel.'
+            )
+            ->modalSubmitActionLabel('Mengerti, ke Halaman Login')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => $this->redirect(route('filament.dinas.auth.login')));
     }
 
     public function getSubheading(): string | \Illuminate\Contracts\Support\Htmlable | null

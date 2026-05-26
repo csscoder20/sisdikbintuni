@@ -60,11 +60,7 @@ class CustomLogin extends BaseLogin
         if ($user && $user->status === 'rejected') {
             Filament::auth()->logout();
 
-            session()->flash('swal_message', [
-                'title' => 'Akun Dinonaktifkan',
-                'text' => 'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi Admin Dinas untuk informasi lebih lanjut.',
-                'icon' => 'error',
-            ]);
+            session()->flash('modal_alert', 'rejected');
 
             return new class implements LoginResponse {
                 public function toResponse($request)
@@ -78,11 +74,7 @@ class CustomLogin extends BaseLogin
         if ($user && $user->hasRole('operator') && $user->status === 'pending') {
             Filament::auth()->logout();
 
-            session()->flash('swal_message', [
-                'title' => 'Verifikasi Tertunda',
-                'text' => 'Akun Anda sedang diverifikasi oleh Admin Dinas. Silakan cek email Anda untuk mendapatkan update terkait akun Anda.',
-                'icon' => 'warning',
-            ]);
+            session()->flash('modal_alert', 'pending');
 
             return new class implements LoginResponse {
                 public function toResponse($request)
@@ -133,24 +125,42 @@ class CustomLogin extends BaseLogin
     {
         parent::mount();
 
-        if (session()->has('swal_message')) {
-            $swal = session()->pull('swal_message');
-
-            $color = match ($swal['icon'] ?? 'info') {
-                'error'   => 'danger',
-                'warning' => 'warning',
-                'success' => 'success',
-                default   => 'info',
-            };
-
-            Notification::make()
-                ->title($swal['title'])
-                ->body($swal['text'])
-                ->color($color)
-                ->$color()
-                ->persistent()
-                ->send();
+        if (session()->has('modal_alert')) {
+            $type = session()->pull('modal_alert');
+            $this->mountAction($type === 'pending' ? 'pendingAlert' : 'rejectedAlert');
         }
+    }
+
+    public function pendingAlertAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('pendingAlert')
+            ->modalHeading('Verifikasi Tertunda')
+            ->modalIcon('heroicon-o-clock')
+            ->modalIconColor('warning')
+            ->modalWidth('md')
+            ->modalDescription(
+                'Akun Anda sedang diverifikasi oleh Admin Dinas. Silakan cek email Anda untuk mendapatkan update terkait akun Anda.'
+            )
+            ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
+    }
+
+    public function rejectedAlertAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('rejectedAlert')
+            ->modalHeading('Akun Dinonaktifkan')
+            ->modalIcon('heroicon-o-x-circle')
+            ->modalIconColor('danger')
+            ->modalWidth('md')
+            ->modalDescription(
+                'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi Admin Dinas untuk informasi lebih lanjut.'
+            )
+            ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
     }
 
     public function content(Schema $schema): Schema

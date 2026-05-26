@@ -775,6 +775,10 @@ class AdminPanelProvider extends PanelProvider
                         transform: rotate(360deg);
                     }
                 }
+                
+                .fi-fo-field .fi-fo-field-wrp-error-message {
+                    font-size: 11px;
+                }
             </style>
 
             <script>

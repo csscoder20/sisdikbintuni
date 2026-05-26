@@ -6,6 +6,7 @@ use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class CustomProfile extends Page
 {
@@ -67,11 +68,10 @@ class CustomProfile extends Page
         if (!empty($this->pwd_new)) {
             $this->validate([
                 'pwd_current' => ['required'],
-                'pwd_new'     => ['required', 'min:8', 'same:pwd_confirm'],
+                'pwd_new'     => ['required', Password::defaults(), 'same:pwd_confirm'],
                 'pwd_confirm' => ['required'],
             ], [
                 'pwd_current.required' => 'Password lama wajib diisi.',
-                'pwd_new.min'          => 'Password baru minimal 8 karakter.',
                 'pwd_new.same'         => 'Konfirmasi password tidak cocok.',
                 'pwd_confirm.required' => 'Konfirmasi password wajib diisi.',
             ]);
