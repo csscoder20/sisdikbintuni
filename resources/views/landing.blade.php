@@ -87,13 +87,47 @@
         }
 
         div#legend-kecamatan {
-            height: 370px;
+            height: 220px;
             overflow-y: auto;
         }
 
         /* .bg-white.p-6.rounded-xl.shadow-md.border.border-gray-100.mb-16 {
             background-color: #b0d8f2;
         } */
+
+        /* === Peta Inset === */
+        #mini-inset-map {
+            height: 130px;
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #b0d8f2;
+        }
+
+        /* === Kompas Arah Utara (overlay di dalam peta inset) === */
+        .inset-map-wrap {
+            position: relative;
+        }
+
+        .north-arrow {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            z-index: 1000;
+            width: 36px;
+            height: 36px;
+            pointer-events: none;
+        }
+
+        .north-arrow svg {
+            width: 36px;
+            height: 36px;
+            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+        }
+
+        .petaInset {
+            margin-top: 20px !important;
+        }
     </style>
     <meta property="og:title" content="Lapbul Dikpora Bintuni" />
     <meta property="og:description" content="Aplikasi laporan bulanan Dikpora Bintuni" />
@@ -243,6 +277,32 @@
                         </div>
                         <div class="text-xs font-bold text-gray-800 mb-3 uppercase">Legenda Kecamatan</div>
                         <div id="legend-kecamatan" class="space-y-2 mb-3 text-xs text-gray-700"></div>
+
+                        {{-- Peta Inset --}}
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <div class="text-xs font-bold text-gray-800 mb-2 uppercase petaInset">Peta Inset</div>
+                            <div class="inset-map-wrap">
+                                {{-- Kompas di dalam peta inset --}}
+                                <div class="north-arrow" title="Arah Utara">
+                                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Lingkaran luar -->
+                                        <circle cx="18" cy="18" r="17" stroke="#374151" stroke-width="1.5"
+                                            fill="white" fill-opacity="0.9" />
+                                        <!-- Jarum utara (merah) -->
+                                        <polygon points="18,3 21.5,18 18,15 14.5,18" fill="#EF4444" />
+                                        <!-- Jarum selatan (abu) -->
+                                        <polygon points="18,33 21.5,18 18,21 14.5,18" fill="#9CA3AF" />
+                                        <!-- Titik tengah -->
+                                        <circle cx="18" cy="18" r="2.5" fill="#111827" />
+                                        <!-- Huruf N -->
+                                        <text x="18" y="13" text-anchor="middle" font-size="5" font-weight="bold"
+                                            fill="#EF4444" font-family="Inter,sans-serif">N</text>
+                                    </svg>
+                                </div>
+                                <div id="mini-inset-map"></div>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-1">Kabupaten Teluk Bintuni</div>
+                        </div>
                     </div>
                 </div>
 
@@ -407,7 +467,8 @@
                             item.className = 'flex items-center gap-2';
                             item.innerHTML =
                                 '<span class="rounded-sm border border-slate-300" style="position: relative; overflow: hidden; background-color: #b0d8f2; display: inline-block; min-width: 1rem; min-height: 1rem; width: 1rem; height: 1rem;">' +
-                                '<span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color:' + color + '; opacity: 0.45;"></span>' +
+                                '<span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color:' +
+                                color + '; opacity: 0.45;"></span>' +
                                 '</span>' +
                                 '<span class="text-xs text-gray-700">' + kecamatanName + '</span>';
                             legendContainer.appendChild(item);
@@ -805,6 +866,54 @@
                 })
                 .catch(error => {
                     console.error('Gagal memuat GeoJSON Bintuni:', error);
+                });
+
+            // ========== PETA INSET / OVERVIEW MAP ==========
+            var miniMap = L.map('mini-inset-map', {
+                zoomControl: false,
+                attributionControl: false,
+                dragging: false,
+                scrollWheelZoom: false,
+                doubleClickZoom: false,
+                touchZoom: false,
+                keyboard: false
+            }).setView([-1.8841, 133.3283], 6);
+
+            // Layer tile OpenStreetMap untuk mini-map
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 10,
+                opacity: 0.8
+            }).addTo(miniMap);
+
+            // Muat GeoJSON kecamatan Bintuni untuk inset
+            fetch('{{ asset('assets/geo/92.06_Teluk_Bintuni.geojson') }}')
+                .then(res => res.json())
+                .then(geojsonInset => {
+                    var insetLayer = L.geoJSON(geojsonInset, {
+                        interactive: false,
+                        style: {
+                            color: '#1e3a8a',
+                            weight: 1.5,
+                            fillColor: '#EF4444',
+                            fillOpacity: 0.55
+                        }
+                    }).addTo(miniMap);
+
+                    var insetBounds = insetLayer.getBounds();
+                    if (insetBounds.isValid()) {
+                        miniMap.fitBounds(insetBounds.pad(0.15));
+                    }
+                })
+                .catch(err => {
+                    // Fallback: tampilkan marker saja jika GeoJSON gagal dimuat
+                    L.circleMarker([-1.8841, 133.3283], {
+                        radius: 9,
+                        fillColor: '#EF4444',
+                        color: '#fff',
+                        weight: 2,
+                        fillOpacity: 0.9
+                    }).addTo(miniMap);
+                    console.warn('Inset GeoJSON gagal dimuat, menggunakan marker:', err);
                 });
         });
     </script>

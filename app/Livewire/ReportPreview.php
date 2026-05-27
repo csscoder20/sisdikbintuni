@@ -13,10 +13,13 @@ class ReportPreview extends Component
     public $activeSection = null;
     public $showSectionModal = false;
 
-    public function mount($schoolId)
+    public function mount($schoolId, $laporanId = null)
     {
         $this->schoolId = $schoolId;
         $this->isPreview = true;
+        if ($laporanId) {
+            $this->selectedLaporanId = (int) $laporanId;
+        }
         $this->initializeLaporanBulanan();
     }
 

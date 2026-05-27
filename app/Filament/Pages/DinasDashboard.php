@@ -7,15 +7,64 @@ use Filament\Panel;
 use Illuminate\Contracts\Support\Htmlable;
 use App\Filament\Traits\HasLaporanBulananLogic;
 use App\Models\ActivityLog;
+use App\Models\Laporan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Filament\Actions\Action;
 
 class DinasDashboard extends BaseDashboard
 {
     use HasLaporanBulananLogic;
 
     protected static ?string $navigationLabel = 'Dasbor';
+
+    public ?int $previewLaporanId = null;
+
+    public function openLaporanPreview(int $laporanId): void
+    {
+        $this->previewLaporanId = $laporanId;
+        $this->mountAction('previewLaporan');
+    }
+
+    public function getActions(): array
+    {
+        return [
+            Action::make('previewLaporan')
+                ->label('Pratinjau Laporan')
+                ->modalHeading(function () {
+                    if (!$this->previewLaporanId) return 'Pratinjau Laporan';
+                    $laporan = Laporan::find($this->previewLaporanId);
+                    if (!$laporan) return 'Pratinjau Laporan';
+                    $periode = \Carbon\Carbon::createFromDate($laporan->tahun, $laporan->bulan, 1)->translatedFormat('F Y');
+                    return 'Pratinjau Laporan — ' . $periode;
+                })
+                ->modalWidth('5xl')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Tutup')
+                ->extraModalFooterActions([
+                    Action::make('download_pdf_laporan')
+                        ->label('Download PDF')
+                        ->color('info')
+                        ->icon('heroicon-m-document-arrow-down')
+                        ->url(function () {
+                            if (!$this->previewLaporanId) return '#';
+                            $laporan = Laporan::find($this->previewLaporanId);
+                            if (!$laporan) return '#';
+                            return route('cetak-laporan.pdf', $laporan->sekolah) . '?laporan_id=' . $laporan->id;
+                        })
+                        ->openUrlInNewTab(),
+                ])
+                ->modalContent(function () {
+                    if (!$this->previewLaporanId) return view('livewire.report-preview-container', ['schoolId' => null, 'laporanId' => null]);
+                    $laporan = Laporan::find($this->previewLaporanId);
+                    return view('livewire.report-preview-container', [
+                        'schoolId'  => $laporan?->sekolah_id,
+                        'laporanId' => $this->previewLaporanId,
+                    ]);
+                }),
+        ];
+    }
 
     public static function canAccess(): bool
     {

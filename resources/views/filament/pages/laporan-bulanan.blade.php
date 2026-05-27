@@ -173,9 +173,10 @@
                                             </td>
                                             @if (($laporan->status ?? 'draft') === 'valid')
                                                 <td style="padding: 0.875rem 0.75rem;">
-                                                    <a href="{{ route('cetak-laporan.pdf', $laporan->sekolah) . '?laporan_id=' . $laporan->id }}"
-                                                        target="_blank"
-                                                        style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.75rem; background: #fee2e2; color: #b91c1c; border-radius: 0.75rem; text-decoration: none; font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; border: 1px solid #fecaca;">
+                                                    <button
+                                                        wire:click="openLaporanPreview({{ $laporan->id }})"
+                                                        type="button"
+                                                        style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.75rem; background: #fee2e2; color: #b91c1c; border-radius: 0.75rem; text-decoration: none; font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; border: 1px solid #fecaca; cursor: pointer;">
                                                         <svg style="width: 0.95rem; height: 0.95rem;"
                                                             fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd"
@@ -183,7 +184,7 @@
                                                                 clip-rule="evenodd"></path>
                                                         </svg>
                                                         PDF
-                                                    </a>
+                                                    </button>
                                                 </td>
                                             @elseif($hasValidatedReport)
                                                 <td

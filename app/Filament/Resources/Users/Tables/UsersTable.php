@@ -38,7 +38,10 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Alamat Email')
-                    ->searchable(),
+                    ->searchable()
+                    ->copyable()
+                    ->copyMessage('Email berhasil dicopy!')
+                    ->copyMessageDuration(2000),
                 TextColumn::make('nohp')
                     ->label('Nomor WA')
                     ->searchable()

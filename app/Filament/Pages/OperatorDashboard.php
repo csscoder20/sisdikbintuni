@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Models\ActivityLog;
+use App\Models\Laporan;
+use Filament\Actions\Action;
 use Filament\Pages\Dashboard as BaseDashboard;
 use App\Filament\Traits\HasLaporanBulananLogic;
 use Illuminate\Support\Facades\Auth;
@@ -17,11 +19,59 @@ class OperatorDashboard extends BaseDashboard
     protected static ?int $navigationSort = 1;
     protected string $view = 'filament.pages.laporan-bulanan';
 
+    public ?int $previewLaporanId = null;
+
     public int $laporanCurrentPage = 1;
     public int $laporanPerPage = 5;
 
     public int $activityLogCurrentPage = 1;
     public int $activityLogPerPage = 5;
+
+    public function openLaporanPreview(int $laporanId): void
+    {
+        $this->previewLaporanId = $laporanId;
+        $this->mountAction('previewLaporan');
+    }
+
+    public function getActions(): array
+    {
+        return [
+            Action::make('previewLaporan')
+                ->label('Pratinjau Laporan')
+                ->extraAttributes(['style' => 'display:none!important;']) // Sembunyikan tombol header, tetap bisa dipanggil via wire:click
+                ->modalHeading(function () {
+                    if (!$this->previewLaporanId) return 'Pratinjau Laporan';
+                    $laporan = Laporan::find($this->previewLaporanId);
+                    if (!$laporan) return 'Pratinjau Laporan';
+                    $periode = \Carbon\Carbon::createFromDate($laporan->tahun, $laporan->bulan, 1)->translatedFormat('F Y');
+                    return 'Pratinjau Laporan — ' . $periode;
+                })
+                ->modalWidth('5xl')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Tutup')
+                ->extraModalFooterActions([
+                    Action::make('download_pdf_laporan')
+                        ->label('Download PDF')
+                        ->color('info')
+                        ->icon('heroicon-m-document-arrow-down')
+                        ->url(function () {
+                            if (!$this->previewLaporanId) return '#';
+                            $laporan = Laporan::find($this->previewLaporanId);
+                            if (!$laporan) return '#';
+                            return route('cetak-laporan.pdf', $laporan->sekolah) . '?laporan_id=' . $laporan->id;
+                        })
+                        ->openUrlInNewTab(),
+                ])
+                ->modalContent(function () {
+                    if (!$this->previewLaporanId) return view('livewire.report-preview-container', ['schoolId' => null, 'laporanId' => null]);
+                    $laporan = Laporan::find($this->previewLaporanId);
+                    return view('livewire.report-preview-container', [
+                        'schoolId'  => $laporan?->sekolah_id,
+                        'laporanId' => $this->previewLaporanId,
+                    ]);
+                }),
+        ];
+    }
 
     public static function canAccess(): bool
     {
