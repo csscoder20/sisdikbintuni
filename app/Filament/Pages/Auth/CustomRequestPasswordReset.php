@@ -37,7 +37,7 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
         try {
             $this->rateLimit(2);
         } catch (TooManyRequestsException $exception) {
-            $this->getRateLimitedNotification($exception)?->send();
+            $this->mountAction('rateLimitedError', ['seconds' => ceil($exception->secondsUntilAvailable)]);
 
             return;
         }
@@ -65,14 +65,8 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
             },
         );
 
-        // Flash notification message untuk ditampilkan di halaman login
-        session()->flash('swal_message', [
-            'title' => 'Atur Ulang Kata Sandi',
-            'text' => 'Kami telah mengirimkan tautan atur ulang kata sandi ke email Anda.<br>Jika akun Anda tidak terdaftar, Anda tidak akan menerima email.',
-            'icon' => 'success',
-        ]);
-
-        $this->redirect(filament()->getLoginUrl());
+        // Tampilkan modal sukses
+        $this->mountAction('resetEmailSent');
     }
 
     public function content(Schema $schema): Schema
@@ -86,5 +80,37 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
                     $this->loginAction,
                 ])->alignment(Alignment::Center),
             ]);
+    }
+
+    public function resetEmailSentAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('resetEmailSent')
+            ->modalHeading('Tautan Terkirim')
+            ->modalIcon('heroicon-o-check-circle')
+            ->modalIconColor('success')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(
+                'Kami telah mengirimkan tautan atur ulang kata sandi ke email Anda. Jika akun Anda terdaftar, Anda akan segera menerima email.'
+            )
+            ->modalSubmitActionLabel('Mengerti, ke Halaman Login')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => $this->redirect(filament()->getLoginUrl()));
+    }
+
+    public function rateLimitedErrorAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('rateLimitedError')
+            ->modalHeading('Terlalu banyak permintaan')
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(fn (array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
+            ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
     }
 }

@@ -21,6 +21,15 @@
             input.dispatchEvent(new Event('input'));
         }
     }
+
+    document.addEventListener('livewire:initialized', () => {
+        window.addEventListener('reset-captcha', () => {
+            if (typeof grecaptcha !== 'undefined' && document.querySelector('.g-recaptcha')) {
+                grecaptcha.reset();
+                onCaptchaExpired();
+            }
+        });
+    });
 </script>
 
 @once

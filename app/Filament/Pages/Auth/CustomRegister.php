@@ -54,12 +54,17 @@ class CustomRegister extends BaseRegister
         try {
             $this->rateLimit(2);
         } catch (TooManyRequestsException $exception) {
-            $this->getRateLimitedNotification($exception)?->send();
+            $this->mountAction('rateLimitedError', ['seconds' => ceil($exception->secondsUntilAvailable)]);
 
             return null;
         }
 
-        $data = $this->form->getState();
+        try {
+            $data = $this->form->getState();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('reset-captcha');
+            throw $e;
+        }
 
         $sekolahId = $data['sekolah_id'];
         unset($data['sekolah_id']);
@@ -112,6 +117,7 @@ class CustomRegister extends BaseRegister
             ->modalHeading('Pendaftaran Berhasil! 🎉')
             ->modalIcon('heroicon-o-check-circle')
             ->modalIconColor('success')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
             ->modalWidth('md')
             ->modalDescription(
                 'Akun Anda telah berhasil didaftarkan. Harap tunggu verifikasi dari Admin Dinas sebelum Anda dapat masuk ke panel.'
@@ -120,6 +126,21 @@ class CustomRegister extends BaseRegister
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
             ->action(fn () => $this->redirect(route('filament.dinas.auth.login')));
+    }
+
+    public function rateLimitedErrorAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('rateLimitedError')
+            ->modalHeading('Terlalu banyak permintaan')
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(fn (array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
+            ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
     }
 
     public function getSubheading(): string | \Illuminate\Contracts\Support\Htmlable | null

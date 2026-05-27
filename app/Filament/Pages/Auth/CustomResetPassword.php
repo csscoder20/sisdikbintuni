@@ -20,7 +20,7 @@ class CustomResetPassword extends BaseResetPassword
         try {
             $this->rateLimit(2);
         } catch (TooManyRequestsException $exception) {
-            $this->getRateLimitedNotification($exception)?->send();
+            $this->mountAction('rateLimitedError', ['seconds' => ceil($exception->secondsUntilAvailable)]);
 
             return null;
         }
@@ -62,21 +62,57 @@ class CustomResetPassword extends BaseResetPassword
         }
 
         if ($status === Password::PASSWORD_RESET) {
-            session()->flash('swal_message', [
-                'title' => 'Atur Ulang Kata Sandi',
-                'text' => 'Kata sandi Anda telah berhasil diatur ulang.',
-                'icon' => 'success',
-            ]);
-
-            $this->redirect(filament()->getLoginUrl());
+            $this->mountAction('resetSuccess');
             return null;
         }
 
-        Notification::make()
-            ->title(__($status))
-            ->danger()
-            ->send();
+        $this->mountAction('resetError', ['message' => __($status)]);
 
         return null;
+    }
+
+    public function rateLimitedErrorAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('rateLimitedError')
+            ->modalHeading('Terlalu banyak permintaan')
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(fn (array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
+            ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
+    }
+
+    public function resetSuccessAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('resetSuccess')
+            ->modalHeading('Atur Ulang Kata Sandi')
+            ->modalIcon('heroicon-o-check-circle')
+            ->modalIconColor('success')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription('Kata sandi Anda telah berhasil diatur ulang.')
+            ->modalSubmitActionLabel('Mengerti, ke Halaman Login')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => $this->redirect(filament()->getLoginUrl()));
+    }
+
+    public function resetErrorAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('resetError')
+            ->modalHeading('Gagal Mengatur Ulang')
+            ->modalIcon('heroicon-o-x-circle')
+            ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(fn (array $arguments) => $arguments['message'] ?? 'Tautan atau token atur ulang kata sandi ini tidak valid.')
+            ->modalSubmitActionLabel('Tutup')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
     }
 }

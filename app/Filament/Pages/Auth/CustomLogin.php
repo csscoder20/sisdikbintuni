@@ -27,7 +27,7 @@ class CustomLogin extends BaseLogin
         try {
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
-            $this->getRateLimitedNotification($exception)?->send();
+            $this->mountAction('rateLimitedError', ['seconds' => ceil($exception->secondsUntilAvailable)]);
 
             return null;
         }
@@ -39,18 +39,21 @@ class CustomLogin extends BaseLogin
                 ['captcha_token.required' => 'Selesaikan captcha terlebih dahulu.']
             )->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Notification::make()
-                ->title('Gagal Validasi Captcha')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
+            $this->dispatch('reset-captcha');
+            $this->mountAction('captchaError', ['message' => $e->getMessage()]);
 
             return null;
         }
 
-        $data = $this->form->getState();
+        try {
+            $data = $this->form->getState();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('reset-captcha');
+            throw $e;
+        }
 
         if (! Filament::auth()->attempt($this->getCredentialsFromFormData($data), $data['remember'] ?? false)) {
+            $this->dispatch('reset-captcha');
             $this->throwFailureValidationException();
         }
 
@@ -137,6 +140,7 @@ class CustomLogin extends BaseLogin
             ->modalHeading('Verifikasi Tertunda')
             ->modalIcon('heroicon-o-clock')
             ->modalIconColor('warning')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
             ->modalWidth('md')
             ->modalDescription(
                 'Akun Anda sedang diverifikasi oleh Admin Dinas. Silakan cek email Anda untuk mendapatkan update terkait akun Anda.'
@@ -153,11 +157,42 @@ class CustomLogin extends BaseLogin
             ->modalHeading('Akun Dinonaktifkan')
             ->modalIcon('heroicon-o-x-circle')
             ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
             ->modalWidth('md')
             ->modalDescription(
                 'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi Admin Dinas untuk informasi lebih lanjut.'
             )
             ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
+    }
+
+    public function rateLimitedErrorAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('rateLimitedError')
+            ->modalHeading('Terlalu banyak permintaan')
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(fn (array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
+            ->modalSubmitActionLabel('Mengerti')
+            ->modalCancelAction(false)
+            ->closeModalByClickingAway(false)
+            ->action(fn () => null);
+    }
+
+    public function captchaErrorAction(): \Filament\Actions\Action
+    {
+        return \Filament\Actions\Action::make('captchaError')
+            ->modalHeading('Gagal Validasi Captcha')
+            ->modalIcon('heroicon-o-x-circle')
+            ->modalIconColor('danger')
+            ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
+            ->modalWidth('md')
+            ->modalDescription(fn (array $arguments) => $arguments['message'] ?? 'Selesaikan captcha terlebih dahulu.')
+            ->modalSubmitActionLabel('Tutup')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
             ->action(fn () => null);
