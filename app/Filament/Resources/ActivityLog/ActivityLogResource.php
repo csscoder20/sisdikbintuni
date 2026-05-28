@@ -10,7 +10,7 @@ use BackedEnum;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
@@ -54,78 +54,73 @@ class ActivityLogResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Ringkasan Data')
+                Group::make()
                     ->columnSpanFull()
-                    ->columns([
-                        'default' => 1,
-                        'md' => 2,
-                        'xl' => 4,
-                    ])
                     ->schema([
-                        TextEntry::make('created_at')
-                            ->label('Waktu')
-                            ->dateTime('d/m/Y H:i')
-                            ->placeholder('-'),
-                        TextEntry::make('user.name')
-                            ->label('Pengguna')
-                            ->placeholder('-'),
-                        TextEntry::make('event')
-                            ->label('Aktivitas')
-                            ->badge()
-                            ->color(fn(?string $state): string => match ($state) {
-                                'login' => 'success',
-                                'logout' => 'warning',
-                                'created' => 'info',
-                                'updated' => 'primary',
-                                'deleted' => 'danger',
-                                default => 'gray',
-                            })
-                            ->formatStateUsing(fn(?string $state): string => match ($state) {
-                                'login' => 'Login',
-                                'logout' => 'Logout',
-                                'created' => 'Ditambahkan',
-                                'updated' => 'Diperbarui',
-                                'deleted' => 'Dihapus',
-                                default => $state ? ucfirst($state) : '-',
+                        TextEntry::make('summary')
+                            ->label('Ringkasan Aktivitas')
+                            ->state(function (ActivityLog $record) {
+                                $date = $record->created_at ? $record->created_at->format('d/m/Y H:i:s') : '-';
+                                $user = $record->user ? $record->user->name : 'Sistem / Guest';
+
+                                $event = match ($record->event) {
+                                    'login' => 'berhasil masuk (login) ke dalam aplikasi',
+                                    'logout' => 'telah keluar (logout) dari aplikasi',
+                                    'created' => 'menambahkan data baru pada',
+                                    'updated' => 'melakukan perubahan data pada',
+                                    'deleted' => 'menghapus data pada',
+                                    default => 'melakukan aktivitas \'' . $record->event . '\' pada',
+                                };
+
+                                $subject = $record->subject_type ? class_basename($record->subject_type) : '';
+                                $subjectId = $record->subject_id ? " (ID: {$record->subject_id})" : '';
+
+                                $message = "{$date}, {$user} {$event}";
+                                if ($subject) {
+                                    $message .= " {$subject}{$subjectId}";
+                                }
+
+                                return $message . '.';
                             }),
-                        TextEntry::make('description')
-                            ->label('Deskripsi')
-                            ->placeholder('-'),
                     ]),
-                Section::make('Objek & Perangkat')
+                Group::make()
                     ->columnSpanFull()
-                    ->columns([
-                        'default' => 1,
-                        'md' => 2,
-                    ])
                     ->schema([
-                        TextEntry::make('subject_type')
-                            ->label('Model')
-                            ->formatStateUsing(fn(?string $state): string => $state ? class_basename($state) : '-')
-                            ->badge()
-                            ->color('gray'),
-                        TextEntry::make('subject_id')
-                            ->label('ID Subjek')
-                            ->placeholder('-')
-                            ->copyable(),
                         TextEntry::make('ip_address')
-                            ->label('Alamat IP')
+                            ->label('Alamat IP/Lokasi')
+                            ->state(function (ActivityLog $record) {
+                                $ip = $record->ip_address;
+                                if (!$ip) return '-';
+                                if ($ip === '127.0.0.1' || $ip === '::1') {
+                                    return $ip . ' (Lokal)';
+                                }
+
+                                $location = \Illuminate\Support\Facades\Cache::remember('ip_location_' . $ip, 86400, function () use ($ip) {
+                                    try {
+                                        $response = \Illuminate\Support\Facades\Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
+                                        if ($response->successful() && $response->json('status') === 'success') {
+                                            $data = $response->json();
+                                            return $data['city'] . ', ' . $data['regionName'] . ', ' . $data['country'];
+                                        }
+                                    } catch (\Exception $e) {
+                                        return 'Lokasi tidak diketahui';
+                                    }
+                                    return 'Lokasi tidak diketahui';
+                                });
+
+                                return $ip . ' - ' . $location;
+                            })
                             ->placeholder('-')
                             ->copyable(),
                         TextEntry::make('user_agent')
-                            ->label('Agen Pengguna')
+                            ->label('Perangkat (User Agent)')
                             ->placeholder('-')
                             ->fontFamily(FontFamily::Mono)
                             ->size('xs')
-                            ->columnSpanFull()
                             ->copyable(),
                     ]),
-                Section::make('Detail Perubahan')
+                Group::make()
                     ->columnSpanFull()
-                    ->columns([
-                        'default' => 1,
-                        'lg' => 2,
-                    ])
                     ->schema([
                         KeyValueEntry::make('properties.before')
                             ->label('Sebelum')

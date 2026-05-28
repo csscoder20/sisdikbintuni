@@ -247,7 +247,7 @@ class AdminPanelProvider extends PanelProvider
                         .fi-modal-actions,
                         .fi-modal-footer-actions,
                         .fi-fo-modal-actions {
-                            justify-content: center !important;
+                            justify-content: flex-end !important;
                         }
                     </style>
                 HTML;
@@ -609,7 +609,11 @@ class AdminPanelProvider extends PanelProvider
                         .fi-modal-actions,
                         .fi-modal-footer-actions,
                         .fi-fo-modal-actions {
-                            justify-content: center !important;
+                            justify-content: flex-end !important;
+                        }
+
+                        .fi-sc.fi-sc-has-gap {
+                            gap: calc(var(--spacing) * 3);
                         }
                     </style>
                 HTML;

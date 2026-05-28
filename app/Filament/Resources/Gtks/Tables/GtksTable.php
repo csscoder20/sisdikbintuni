@@ -162,7 +162,7 @@ class GtksTable
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                     ViewAction::make()
-                        ->modalHeading(fn ($record): string => 'Lihat Data GTK: ' . ($record->nama ?? '-'))
+                        ->modalHeading(fn($record): string => 'Detail Data GTK: ' . ($record->nama ?? '-'))
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye),
                     EditAction::make()
@@ -182,6 +182,6 @@ class GtksTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ;
+        ;
     }
 }

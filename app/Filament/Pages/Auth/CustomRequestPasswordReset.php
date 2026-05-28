@@ -113,4 +113,10 @@ class CustomRequestPasswordReset extends BaseRequestPasswordReset
             ->closeModalByClickingAway(false)
             ->action(fn () => null);
     }
+
+    public function loginAction(): \Filament\Actions\Action
+    {
+        return parent::loginAction()
+            ->label('Kembali ke halaman Login');
+    }
 }

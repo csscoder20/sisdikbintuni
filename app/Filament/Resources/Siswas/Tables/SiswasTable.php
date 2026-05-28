@@ -156,7 +156,7 @@ class SiswasTable
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                     ViewAction::make()
-                        ->modalHeading(fn($record): string => 'Lihat Data Siswa: ' . ($record->nama ?? '-'))
+                        ->modalHeading(fn($record): string => 'Detail Data Siswa: ' . ($record->nama ?? '-'))
                         ->modalWidth(\Filament\Support\Enums\Width::FiveExtraLarge)
                         ->icon(Heroicon::OutlinedEye)
                         ->mutateRecordDataUsing(function (array $data, \App\Models\Siswa $record): array {

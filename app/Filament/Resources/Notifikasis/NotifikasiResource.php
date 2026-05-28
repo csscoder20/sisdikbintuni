@@ -64,6 +64,43 @@ class NotifikasiResource extends Resource
         return NotifikasiForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            \Filament\Schemas\Components\Group::make()->schema([
+                \Filament\Infolists\Components\TextEntry::make('subject')
+                    ->label('Judul Pemberitahuan')
+                    ->weight('bold')
+                    ->size('lg'),
+                \Filament\Infolists\Components\TextEntry::make('created_at')
+                    ->label('Tanggal Kirim')
+                    ->dateTime('d M Y, H:i')
+                    ->color('gray'),
+                \Filament\Infolists\Components\TextEntry::make('sender.name')
+                    ->label('Pengirim')
+                    ->icon('heroicon-m-user'),
+                \Filament\Infolists\Components\TextEntry::make('recipient_type')
+                    ->label('Tipe Penerima')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'all' => 'Semua Operator',
+                        'schools' => 'Sekolah Tertentu',
+                        'users' => 'Pengguna Tertentu',
+                        default => $state,
+                    })
+                    ->badge()
+                    ->color('info'),
+                \Filament\Schemas\Components\Section::make('Isi Pemberitahuan')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('content')
+                            ->hiddenLabel()
+                            ->html()
+                            ->prose(),
+                    ])
+                    ->columnSpanFull(),
+            ])->columns(2)
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return NotifikasisTable::configure($table);

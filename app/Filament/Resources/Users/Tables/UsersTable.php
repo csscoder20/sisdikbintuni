@@ -25,6 +25,7 @@ use App\Mail\OperatorVerified;
 use Illuminate\Support\Facades\Mail;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Size;
+
 class UsersTable
 {
     public static function configure(Table $table): Table
@@ -96,7 +97,7 @@ class UsersTable
                         ->label('Verifikasi')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->hidden(fn ($record) => $record->status === 'active' || $record->hasRole(['admin_dinas', 'super_admin']))
+                        ->hidden(fn($record) => $record->status === 'active' || $record->hasRole(['admin_dinas', 'super_admin']))
                         ->requiresConfirmation()
                         ->modalHeading('Verifikasi Operator')
                         ->modalDescription('Dengan mengaktifkan pengguna ini, yang bersangkutan akan menerima notifikasi melalui email dan dapat masuk ke sistem. Lanjutkan?')
@@ -113,7 +114,7 @@ class UsersTable
                         ->label('Nonaktifkan')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
-                        ->hidden(fn ($record) => $record->status === 'rejected')
+                        ->hidden(fn($record) => $record->status === 'rejected')
                         ->requiresConfirmation()
                         ->modalHeading('Nonaktifkan Pengguna')
                         ->modalDescription('Apakah Anda yakin ingin menonaktifkan pengguna ini? Pengguna yang dinonaktifkan tidak dapat masuk ke sistem.')
@@ -127,13 +128,13 @@ class UsersTable
                                 ->send();
                         }),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
 
                 BulkActionGroup::make([
-                RestoreBulkAction::make(),
+                    RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
