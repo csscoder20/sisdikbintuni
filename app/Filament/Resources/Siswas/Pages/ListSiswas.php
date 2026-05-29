@@ -70,7 +70,7 @@ class ListSiswas extends ListRecords
                                 ->label('Pilih Format')
                                 ->options([
                                     'xlsx' => 'Excel (.xlsx)',
-                                    'pdf' => 'PDF (.pdf)',
+                                    // 'pdf' => 'PDF (.pdf)',
                                 ])
                                 ->default('xlsx')
                                 ->required()
