@@ -8,22 +8,25 @@ trait HasBrowsershot
 {
     /**
      * Buat instance Browsershot dengan konfigurasi yang sesuai lingkungan.
-     * Path Node/NPM dibaca dari .env agar bisa berbeda antara localhost (Windows)
+     * Semua path dibaca dari .env agar bisa berbeda antara localhost (Windows)
      * dan VPS (Linux) tanpa mengubah kode.
      *
-     * Di .env lokal (Windows):
+     * Konfigurasi .env lokal (Windows):
      *   NODE_BINARY="C:\Program Files\nodejs\node.exe"
      *   NPM_BINARY="C:\Program Files\nodejs\npm.cmd"
+     *   CHROME_BINARY=   (kosong — Puppeteer otomatis mengelola)
      *
-     * Di .env VPS (Linux):
+     * Konfigurasi .env VPS (Linux):
      *   NODE_BINARY=/usr/bin/node
      *   NPM_BINARY=/usr/bin/npm
-     *   (atau kosongkan agar menggunakan deteksi otomatis)
+     *   CHROME_BINARY=/usr/bin/chromium-browser
+     *   (atau: /usr/bin/chromium / /usr/bin/google-chrome)
      */
     protected function makeBrowsershot(string $html): Browsershot
     {
-        $nodeBinary = env('NODE_BINARY');
-        $npmBinary  = env('NPM_BINARY');
+        $nodeBinary   = env('NODE_BINARY');
+        $npmBinary    = env('NPM_BINARY');
+        $chromeBinary = env('CHROME_BINARY');
 
         // Fallback otomatis berdasarkan OS jika .env tidak dikonfigurasi
         if (empty($nodeBinary)) {
@@ -46,6 +49,13 @@ trait HasBrowsershot
             ->showBackground()
             ->noSandbox();
 
+        // Gunakan Chrome/Chromium sistem jika path dikonfigurasi di .env
+        // Ini diperlukan di VPS agar tidak mengandalkan Puppeteer auto-download
+        if (!empty($chromeBinary)) {
+            $browsershot->setChromePath($chromeBinary);
+        }
+
         return $browsershot;
     }
 }
+
