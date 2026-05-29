@@ -97,7 +97,7 @@ class NotifikasiResource extends Resource
                             ->prose(),
                     ])
                     ->columnSpanFull(),
-            ])->columns(2)
+            ])->columns(2)->columnSpanFull()
         ]);
     }
 

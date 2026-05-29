@@ -12,6 +12,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ViewAction;
 use Illuminate\Support\Str;
 
 
@@ -53,7 +54,8 @@ class NotifikasisTable
             ])
             ->recordActions([
                 ActionGroup::make([
-                    \Filament\Actions\ViewAction::make(),
+                    ViewAction::make()
+                        ->modalWidth('lg'),
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                     DeleteAction::make(),

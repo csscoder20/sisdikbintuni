@@ -66,7 +66,8 @@ class ExcelImportAction extends Action
 
                 $filePath = storage_path('app/private/' . $data['file']);
                 // Dispatch the import job to the queue for asynchronous processing
-                ImportExcelJob::dispatch($filePath, $this->importerClass);
+                // Pass the current authenticated user id so importer can resolve sekolah/user
+                ImportExcelJob::dispatch($filePath, $this->importerClass, [], auth()->id());
             });
     }
 
