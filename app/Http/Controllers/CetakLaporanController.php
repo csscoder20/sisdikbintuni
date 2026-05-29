@@ -7,10 +7,12 @@ use App\Models\Laporan;
 use App\Filament\Traits\HasLaporanBulananLogic;
 use Illuminate\Http\Request;
 use Spatie\Browsershot\Browsershot;
+use App\Filament\Traits\HasBrowsershot;
 
 class CetakLaporanController extends Controller
 {
     use HasLaporanBulananLogic;
+    use HasBrowsershot;
 
     public function downloadPdf(Sekolah $sekolah)
     {
@@ -80,14 +82,7 @@ class CetakLaporanController extends Controller
 
         $html = view('pdf.report-pdf', $data)->render();
 
-        $pdfContent = Browsershot::html($html)
-            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-            ->preferCssPageSize()
-            ->format('A4')
-            ->showBackground()
-            ->noSandbox()
-            ->pdf();
+        $pdfContent = $this->makeBrowsershot($html)->pdf();
 
         $filename = "Laporan Bulanan - {$sekolah->nama} Periode {$periode}.pdf";
 

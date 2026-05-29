@@ -13,9 +13,11 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Filament\Traits\HasBrowsershot;
 
 class ListLaporanKeuangan extends ListRecords
 {
+    use HasBrowsershot;
     protected static string $resource = LaporanKeuanganResource::class;
 
     protected function getHeaderActions(): array
@@ -122,13 +124,7 @@ class ListLaporanKeuangan extends ListRecords
                         'sekolah' => $sekolah,
                     ])->render();
 
-                    $browsershot = \Spatie\Browsershot\Browsershot::html($html)
-                        ->setNodeBinary('C:\\Program Files\\nodejs\\node.exe')
-                        ->setNpmBinary('C:\\Program Files\\nodejs\\npm.cmd')
-                        ->preferCssPageSize()
-                        ->format('A4')
-                        ->showBackground()
-                        ->noSandbox();
+                    $browsershot = $this->makeBrowsershot($html);
 
                     if (count($selectedColumns) > 3) {
                         $browsershot->landscape();

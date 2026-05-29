@@ -12,11 +12,13 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\CheckboxList;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Filament\Traits\HasBrowsershot;
 use Filament\Support\Icons\Heroicon;
 
 class ListGtks extends ListRecords
 {
     use HasImportTemplate;
+    use HasBrowsershot;
 
     protected static string $resource = GtkResource::class;
 
@@ -171,13 +173,7 @@ class ListGtks extends ListRecords
                         'fontSize' => $fontSize,
                     ])->render();
 
-                    $browsershot = \Spatie\Browsershot\Browsershot::html($html)
-                        ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-                        ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-                        ->preferCssPageSize()
-                        ->format('A4')
-                        ->showBackground()
-                        ->noSandbox();
+                    $browsershot = $this->makeBrowsershot($html);
 
                     if ($columnCount > 7) {
                         $browsershot->landscape();

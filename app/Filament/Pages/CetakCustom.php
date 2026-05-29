@@ -23,11 +23,13 @@ use Filament\Forms\Contracts\HasForms;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DynamicExport;
 use Spatie\Browsershot\Browsershot;
+use App\Filament\Traits\HasBrowsershot;
 use Carbon\Carbon;
 
 class CetakCustom extends Page implements HasForms
 {
     use InteractsWithForms;
+    use HasBrowsershot;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-plus';
 
@@ -1503,14 +1505,8 @@ class CetakCustom extends Page implements HasForms
 
     protected function configureBrowsershot(string $html, int $columnCount): Browsershot
     {
-        $browsershot = Browsershot::html($html)
-            ->setNodeBinary('C:\Program Files\nodejs\node.exe')
-            ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
-            ->preferCssPageSize()
-            ->format('A4')
-            ->showBackground()
-            ->waitUntilNetworkIdle()
-            ->noSandbox();
+        $browsershot = $this->makeBrowsershot($html)
+            ->waitUntilNetworkIdle();
 
         if ($columnCount > 7) {
             $browsershot->landscape();
