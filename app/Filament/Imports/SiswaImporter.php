@@ -272,6 +272,15 @@ class SiswaImporter extends Importer
         ];
     }
 
+    private static array $seenNisns = [];
+    private static array $seenNiks = [];
+
+    public static function resetDuplicateTracker(): void
+    {
+        self::$seenNisns = [];
+        self::$seenNiks = [];
+    }
+
     public function resolveRecord(): ?Siswa
     {
         // Skip if this is the instruction or example row from the template
@@ -284,6 +293,30 @@ class SiswaImporter extends Importer
 
         if (! $sekolahId) {
             throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
+        }
+
+        $nisn = trim((string) ($this->data['nisn'] ?? ''));
+        if ($nisn) {
+            if (isset(self::$seenNisns[$nisn])) {
+                throw new \Exception("Duplikat dalam file: Siswa dengan NISN {$nisn} muncul lebih dari sekali.");
+            }
+            self::$seenNisns[$nisn] = true;
+
+            if (Siswa::where('nisn', $nisn)->exists()) {
+                throw new \Exception("Sudah ada: Siswa dengan NISN {$nisn} sudah terdaftar di sistem.");
+            }
+        }
+
+        $nik = trim((string) ($this->data['nik'] ?? ''));
+        if ($nik) {
+            if (isset(self::$seenNiks[$nik])) {
+                throw new \Exception("Duplikat dalam file: Siswa dengan NIK {$nik} muncul lebih dari sekali.");
+            }
+            self::$seenNiks[$nik] = true;
+
+            if (Siswa::where('nik', $nik)->exists()) {
+                throw new \Exception("Sudah ada: Siswa dengan NIK {$nik} sudah terdaftar di sistem.");
+            }
         }
 
         return new Siswa(['sekolah_id' => $sekolahId]);

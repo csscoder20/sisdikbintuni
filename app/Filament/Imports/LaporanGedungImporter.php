@@ -38,6 +38,13 @@ class LaporanGedungImporter extends Importer
         ];
     }
 
+    private static array $seenRuang = [];
+
+    public static function resetDuplicateTracker(): void
+    {
+        self::$seenRuang = [];
+    }
+
     public function resolveRecord(): ?LaporanGedung
     {
         // Skip if this is the instruction or example row from the template
@@ -62,9 +69,21 @@ class LaporanGedungImporter extends Importer
             'tahun' => $year,
         ]);
 
-        return LaporanGedung::firstOrNew([
+        $namaRuang = trim((string) ($this->data['nama_ruang'] ?? ''));
+        $key = strtolower($namaRuang) . '||' . $laporan->id;
+
+        if (isset(self::$seenRuang[$key])) {
+            throw new \Exception("Duplikat dalam file: Ruang \"{$namaRuang}\" muncul lebih dari sekali.");
+        }
+        self::$seenRuang[$key] = true;
+
+        if (LaporanGedung::where('laporan_id', $laporan->id)->where('nama_ruang', $namaRuang)->exists()) {
+            throw new \Exception("Sudah ada: Ruang \"{$namaRuang}\" sudah terdaftar pada laporan bulan ini.");
+        }
+
+        return new LaporanGedung([
             'laporan_id' => $laporan->id,
-            'nama_ruang' => $this->data['nama_ruang'],
+            'nama_ruang' => $namaRuang,
         ]);
     }
 

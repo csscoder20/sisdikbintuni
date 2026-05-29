@@ -32,7 +32,7 @@ class UserForm
                 Select::make('roles')
                     ->label('Peran')
                     ->multiple()
-                    ->relationship('roles', 'name')
+                    ->relationship('roles', 'name', fn ($query) => auth()->check() && auth()->user()->hasRole('super_admin') ? $query : $query->where('name', '!=', 'super_admin'))
                     ->preload(),
                 Select::make('status')
                     ->label('Status')

@@ -41,15 +41,21 @@ class GtkPendidikanImporter extends Importer
     {
         $sekolahId = $this->options['sekolah_id'] ?? (filament()->getTenant()?->id ?? $this->import->user->sekolah?->id);
 
-        $gtk = Gtk::where('nik', $this->data['nik_gtk'])
+        $nikGtk = trim((string) ($this->data['nik_gtk'] ?? ''));
+        
+        $gtk = Gtk::where('nik', $nikGtk)
             ->where('sekolah_id', $sekolahId)
             ->first();
         
         if (!$gtk) {
-            return null;
+            throw new \Exception("Gagal: GTK dengan NIK {$nikGtk} tidak ditemukan di sekolah ini.");
         }
 
-        return GtkPendidikan::firstOrNew([
+        if (GtkPendidikan::where('gtk_id', $gtk->id)->exists()) {
+            throw new \Exception("Sudah ada: Data pendidikan untuk GTK dengan NIK {$nikGtk} sudah terdaftar.");
+        }
+
+        return new GtkPendidikan([
             'gtk_id' => $gtk->id,
         ]);
     }

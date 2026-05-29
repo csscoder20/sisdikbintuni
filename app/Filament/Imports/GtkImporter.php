@@ -234,6 +234,15 @@ class GtkImporter extends Importer
         ];
     }
 
+    private static array $seenNiks = [];
+    private static array $seenNips = [];
+
+    public static function resetDuplicateTracker(): void
+    {
+        self::$seenNiks = [];
+        self::$seenNips = [];
+    }
+
     public function resolveRecord(): ?Gtk
     {
         // Skip if this is the instruction or example row from the template
@@ -248,18 +257,30 @@ class GtkImporter extends Importer
             throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
         }
 
-        if (!empty($this->data['nik'])) {
-            $record = Gtk::where('sekolah_id', $sekolahId)
-                ->where('nik', $this->data['nik'])
-                ->first();
-            if ($record) return $record;
+        $nik = trim((string) ($this->data['nik'] ?? ''));
+        if ($nik) {
+            if (isset(self::$seenNiks[$nik])) {
+                throw new \Exception("Duplikat dalam file: GTK dengan NIK {$nik} muncul lebih dari sekali.");
+            }
+            self::$seenNiks[$nik] = true;
+
+            $record = Gtk::where('nik', $nik)->first();
+            if ($record) {
+                throw new \Exception("Sudah ada: GTK dengan NIK {$nik} sudah terdaftar di sistem.");
+            }
         }
 
-        if (!empty($this->data['nip'])) {
-            $record = Gtk::where('sekolah_id', $sekolahId)
-                ->where('nip', $this->data['nip'])
-                ->first();
-            if ($record) return $record;
+        $nip = trim((string) ($this->data['nip'] ?? ''));
+        if ($nip) {
+            if (isset(self::$seenNips[$nip])) {
+                throw new \Exception("Duplikat dalam file: GTK dengan NIP {$nip} muncul lebih dari sekali.");
+            }
+            self::$seenNips[$nip] = true;
+
+            $record = Gtk::where('nip', $nip)->first();
+            if ($record) {
+                throw new \Exception("Sudah ada: GTK dengan NIP {$nip} sudah terdaftar di sistem.");
+            }
         }
 
         $record = new Gtk();

@@ -387,6 +387,19 @@ class CetakCustom extends Page implements HasForms
                                     ]),
 
                                 Actions::make([
+                                    Action::make('preview_sekolah')
+                                        ->label('Preview')
+                                        ->icon('heroicon-o-eye')
+                                        ->color('info')
+                                        ->modalHeading('Preview Laporan Sekolah')
+                                        ->modalWidth('7xl')
+                                        ->modalContent(function () {
+                                            $html = $this->getSekolahPreviewHtml();
+                                            if (!$html) return new \Illuminate\Support\HtmlString('<div class="p-4 text-center text-gray-500">Tidak ada data yang sesuai filter.</div>');
+                                            return new \Illuminate\Support\HtmlString('<div style="width: 100%; height: 70vh; border: 1px solid #d1d5db; border-radius: 0.375rem; overflow: hidden; background-color: #ffffff;"><iframe style="width: 100%; height: 100%; border: none;" srcdoc="' . htmlspecialchars($html . '<style>table{width:max-content!important;min-width:100%!important;white-space:nowrap!important;}</style>', ENT_QUOTES, 'UTF-8') . '"></iframe></div>');
+                                        })
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_sekolah_excel')
                                         ->label('Unduh Excel')
                                         ->icon('heroicon-o-arrow-down-tray')
@@ -532,6 +545,19 @@ class CetakCustom extends Page implements HasForms
                                     ]),
 
                                 Actions::make([
+                                    Action::make('preview_siswa')
+                                        ->label('Preview')
+                                        ->icon('heroicon-o-eye')
+                                        ->color('info')
+                                        ->modalHeading('Preview Laporan Siswa')
+                                        ->modalWidth('7xl')
+                                        ->modalContent(function () {
+                                            $html = $this->getSiswaPreviewHtml();
+                                            if (!$html) return new \Illuminate\Support\HtmlString('<div class="p-4 text-center text-gray-500">Tidak ada data yang sesuai filter.</div>');
+                                            return new \Illuminate\Support\HtmlString('<div style="width: 100%; height: 70vh; border: 1px solid #d1d5db; border-radius: 0.375rem; overflow: hidden; background-color: #ffffff;"><iframe style="width: 100%; height: 100%; border: none;" srcdoc="' . htmlspecialchars($html . '<style>table{width:max-content!important;min-width:100%!important;white-space:nowrap!important;}</style>', ENT_QUOTES, 'UTF-8') . '"></iframe></div>');
+                                        })
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_siswa_excel')
                                         ->label('Unduh Excel')
                                         ->icon('heroicon-o-arrow-down-tray')
@@ -751,6 +777,19 @@ class CetakCustom extends Page implements HasForms
                                     ]),
 
                                 Actions::make([
+                                    Action::make('preview_gtk')
+                                        ->label('Preview')
+                                        ->icon('heroicon-o-eye')
+                                        ->color('info')
+                                        ->modalHeading('Preview Laporan GTK')
+                                        ->modalWidth('7xl')
+                                        ->modalContent(function () {
+                                            $html = $this->getGtkPreviewHtml();
+                                            if (!$html) return new \Illuminate\Support\HtmlString('<div class="p-4 text-center text-gray-500">Tidak ada data yang sesuai filter.</div>');
+                                            return new \Illuminate\Support\HtmlString('<div style="width: 100%; height: 70vh; border: 1px solid #d1d5db; border-radius: 0.375rem; overflow: hidden; background-color: #ffffff;"><iframe style="width: 100%; height: 100%; border: none;" srcdoc="' . htmlspecialchars($html . '<style>table{width:max-content!important;min-width:100%!important;white-space:nowrap!important;}</style>', ENT_QUOTES, 'UTF-8') . '"></iframe></div>');
+                                        })
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_gtk_excel')
                                         ->label('Unduh Excel')
                                         ->icon('heroicon-o-arrow-down-tray')
@@ -818,6 +857,19 @@ class CetakCustom extends Page implements HasForms
                                     ]),
 
                                 Actions::make([
+                                    Action::make('preview_sarpras')
+                                        ->label('Preview')
+                                        ->icon('heroicon-o-eye')
+                                        ->color('info')
+                                        ->modalHeading('Preview Laporan Sarpras')
+                                        ->modalWidth('7xl')
+                                        ->modalContent(function () {
+                                            $html = $this->getSarprasPreviewHtml();
+                                            if (!$html) return new \Illuminate\Support\HtmlString('<div class="p-4 text-center text-gray-500">Tidak ada data yang sesuai filter.</div>');
+                                            return new \Illuminate\Support\HtmlString('<div style="width: 100%; height: 70vh; border: 1px solid #d1d5db; border-radius: 0.375rem; overflow: hidden; background-color: #ffffff;"><iframe style="width: 100%; height: 100%; border: none;" srcdoc="' . htmlspecialchars($html . '<style>table{width:max-content!important;min-width:100%!important;white-space:nowrap!important;}</style>', ENT_QUOTES, 'UTF-8') . '"></iframe></div>');
+                                        })
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_sarpras_excel')
                                         ->label('Unduh Excel')
                                         ->icon('heroicon-o-arrow-down-tray')
@@ -883,7 +935,7 @@ class CetakCustom extends Page implements HasForms
         );
     }
 
-    public function downloadSekolahPdf()
+    public function getSekolahPreviewHtml(): ?string
     {
         $state = $this->form->getState();
         $query = Sekolah::query();
@@ -910,6 +962,29 @@ class CetakCustom extends Page implements HasForms
         $records = $query->orderBy('nama')->get();
 
         if ($records->isEmpty()) {
+            return null;
+        }
+
+        $selectedColumns = array_intersect_key(static::getSekolahColumns(), array_flip($state['sekolah_columns'] ?? []));
+        $columnCount = count($selectedColumns);
+
+        $fontSize = $this->calculateFontSize($columnCount);
+
+        return view('pdf.dataset-custom', [
+            'title' => 'LAPORAN BULANAN SEKOLAH SEKABUPATEN TELUK BINTUNI',
+            'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
+            'records' => $records,
+            'columns' => $selectedColumns,
+            'fontSize' => $fontSize,
+            'sekolah' => null, 'isPreview' => true,
+        ])->render();
+    }
+
+    public function downloadSekolahPdf()
+    {
+        $html = $this->getSekolahPreviewHtml();
+
+        if (!$html) {
             Notification::make()
                 ->title('Data tidak ditemukan')
                 ->body('Tidak ada data sekolah yang sesuai dengan kriteria filter.')
@@ -918,19 +993,9 @@ class CetakCustom extends Page implements HasForms
             return;
         }
 
+        $state = $this->form->getState();
         $selectedColumns = array_intersect_key(static::getSekolahColumns(), array_flip($state['sekolah_columns'] ?? []));
         $columnCount = count($selectedColumns);
-
-        $fontSize = $this->calculateFontSize($columnCount);
-
-        $html = view('pdf.dataset-custom', [
-            'title' => 'LAPORAN BULANAN SEKOLAH SEKABUPATEN TELUK BINTUNI',
-            'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
-            'records' => $records,
-            'columns' => $selectedColumns,
-            'fontSize' => $fontSize,
-            'sekolah' => null,
-        ])->render();
 
         $browsershot = $this->configureBrowsershot($html, $columnCount);
 
@@ -1005,7 +1070,7 @@ class CetakCustom extends Page implements HasForms
         );
     }
 
-    public function downloadSiswaPdf()
+    public function getSiswaPreviewHtml(): ?string
     {
         $state = $this->form->getState();
         $query = Siswa::query()->with('sekolah');
@@ -1044,12 +1109,7 @@ class CetakCustom extends Page implements HasForms
         }
 
         if ($records->isEmpty()) {
-            Notification::make()
-                ->title('Data tidak ditemukan')
-                ->body('Tidak ada data siswa yang sesuai dengan kriteria filter.')
-                ->danger()
-                ->send();
-            return;
+            return null;
         }
 
         // Map relation attributes
@@ -1067,7 +1127,7 @@ class CetakCustom extends Page implements HasForms
             $sekolah = Sekolah::find($state['siswa_sekolah'][0]);
         }
 
-        $html = view('pdf.dataset-custom', [
+        return view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH UNTUK SISWA',
             'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
             'records' => $records,
@@ -1075,6 +1135,25 @@ class CetakCustom extends Page implements HasForms
             'fontSize' => $fontSize,
             'sekolah' => $sekolah,
         ])->render();
+    }
+
+    public function downloadSiswaPdf()
+    {
+        $html = $this->getSiswaPreviewHtml();
+
+        if (!$html) {
+            Notification::make()
+                ->title('Data tidak ditemukan')
+                ->body('Tidak ada data yang sesuai dengan kriteria filter.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $state = $this->form->getState();
+        $selectedColumns = array_intersect_key(static::getSiswaColumns(), array_flip($state['siswa_columns'] ?? []));
+        $columnCount = count($selectedColumns);
+
 
         $browsershot = $this->configureBrowsershot($html, $columnCount);
 
@@ -1171,7 +1250,7 @@ class CetakCustom extends Page implements HasForms
         );
     }
 
-    public function downloadGtkPdf()
+    public function getGtkPreviewHtml(): ?string
     {
         $state = $this->form->getState();
         $query = Gtk::query()->with(['sekolah', 'pendidikan']);
@@ -1228,12 +1307,7 @@ class CetakCustom extends Page implements HasForms
         }
 
         if ($records->isEmpty()) {
-            Notification::make()
-                ->title('Data tidak ditemukan')
-                ->body('Tidak ada data GTK yang sesuai dengan kriteria filter.')
-                ->danger()
-                ->send();
-            return;
+            return null;
         }
 
         // Map relation attributes
@@ -1255,7 +1329,7 @@ class CetakCustom extends Page implements HasForms
             $sekolah = Sekolah::find($state['gtk_sekolah'][0]);
         }
 
-        $html = view('pdf.dataset-custom', [
+        return view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH UNTUK GTK',
             'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
             'records' => $records,
@@ -1263,6 +1337,25 @@ class CetakCustom extends Page implements HasForms
             'fontSize' => $fontSize,
             'sekolah' => $sekolah,
         ])->render();
+    }
+
+    public function downloadGtkPdf()
+    {
+        $html = $this->getGtkPreviewHtml();
+
+        if (!$html) {
+            Notification::make()
+                ->title('Data tidak ditemukan')
+                ->body('Tidak ada data yang sesuai dengan kriteria filter.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $state = $this->form->getState();
+        $selectedColumns = array_intersect_key(static::getGtkColumns(), array_flip($state['gtk_columns'] ?? []));
+        $columnCount = count($selectedColumns);
+
 
         $browsershot = $this->configureBrowsershot($html, $columnCount);
 
@@ -1320,7 +1413,7 @@ class CetakCustom extends Page implements HasForms
         );
     }
 
-    public function downloadSarprasPdf()
+    public function getSarprasPreviewHtml(): ?string
     {
         $state = $this->form->getState();
         $query = LaporanGedung::query()->with('laporan.sekolah');
@@ -1337,12 +1430,7 @@ class CetakCustom extends Page implements HasForms
         $records = $query->get();
 
         if ($records->isEmpty()) {
-            Notification::make()
-                ->title('Data tidak ditemukan')
-                ->body('Tidak ada data sarpras yang sesuai dengan kriteria filter.')
-                ->danger()
-                ->send();
-            return;
+            return null;
         }
 
         // Map relation attributes
@@ -1365,7 +1453,7 @@ class CetakCustom extends Page implements HasForms
             $sekolah = Sekolah::find($state['sarpras_sekolah'][0]);
         }
 
-        $html = view('pdf.dataset-custom', [
+        return view('pdf.dataset-custom', [
             'title' => 'LAPORAN BULANAN SEKOLAH UNTUK SARPRAS',
             'subTitle' => 'Periode ' . now()->translatedFormat('F Y'),
             'records' => $records,
@@ -1373,6 +1461,25 @@ class CetakCustom extends Page implements HasForms
             'fontSize' => $fontSize,
             'sekolah' => $sekolah,
         ])->render();
+    }
+
+    public function downloadSarprasPdf()
+    {
+        $html = $this->getSarprasPreviewHtml();
+
+        if (!$html) {
+            Notification::make()
+                ->title('Data tidak ditemukan')
+                ->body('Tidak ada data yang sesuai dengan kriteria filter.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $state = $this->form->getState();
+        $selectedColumns = array_intersect_key(static::getSarprasColumns(), array_flip($state['sarpras_columns'] ?? []));
+        $columnCount = count($selectedColumns);
+
 
         $browsershot = $this->configureBrowsershot($html, $columnCount);
 
