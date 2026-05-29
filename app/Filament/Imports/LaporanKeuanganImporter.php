@@ -152,23 +152,34 @@ class LaporanKeuanganImporter extends Importer
         ];
     }
 
+    /**
+     * Melacak kombinasi data transaksi yang sudah diproses dalam satu sesi impor.
+     */
+    private static array $seenKeys = [];
+
+    public static function resetDuplicateTracker(): void
+    {
+        self::$seenKeys = [];
+    }
+
     public function resolveRecord(): ?LaporanKeuangan
     {
         $keterangan = (string) ($this->data['keterangan'] ?? '');
         if (
             str_contains(strtolower($keterangan), 'diisi') ||
             str_contains(strtolower($keterangan), 'contoh') ||
-            str_contains(strtolower($keterangan), 'format')
+            str_contains(strtolower($keterangan), 'format') ||
+            str_contains(strtolower($keterangan), 'wajib')
         ) {
             return null;
         }
 
         $tanggal = $this->data['tanggal'] ?? null;
         if (blank($tanggal)) {
-            return null;
+            return null; // Skip jika tidak ada tanggal
         }
 
-        $sekolahId = $this->options['dinas_selected_sekolah_id'] ?? (Filament::getTenant()?->id ?? $this->import->user->sekolah?->id);
+        $sekolahId = $this->options['sekolah_id'] ?? (Filament::getTenant()?->id ?? $this->import->user->sekolah?->id);
         if (!$sekolahId) {
             throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda mengimpor dari panel sekolah yang benar.');
         }
@@ -178,18 +189,44 @@ class LaporanKeuanganImporter extends Importer
             throw new \Exception('Gagal menentukan laporan keuangan berdasarkan tanggal. Pastikan format tanggal benar.');
         }
 
-        $record = LaporanKeuangan::where('laporan_id', $laporanId)
-            ->where('tanggal', $tanggal)
-            ->where('jenis_transaksi', $this->data['jenis_transaksi'] ?? '')
-            ->where('keterangan', $keterangan)
-            ->first();
+        $jenisTransaksi = strtolower(trim($this->data['jenis_transaksi'] ?? ''));
+        // Parse nominal karena Filament belum melakukan cast saat di dalam resolveRecord()
+        $nominal = static::parseNominal($this->data['nominal'] ?? null);
 
-        if ($record) {
-            return $record;
+        if ($nominal === null) {
+            throw new \Exception("Nominal tidak valid untuk transaksi: {$keterangan}");
+        }
+
+        // ── Cek duplikat dalam file ──────────────────────────────────────────
+        $key = md5("{$laporanId}|{$tanggal}|{$jenisTransaksi}|{$keterangan}|{$nominal}");
+
+        if (isset(self::$seenKeys[$key])) {
+            throw new \Exception(
+                "Duplikat dalam file: Transaksi '{$keterangan}' sebesar Rp" . number_format($nominal, 0, ',', '.') . " pada tanggal {$tanggal} muncul lebih dari sekali."
+            );
+        }
+
+        self::$seenKeys[$key] = true;
+
+        // ── Cek duplikat di database ─────────────────────────────────────────
+        $exists = LaporanKeuangan::where('laporan_id', $laporanId)
+            ->where('tanggal', $tanggal)
+            ->where('jenis_transaksi', $jenisTransaksi)
+            ->where('keterangan', $keterangan)
+            ->where('nominal', $nominal)
+            ->exists();
+
+        if ($exists) {
+            throw new \Exception(
+                "Sudah ada: Transaksi '{$keterangan}' sebesar Rp" . number_format($nominal, 0, ',', '.') . " pada tanggal {$tanggal} sudah terdaftar."
+            );
         }
 
         $record = new LaporanKeuangan();
         $record->laporan_id = $laporanId;
+
+        // Kita set nominal secara manual agar nilai parseNominal langsung tersimpan
+        $this->data['nominal'] = $nominal;
 
         return $record;
     }

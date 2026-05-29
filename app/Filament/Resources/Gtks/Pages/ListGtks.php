@@ -25,6 +25,11 @@ class ListGtks extends ListRecords
         return [
             \App\Filament\Actions\ExcelImportAction::make()
                 ->importer(GtkImporter::class)
+                ->options(function () {
+                    return [
+                        'sekolah_id' => filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id'),
+                    ];
+                })
                 ->label('Impor Data GTK')
                 ->modalHeading('Impor Data Guru & Tenaga Kependidikan')
                 ->modalDescription(fn() => new \Illuminate\Support\HtmlString(

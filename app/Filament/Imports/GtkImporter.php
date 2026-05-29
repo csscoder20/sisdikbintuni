@@ -77,12 +77,12 @@ class GtkImporter extends Importer
                 ->example('Siti Maimunah, S.Pd'),
             ImportColumn::make('nik')
                 ->label('NIK')
-                ->rules(['nullable', 'max:255', 'unique:gtk,nik'])
+                ->rules(['nullable', 'max:255'])
                 ->castStateUsing(fn($state) => blank($state) ? null : (string) $state)
                 ->example('3201010101010005'),
             ImportColumn::make('nip')
                 ->label('NIP')
-                ->rules(['nullable', 'max:255', 'unique:gtk,nip'])
+                ->rules(['nullable', 'max:255'])
                 ->castStateUsing(fn($state) => blank($state) ? null : (string) $state)
                 ->example('198501012010012001'),
             ImportColumn::make('nokarpeg')
@@ -242,7 +242,7 @@ class GtkImporter extends Importer
             return null;
         }
 
-        $sekolahId = $this->options['dinas_selected_sekolah_id'] ?? (filament()->getTenant()?->id ?? $this->import->user->sekolah?->id);
+        $sekolahId = $this->options['sekolah_id'] ?? (filament()->getTenant()?->id ?? $this->import->user->sekolah?->id);
         
         if (!$sekolahId) {
             throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');

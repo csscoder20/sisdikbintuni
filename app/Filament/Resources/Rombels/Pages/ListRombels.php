@@ -20,6 +20,11 @@ class ListRombels extends ListRecords
         return [
             \App\Filament\Actions\ExcelImportAction::make()
                 ->importer(RombelImporter::class)
+                ->options(function () {
+                    return [
+                        'sekolah_id' => filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id'),
+                    ];
+                })
                 ->label('Impor Data Rombel')
                 ->modalHeading('Impor Data Rombongan Belajar')
                 ->modalDescription(fn () => new \Illuminate\Support\HtmlString(

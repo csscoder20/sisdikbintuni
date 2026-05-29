@@ -32,16 +32,24 @@ class MapelForm
                         'sma' => 'SMA',
                         'smk' => 'SMK',
                     ])
-                    ->default(function() {
+                    ->default(function () {
                         $jenjang = Filament::getTenant()?->jenjang ?: (Filament::getCurrentPanel() && in_array(Filament::getCurrentPanel()->getId(), ['sma', 'smk']) ? Filament::getCurrentPanel()->getId() : null);
                         return $jenjang ? strtolower($jenjang) : null;
                     })
-                    ->disabled(function() {
+                    ->disabled(function () {
                         $jenjang = Filament::getTenant()?->jenjang ?: (Filament::getCurrentPanel() && in_array(Filament::getCurrentPanel()->getId(), ['sma', 'smk']) ? Filament::getCurrentPanel()->getId() : null);
                         return !empty($jenjang);
                     })
                     ->dehydrated()
                     ->required(),
+                \Filament\Forms\Components\Hidden::make('sekolah_id')
+                    ->default(function () {
+                        return Filament::getCurrentPanel()?->getId() !== 'dinas' ? Filament::getTenant()?->id : session('dinas_selected_sekolah_id');
+                    }),
+                TextInput::make('tingkat')
+                    ->label('Tingkat')
+                    ->maxLength(255)
+                    ->helperText('Contoh: 10, 11, 12 untuk SMA/SMK'),
             ]);
     }
 }

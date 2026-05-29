@@ -844,7 +844,11 @@ class ValidasiData extends Page
         $sekolah = Sekolah::find($id);
         $query = Mapel::query();
         if ($sekolah && $sekolah->jenjang) {
-            $query->where('jenjang', $sekolah->jenjang);
+            $query->where(function ($q) use ($sekolah, $id) {
+                $q->whereNull('sekolah_id')
+                  ->where('jenjang', $sekolah->jenjang)
+                  ->orWhere('sekolah_id', $id);
+            });
         }
         $query->withExists(['mengajars' => function ($q) use ($id) {
             $q->whereHas('gtk', fn($sq) => $sq->where('sekolah_id', $id));
@@ -854,10 +858,15 @@ class ValidasiData extends Page
 
     public function getMapelCount(): int
     {
-        $sekolah = Sekolah::find($this->getSchoolId());
+        $id = $this->getSchoolId();
+        $sekolah = Sekolah::find($id);
         $query = Mapel::query();
         if ($sekolah && $sekolah->jenjang) {
-            $query->where('jenjang', $sekolah->jenjang);
+            $query->where(function ($q) use ($sekolah, $id) {
+                $q->whereNull('sekolah_id')
+                  ->where('jenjang', $sekolah->jenjang)
+                  ->orWhere('sekolah_id', $id);
+            });
         }
         return $query->count();
     }

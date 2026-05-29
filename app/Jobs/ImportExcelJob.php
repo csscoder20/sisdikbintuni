@@ -173,7 +173,10 @@ class ImportExcelJob implements ShouldQueue
             ->persistent($errorCount > 0)
             ->body(new HtmlString($body));
         if ($this->userId) {
-            $notification->toUser($this->userId);
+            $user = \App\Models\User::find($this->userId);
+            if ($user) {
+                $notification->sendToDatabase($user);
+            }
         } else {
             $notification->send();
         }
@@ -247,7 +250,10 @@ class ImportExcelJob implements ShouldQueue
             ->danger()
             ->body($message);
         if ($this->userId) {
-            $notification->toUser($this->userId);
+            $user = \App\Models\User::find($this->userId);
+            if ($user) {
+                $notification->sendToDatabase($user);
+            }
         } else {
             $notification->send();
         }

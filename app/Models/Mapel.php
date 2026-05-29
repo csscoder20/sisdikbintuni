@@ -17,10 +17,16 @@ class Mapel extends Model
         'jjp',
         'jenjang',
         'tingkat',
+        'sekolah_id',
     ];
 
     public function mengajars()
     {
         return $this->hasMany(Mengajar::class);
+    }
+
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
     }
 }

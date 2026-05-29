@@ -39,7 +39,7 @@ class GtkPendidikanImporter extends Importer
 
     public function resolveRecord(): ?GtkPendidikan
     {
-        $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
+        $sekolahId = $this->options['sekolah_id'] ?? (filament()->getTenant()?->id ?? $this->import->user->sekolah?->id);
 
         $gtk = Gtk::where('nik', $this->data['nik_gtk'])
             ->where('sekolah_id', $sekolahId)

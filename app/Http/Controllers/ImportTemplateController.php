@@ -18,9 +18,12 @@ class ImportTemplateController extends Controller
      * Value: nama file di storage/app/templates/
      */
     protected static array $staticFileMap = [
-        'gtk'            => 'gtk_import_template.xlsx',
-        'siswa'          => 'siswa_import_template.xlsx',
-        'laporan-gedung' => 'laporan-gedung_import_template.xlsx',
+        'gtk'               => 'gtk_import_template.xlsx',
+        'siswa'             => 'siswa_import_template.xlsx',
+        'laporan-gedung'    => 'laporan-gedung_import_template.xlsx',
+        'gtk-pendidikan'    => 'gtk-pendidikan_import_template.xlsx',
+        'laporan-keuangan'  => 'laporan-keuangan_import_template.xlsx',
+        'rombel'            => 'rombel_import_template.xlsx',
     ];
 
     public function download(string $importerName)

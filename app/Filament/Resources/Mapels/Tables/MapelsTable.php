@@ -46,6 +46,10 @@ class MapelsTable
                     ->formatStateUsing(fn($state) => strtoupper($state))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('tingkat')
+                    ->label('Tingkat')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime('d/m/Y H:i')

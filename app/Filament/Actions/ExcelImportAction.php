@@ -2,7 +2,6 @@
 
 namespace App\Filament\Actions;
 
-use App\Jobs\ImportExcelJob;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -15,6 +14,19 @@ use App\Support\ValidationPeriod;
 class ExcelImportAction extends Action
 {
     protected string $importerClass;
+    protected array|\Closure $customOptions = [];
+
+    public function options(array|\Closure $options): static
+    {
+        $this->customOptions = $options;
+
+        return $this;
+    }
+
+    public function getCustomOptions(): array
+    {
+        return $this->evaluate($this->customOptions) ?? [];
+    }
 
     public static function getDefaultName(): ?string
     {
@@ -65,9 +77,16 @@ class ExcelImportAction extends Action
                 }
 
                 $filePath = storage_path('app/private/' . $data['file']);
-                // Dispatch the import job to the queue for asynchronous processing
-                // Pass the current authenticated user id so importer can resolve sekolah/user
-                ImportExcelJob::dispatch($filePath, $this->importerClass, [], auth()->id());
+
+                try {
+                    $this->processImport($filePath);
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->title('Impor Gagal')
+                        ->body('Terjadi kesalahan: ' . $e->getMessage())
+                        ->danger()
+                        ->send();
+                }
             });
     }
 
@@ -259,6 +278,22 @@ class ExcelImportAction extends Action
                 $headerRow = $rows->shift(); // Baru di-shift jika benar-benar header yang lebih baik
                 $columnMap = $secondRowMap;
                 $matchCount = $secondMatchCount;
+
+                // Setelah headerRow baru ditemukan (karena ada baris judul grup di atas),
+                // periksa lagi apakah baris berikutnya adalah baris instruksi dan skip jika ya.
+                if ($rows->isNotEmpty()) {
+                    $nextRow = $rows->first();
+                    $isNextInstruction = $nextRow->contains(function ($value) {
+                        $str = strtolower((string) $value);
+                        return str_contains($str, 'diisi dengan')
+                            || str_contains($str, 'wajib diisi')
+                            || str_contains($str, 'contoh:')
+                            || str_contains($str, 'format:');
+                    });
+                    if ($isNextInstruction) {
+                        $rows->shift(); // Lewati baris instruksi
+                    }
+                }
             } else {
                 // Jika baris kedua tidak membantu, biarkan saja (jangan di-shift)
             }
@@ -267,6 +302,11 @@ class ExcelImportAction extends Action
         $successCount = 0;
         $errorCount = 0;
         $failureDetails = [];
+
+        // Reset pelacak duplikat dalam file untuk setiap sesi impor baru
+        if (method_exists($this->importerClass, 'resetDuplicateTracker')) {
+            $this->importerClass::resetDuplicateTracker();
+        }
 
         foreach ($rows as $rowIndex => $row) {
             if ($row->filter()->isEmpty()) continue; // Skip empty rows
@@ -293,7 +333,7 @@ class ExcelImportAction extends Action
                     $importMock->setRelation('user', auth()->user());
                 }
 
-                $options = [];
+                $options = $this->getCustomOptions();
                 if (session()->has('dinas_selected_sekolah_id')) {
                     $options['dinas_selected_sekolah_id'] = session('dinas_selected_sekolah_id');
                 }

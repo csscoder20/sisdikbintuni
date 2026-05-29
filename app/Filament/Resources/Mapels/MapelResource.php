@@ -87,21 +87,32 @@ class MapelResource extends Resource
             ]);
 
         $jenjang = null;
+        $sekolahId = null;
 
         if (Filament::getCurrentPanel()?->getId() === 'dinas') {
             $selectedId = session('dinas_selected_sekolah_id');
             if ($selectedId) {
                 $sekolah = \App\Models\Sekolah::find($selectedId);
                 $jenjang = $sekolah?->jenjang;
+                $sekolahId = $selectedId;
             }
         } else {
             $tenant = Filament::getTenant();
             $panelId = Filament::getCurrentPanel()?->getId();
             $jenjang = $tenant?->jenjang ?: (in_array($panelId, ['sma', 'smk']) ? strtoupper($panelId) : null);
+            $sekolahId = $tenant?->id;
         }
 
         if ($jenjang) {
-            $query->where('jenjang', $jenjang);
+            if ($sekolahId) {
+                $query->where(function ($q) use ($jenjang, $sekolahId) {
+                    $q->whereNull('sekolah_id')
+                      ->where('jenjang', strtolower($jenjang))
+                      ->orWhere('sekolah_id', $sekolahId);
+                });
+            } else {
+                $query->where('jenjang', strtolower($jenjang));
+            }
         }
 
         return $query;

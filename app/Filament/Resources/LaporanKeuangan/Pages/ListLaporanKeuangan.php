@@ -23,6 +23,11 @@ class ListLaporanKeuangan extends ListRecords
         return [
             ExcelImportAction::make()
                 ->importer(LaporanKeuanganImporter::class)
+                ->options(function () {
+                    return [
+                        'sekolah_id' => filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id'),
+                    ];
+                })
                 ->label('Impor Data Keuangan')
                 ->modalHeading('Impor Data')
                 ->modalDescription(fn() => new HtmlString(

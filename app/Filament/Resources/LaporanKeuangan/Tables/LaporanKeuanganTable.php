@@ -78,7 +78,15 @@ class LaporanKeuanganTable
                 \Filament\Tables\Filters\SelectFilter::make('laporan_id')
                     ->label('Pilih Periode')
                     ->options(function () {
-                        $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
+                        $sekolahId = null;
+                        if (\Filament\Facades\Filament::getCurrentPanel()?->getId() === 'dinas') {
+                            $sekolahId = session('dinas_selected_sekolah_id');
+                        } else {
+                            $sekolahId = \Filament\Facades\Filament::getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
+                        }
+
+                        if (!$sekolahId) return [];
+
                         return \App\Models\Laporan::where('sekolah_id', $sekolahId)
                             ->orderBy('tahun', 'desc')
                             ->orderBy('bulan', 'desc')
@@ -92,16 +100,7 @@ class LaporanKeuanganTable
                         if (!empty($data['value'])) {
                             return $query->where('laporan_id', $data['value']);
                         }
-
-                        $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
-                        $latestLaporan = \App\Models\Laporan::where('sekolah_id', $sekolahId)
-                            ->orderBy('tahun', 'desc')
-                            ->orderBy('bulan', 'desc')
-                            ->first();
-
-                        if ($latestLaporan) {
-                            return $query->where('laporan_id', $latestLaporan->id);
-                        }
+                        // Default tampilkan semua data jika tidak ada filter yang dipilih
                         return $query;
                     }),
                 TrashedFilter::make(),

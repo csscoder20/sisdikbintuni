@@ -49,6 +49,7 @@ class UserForm
                     ->placeholder('Kosongkan jika tidak ingin mengubah')
                     ->required(fn (string $context): bool => $context === 'create')
                     ->rule(Password::defaults())
+                    ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
                     ->dehydrated(fn ($state) => filled($state)),
             ]);
     }

@@ -22,6 +22,11 @@ class ListSiswas extends ListRecords
         return [
             \App\Filament\Actions\ExcelImportAction::make()
                 ->importer(SiswaImporter::class)
+                ->options(function () {
+                    return [
+                        'sekolah_id' => filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id'),
+                    ];
+                })
                 ->label('Impor Data Siswa')
                 ->modalHeading('Impor Data Siswa')
                 ->modalDescription(fn() => new \Illuminate\Support\HtmlString(

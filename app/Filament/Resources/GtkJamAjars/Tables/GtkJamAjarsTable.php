@@ -469,7 +469,10 @@ class GtkJamAjarsTable
 
     protected static function getMapelOptions($rombelId = null, array $excludeMapelIds = []): array
     {
-        $jenjang = filament()->getTenant()?->jenjang;
+        $tenant = filament()->getTenant();
+        $jenjang = $tenant?->jenjang;
+        $sekolahId = $tenant?->id;
+        
         $tingkat = null;
 
         if ($rombelId) {
@@ -477,7 +480,17 @@ class GtkJamAjarsTable
         }
 
         return Mapel::query()
-            ->when($jenjang, fn ($query) => $query->where('jenjang', $jenjang))
+            ->when($jenjang, function ($query) use ($jenjang, $sekolahId) {
+                if ($sekolahId) {
+                    $query->where(function ($q) use ($jenjang, $sekolahId) {
+                        $q->whereNull('sekolah_id')
+                          ->where('jenjang', $jenjang)
+                          ->orWhere('sekolah_id', $sekolahId);
+                    });
+                } else {
+                    $query->where('jenjang', $jenjang);
+                }
+            })
             ->when($tingkat, fn ($query) => $query->where('tingkat', $tingkat))
             ->when(filled($excludeMapelIds), fn ($query) => $query->whereNotIn('id', $excludeMapelIds))
             ->orderBy('nama_mapel')

@@ -46,7 +46,7 @@ class LaporanGedungImporter extends Importer
             return null;
         }
 
-        $sekolahId = filament()->getTenant()?->id ?? $this->import->user->sekolah?->id;
+        $sekolahId = $this->options['sekolah_id'] ?? (filament()->getTenant()?->id ?? $this->import->user->sekolah?->id);
 
         if (! $sekolahId) {
             throw new \Exception('Gagal mendeteksi data Sekolah. Pastikan Anda melakukan import di dalam panel sekolah yang benar.');
