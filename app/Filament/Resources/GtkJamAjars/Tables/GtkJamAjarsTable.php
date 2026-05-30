@@ -457,10 +457,19 @@ class GtkJamAjarsTable
             ]);
     }
 
+    protected static function getSekolahId(): ?int
+    {
+        if (filament()->getCurrentPanel()?->getId() === 'dinas') {
+            return session('dinas_selected_sekolah_id');
+        }
+        
+        return filament()->getTenant()?->id;
+    }
+
     protected static function getRombelOptions(): array
     {
         return Rombel::query()
-            ->where('sekolah_id', filament()->getTenant()?->id)
+            ->where('sekolah_id', self::getSekolahId())
             ->orderBy('tingkat')
             ->orderBy('nama')
             ->pluck('nama', 'id')
@@ -469,9 +478,16 @@ class GtkJamAjarsTable
 
     protected static function getMapelOptions($rombelId = null, array $excludeMapelIds = []): array
     {
-        $tenant = filament()->getTenant();
-        $jenjang = $tenant?->jenjang;
-        $sekolahId = $tenant?->id;
+        $sekolahId = self::getSekolahId();
+        $jenjang = null;
+        
+        if (filament()->getCurrentPanel()?->getId() === 'dinas') {
+            if ($sekolahId) {
+                $jenjang = \App\Models\Sekolah::find($sekolahId)?->jenjang;
+            }
+        } else {
+            $jenjang = filament()->getTenant()?->jenjang;
+        }
         
         $tingkat = null;
 

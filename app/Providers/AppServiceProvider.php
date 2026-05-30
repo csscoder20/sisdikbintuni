@@ -7,6 +7,15 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Actions\Action;
 use Filament\Actions\Imports\ImportColumn;
 use Illuminate\Validation\Rules\Password;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DeleteAction;
+use Livewire\Component;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\TrashedFilter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -66,6 +75,88 @@ class AppServiceProvider extends ServiceProvider
         ImportColumn::macro('getExamples', function () {
             return $this->examples ?? [];
         });
+
+        RestoreBulkAction::configureUsing(function (RestoreBulkAction $action): void {
+            $action->hidden(function (Component $livewire) {
+                if (filament()->getCurrentPanel()?->getId() !== 'dinas') {
+                    return true;
+                }
+                if ($livewire instanceof HasTable) {
+                    $trashedFilterState = $livewire->getTableFilterState('trashed') ?? $livewire->getTableFilterState(TrashedFilter::class) ?? [];
+                    $val = $trashedFilterState['value'] ?? null;
+                    return $val !== false; // Sembunyikan jika BUKAN filter "Hanya data yang dihapus"
+                }
+                return true;
+            });
+        }, isImportant: true);
+
+        ForceDeleteBulkAction::configureUsing(function (ForceDeleteBulkAction $action): void {
+            $action->hidden(function (Component $livewire) {
+                if (filament()->getCurrentPanel()?->getId() !== 'dinas') {
+                    return true;
+                }
+                if ($livewire instanceof HasTable) {
+                    $trashedFilterState = $livewire->getTableFilterState('trashed') ?? $livewire->getTableFilterState(TrashedFilter::class) ?? [];
+                    $val = $trashedFilterState['value'] ?? null;
+                    return !(! $val && filled($val));
+                }
+                return false;
+            });
+        }, isImportant: true);
+
+        RestoreAction::configureUsing(function (RestoreAction $action): void {
+            $action->hidden(function (Component $livewire) {
+                if (filament()->getCurrentPanel()?->getId() !== 'dinas') {
+                    return true;
+                }
+                if ($livewire instanceof HasTable) {
+                    $trashedFilterState = $livewire->getTableFilterState('trashed') ?? $livewire->getTableFilterState(TrashedFilter::class) ?? [];
+                    $val = $trashedFilterState['value'] ?? null;
+                    return $val !== false;
+                }
+                return false;
+            });
+        }, isImportant: true);
+
+        ForceDeleteAction::configureUsing(function (ForceDeleteAction $action): void {
+            $action->hidden(function (Component $livewire) {
+                if (filament()->getCurrentPanel()?->getId() !== 'dinas') {
+                    return true;
+                }
+                if ($livewire instanceof HasTable) {
+                    $trashedFilterState = $livewire->getTableFilterState('trashed') ?? $livewire->getTableFilterState(TrashedFilter::class) ?? [];
+                    $val = $trashedFilterState['value'] ?? null;
+                    return $val !== false;
+                }
+                return false;
+            });
+        }, isImportant: true);
+
+        DeleteBulkAction::configureUsing(function (DeleteBulkAction $action): void {
+            $action->hidden(function (Component $livewire) {
+                if ($livewire instanceof HasTable) {
+                    $trashedFilterState = $livewire->getTableFilterState('trashed') ?? $livewire->getTableFilterState(TrashedFilter::class) ?? [];
+                    $val = $trashedFilterState['value'] ?? null;
+                    if ($val === 'false' || $val === false || $val === 0 || $val === '0') {
+                        return true;
+                    }
+                    if (blank($val)) {
+                        return false;
+                    }
+                    return false;
+                }
+                return false;
+            });
+        }, isImportant: true);
+
+        DeleteAction::configureUsing(function (DeleteAction $action): void {
+            $action->hidden(function (\Illuminate\Database\Eloquent\Model $record) {
+                if (method_exists($record, 'trashed')) {
+                    return $record->trashed(); // Sembunyikan tombol hapus biasa jika record sudah terhapus
+                }
+                return false;
+            });
+        }, isImportant: true);
     }
 
     protected static function isReadOnlyAction(Action $action): bool
