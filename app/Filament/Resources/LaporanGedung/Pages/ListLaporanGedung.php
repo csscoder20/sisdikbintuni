@@ -63,7 +63,22 @@ class ListLaporanGedung extends ListRecords
                 ->label('Tambah Sarpras')
                 ->modalHeading('Tambah Sarpras')
                 ->modalSubmitActionLabel('Simpan Data')
-                ->createAnother(false),
+                ->createAnother(false)
+                ->mutateFormDataUsing(function (array $data): array {
+                    if (empty($data['laporan_id'])) {
+                        $sekolahId = filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id');
+                        
+                        if ($sekolahId) {
+                            $laporan = \App\Models\Laporan::firstOrCreate([
+                                'sekolah_id' => $sekolahId,
+                                'bulan' => (int) date('m'),
+                                'tahun' => (int) date('Y'),
+                            ]);
+                            $data['laporan_id'] = $laporan->id;
+                        }
+                    }
+                    return $data;
+                }),
         ];
     }
 }

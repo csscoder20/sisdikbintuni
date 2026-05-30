@@ -17,7 +17,7 @@ class LaporanGedungForm
             ->components([
                 \Filament\Forms\Components\Hidden::make('laporan_id')
                     ->default(function () {
-                        $sekolahId = Filament::getTenant()?->id;
+                        $sekolahId = Filament::getTenant()?->id ?? session('dinas_selected_sekolah_id');
                         if (!$sekolahId) {
                             return null;
                         }
@@ -25,8 +25,7 @@ class LaporanGedungForm
                             ->orderBy('tahun', 'desc')
                             ->orderBy('bulan', 'desc')
                             ->first()?->id;
-                    })
-                    ->required(),
+                    }),
                 TextInput::make('nama_ruang')
                     ->label('Nama Ruang')
                     ->required(),
