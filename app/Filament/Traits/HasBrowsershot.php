@@ -14,13 +14,12 @@ trait HasBrowsershot
      * Konfigurasi .env lokal (Windows):
      *   NODE_BINARY="C:\Program Files\nodejs\node.exe"
      *   NPM_BINARY="C:\Program Files\nodejs\npm.cmd"
-     *   CHROME_BINARY=   (kosong — Puppeteer otomatis mengelola)
+     *   CHROME_BINARY=   (kosong)
      *
      * Konfigurasi .env VPS (Linux):
      *   NODE_BINARY=/usr/bin/node
      *   NPM_BINARY=/usr/bin/npm
-     *   CHROME_BINARY=/usr/bin/chromium-browser
-     *   (atau: /usr/bin/chromium / /usr/bin/google-chrome)
+     *   CHROME_BINARY=/usr/bin/google-chrome
      */
     protected function makeBrowsershot(string $html): Browsershot
     {
@@ -50,9 +49,21 @@ trait HasBrowsershot
             ->noSandbox();
 
         // Gunakan Chrome/Chromium sistem jika path dikonfigurasi di .env
-        // Ini diperlukan di VPS agar tidak mengandalkan Puppeteer auto-download
         if (!empty($chromeBinary)) {
             $browsershot->setChromePath($chromeBinary);
+        }
+
+        // Tambahan flag khusus Linux/VPS untuk menghindari error permission
+        // Chrome butuh direktori HOME yang bisa ditulis — arahkan ke /tmp
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $browsershot->addChromiumArguments([
+                '--disable-dev-shm-usage',   // Hindari /dev/shm yang terbatas di VPS
+                '--disable-crash-reporter',  // Matikan crash reporter (butuh HOME writable)
+                '--no-first-run',            // Skip first-run setup
+                '--disable-extensions',      // Tidak perlu ekstensi
+                '--disable-gpu',             // Tidak ada GPU di server
+                '--user-data-dir=/tmp/chrome-browsershot-' . getmypid(), // Direktori profil yang writable
+            ]);
         }
 
         return $browsershot;
