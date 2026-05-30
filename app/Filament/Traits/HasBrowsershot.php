@@ -55,14 +55,16 @@ trait HasBrowsershot
 
         // Tambahan flag khusus Linux/VPS untuk menghindari error permission
         // Chrome butuh direktori HOME yang bisa ditulis — arahkan ke /tmp
+        // PENTING: addChromiumArguments() sudah menambahkan '--' secara otomatis,
+        // jadi nama argumen TIDAK boleh diawali '--' (akan jadi '----')
         if (PHP_OS_FAMILY !== 'Windows') {
             $browsershot->addChromiumArguments([
-                '--disable-dev-shm-usage',   // Hindari /dev/shm yang terbatas di VPS
-                '--disable-crash-reporter',  // Matikan crash reporter (butuh HOME writable)
-                '--no-first-run',            // Skip first-run setup
-                '--disable-extensions',      // Tidak perlu ekstensi
-                '--disable-gpu',             // Tidak ada GPU di server
-                '--user-data-dir=/tmp/chrome-browsershot-' . getmypid(), // Direktori profil yang writable
+                'disable-dev-shm-usage',
+                'disable-crash-reporter',
+                'no-first-run',
+                'disable-extensions',
+                'disable-gpu',
+                'user-data-dir=/tmp/chrome-browsershot-' . getmypid(),
             ]);
         }
 
