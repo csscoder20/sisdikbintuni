@@ -56,10 +56,10 @@ class ListLaporanKeuangan extends ListRecords
                 ->modalSubmitActionLabel('Simpan Transaksi')
                 ->createAnother(false),
             Action::make('export')
-                ->label('Expor Data')
+                ->label('Ekspor Data')
                 // ->icon('heroicon-o-arrow-down-tray')
                 ->color('warning')
-                ->modalHeading('Export Data Keuangan')
+                ->modalHeading('Ekspor Data Keuangan')
                 ->modalDescription('Pilih format file dan kolom yang ingin Anda sertakan.')
                 ->modalSubmitActionLabel('Export Sekarang')
                 ->form([

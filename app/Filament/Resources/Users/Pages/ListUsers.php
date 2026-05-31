@@ -18,22 +18,22 @@ class ListUsers extends ListRecords
     {
         return [
             \Filament\Actions\Action::make('export')
-                ->label('Export Data')
+                ->label('Ekspor Data')
                 ->color('success')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->modalHeading('Preview Export Data Pengguna')
+                // ->icon('heroicon-o-arrow-down-tray')
+                ->modalHeading('Preview Ekspor Data Pengguna')
                 ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge)
-                ->modalContent(fn () => view('users.preview', ['records' => $this->getFilteredTableQuery()->get()]))
+                ->modalContent(fn() => view('users.preview', ['records' => $this->getFilteredTableQuery()->get()]))
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Batal')
-                ->modalFooterActions(fn (\Filament\Actions\Action $action) => [
+                ->modalFooterActions(fn(\Filament\Actions\Action $action) => [
                     \Filament\Actions\Action::make('export_excel')
                         ->label('Ekspor Excel')
                         ->color('success')
                         ->icon('heroicon-o-document-arrow-down')
                         ->action(function () {
                             $query = $this->getFilteredTableQuery();
-                            
+
                             $roleMap = [
                                 'operator' => 'Operator Sekolah',
                                 'admin_dinas' => 'Admin Dinas',
@@ -51,7 +51,7 @@ class ListUsers extends ListRecords
                                     'status' => $user->status,
                                 ];
                             });
-                            
+
                             $columns = [
                                 'name' => 'Nama',
                                 'email' => 'Email',
@@ -72,7 +72,7 @@ class ListUsers extends ListRecords
                         ->icon('heroicon-o-document-text')
                         ->action(function () {
                             $records = $this->getFilteredTableQuery()->get();
-                            
+
                             $html = view('pdf.users-export', [
                                 'records' => $records,
                             ])->render();

@@ -391,7 +391,7 @@ class CetakCustom extends Page implements HasForms
                                 Actions::make([
                                     Action::make('preview_sekolah')
                                         ->label('Preview')
-                                        ->icon('heroicon-o-eye')
+                                        // ->icon('heroicon-o-eye')
                                         ->color('info')
                                         ->modalHeading('Preview Laporan Sekolah')
                                         ->modalWidth('7xl')
@@ -404,12 +404,12 @@ class CetakCustom extends Page implements HasForms
                                         ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_sekolah_excel')
                                         ->label('Unduh Excel')
-                                        ->icon('heroicon-o-arrow-down-tray')
+                                        // ->icon('heroicon-o-arrow-down-tray')
                                         ->color('success')
                                         ->action('downloadSekolahExcel'),
                                     Action::make('download_sekolah_pdf')
                                         ->label('Unduh PDF')
-                                        ->icon('heroicon-o-document-text')
+                                        // ->icon('heroicon-o-document-text')
                                         ->color('danger')
                                         ->action('downloadSekolahPdf'),
                                 ])->alignment('end'),
@@ -549,7 +549,7 @@ class CetakCustom extends Page implements HasForms
                                 Actions::make([
                                     Action::make('preview_siswa')
                                         ->label('Preview')
-                                        ->icon('heroicon-o-eye')
+                                        // ->icon('heroicon-o-eye')
                                         ->color('info')
                                         ->modalHeading('Preview Laporan Siswa')
                                         ->modalWidth('7xl')
@@ -562,12 +562,12 @@ class CetakCustom extends Page implements HasForms
                                         ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_siswa_excel')
                                         ->label('Unduh Excel')
-                                        ->icon('heroicon-o-arrow-down-tray')
+                                        // ->icon('heroicon-o-arrow-down-tray')
                                         ->color('success')
                                         ->action('downloadSiswaExcel'),
                                     Action::make('download_siswa_pdf')
                                         ->label('Unduh PDF')
-                                        ->icon('heroicon-o-document-text')
+                                        // ->icon('heroicon-o-document-text')
                                         ->color('danger')
                                         ->action('downloadSiswaPdf'),
                                 ])->alignment('end'),
@@ -781,7 +781,7 @@ class CetakCustom extends Page implements HasForms
                                 Actions::make([
                                     Action::make('preview_gtk')
                                         ->label('Preview')
-                                        ->icon('heroicon-o-eye')
+                                        // ->icon('heroicon-o-eye')
                                         ->color('info')
                                         ->modalHeading('Preview Laporan GTK')
                                         ->modalWidth('7xl')
@@ -794,12 +794,12 @@ class CetakCustom extends Page implements HasForms
                                         ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_gtk_excel')
                                         ->label('Unduh Excel')
-                                        ->icon('heroicon-o-arrow-down-tray')
+                                        // ->icon('heroicon-o-arrow-down-tray')
                                         ->color('success')
                                         ->action('downloadGtkExcel'),
                                     Action::make('download_gtk_pdf')
                                         ->label('Unduh PDF')
-                                        ->icon('heroicon-o-document-text')
+                                        // ->icon('heroicon-o-document-text')
                                         ->color('danger')
                                         ->action('downloadGtkPdf'),
                                 ])->alignment('end'),
@@ -861,7 +861,7 @@ class CetakCustom extends Page implements HasForms
                                 Actions::make([
                                     Action::make('preview_sarpras')
                                         ->label('Preview')
-                                        ->icon('heroicon-o-eye')
+                                        // ->icon('heroicon-o-eye')
                                         ->color('info')
                                         ->modalHeading('Preview Laporan Sarpras')
                                         ->modalWidth('7xl')
@@ -874,12 +874,12 @@ class CetakCustom extends Page implements HasForms
                                         ->modalCancelActionLabel('Tutup'),
                                     Action::make('download_sarpras_excel')
                                         ->label('Unduh Excel')
-                                        ->icon('heroicon-o-arrow-down-tray')
+                                        // ->icon('heroicon-o-arrow-down-tray')
                                         ->color('success')
                                         ->action('downloadSarprasExcel'),
                                     Action::make('download_sarpras_pdf')
                                         ->label('Unduh PDF')
-                                        ->icon('heroicon-o-document-text')
+                                        // ->icon('heroicon-o-document-text')
                                         ->color('danger')
                                         ->action('downloadSarprasPdf'),
                                 ])->alignment('end'),
@@ -978,7 +978,8 @@ class CetakCustom extends Page implements HasForms
             'records' => $records,
             'columns' => $selectedColumns,
             'fontSize' => $fontSize,
-            'sekolah' => null, 'isPreview' => true,
+            'sekolah' => null,
+            'isPreview' => true,
         ])->render();
     }
 
