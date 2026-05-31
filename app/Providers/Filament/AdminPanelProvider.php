@@ -80,7 +80,7 @@ class AdminPanelProvider extends PanelProvider
                     .brand-text-mobile { display: none !important; }
                     @media (max-width: 1024px) {
                         .brand-text-desktop { display: none !important; }
-                        .brand-text-mobile { display: block !important; font-size: 1.1rem; font-weight: 700; color: var(--text-color, #1e293b); letter-spacing: -0.01em; }
+                        .brand-text-mobile { display: block !important; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
                         .brand-wrapper-responsive { justify-content: center !important; width: 100% !important; }
                     }
                 </style>
@@ -88,10 +88,10 @@ class AdminPanelProvider extends PanelProvider
                     <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); flex-shrink: 0;">
                         <img src="' . asset('assets/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
-                    <span class="brand-text-desktop" style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
+                    <span class="brand-text-desktop text-gray-900 dark:text-white" style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em;">
                         Sistem Pelaporan Bulanan<span style="color: #3b82f6;"> Satuan Pendidikan</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
                     </span>
-                    <span class="brand-text-mobile">Laporan Bulanan</span>
+                    <span class="brand-text-mobile text-gray-900 dark:text-white">Laporan Bulanan</span>
                 </div>
             '))
 
@@ -539,7 +539,7 @@ class AdminPanelProvider extends PanelProvider
                     .brand-text-mobile { display: none !important; }
                     @media (max-width: 1024px) {
                         .brand-text-desktop { display: none !important; }
-                        .brand-text-mobile { display: block !important; font-size: 1.1rem; font-weight: 700; color: var(--text-color, #1e293b); letter-spacing: -0.01em; }
+                        .brand-text-mobile { display: block !important; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
                         .brand-wrapper-responsive { justify-content: center !important; width: 100% !important; }
                     }
                 </style>
@@ -547,10 +547,10 @@ class AdminPanelProvider extends PanelProvider
                     <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); flex-shrink: 0;">
                         <img src="' . asset('storage/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
-                    <span class="brand-text-desktop" style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
+                    <span class="brand-text-desktop text-gray-900 dark:text-white" style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em;">
                         Sistem Pelaporan Bulanan<span style="color: #10b981;"> Satuan Pendidikan</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
                     </span>
-                    <span class="brand-text-mobile">Laporan Bulanan</span>
+                    <span class="brand-text-mobile text-gray-900 dark:text-white">Laporan Bulanan</span>
                 </div>
             '))
 
