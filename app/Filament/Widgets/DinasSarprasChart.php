@@ -9,19 +9,18 @@ class DinasSarprasChart extends ChartWidget
     protected ?string $heading = 'Grafik Kondisi Sarana Prasarana di Setiap Sekolah';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 2;
-    protected ?string $maxHeight = '600px';
-    protected array | string | null $extraAttributes = ['class' => 'tall-horizontal-chart'];
+    protected ?string $maxHeight = null;
 
     protected function getData(): array
     {
         $data = DB::table('sekolah')
             ->leftJoin('laporan', function ($join) {
                 $join->on('sekolah.id', '=', 'laporan.sekolah_id')
-                     ->whereNull('laporan.deleted_at');
+                    ->whereNull('laporan.deleted_at');
             })
             ->leftJoin('laporan_gedung', function ($join) {
                 $join->on('laporan.id', '=', 'laporan_gedung.laporan_id')
-                     ->whereNull('laporan_gedung.deleted_at');
+                    ->whereNull('laporan_gedung.deleted_at');
             })
             ->select(
                 'sekolah.nama as sekolah_nama',
@@ -59,19 +58,49 @@ class DinasSarprasChart extends ChartWidget
     protected function getOptions(): array
     {
         return [
-            'indexAxis' => 'y', // Membuat bar chart menjadi horizontal
-            'scales' => [
-                'x' => [
-                    'stacked' => true,
-                ],
-                'y' => [
-                    'stacked' => true,
-                    'ticks' => [
-                        'autoSkip' => false,
+            'indexAxis' => 'y', // Vertical bar chart
+            'responsive' => true,
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                    'labels' => [
+                        'font' => [
+                            'size' => 13,
+                            'weight' => '600',
+                        ],
+                        'padding' => 15,
                     ],
                 ],
             ],
-            'maintainAspectRatio' => false,
+            'scales' => [
+                'x' => [
+                    'stacked' => true,
+                    'ticks' => [
+                        'font' => [
+                            'size' => 11,
+                        ],
+                        'maxRotation' => 45,
+                        'minRotation' => 45,
+                        'autoSkip' => false,
+                        'autoSkipPadding' => 0,
+                    ],
+                ],
+                'y' => [
+                    'stacked' => true,
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'font' => [
+                            'size' => 11,
+                        ],
+                    ],
+                ],
+            ],
+            'layout' => [
+                'padding' => [
+                    'bottom' => 30,
+                ],
+            ],
+            'maintainAspectRatio' => true,
         ];
     }
 }

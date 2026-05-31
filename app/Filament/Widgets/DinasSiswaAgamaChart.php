@@ -9,8 +9,7 @@ class DinasSiswaAgamaChart extends ChartWidget
     protected ?string $heading = 'Grafik Jumlah Siswa Berdasarkan Agama di Setiap Sekolah';
     protected static ?int $sort = 5;
     protected int | string | array $columnSpan = 2;
-    protected ?string $maxHeight = '600px';
-    protected array | string | null $extraAttributes = ['class' => 'tall-horizontal-chart'];
+    protected ?string $maxHeight = null;
 
     protected function getData(): array
     {
@@ -80,16 +79,48 @@ class DinasSiswaAgamaChart extends ChartWidget
     {
         return [
             'indexAxis' => 'y',
-            'scales' => [
-                'x' => ['stacked' => true],
-                'y' => [
-                    'stacked' => true,
-                    'ticks' => [
-                        'autoSkip' => false,
+            'responsive' => true,
+            'plugins' => [
+                'legend' => [
+                    'position' => 'bottom',
+                    'labels' => [
+                        'font' => [
+                            'size' => 13,
+                            'weight' => '600',
+                        ],
+                        'padding' => 15,
                     ],
                 ],
             ],
-            'maintainAspectRatio' => false,
+            'scales' => [
+                'x' => [
+                    'stacked' => true,
+                    'ticks' => [
+                        'font' => [
+                            'size' => 11,
+                        ],
+                        'maxRotation' => 45,
+                        'minRotation' => 45,
+                        'autoSkip' => false,
+                        'autoSkipPadding' => 0,
+                    ],
+                ],
+                'y' => [
+                    'stacked' => true,
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'font' => [
+                            'size' => 11,
+                        ],
+                    ],
+                ],
+            ],
+            'layout' => [
+                'padding' => [
+                    'bottom' => 30,
+                ],
+            ],
+            'maintainAspectRatio' => true,
         ];
     }
 }

@@ -287,10 +287,28 @@ class AdminPanelProvider extends PanelProvider
                                 justify-content: space-between;
                             }
                         }
-                        
-                        /* Fix chart overlapping on all screens */
-                        .tall-horizontal-chart canvas {
-                            min-height: 750px !important;
+                        /* Implement Scrollable Charts */
+                        .tall-horizontal-chart {
+                            display: none;
+                        }
+                        /* Chart responsive styling */
+                        .fi-wi-chart {
+                            width: 100%;
+                        }
+                        .fi-wi-chart canvas {
+                            max-width: 100% !important;
+                            height: auto !important;
+                        }
+                        /* Mobile responsive adjustments */
+                        @media (max-width: 768px) {
+                            .fi-wi-chart {
+                                margin: 0 auto;
+                            }
+                        }
+                        @media (max-width: 480px) {
+                            .fi-wi-chart {
+                                margin: 0 auto;
+                            }
                         }
                         .fi-ta-cell {
                             height: auto !important;
