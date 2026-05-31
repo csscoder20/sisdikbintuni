@@ -32,6 +32,7 @@ class DinasDashboard extends BaseDashboard
         return [
             Action::make('previewLaporan')
                 ->label('Pratinjau Laporan')
+                ->extraAttributes(['style' => 'display:none!important;']) // Sembunyikan tombol header, tetap bisa dipanggil via wire:click
                 ->modalHeading(function () {
                     if (!$this->previewLaporanId) return 'Pratinjau Laporan';
                     $laporan = Laporan::find($this->previewLaporanId);
