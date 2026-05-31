@@ -40,7 +40,7 @@ class ActivityLogResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->check() &&
-            (auth()->user()->isSuperAdmin() || auth()->user()->hasRole('admin_dinas')) &&
+            (auth()->user()->isSuperAdmin() || auth()->user()->hasRole(['admin_dinas', 'pengawas'])) &&
             filament()->getCurrentPanel()?->getId() === 'dinas';
     }
 

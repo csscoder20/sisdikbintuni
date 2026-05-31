@@ -4,46 +4,38 @@ $app = require_once __DIR__.'/bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
-use Illuminate\Support\Facades\DB;
+$roles = \Illuminate\Support\Facades\DB::table('roles')->get();
+echo "Roles:\n";
+foreach($roles as $r) {
+    echo $r->id . " - " . $r->name . "\n";
+}
 
-$chartData = DB::table('sekolah')
-    ->leftJoin('gtk', function ($join) {
-        $join->on('sekolah.id', '=', 'gtk.sekolah_id')
-            ->whereNull('gtk.deleted_at');
-    })
-    ->select(
-        'sekolah.nama as sekolah_nama',
-        DB::raw("SUM(CASE WHEN gtk.pendidikan_terakhir LIKE 'SMA%' OR gtk.pendidikan_terakhir LIKE 'SMK%' THEN 1 ELSE 0 END) as sma"),
-        DB::raw("SUM(CASE WHEN gtk.pendidikan_terakhir LIKE 'S1%' OR gtk.pendidikan_terakhir LIKE 'S-1%' THEN 1 ELSE 0 END) as s1")
-    )
-    ->whereIn('sekolah.jenjang', ['SMA', 'SMK', 'sma', 'smk'])
-    ->whereNull('sekolah.deleted_at')
-    ->groupBy('sekolah.id', 'sekolah.nama')
-    ->orderBy('sekolah.nama')
-    ->get();
+$permissions = \Illuminate\Support\Facades\DB::table('permissions')->where('name', 'like', '%delete%')->get();
+echo "\nDelete Permissions:\n";
+foreach($permissions as $p) {
+    echo $p->id . " - " . $p->name . "\n";
+}
 
-echo "=== DinasGtkPendidikanChart Data ===\n";
-foreach($chartData as $d) {
-    if ($d->sma > 0 || $d->s1 > 0) {
-        echo $d->sekolah_nama . ": SMA=" . $d->sma . ", S1=" . $d->s1 . "\n";
+$role_has_permissions = \Illuminate\Support\Facades\DB::table('role_has_permissions')->get();
+$operatorRole = $roles->firstWhere('name', 'operator');
+$adminRole = $roles->firstWhere('name', 'admin_dinas');
+
+if ($operatorRole) {
+    echo "\nOperator has delete permissions:\n";
+    $op_perms = $role_has_permissions->where('role_id', $operatorRole->id)->pluck('permission_id')->toArray();
+    foreach($permissions as $p) {
+        if (in_array($p->id, $op_perms)) {
+            echo "YES - " . $p->name . "\n";
+        }
     }
 }
 
-echo "\n=== Raw GTK Table - Pendidikan Terakhir ===\n";
-$gtk_edu = DB::table('gtk')->select('pendidikan_terakhir', DB::raw('COUNT(*) as total'))->whereNull('deleted_at')->groupBy('pendidikan_terakhir')->get();
-foreach($gtk_edu as $g) {
-    echo $g->pendidikan_terakhir . ": " . $g->total . "\n";
+if ($adminRole) {
+    echo "\nAdmin Dinas has delete permissions:\n";
+    $ad_perms = $role_has_permissions->where('role_id', $adminRole->id)->pluck('permission_id')->toArray();
+    foreach($permissions as $p) {
+        if (in_array($p->id, $ad_perms)) {
+            echo "YES - " . $p->name . "\n";
+        }
+    }
 }
-
-$gtk_sekolah = DB::table('gtk')
-    ->join('sekolah', 'gtk.sekolah_id', '=', 'sekolah.id')
-    ->select('sekolah.nama', DB::raw('COUNT(gtk.id) as total'))
-    ->whereNull('gtk.deleted_at')
-    ->groupBy('sekolah.nama')
-    ->get();
-
-echo "\n=== Raw GTK Table - Per Sekolah ===\n";
-foreach($gtk_sekolah as $s) {
-    echo $s->nama . ": " . $s->total . "\n";
-}
-echo "\n";

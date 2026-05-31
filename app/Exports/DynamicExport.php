@@ -153,7 +153,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
 
     public function startCell(): string
     {
-        return 'A9';
+        return $this->sekolah ? 'A9' : 'A6';
     }
 
     public function registerEvents(): array
@@ -166,46 +166,50 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 // Header Text
                 $sheet->setCellValue('A1', 'PEMERINTAH KABUPATEN TELUK BINTUNI');
                 $sheet->setCellValue('A2', 'DINAS PENDIDIKAN, KEBUDAYAAN, PEMUDA, DAN OLAHRAGA');
-                $sheet->setCellValue('A3', strtoupper($this->sekolah?->nama ?? 'NAMA SEKOLAH'));
                 
-                $alamat = ($this->sekolah?->alamat ?? '---') . ', ' . ($this->sekolah?->desa ?? '-') . ', ' . ($this->sekolah?->kecamatan ?? '-') . ', ' . ($this->sekolah?->kabupaten ?? 'Teluk Bintuni') . ', Papua Barat';
-                $sheet->setCellValue('A4', $alamat);
-                
-                $kontak = 'email : ' . ($this->sekolah?->email ?? '-') . ' - Website : ' . ($this->sekolah?->website ?? '-') . ' - Kode Pos: ' . ($this->sekolah?->kodepos ?? '-');
-                $sheet->setCellValue('A5', $kontak);
+                $titleRow = 4;
+                if ($this->sekolah) {
+                    $sheet->setCellValue('A3', strtoupper($this->sekolah->nama));
+                    
+                    $alamat = ($this->sekolah->alamat ?? '---') . ', ' . ($this->sekolah->desa ?? '-') . ', ' . ($this->sekolah->kecamatan ?? '-') . ', ' . ($this->sekolah->kabupaten ?? 'Teluk Bintuni') . ', Papua Barat';
+                    $sheet->setCellValue('A4', $alamat);
+                    
+                    $kontak = 'email : ' . ($this->sekolah->email ?? '-') . ' - Website : ' . ($this->sekolah->website ?? '-') . ' - Kode Pos: ' . ($this->sekolah->kodepos ?? '-');
+                    $sheet->setCellValue('A5', $kontak);
+                    
+                    $sheet->mergeCells("A3:{$lastColumnLetter}3");
+                    $sheet->mergeCells("A4:{$lastColumnLetter}4");
+                    $sheet->mergeCells("A5:{$lastColumnLetter}5");
+                    $sheet->getStyle("A1:{$lastColumnLetter}5")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('A3')->getFont()->setSize(14)->setBold(true);
+                    $sheet->getStyle('A4:A5')->getFont()->setSize(8);
+                    $sheet->getStyle("A5:{$lastColumnLetter}5")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THICK);
+                    $titleRow = 7;
+                } else {
+                    $sheet->getStyle("A1:{$lastColumnLetter}2")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle("A2:{$lastColumnLetter}2")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THICK);
+                    // Hide empty rows to shift table up, but Excel doesn't easily delete rows in event. 
+                    // Better to just start the title at row 4
+                }
 
-                $sheet->setCellValue('A7', $this->title);
-                $sheet->setCellValue('A8', '');
-
-                // Merge and Style Kop
                 $sheet->mergeCells("A1:{$lastColumnLetter}1");
                 $sheet->mergeCells("A2:{$lastColumnLetter}2");
-                $sheet->mergeCells("A3:{$lastColumnLetter}3");
-                $sheet->mergeCells("A4:{$lastColumnLetter}4");
-                $sheet->mergeCells("A5:{$lastColumnLetter}5");
-                $sheet->mergeCells("A7:{$lastColumnLetter}7");
-                $sheet->mergeCells("A8:{$lastColumnLetter}8");
-
-                $sheet->getStyle("A1:{$lastColumnLetter}5")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A7:{$lastColumnLetter}8")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
                 $sheet->getStyle('A1:A2')->getFont()->setSize(11);
-                $sheet->getStyle('A3')->getFont()->setSize(14)->setBold(true);
-                $sheet->getStyle('A4:A5')->getFont()->setSize(8);
-                $sheet->getStyle('A7')->getFont()->setSize(12)->setBold(true);
-                $sheet->getStyle('A8')->getFont()->setSize(10);
 
-                // Bottom Border for header
-                $sheet->getStyle("A5:{$lastColumnLetter}5")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THICK);
+                $sheet->setCellValue('A' . $titleRow, $this->title);
+                $sheet->mergeCells('A' . $titleRow . ":{$lastColumnLetter}" . $titleRow);
+                $sheet->getStyle('A' . $titleRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A' . $titleRow)->getFont()->setSize(12)->setBold(true);
             },
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
                 $lastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->columns) + 1);
                 $lastRow = $sheet->getHighestRow();
 
-                // Table headings are at Row 9
-                $headerRange = "A9:{$lastColumnLetter}9";
-                $tableRange = "A9:{$lastColumnLetter}{$lastRow}";
+                $startRow = $this->sekolah ? 9 : 6;
+                // Table headings are at startRow
+                $headerRange = "A{$startRow}:{$lastColumnLetter}{$startRow}";
+                $tableRange = "A{$startRow}:{$lastColumnLetter}{$lastRow}";
 
                 // Style the headings
                 $sheet->getStyle($headerRange)->applyFromArray([
@@ -225,7 +229,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 ]);
 
                 // Set row height for header (increase to accommodate wrap text)
-                $sheet->getRowDimension(9)->setRowHeight(35);
+                $sheet->getRowDimension($startRow)->setRowHeight(35);
 
                 // Column Sizing Logic
                 $sheet->getColumnDimension('A')->setWidth(5);
@@ -239,7 +243,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                         $sheet->getColumnDimension($columnLetter)->setWidth(20);
                         
                         // Enable wrap text for the whole column
-                        $sheet->getStyle("{$columnLetter}9:{$columnLetter}{$lastRow}")->getAlignment()->setWrapText(true);
+                        $sheet->getStyle("{$columnLetter}{$startRow}:{$columnLetter}{$lastRow}")->getAlignment()->setWrapText(true);
                     } else {
                         $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
                     }
@@ -250,7 +254,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
                 // Center align the NO column
-                $sheet->getStyle("A9:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("A{$startRow}:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 
                 // Set default alignment for all table cells to center vertical and set font size
                 $sheet->getStyle($tableRange)->applyFromArray([
@@ -266,7 +270,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 $sheet->getStyle($headerRange)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE));
 
                 // Ensure row heights for data rows are automatic to accommodate wrapped text
-                for ($i = 10; $i <= $lastRow; $i++) {
+                for ($i = $startRow + 1; $i <= $lastRow; $i++) {
                     $sheet->getRowDimension($i)->setRowHeight(-1); // -1 means auto height
                 }
             }

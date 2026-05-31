@@ -30,7 +30,7 @@ class RiwayatLaporan extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->hasRole(['super_admin', 'admin_dinas']);
+        return auth()->check() && auth()->user()->hasRole(['super_admin', 'admin_dinas', 'pengawas']);
     }
 
     public function getBreadcrumbs(): array

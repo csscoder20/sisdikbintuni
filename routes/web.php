@@ -128,7 +128,7 @@ Route::get('/login', function () {
 
 Route::get('/import-template/{importer}', [\App\Http\Controllers\ImportTemplateController::class, 'download'])->name('import-template.download');
 Route::get('/start-impersonating/{sekolah}', function (\App\Models\Sekolah $sekolah) {
-    if (!auth()->check() || !(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('admin_dinas'))) {
+    if (!auth()->check() || !(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole(['admin_dinas', 'pengawas']))) {
         abort(403);
     }
 

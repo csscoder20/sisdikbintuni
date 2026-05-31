@@ -75,7 +75,7 @@ class OperatorDashboard extends BaseDashboard
 
     public static function canAccess(): bool
     {
-        return Auth::check() && Auth::user()->hasRole(['operator', 'super_admin', 'admin_dinas']);
+        return Auth::check() && Auth::user()->hasRole(['operator', 'super_admin', 'admin_dinas', 'pengawas']);
     }
 
     public function mount()

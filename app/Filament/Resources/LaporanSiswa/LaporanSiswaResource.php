@@ -57,7 +57,7 @@ class LaporanSiswaResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas', 'pengawas']));
     }
 
 

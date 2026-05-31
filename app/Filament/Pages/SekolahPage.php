@@ -65,7 +65,7 @@ class SekolahPage extends Page implements HasSchemas
     // Hanya tampil di panel operator (bukan panel dinas/admin)
     public static function canAccess(): bool
     {
-        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']));
+        return auth()->check() && (auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas', 'pengawas']));
     }
 
 

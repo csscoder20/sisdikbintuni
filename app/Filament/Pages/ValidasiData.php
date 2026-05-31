@@ -100,7 +100,7 @@ class ValidasiData extends Page
     public static function canAccess(): bool
     {
         return auth()->check()
-            && auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas']);
+            && auth()->user()->hasRole(['operator', 'super_admin', 'admin_dinas', 'pengawas']);
     }
 
     /* ------------------------------------------------------------------ */

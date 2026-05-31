@@ -41,6 +41,7 @@ class ExcelImportAction extends Action
             ->modalHeading('Impor Data dari Excel')
             ->modalDescription('Unggah berkas Excel (.xlsx) yang sudah diisi sesuai format.')
             ->modalSubmitActionLabel('Mulai Impor')
+            ->visible(fn() => !auth()->user()->hasRole('pengawas'))
             ->form([
                 FileUpload::make('file')
                     ->label('Berkas Excel')

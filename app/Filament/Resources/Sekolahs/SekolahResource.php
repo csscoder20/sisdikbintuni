@@ -42,7 +42,7 @@ class SekolahResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->check() &&
-            (auth()->user()->hasRole(['super_admin', 'admin_dinas'])) &&
+            (auth()->user()->hasRole(['super_admin', 'admin_dinas', 'pengawas'])) &&
             filament()->getCurrentPanel()?->getId() === 'dinas';
     }
 

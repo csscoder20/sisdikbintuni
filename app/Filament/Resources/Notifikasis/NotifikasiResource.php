@@ -39,7 +39,7 @@ class NotifikasiResource extends Resource
                 SoftDeletingScope::class,
             ]);
 
-        if (auth()->check() && auth()->user()->hasRole('admin_dinas')) {
+        if (auth()->check() && auth()->user()->hasRole(['admin_dinas', 'pengawas'])) {
             $query->whereHas('sender', function ($q) {
                 $q->whereDoesntHave('roles', function ($rq) {
                     $rq->where('name', 'super_admin');

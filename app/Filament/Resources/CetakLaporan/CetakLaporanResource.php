@@ -32,7 +32,7 @@ class CetakLaporanResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->check() && (auth()->user()->hasRole(['super_admin', 'admin_dinas']));
+        return auth()->check() && (auth()->user()->hasRole(['super_admin', 'admin_dinas', 'pengawas']));
     }
 
     public static function table(Table $table): Table

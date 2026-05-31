@@ -81,7 +81,7 @@ class HelpGuide extends Page
     protected function isOperatorUser(): bool
     {
         return auth()->user()?->hasRole('operator') === true
-            && ! auth()->user()?->hasRole(['super_admin', 'admin_dinas']);
+            && ! auth()->user()?->hasRole(['super_admin', 'admin_dinas', 'pengawas']);
     }
 
     protected function getAdminGuideSections(): array

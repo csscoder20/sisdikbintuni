@@ -110,6 +110,11 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
         return $this->hasRole('admin_dinas');
     }
 
+    public function isPengawas()
+    {
+        return $this->hasRole('pengawas');
+    }
+
     public function isSuperAdmin()
     {
         return $this->hasRole('super_admin');
@@ -117,7 +122,7 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
 
     public function getTenants(Panel $panel): array|Collection
     {
-        if ($this->hasRole(['super_admin', 'admin_dinas'])) {
+        if ($this->hasRole(['super_admin', 'admin_dinas', 'pengawas'])) {
             return Sekolah::all();
         }
 
@@ -126,7 +131,7 @@ class User extends Authenticatable implements HasTenants, FilamentUser, HasAvata
 
     public function canAccessTenant(Model $tenant): bool
     {
-        if ($this->hasRole(['super_admin', 'admin_dinas'])) {
+        if ($this->hasRole(['super_admin', 'admin_dinas', 'pengawas'])) {
             return true;
         }
 

@@ -76,13 +76,22 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 ')
                 : new \Illuminate\Support\HtmlString('
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <style>
+                    .brand-text-mobile { display: none !important; }
+                    @media (max-width: 1024px) {
+                        .brand-text-desktop { display: none !important; }
+                        .brand-text-mobile { display: block !important; font-size: 1.1rem; font-weight: 700; color: var(--text-color, #1e293b); letter-spacing: -0.01em; }
+                        .brand-wrapper-responsive { justify-content: center !important; width: 100% !important; }
+                    }
+                </style>
+                <div class="brand-wrapper-responsive" style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); flex-shrink: 0;">
                         <img src="' . asset('assets/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
-                    <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
+                    <span class="brand-text-desktop" style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
                         Sistem Pelaporan Bulanan<span style="color: #3b82f6;"> Satuan Pendidikan</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . request()->user()->name . '</span>' : '') . '
                     </span>
+                    <span class="brand-text-mobile">Laporan Bulanan</span>
                 </div>
             '))
 
@@ -240,6 +249,49 @@ class AdminPanelProvider extends PanelProvider
                             padding-top: 0px !important;
                             padding-bottom: 0px !important;
                         }
+                        .brand-text-desktop {
+                            font-weight: 800;
+                            font-size: 1.15rem;
+                            letter-spacing: -0.025em;
+                        }
+                        
+                        /* Fix responsive topbar for custom widgets */
+                        .school-selector-container {
+                            margin-left: 1rem;
+                        }
+                        @media (max-width: 1024px) {
+                            .fi-topbar {
+                                height: auto !important;
+                            }
+                            .fi-topbar nav {
+                                flex-wrap: wrap !important;
+                                height: auto !important;
+                                padding: 0.5rem 1rem !important;
+                                gap: 0.5rem;
+                            }
+                            .fi-topbar-nav-end {
+                                flex-wrap: wrap !important;
+                            }
+                            /* Allow the school selector and validation toggle to wrap smoothly */
+                            .school-selector-container {
+                                flex-basis: 100%;
+                                margin-left: 0 !important;
+                            }
+                            .school-selector-container > div {
+                                min-width: 100% !important;
+                                max-width: 100% !important;
+                            }
+                            .validation-period-toggle {
+                                flex-basis: 100%;
+                                margin-left: 0 !important;
+                                justify-content: space-between;
+                            }
+                        }
+                        
+                        /* Fix chart overlapping on all screens */
+                        .tall-horizontal-chart canvas {
+                            min-height: 750px !important;
+                        }
                         .fi-ta-cell {
                             height: auto !important;
                             min-height: unset !important;
@@ -393,6 +445,10 @@ class AdminPanelProvider extends PanelProvider
             return 'Admin Dinas';
         }
 
+        if ($user->hasRole('pengawas')) {
+            return 'Pengawas';
+        }
+
         if ($user->hasRole('operator')) {
             return 'Operator Sekolah';
         }
@@ -477,13 +533,22 @@ class AdminPanelProvider extends PanelProvider
                     </div>
                 ')
                 : new \Illuminate\Support\HtmlString('
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <style>
+                    .brand-text-mobile { display: none !important; }
+                    @media (max-width: 1024px) {
+                        .brand-text-desktop { display: none !important; }
+                        .brand-text-mobile { display: block !important; font-size: 1.1rem; font-weight: 700; color: var(--text-color, #1e293b); letter-spacing: -0.01em; }
+                        .brand-wrapper-responsive { justify-content: center !important; width: 100% !important; }
+                    }
+                </style>
+                <div class="brand-wrapper-responsive" style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; padding: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); flex-shrink: 0;">
                         <img src="' . asset('storage/logo/logo-bintuni.png') . '" alt="Logo Bintuni" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
-                    <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
+                    <span class="brand-text-desktop" style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-color, #1e293b);">
                         Sistem Pelaporan Bulanan<span style="color: #10b981;"> Satuan Pendidikan</span>' . (auth()->check() ? ' <span style="font-size:0.95rem; font-weight:600; opacity:0.75; margin-left:2px;">| ' . (request()->user()->sekolah?->nama ?? request()->user()->name) . '</span>' : '') . '
                     </span>
+                    <span class="brand-text-mobile">Laporan Bulanan</span>
                 </div>
             '))
 

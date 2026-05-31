@@ -10,12 +10,19 @@ class DinasSarprasChart extends ChartWidget
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 2;
     protected ?string $maxHeight = '600px';
+    protected array | string | null $extraAttributes = ['class' => 'tall-horizontal-chart'];
 
     protected function getData(): array
     {
         $data = DB::table('sekolah')
-            ->leftJoin('laporan', 'sekolah.id', '=', 'laporan.sekolah_id')
-            ->leftJoin('laporan_gedung', 'laporan.id', '=', 'laporan_gedung.laporan_id')
+            ->leftJoin('laporan', function ($join) {
+                $join->on('sekolah.id', '=', 'laporan.sekolah_id')
+                     ->whereNull('laporan.deleted_at');
+            })
+            ->leftJoin('laporan_gedung', function ($join) {
+                $join->on('laporan.id', '=', 'laporan_gedung.laporan_id')
+                     ->whereNull('laporan_gedung.deleted_at');
+            })
             ->select(
                 'sekolah.nama as sekolah_nama',
                 DB::raw('COALESCE(SUM(laporan_gedung.jumlah_baik), 0) as baik'),

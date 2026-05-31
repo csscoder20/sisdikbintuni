@@ -40,7 +40,7 @@ class UserResource extends Resource
                 SoftDeletingScope::class,
             ]);
 
-        if (auth()->check() && auth()->user()->hasRole('admin_dinas')) {
+        if (auth()->check() && auth()->user()->hasRole(['admin_dinas', 'pengawas'])) {
             $query->whereDoesntHave('roles', function ($q) {
                 $q->where('name', 'super_admin');
             });

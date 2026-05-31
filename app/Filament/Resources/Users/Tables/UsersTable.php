@@ -53,6 +53,7 @@ class UsersTable
                     ->colors([
                         'primary' => 'operator',
                         'success' => 'admin_dinas',
+                        'info' => 'pengawas',
                         'warning' => 'super_admin',
                     ]),
                 TextColumn::make('sekolah.nama')
@@ -97,7 +98,7 @@ class UsersTable
                         ->label('Verifikasi')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->hidden(fn($record) => $record->status === 'active' || $record->hasRole(['admin_dinas', 'super_admin']))
+                        ->hidden(fn($record) => $record->status === 'active' || $record->hasRole(['admin_dinas', 'super_admin', 'pengawas']))
                         ->requiresConfirmation()
                         ->modalHeading('Verifikasi Operator')
                         ->modalDescription('Dengan mengaktifkan pengguna ini, yang bersangkutan akan menerima notifikasi melalui email dan dapat masuk ke sistem. Lanjutkan?')

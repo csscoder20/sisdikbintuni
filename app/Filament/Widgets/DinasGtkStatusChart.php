@@ -10,6 +10,7 @@ class DinasGtkStatusChart extends ChartWidget
     protected static ?int $sort = 6;
     protected int | string | array $columnSpan = 2;
     protected ?string $maxHeight = '600px';
+    protected array | string | null $extraAttributes = ['class' => 'tall-horizontal-chart'];
 
     protected function getData(): array
     {

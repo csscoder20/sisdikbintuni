@@ -10,6 +10,7 @@ class DinasSiswaAgamaChart extends ChartWidget
     protected static ?int $sort = 5;
     protected int | string | array $columnSpan = 2;
     protected ?string $maxHeight = '600px';
+    protected array | string | null $extraAttributes = ['class' => 'tall-horizontal-chart'];
 
     protected function getData(): array
     {
@@ -21,7 +22,7 @@ class DinasSiswaAgamaChart extends ChartWidget
             ->select(
                 'sekolah.nama as sekolah_nama',
                 DB::raw("SUM(CASE WHEN LOWER(siswa.agama) = 'islam' THEN 1 ELSE 0 END) as islam"),
-                DB::raw("SUM(CASE WHEN LOWER(siswa.agama) = 'kristen' THEN 1 ELSE 0 END) as kristen"),
+                DB::raw("SUM(CASE WHEN LOWER(siswa.agama) IN ('kristen protestan', 'kristen') THEN 1 ELSE 0 END) as kristen"),
                 DB::raw("SUM(CASE WHEN LOWER(siswa.agama) = 'katolik' THEN 1 ELSE 0 END) as katolik"),
                 DB::raw("SUM(CASE WHEN LOWER(siswa.agama) = 'hindu' THEN 1 ELSE 0 END) as hindu"),
                 DB::raw("SUM(CASE WHEN LOWER(siswa.agama) = 'buddha' THEN 1 ELSE 0 END) as buddha"),
@@ -63,7 +64,7 @@ class DinasSiswaAgamaChart extends ChartWidget
                 [
                     'label' => 'Konghucu',
                     'data' => $data->pluck('konghucu')->toArray(),
-                    'backgroundColor' => '#64748B',
+                    'backgroundColor' => '#6B7280',
                 ],
             ],
             'labels' => $data->pluck('sekolah_nama')->map(fn($nama) => strtoupper($nama))->toArray(),

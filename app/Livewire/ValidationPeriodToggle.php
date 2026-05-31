@@ -57,7 +57,7 @@ class ValidationPeriodToggle extends Component
 
         if (
             Filament::getCurrentPanel()?->getId() !== 'dinas'
-            || ! $user?->hasAnyRole(['admin_dinas', 'super_admin'])
+            || ! $user?->hasAnyRole(['admin_dinas', 'super_admin', 'pengawas'])
         ) {
             return <<<'HTML'
                 <div></div>

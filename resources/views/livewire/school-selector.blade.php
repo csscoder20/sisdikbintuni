@@ -1,4 +1,4 @@
-<div x-data="{ open: false }" x-init="$watch('open', value => { if (value) $nextTick(() => $refs.searchInput.focus()) })" @click.away="open = false" style="display: flex; align-items: center; margin-left: 1rem; position: relative;">
+<div x-data="{ open: false }" x-init="$watch('open', value => { if (value) $nextTick(() => $refs.searchInput.focus()) })" @click.away="open = false" class="school-selector-container" style="display: flex; align-items: center; position: relative;">
     <!-- Trigger Button -->
     <div @click="open = !open" 
          style="cursor: pointer; display: flex; align-items: center; background-color: #f3f4f6; border-radius: 9999px; padding: 6px 14px; border: 1px solid #d1d5db; box-shadow: 0 1px 2px rgba(0,0,0,0.05); min-width: 220px; max-width: 300px; transition: all 0.2s;">

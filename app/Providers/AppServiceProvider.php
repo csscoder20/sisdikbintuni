@@ -35,6 +35,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if ($user->hasRole('pengawas')) {
+                if (in_array($ability, ['create', 'update', 'delete', 'restore', 'forceDelete', 'replicate'])) {
+                    return false;
+                }
+            }
+        });
+
+        \Illuminate\Support\Facades\Gate::guessPolicyNamesUsing(function ($modelClass) {
+            $class = 'App\\Policies\\' . class_basename($modelClass) . 'Policy';
+            if (class_exists($class)) {
+                return $class;
+            }
+            return \App\Policies\GlobalPolicy::class;
+        });
+
         Password::defaults(function () {
             return Password::min(8)
                 ->letters()
@@ -57,14 +73,21 @@ class AppServiceProvider extends ServiceProvider
         // Globally disable modal click-away using the unified Action class
         Action::configureUsing(fn (Action $action) => $action->closeModalByClickingAway(false));
 
-        Action::configureUsing(function (Action $action): void {
+        $hideNonReadOnlyActions = function ($action): void {
             if (self::isReadOnlyAction($action)) {
                 return;
             }
 
-            $action
-                ->hidden(fn (): bool => ValidationPeriod::isLockedForOperatorPanel());
-        }, isImportant: true);
+            $action->hidden(function () {
+                if (auth()->check() && auth()->user()->hasRole('pengawas')) {
+                    return true;
+                }
+                
+                return ValidationPeriod::isLockedForOperatorPanel();
+            });
+        };
+
+        Action::configureUsing($hideNonReadOnlyActions, isImportant: true);
 
         // Add example macro to ImportColumn for templates
         ImportColumn::macro('example', function (string $value) {
@@ -159,7 +182,7 @@ class AppServiceProvider extends ServiceProvider
         }, isImportant: true);
     }
 
-    protected static function isReadOnlyAction(Action $action): bool
+    protected static function isReadOnlyAction($action): bool
     {
         $name = strtolower((string) $action->getName());
 
