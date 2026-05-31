@@ -174,15 +174,16 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
 
-            // 1. SCHOOL SELECTOR (paling kiri setelah breadcrumbs)
+            // 1. SCHOOL SELECTOR (di atas menu dashboard di sidebar)
             ->renderHook(
-                'panels::global-search.before',
-                fn(): string => \Illuminate\Support\Facades\Blade::render('<livewire:school-selector />'),
+                'panels::sidebar.nav.start',
+                fn(): string => \Illuminate\Support\Facades\Blade::render('<div class="px-4 py-3"><livewire:school-selector /></div>'),
             )
 
+            // 2. VALIDATION PERIOD TOGGLE (di bagian paling bawah sidebar)
             ->renderHook(
-                'panels::global-search.after',
-                fn(): string => \Illuminate\Support\Facades\Blade::render('<livewire:validation-period-toggle />'),
+                'panels::sidebar.footer',
+                fn(): string => \Illuminate\Support\Facades\Blade::render('<div class="p-4 border-t border-gray-200 dark:border-white/10"><livewire:validation-period-toggle /></div>'),
             )
 
             // 2. HELP GUIDE (di antara school selector dan notifikasi)
@@ -255,10 +256,7 @@ class AdminPanelProvider extends PanelProvider
                             letter-spacing: -0.025em;
                         }
                         
-                        /* Fix responsive topbar for custom widgets */
-                        .school-selector-container {
-                            margin-left: 1rem;
-                        }
+                        /* Topbar height adjustment for better mobile display if needed */
                         @media (max-width: 1024px) {
                             .fi-topbar {
                                 height: auto !important;
@@ -271,20 +269,6 @@ class AdminPanelProvider extends PanelProvider
                             }
                             .fi-topbar-nav-end {
                                 flex-wrap: wrap !important;
-                            }
-                            /* Allow the school selector and validation toggle to wrap smoothly */
-                            .school-selector-container {
-                                flex-basis: 100%;
-                                margin-left: 0 !important;
-                            }
-                            .school-selector-container > div {
-                                min-width: 100% !important;
-                                max-width: 100% !important;
-                            }
-                            .validation-period-toggle {
-                                flex-basis: 100%;
-                                margin-left: 0 !important;
-                                justify-content: space-between;
                             }
                         }
                         /* Implement Scrollable Charts */

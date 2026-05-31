@@ -1,7 +1,8 @@
-<div x-data="{ open: false }" x-init="$watch('open', value => { if (value) $nextTick(() => $refs.searchInput.focus()) })" @click.away="open = false" class="school-selector-container" style="display: flex; align-items: center; position: relative;">
+<div x-data="{ open: false }" x-init="$watch('open', value => { if (value) $nextTick(() => $refs.searchInput.focus()) })" @click.away="open = false" class="school-selector-container" style="display: flex; align-items: center; position: relative; width: 100%;">
     <!-- Trigger Button -->
     <div @click="open = !open" 
-         style="cursor: pointer; display: flex; align-items: center; background-color: #f3f4f6; border-radius: 9999px; padding: 6px 14px; border: 1px solid #d1d5db; box-shadow: 0 1px 2px rgba(0,0,0,0.05); min-width: 220px; max-width: 300px; transition: all 0.2s;">
+         style="cursor: pointer; display: flex; align-items: center; background-color: #f3f4f6; border-radius: 0.5rem; padding: 8px 12px; border: 1px solid #d1d5db; box-shadow: 0 1px 2px rgba(0,0,0,0.05); width: 100%; transition: all 0.2s;"
+         onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
         
         <!-- Icon -->
         <div style="flex-shrink: 0; margin-right: 10px; color: #ea580c; display: flex; align-items: center;">
@@ -29,7 +30,7 @@
          x-transition:enter="transition ease-out duration-100"
          x-transition:enter-start="opacity-0 transform scale-95"
          x-transition:enter-end="opacity-100 transform scale-100"
-         style="display: none; position: absolute; top: 110%; left: 0; width: 320px; background-color: white; border: 1px solid #d1d5db; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; padding: 8px;">
+         style="display: none; position: absolute; top: calc(100% + 4px); left: 0; width: 100%; background-color: white; border: 1px solid #d1d5db; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; padding: 8px;">
         
         <!-- Search Input -->
         <div style="margin-bottom: 8px; position: relative;">
@@ -37,7 +38,7 @@
                    wire:model.live.debounce.300ms="search"
                    x-ref="searchInput"
                    placeholder="Cari sekolah..."
-                   style="width: 100%; padding: 8px 12px; font-size: 0.875rem; border: 1px solid #e5e7eb; border-radius: 8px; outline: none; focus: border-orange-500;">
+                   style="width: 100%; padding: 8px 12px; font-size: 0.875rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; outline: none;">
         </div>
 
         <!-- Results List -->
