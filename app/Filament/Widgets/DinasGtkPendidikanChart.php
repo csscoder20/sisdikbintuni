@@ -85,7 +85,15 @@ class DinasGtkPendidikanChart extends ChartWidget
     {
         return [
             'indexAxis' => 'y',
-            'scales' => ['x' => ['stacked' => true], 'y' => ['stacked' => true]],
+            'scales' => [
+                'x' => ['stacked' => true],
+                'y' => [
+                    'stacked' => true,
+                    'ticks' => [
+                        'autoSkip' => false,
+                    ],
+                ],
+            ],
             'maintainAspectRatio' => false,
         ];
     }

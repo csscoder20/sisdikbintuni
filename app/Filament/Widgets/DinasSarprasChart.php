@@ -59,6 +59,9 @@ class DinasSarprasChart extends ChartWidget
                 ],
                 'y' => [
                     'stacked' => true,
+                    'ticks' => [
+                        'autoSkip' => false,
+                    ],
                 ],
             ],
             'maintainAspectRatio' => false,
