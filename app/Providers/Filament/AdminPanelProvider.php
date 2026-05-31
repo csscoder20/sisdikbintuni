@@ -689,7 +689,13 @@ class AdminPanelProvider extends PanelProvider
 
     public static function renderValidationPeriodClosedNotice(): string
     {
-        if (! \App\Support\ValidationPeriod::isLockedForOperatorPanel()) {
+        // Jika periode validasi tidak aktif, jangan tampilkan banner
+        if (! \App\Support\ValidationPeriod::isActive()) {
+            return '';
+        }
+
+        // Tampilkan banner HANYA di panel operator ('sma' atau 'smk')
+        if (! in_array(\Filament\Facades\Filament::getCurrentPanel()?->getId(), ['sma', 'smk'], true)) {
             return '';
         }
 
@@ -703,17 +709,17 @@ class AdminPanelProvider extends PanelProvider
                     z-index: 80 !important;
                 }
             </style>
-            <div data-validation-period-notice style="position: sticky; top: 0; width: 100%; padding: 8px 44px 8px 16px; background: #fef2f2; border-bottom: 1px solid #fecaca; color: #991b1b;">
+            <div data-validation-period-notice style="position: sticky; top: 0; width: 100%; padding: 8px 44px 8px 16px; background: #ecfdf5; border-bottom: 1px solid #a7f3d0; color: #065f46;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; line-height: 1.25rem; text-align: center;">
-                    <x-filament::icon icon="heroicon-o-no-symbol" style="width: 18px; height: 18px; flex: none;" />
-                    <span>Periode validasi sudah ditutup oleh Admin Dinas. Aksi tambah, edit, hapus, upload, dan validasi sementara tidak dapat dilakukan di sisi Operator.</span>
+                    <x-filament::icon icon="heroicon-o-check-circle" style="width: 18px; height: 18px; flex: none;" />
+                    <span>Periode validasi sedang aktif. Anda dapat melakukan aksi tambah data, ubah data, hapus data, import data, dan validasi data.</span>
                 </div>
                 <button
                     type="button"
                     aria-label="Tutup pemberitahuan"
                     title="Tutup"
                     onclick="this.closest(\'[data-validation-period-notice]\').remove();"
-                    style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 9999px; background: transparent; color: #991b1b; cursor: pointer;"
+                    style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 9999px; background: transparent; color: #065f46; cursor: pointer;"
                 >
                     <x-filament::icon icon="heroicon-o-x-mark" style="width: 18px; height: 18px;" />
                 </button>
