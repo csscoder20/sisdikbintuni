@@ -177,13 +177,13 @@ class AdminPanelProvider extends PanelProvider
             // 1. SCHOOL SELECTOR (di atas menu dashboard di sidebar)
             ->renderHook(
                 'panels::sidebar.nav.start',
-                fn(): string => \Illuminate\Support\Facades\Blade::render('<div class="px-4 py-3"><livewire:school-selector /></div>'),
+                fn(): string => \Illuminate\Support\Facades\Blade::render('<div class="sidebar-school-selector-hook px-4 py-3"><livewire:school-selector /></div>'),
             )
 
             // 2. VALIDATION PERIOD TOGGLE (di bagian paling bawah sidebar)
             ->renderHook(
                 'panels::sidebar.footer',
-                fn(): string => \Illuminate\Support\Facades\Blade::render('<div class="p-4 border-t border-gray-200 dark:border-white/10"><livewire:validation-period-toggle /></div>'),
+                fn(): string => \Illuminate\Support\Facades\Blade::render('<div class="sidebar-validation-period-hook p-4 border-t border-gray-200 dark:border-white/10"><livewire:validation-period-toggle /></div>'),
             )
 
             // 2. HELP GUIDE (di antara school selector dan notifikasi)

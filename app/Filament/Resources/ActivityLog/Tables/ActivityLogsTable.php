@@ -3,18 +3,15 @@
 namespace App\Filament\Resources\ActivityLog\Tables;
 
 use App\Models\ActivityLog;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
-use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
-use Filament\Support\Enums\Size;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
@@ -23,6 +20,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActivityLogsTable
 {
@@ -35,15 +33,15 @@ class ActivityLogsTable
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Waktu')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
+                    ->dateTime('d/m/Y H:i'),
+                // ->sortable(),
                 TextColumn::make('user.name')
                     ->label('Pengguna')
                     ->searchable(),
                 TextColumn::make('event')
                     ->label('Aktivitas')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'login' => 'success',
                         'logout' => 'warning',
                         'created' => 'info',
@@ -58,15 +56,53 @@ class ActivityLogsTable
             ->defaultSort('created_at', 'desc')
             ->filters([
                 TrashedFilter::make(),
+                Filter::make('created_at')
+                    ->label('Rentang Waktu')
+                    ->schema([
+                        DatePicker::make('created_from')
+                            ->label('Dari tanggal')
+                            ->native(false)
+                            ->displayFormat('d/m/Y'),
+                        DatePicker::make('created_until')
+                            ->label('Sampai tanggal')
+                            ->native(false)
+                            ->displayFormat('d/m/Y'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'] ?? null,
+                                fn(Builder $query, $date): Builder => $query->where('created_at', '>=', Carbon::parse($date)->startOfDay()),
+                            )
+                            ->when(
+                                $data['created_until'] ?? null,
+                                fn(Builder $query, $date): Builder => $query->where('created_at', '<=', Carbon::parse($date)->endOfDay()),
+                            );
+                    }),
+                SelectFilter::make('user_id')
+                    ->label('Pengguna')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('event')
                     ->label('Aktivitas')
-                    ->options([
-                        'login' => 'Login',
-                        'logout' => 'Logout',
-                        'created' => 'Ditambahkan',
-                        'updated' => 'Diperbarui',
-                        'deleted' => 'Dihapus',
-                    ]),
+                    ->options(fn(): array => ActivityLog::query()
+                        ->whereNotNull('event')
+                        ->distinct()
+                        ->orderBy('event')
+                        ->pluck('event', 'event')
+                        ->mapWithKeys(fn(string $event, string $key): array => [
+                            $key => match ($event) {
+                                'login' => 'Login',
+                                'logout' => 'Logout',
+                                'created' => 'Ditambahkan',
+                                'updated' => 'Diperbarui',
+                                'deleted' => 'Dihapus',
+                                default => ucfirst(str_replace('_', ' ', $event)),
+                            },
+                        ])
+                        ->all())
+                    ->searchable(),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -79,8 +115,8 @@ class ActivityLogsTable
                     DeleteAction::make()
                         ->icon(Heroicon::OutlinedTrash),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->color('primary')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->color('primary')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

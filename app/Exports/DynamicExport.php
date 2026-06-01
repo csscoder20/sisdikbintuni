@@ -5,12 +5,9 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
-use Maatwebsite\Excel\Concerns\WithDrawings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\BeforeSheet;
 use Maatwebsite\Excel\Events\AfterSheet;
@@ -20,10 +17,8 @@ use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DynamicExport extends DefaultValueBinder implements FromCollection, WithHeadings, WithMapping, WithColumnFormatting, WithCustomValueBinder, WithDrawings, WithEvents, WithCustomStartCell
+class DynamicExport extends DefaultValueBinder implements FromCollection, WithHeadings, WithMapping, WithColumnFormatting, WithCustomValueBinder, WithEvents, WithCustomStartCell
 {
     protected $records;
     protected $columns;
@@ -119,41 +114,9 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
         return parent::bindValue($cell, $value);
     }
 
-    public function drawings()
-    {
-        $drawings = [];
-
-        // Left Logo
-        if (file_exists(public_path('assets/logo/logo-bintuni.png'))) {
-            $drawing = new Drawing();
-            $drawing->setName('Logo Bintuni');
-            $drawing->setPath(public_path('assets/logo/logo-bintuni.png'));
-            $drawing->setHeight(70);
-            $drawing->setCoordinates('A1');
-            $drawing->setOffsetX(5);
-            $drawing->setOffsetY(5);
-            $drawings[] = $drawing;
-        }
-
-        // Right Logo
-        $lastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->columns) + 1);
-        if (file_exists(public_path('assets/logo/tut-wuri-handayani.png'))) {
-            $drawing2 = new Drawing();
-            $drawing2->setName('Logo Tut Wuri');
-            $drawing2->setPath(public_path('assets/logo/tut-wuri-handayani.png'));
-            $drawing2->setHeight(70);
-            $drawing2->setCoordinates($lastColumnLetter . '1');
-            $drawing2->setOffsetX(-5);
-            $drawing2->setOffsetY(5);
-            $drawings[] = $drawing2;
-        }
-
-        return $drawings;
-    }
-
     public function startCell(): string
     {
-        return $this->sekolah ? 'A9' : 'A6';
+        return 'A3';
     }
 
     public function registerEvents(): array
@@ -163,50 +126,17 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 $sheet = $event->sheet->getDelegate();
                 $lastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->columns) + 1);
 
-                // Header Text
-                $sheet->setCellValue('A1', 'PEMERINTAH KABUPATEN TELUK BINTUNI');
-                $sheet->setCellValue('A2', 'DINAS PENDIDIKAN, KEBUDAYAAN, PEMUDA, DAN OLAHRAGA');
-                
-                $titleRow = 4;
-                if ($this->sekolah) {
-                    $sheet->setCellValue('A3', strtoupper($this->sekolah->nama));
-                    
-                    $alamat = ($this->sekolah->alamat ?? '---') . ', ' . ($this->sekolah->desa ?? '-') . ', ' . ($this->sekolah->kecamatan ?? '-') . ', ' . ($this->sekolah->kabupaten ?? 'Teluk Bintuni') . ', Papua Barat';
-                    $sheet->setCellValue('A4', $alamat);
-                    
-                    $kontak = 'email : ' . ($this->sekolah->email ?? '-') . ' - Website : ' . ($this->sekolah->website ?? '-') . ' - Kode Pos: ' . ($this->sekolah->kodepos ?? '-');
-                    $sheet->setCellValue('A5', $kontak);
-                    
-                    $sheet->mergeCells("A3:{$lastColumnLetter}3");
-                    $sheet->mergeCells("A4:{$lastColumnLetter}4");
-                    $sheet->mergeCells("A5:{$lastColumnLetter}5");
-                    $sheet->getStyle("A1:{$lastColumnLetter}5")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('A3')->getFont()->setSize(14)->setBold(true);
-                    $sheet->getStyle('A4:A5')->getFont()->setSize(8);
-                    $sheet->getStyle("A5:{$lastColumnLetter}5")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THICK);
-                    $titleRow = 7;
-                } else {
-                    $sheet->getStyle("A1:{$lastColumnLetter}2")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle("A2:{$lastColumnLetter}2")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THICK);
-                    // Hide empty rows to shift table up, but Excel doesn't easily delete rows in event. 
-                    // Better to just start the title at row 4
-                }
-
+                $sheet->setCellValue('A1', $this->title);
                 $sheet->mergeCells("A1:{$lastColumnLetter}1");
-                $sheet->mergeCells("A2:{$lastColumnLetter}2");
-                $sheet->getStyle('A1:A2')->getFont()->setSize(11);
-
-                $sheet->setCellValue('A' . $titleRow, $this->title);
-                $sheet->mergeCells('A' . $titleRow . ":{$lastColumnLetter}" . $titleRow);
-                $sheet->getStyle('A' . $titleRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('A' . $titleRow)->getFont()->setSize(12)->setBold(true);
+                $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A1')->getFont()->setSize(12)->setBold(true);
             },
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
                 $lastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->columns) + 1);
                 $lastRow = $sheet->getHighestRow();
 
-                $startRow = $this->sekolah ? 9 : 6;
+                $startRow = 3;
                 // Table headings are at startRow
                 $headerRange = "A{$startRow}:{$lastColumnLetter}{$startRow}";
                 $tableRange = "A{$startRow}:{$lastColumnLetter}{$lastRow}";

@@ -62,6 +62,24 @@
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
             transition: left 160ms ease;
         }
+
+        @media (min-width: 1024px) {
+            .fi-body-has-sidebar-collapsible-on-desktop .fi-sidebar:not(.fi-sidebar-open) .sidebar-validation-period-hook {
+                display: flex;
+                justify-content: center;
+                padding: 0.75rem 0 !important;
+            }
+
+            .fi-body-has-sidebar-collapsible-on-desktop .fi-sidebar:not(.fi-sidebar-open) .validation-period-toggle {
+                justify-content: center;
+                width: auto;
+                padding: 0;
+            }
+
+            .fi-body-has-sidebar-collapsible-on-desktop .fi-sidebar:not(.fi-sidebar-open) .validation-period-toggle-label {
+                display: none;
+            }
+        }
     </style>
 
     <div class="validation-period-toggle" title="{{ $active ? 'Periode validasi aktif' : 'Periode validasi ditutup' }}">
