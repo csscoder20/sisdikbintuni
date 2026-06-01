@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Sekolah;
+use App\Models\Gtk;
 use App\Support\ValidationPeriod;
 use App\Models\WilayahKabBintuni;
 use BackedEnum;
@@ -40,7 +41,7 @@ class SekolahPage extends Page implements HasSchemas
 
     protected static ?string $modelLabel = 'Profil';
     protected static ?string $pluralModelLabel = 'Profil';
-    
+
     protected static string | \UnitEnum | null $navigationGroup = 'Data Sekolah';
 
     public static function shouldRegisterNavigation(): bool
@@ -74,7 +75,10 @@ class SekolahPage extends Page implements HasSchemas
         $sekolah = $this->getSekolah();
 
         if ($sekolah) {
-            $this->form->fill($sekolah->toArray());
+            $data = $sekolah->toArray();
+            $data['nama_kepala_sekolah'] = $this->getKepalaSekolahName($sekolah);
+
+            $this->form->fill($data);
         }
     }
 
@@ -96,6 +100,20 @@ class SekolahPage extends Page implements HasSchemas
 
         // Fallback: ambil dari relasi user
         return auth()->user()?->sekolah;
+    }
+
+    protected function getKepalaSekolahName(?Sekolah $sekolah = null): ?string
+    {
+        $sekolah ??= $this->getSekolah();
+
+        if (! $sekolah) {
+            return null;
+        }
+
+        return Gtk::query()
+            ->where('sekolah_id', $sekolah->id)
+            ->where('jenis_gtk', 'Kepala Sekolah')
+            ->value('nama');
     }
 
     public function getTitle(): string|Htmlable
@@ -205,6 +223,11 @@ class SekolahPage extends Page implements HasSchemas
                 ->label('Tanggal SK Pendirian')
                 ->native(false)
                 ->displayFormat('d/m/Y'),
+            TextInput::make('nama_kepala_sekolah')
+                ->label('Nama Kepala Sekolah')
+                ->disabled()
+                ->dehydrated(false)
+                ->placeholder('Belum ada GTK dengan jenis Kepala Sekolah'),
         ];
     }
 
@@ -235,7 +258,7 @@ class SekolahPage extends Page implements HasSchemas
                                         ->pluck('nama', 'nama');
                                 })
                                 ->live()
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('desa', null))
+                                ->afterStateUpdated(fn($state, callable $set) => $set('desa', null))
                                 ->searchable(),
 
                             Select::make('desa')
@@ -341,7 +364,7 @@ class SekolahPage extends Page implements HasSchemas
                 ->label('Nomor Rekening BOSP'),
             TextInput::make('nama_bank_bosp')
                 ->label('Nama Bank Rekening BOSP'),
-            
+
         ];
     }
 
@@ -349,7 +372,7 @@ class SekolahPage extends Page implements HasSchemas
     {
         $sekolah = $this->getSekolah();
         $foto = $sekolah?->foto;
-        
+
         return [
             \Filament\Schemas\Components\View::make('filament.components.image-hover')
                 ->viewData([
@@ -364,7 +387,7 @@ class SekolahPage extends Page implements HasSchemas
     {
         $sekolah = $this->getSekolah();
         $logo = $sekolah?->logo;
-        
+
         return [
             \Filament\Schemas\Components\View::make('filament.components.image-hover')
                 ->viewData([
@@ -434,6 +457,7 @@ class SekolahPage extends Page implements HasSchemas
 
         // Pastikan user_id tidak tertimpa
         unset($data['user_id']);
+        unset($data['nama_kepala_sekolah']);
 
         $sekolah->update($data);
 
@@ -453,8 +477,8 @@ class SekolahPage extends Page implements HasSchemas
                 \Filament\Forms\Components\ViewField::make('current_foto')
                     ->view('filament.components.image-current-preview')
                     ->viewData([
-                        'url' => $this->getSekolah()?->foto 
-                            ? Storage::disk('public')->url($this->getSekolah()->foto) 
+                        'url' => $this->getSekolah()?->foto
+                            ? Storage::disk('public')->url($this->getSekolah()->foto)
                             : 'https://placehold.co/800x600?text=Foto+Sekolah',
                         'title' => 'Foto Sekolah'
                     ]),
@@ -468,7 +492,7 @@ class SekolahPage extends Page implements HasSchemas
                     ->live()
                     ->helperText('Klik area di atas untuk memilih gambar baru dari komputer Anda.')
             ])
-            ->modalSubmitAction(fn ($action) => $action->visible(fn () => filled($this->getMountedActionForm()?->getState()['new_foto'] ?? null)))
+            ->modalSubmitAction(fn($action) => $action->visible(fn() => filled($this->getMountedActionForm()?->getState()['new_foto'] ?? null)))
             ->action(function (array $data) {
                 if (!empty($data['new_foto'])) {
                     $sekolah = $this->getSekolah();
@@ -495,8 +519,8 @@ class SekolahPage extends Page implements HasSchemas
                 \Filament\Forms\Components\ViewField::make('current_logo')
                     ->view('filament.components.image-current-preview')
                     ->viewData([
-                        'url' => $this->getSekolah()?->logo 
-                            ? Storage::disk('public')->url($this->getSekolah()->logo) 
+                        'url' => $this->getSekolah()?->logo
+                            ? Storage::disk('public')->url($this->getSekolah()->logo)
                             : 'https://placehold.co/400x400?text=Logo+Sekolah',
                         'title' => 'Logo Sekolah'
                     ]),
@@ -510,16 +534,16 @@ class SekolahPage extends Page implements HasSchemas
                     ->live()
                     ->helperText('Klik area di atas untuk memilih logo baru dari komputer Anda.')
             ])
-            ->modalSubmitAction(fn ($action) => $action->visible(fn () => filled($this->getMountedActionForm()?->getState()['new_logo'] ?? null)))
+            ->modalSubmitAction(fn($action) => $action->visible(fn() => filled($this->getMountedActionForm()?->getState()['new_logo'] ?? null)))
             ->action(function (array $data) {
                 if (!empty($data['new_logo'])) {
                     $sekolah = $this->getSekolah();
                     if ($sekolah) {
                         $sekolah->update(['logo' => $data['new_logo']]);
-                        
+
                         $logoUrl = Storage::disk('public')->url($data['new_logo']);
                         $this->dispatch('school-logo-updated', logo_url: $logoUrl);
-                        
+
                         Notification::make()
                             ->title('Logo sekolah berhasil diperbarui!')
                             ->success()
