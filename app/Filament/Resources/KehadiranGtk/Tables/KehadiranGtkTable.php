@@ -27,9 +27,11 @@ class KehadiranGtkTable
             ->recordAction(null)
             ->striped()
             ->defaultSort('id', 'asc')
+            ->modifyQueryUsing(fn ($query) => $query->with('gtk.pendidikan'))
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')
+                    ->formatStateUsing(fn ($state, $record): string => self::formatGtkName($record->gtk, $state))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('hadir')
@@ -102,5 +104,15 @@ class KehadiranGtkTable
                 ]),
             ])
             ;
+    }
+
+    protected static function formatGtkName($gtk, ?string $nama = null): string
+    {
+        $nama = trim((string) ($nama ?? $gtk?->nama ?? ''));
+        $pendidikan = $gtk?->pendidikan->first();
+        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
     }
 }

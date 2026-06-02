@@ -39,8 +39,8 @@ class LaporanKeuanganForm
                         Select::make('jenis_transaksi')
                             ->label('Jenis Transaksi')
                             ->options([
-                                'debit' => 'Debit (Uang Masuk)',
-                                'kredit' => 'Kredit (Uang Keluar)',
+                                'debit' => 'Debit (Pemasukan)',
+                                'kredit' => 'Kredit (Pengeluaran)',
                             ])
                             ->required(),
                     ]),
@@ -94,7 +94,7 @@ class LaporanKeuanganForm
     private static function getLaporanOptions(): array
     {
         $sekolahId = Filament::getTenant()?->id ?? auth()->user()->sekolah_id;
-        
+
         if (!$sekolahId) return [];
 
         return \App\Models\Laporan::where('sekolah_id', $sekolahId)

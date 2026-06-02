@@ -40,20 +40,20 @@ class LaporanKeuanganTable
                     ->label('Debit')
                     ->state(fn($record) => $record->jenis_transaksi === 'debit' ? $record->nominal : null)
                     ->money('idr')
-                    ->alignment('center')
+                    ->alignment('right')
                     ->extraAttributes(['style' => 'min-width: 250px; padding: 0 1rem;'])
                     ->extraHeaderAttributes(['style' => 'min-width: 250px']),
                 TextColumn::make('kredit')
                     ->label('Kredit')
                     ->state(fn($record) => $record->jenis_transaksi === 'kredit' ? $record->nominal : null)
                     ->money('idr')
-                    ->alignment('center')
+                    ->alignment('right')
                     ->extraAttributes(['style' => 'min-width: 250px; padding: 0 1rem;'])
                     ->extraHeaderAttributes(['style' => 'min-width: 250px']),
                 TextColumn::make('running_balance')
                     ->label('Saldo')
                     ->money('idr')
-                    ->alignment('center')
+                    ->alignment('right')
                     ->extraAttributes(['style' => 'min-width: 250px; padding: 0 1rem;'])
                     ->extraHeaderAttributes(['style' => 'min-width: 250px'])
                     ->state(function ($record) {

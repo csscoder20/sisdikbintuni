@@ -110,10 +110,32 @@ class SekolahPage extends Page implements HasSchemas
             return null;
         }
 
-        return Gtk::query()
+        $gtk = Gtk::query()
             ->where('sekolah_id', $sekolah->id)
             ->where('jenis_gtk', 'Kepala Sekolah')
-            ->value('nama');
+            ->with('pendidikan')
+            ->first();
+
+        if (! $gtk) {
+            return null;
+        }
+
+        $nama = $gtk->nama;
+        $pendidikan = $gtk->pendidikan->first();
+        $gelarDepan = $pendidikan?->gelar_depan;
+        $gelarBelakang = $pendidikan?->gelar_belakang;
+
+        // Format: Gelar Depan Nama Gelar Belakang
+        $parts = [];
+        if ($gelarDepan) {
+            $parts[] = $gelarDepan;
+        }
+        $parts[] = $nama;
+        if ($gelarBelakang) {
+            $parts[] = $gelarBelakang;
+        }
+
+        return implode(' ', $parts);
     }
 
     public function getTitle(): string|Htmlable
@@ -227,6 +249,7 @@ class SekolahPage extends Page implements HasSchemas
                 ->label('Nama Kepala Sekolah')
                 ->disabled()
                 ->dehydrated(false)
+                ->helperText('Kepala Sekolah otomatis diambil dari data GTK dengan jenis Kepala Sekolah')
                 ->placeholder('Belum ada GTK dengan jenis Kepala Sekolah'),
         ];
     }
@@ -286,7 +309,7 @@ class SekolahPage extends Page implements HasSchemas
                             Textarea::make('alamat')
                                 ->label('Alamat Lengkap')
                                 ->rows(3)
-                                ->placeholder('Jl. Contoh No. 123...')
+                                ->placeholder('Contoh: Jl. Raya Teluk Bintuni No. 123, RT/RW jika ada')
                                 ->columnSpanFull()
                                 ->live(),
 
@@ -345,6 +368,7 @@ class SekolahPage extends Page implements HasSchemas
             Textarea::make('alamat_yayasan')
                 ->label('Alamat Penyelenggara / Yayasan')
                 ->rows(2)
+                ->placeholder('Contoh: Jl. Raya Teluk Bintuni No. 123, RT/RW jika ada')
                 ->columnSpan(2),
         ];
     }

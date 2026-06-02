@@ -57,7 +57,7 @@ $watch('modalOpen', value => { if (value) $nextTick(() => $refs.modalSearchInput
         </span>
 
         <span
-            style="font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">
+            style="font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; text-transform: uppercase;">
             {{ $selectedSekolahNama }}
         </span>
 

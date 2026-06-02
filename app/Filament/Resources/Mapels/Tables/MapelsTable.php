@@ -38,16 +38,19 @@ class MapelsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('jjp')
+                    ->alignCenter()
                     ->label('Jumlah Jam Pelajaran')
                     ->formatStateUsing(fn($state) => $state !== null && $state !== '' ? (int) $state : '-')
                     ->sortable(),
                 TextColumn::make('jenjang')
                     ->label('Jenjang')
+                    ->alignCenter()
                     ->formatStateUsing(fn($state) => strtoupper($state))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('tingkat')
                     ->label('Tingkat')
+                    ->alignCenter()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('created_at')

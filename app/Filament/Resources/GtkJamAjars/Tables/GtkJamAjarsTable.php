@@ -44,9 +44,11 @@ class GtkJamAjarsTable
             ->recordAction(null)
             ->defaultSort('id', 'asc')
             ->striped()
+            ->modifyQueryUsing(fn ($query) => $query->with('gtk.pendidikan'))
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')
+                    ->formatStateUsing(fn ($state, Mengajar $record): string => self::formatGtkName($record->gtk, $state))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('total_jam_mengajar')
@@ -107,7 +109,7 @@ class GtkJamAjarsTable
                         ->label('Kelola Jam Mengajar')
                         ->icon(Heroicon::OutlinedPlusCircle)
                         ->modalWidth(Width::FiveExtraLarge)
-                        ->modalHeading(fn (Mengajar $record): string => 'Tambah Jam Mengajar: ' . ($record->gtk?->nama ?? '-'))
+                        ->modalHeading(fn (Mengajar $record): string => 'Tambah Jam Mengajar: ' . self::formatGtkName($record->gtk))
                         ->modalSubmitActionLabel('Simpan Jam Mengajar')
                         ->modalCancelAction(false)
                         ->skippableSteps()
@@ -255,7 +257,7 @@ class GtkJamAjarsTable
                                         ->hiddenLabel()
                                         ->content(function (callable $get, Mengajar $record): \Illuminate\Support\HtmlString {
                                             $total = self::sumTeachingHours($get('tugas_utama') ?? []);
-                                            $nama = $record->gtk?->nama ?? '-';
+                                            $nama = self::formatGtkName($record->gtk);
                                             return new \Illuminate\Support\HtmlString("Jumlah Jam Mengajar dari {$nama} adalah sebanyak <strong>{$total}</strong> jam.");
                                         }),
                                 ]),
@@ -275,7 +277,7 @@ class GtkJamAjarsTable
                                             $totalUtama = self::sumTeachingHours($get('tugas_utama') ?? []);
                                             $totalTambahan = (int) ($get('jumlah_jam_tugas_tambahan') ?? 0);
                                             $total = $totalUtama + $totalTambahan;
-                                            $nama = $record->gtk?->nama ?? '-';
+                                            $nama = self::formatGtkName($record->gtk);
                                             return new \Illuminate\Support\HtmlString("Total Seluruh Jam Mengajar + Tugas Tambahan dari {$nama} adalah sebanyak <strong>{$total}</strong> jam.");
                                         })
                                         ->columnSpanFull(),
@@ -340,7 +342,7 @@ class GtkJamAjarsTable
                         ->form([
                             Placeholder::make('nama_gtk')
                                 ->hiddenLabel()
-                                ->content(fn (Mengajar $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('Nama GTK : <strong>' . e($record->gtk?->nama ?? '-') . '</strong>')),
+                                ->content(fn (Mengajar $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('Nama GTK : <strong>' . e(self::formatGtkName($record->gtk)) . '</strong>')),
                             Placeholder::make('pivot_table')
                                 ->hiddenLabel()
                                 ->content(function (Mengajar $record): \Illuminate\Support\HtmlString {
@@ -464,6 +466,16 @@ class GtkJamAjarsTable
         }
         
         return filament()->getTenant()?->id;
+    }
+
+    protected static function formatGtkName($gtk, ?string $nama = null): string
+    {
+        $nama = trim((string) ($nama ?? $gtk?->nama ?? ''));
+        $pendidikan = $gtk?->pendidikan->first();
+        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
     }
 
     protected static function getRombelOptions(): array

@@ -27,8 +27,6 @@ class MapelForm
                 Select::make('jenjang')
                     ->label('Jenjang')
                     ->options([
-                        'sd' => 'SD',
-                        'smp' => 'SMP',
                         'sma' => 'SMA',
                         'smk' => 'SMK',
                     ])
@@ -46,10 +44,14 @@ class MapelForm
                     ->default(function () {
                         return Filament::getCurrentPanel()?->getId() !== 'dinas' ? Filament::getTenant()?->id : session('dinas_selected_sekolah_id');
                     }),
-                TextInput::make('tingkat')
+                Select::make('tingkat')
                     ->label('Tingkat')
-                    ->maxLength(255)
-                    ->helperText('Contoh: 10, 11, 12 untuk SMA/SMK'),
+                    ->helperText('Contoh: 10, 11, 12 untuk SMA/SMK')
+                    ->options([
+                        '10' => '10',
+                        '11' => '11',
+                        '12' => '12',
+                    ])
             ]);
     }
 }

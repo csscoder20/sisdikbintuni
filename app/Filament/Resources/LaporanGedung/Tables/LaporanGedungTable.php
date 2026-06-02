@@ -29,6 +29,7 @@ class LaporanGedungTable
             ->columns([
                 TextColumn::make('nama_ruang')
                     ->label('Nama Sarpras')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('jumlah_total')
                     ->label('Jumlah')
@@ -47,6 +48,7 @@ class LaporanGedungTable
                     ->alignCenter(),
                 TextColumn::make('status_kepemilikan')
                     ->label('Status Kepemilikan')
+                    ->alignCenter()
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
@@ -77,14 +79,14 @@ class LaporanGedungTable
                         if (!empty($data['value'])) {
                             return $query->where('laporan_id', $data['value']);
                         }
-                        
+
                         // Default to the latest active Laporan for this school if no filter is selected
                         $sekolahId = filament()->getTenant()?->id ?? (auth()->check() ? auth()->user()->sekolah_id : null);
                         $latestLaporan = \App\Models\Laporan::where('sekolah_id', $sekolahId)
                             ->orderBy('tahun', 'desc')
                             ->orderBy('bulan', 'desc')
                             ->first();
-                            
+
                         if ($latestLaporan) {
                             return $query->where('laporan_id', $latestLaporan->id);
                         }
@@ -115,6 +117,6 @@ class LaporanGedungTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ;
+        ;
     }
 }

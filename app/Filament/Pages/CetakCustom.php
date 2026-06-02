@@ -1238,6 +1238,7 @@ class CetakCustom extends Page implements HasForms
         $records->each(function ($item) {
             $item->sekolah_nama = $item->sekolah?->nama ?? '-';
             $pend = $item->pendidikan->first();
+            $item->nama = self::formatGtkName($item);
             $item->jurusan_d3 = $pend?->jurusan_d3 ?? '-';
             $item->jurusan_s1 = $pend?->jurusan_s1 ?? '-';
             $item->jurusan_s2 = $pend?->jurusan_s2 ?? '-';
@@ -1317,6 +1318,7 @@ class CetakCustom extends Page implements HasForms
         $records->each(function ($item) {
             $item->sekolah_nama = $item->sekolah?->nama ?? '-';
             $pend = $item->pendidikan->first();
+            $item->nama = self::formatGtkName($item);
             $item->jurusan_d3 = $pend?->jurusan_d3 ?? '-';
             $item->jurusan_s1 = $pend?->jurusan_s1 ?? '-';
             $item->jurusan_s2 = $pend?->jurusan_s2 ?? '-';
@@ -1502,6 +1504,16 @@ class CetakCustom extends Page implements HasForms
         if ($columnCount <= 12) return '7pt';
         if ($columnCount <= 16) return '6pt';
         return '5pt';
+    }
+
+    protected static function formatGtkName($gtk): string
+    {
+        $nama = trim((string) ($gtk?->nama ?? ''));
+        $pendidikan = $gtk?->pendidikan->first();
+        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
     }
 
     protected function configureBrowsershot(string $html, int $columnCount): Browsershot

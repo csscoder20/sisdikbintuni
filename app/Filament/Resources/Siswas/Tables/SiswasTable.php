@@ -2,25 +2,25 @@
 
 namespace App\Filament\Resources\Siswas\Tables;
 
-use Filament\Actions\ActionGroup;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\ImportAction;
 use App\Filament\Imports\SiswaImporter;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Actions\RestoreAction;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Form;
-
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class SiswasTable
 {
@@ -32,6 +32,7 @@ class SiswasTable
             ->columns([
                 TextColumn::make('nama')
                     ->label('Nama Siswa')
+                    ->formatStateUsing(fn(string $state): string => Str::upper($state))
                     ->searchable(),
                 TextColumn::make('nisn')
                     ->label('NISN')
@@ -44,6 +45,7 @@ class SiswasTable
                     ->searchable(),
                 TextColumn::make('rombel.nama')
                     ->label('Rombel')
+                    ->alignCenter()
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy(
                             \App\Models\Rombel::select('nama')
@@ -56,6 +58,7 @@ class SiswasTable
                     ->badge(),
                 TextColumn::make('status')
                     ->label('Status Siswa')
+                    ->alignCenter()
                     ->searchable()
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -67,10 +70,6 @@ class SiswasTable
                         'mengulang' => 'danger',
                         default => 'gray',
                     }),
-                // TextColumn::make('tahun_masuk')
-                //     ->label('Tahun Masuk')
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tempat_lahir')
                     ->label('Tempat Lahir')
                     ->searchable()

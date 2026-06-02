@@ -88,7 +88,7 @@ class KehadiranGtkResource extends Resource
         }
 
         return parent::getEloquentQuery()
-            ->with(['gtk', 'laporan'])
+            ->with(['gtk.pendidikan', 'laporan'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])

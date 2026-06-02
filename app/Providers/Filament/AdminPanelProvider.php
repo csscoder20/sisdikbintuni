@@ -61,8 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->passwordReset(CustomRequestPasswordReset::class, CustomResetPassword::class)
             ->emailVerification()
-
-            ->darkMode(false)
+            ->darkMode()
             ->brandName('ADMIN')
             ->databaseNotifications()
             ->brandLogo(fn() => request()->routeIs('filament.*.auth.*')
@@ -302,6 +301,11 @@ class AdminPanelProvider extends PanelProvider
                         .fi-modal-footer-actions,
                         .fi-fo-modal-actions {
                             justify-content: flex-end !important;
+                        }
+
+                        span.fi-sc-text {
+                            font-size: 10px;
+                            color: #ea580c;
                         }
                     </style>
                 HTML;

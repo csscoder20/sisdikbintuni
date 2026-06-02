@@ -24,9 +24,11 @@ class GtkKeuangansTable
             ->recordUrl(null)
             ->recordAction(null)
             ->striped()
+            ->modifyQueryUsing(fn ($query) => $query->with('pendidikan'))
             ->columns([
                 TextColumn::make('nama')
                     ->label('Nama GTK')
+                    ->formatStateUsing(fn ($state, $record): string => self::formatGtkName($record, $state))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('nama_bank_gaji')
@@ -69,5 +71,15 @@ class GtkKeuangansTable
             ])
             ->emptyStateHeading('Belum ada data GTK')
             ->emptyStateDescription('Data GTK akan otomatis terambil dari menu Nominatif GTK.');
+    }
+
+    protected static function formatGtkName($gtk, ?string $nama = null): string
+    {
+        $nama = trim((string) ($nama ?? $gtk?->nama ?? ''));
+        $pendidikan = $gtk?->pendidikan->first();
+        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
     }
 }

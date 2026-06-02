@@ -31,6 +31,13 @@ class GtkRiwayatPendidikansTable
             ->columns([
                 TextColumn::make('gtk.nama')
                     ->label('Nama GTK')
+                    ->formatStateUsing(function ($state, $record): string {
+                        $nama = trim((string) $state);
+                        $gelarDepan = trim((string) ($record->gelar_depan ?? ''));
+                        $gelarBelakang = trim((string) ($record->gelar_belakang ?? ''));
+
+                        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
+                    })
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('thn_tamat_sd')
@@ -82,6 +89,7 @@ class GtkRiwayatPendidikansTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('thn_tamat_s1')
+                    ->alignCenter()
                     ->label('Tamat S1'),
                 TextColumn::make('jurusan_s1')
                     ->label('Jurusan S1'),
@@ -118,8 +126,12 @@ class GtkRiwayatPendidikansTable
                     ->label('PT Akta IV')
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('gelar_depan')
+                    ->label('Gelar Depan')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('gelar_belakang')
-                    ->label('Gelar Akademik'),
+                    ->label('Gelar Belakang')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')

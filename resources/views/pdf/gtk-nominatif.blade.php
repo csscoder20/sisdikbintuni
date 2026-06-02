@@ -107,11 +107,12 @@
     @php
         $dateString = \Carbon\Carbon::now()->translatedFormat('d F Y');
         if (isset($sekolah) && $sekolah) {
-            $kepsek = \App\Models\Gtk::where('sekolah_id', $sekolah->id)
+            $kepsek = \App\Models\Gtk::with('pendidikan')
+                ->where('sekolah_id', $sekolah->id)
                 ->where('jenis_gtk', 'Kepala Sekolah')
                 ->first();
             $titleSign = 'Kepala ' . $sekolah->nama;
-            $namaSign = $kepsek?->nama ?? '..........................';
+            $namaSign = $kepsek && isset($formatGtkName) ? $formatGtkName($kepsek) : ($kepsek?->nama ?? '..........................');
             $nipSign = $kepsek?->nip ?? '..........................';
         } else {
             $titleSign = 'Kepala Sekolah';

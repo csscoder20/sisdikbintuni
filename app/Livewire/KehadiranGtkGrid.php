@@ -74,6 +74,16 @@ class KehadiranGtkGrid extends Component
         return filament()->getTenant()?->id ?? session('dinas_selected_sekolah_id');
     }
 
+    public function formatGtkName(Gtk $gtk): string
+    {
+        $pendidikan = $gtk->pendidikan->first();
+        $nama = trim((string) $gtk->nama);
+        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
+    }
+
     protected function loadAttendance($gtks)
     {
         $records = GtkKehadiran::whereYear('tgl_presensi', $this->tahun)
@@ -259,6 +269,7 @@ class KehadiranGtkGrid extends Component
     public function render()
     {
         $query = Gtk::where('sekolah_id', $this->getSchoolId())
+            ->with('pendidikan')
             ->orderBy('id');
 
         $gtks = ($this->perPage === 'all')

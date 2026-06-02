@@ -34,14 +34,23 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
         $this->columns = $columns;
         $this->sekolah = $sekolah;
         $this->title = $title;
-        
+
         // Identify which column letters should be treated as text
         $textColumnKeys = [
-            'nip', 'nik', 'nuptk', 'nisn', 'nis', 'nokarpeg', 
-            'nokk', 'nobpjs', 'nohp_ortuwali', 'no_rekening',
-            'npsn', 'kodepos'
+            'nip',
+            'nik',
+            'nuptk',
+            'nisn',
+            'nis',
+            'nokarpeg',
+            'nokk',
+            'nobpjs',
+            'nohp_ortuwali',
+            'no_rekening',
+            'npsn',
+            'kodepos'
         ];
-        
+
         $colIndex = 2; // Start from 2 because 1 is 'No'
         foreach (array_keys($this->columns) as $column) {
             if (in_array(strtolower($column), $textColumnKeys) || str_contains(strtolower($column), 'nomor') || str_contains(strtolower($column), 'no_')) {
@@ -65,10 +74,10 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
     {
         $this->rowNumber++;
         $mapped = [$this->rowNumber];
-        
+
         foreach (array_keys($this->columns) as $column) {
             $value = $record->{$column} ?? '-';
-            
+
             // Convert Jenis Kelamin to L/P
             if ($column === 'jenis_kelamin') {
                 if (strtolower($value) === 'laki-laki') {
@@ -85,7 +94,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 // If it's a Y-m-d string, format it
                 $value = \Carbon\Carbon::parse($value)->format('d/m/Y');
             }
-            
+
             $mapped[] = $value;
         }
         return $mapped;
@@ -103,7 +112,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
     public function bindValue(Cell $cell, $value)
     {
         $columnLetter = $cell->getColumn();
-        
+
         // If this column is designated as a text column, or if it's a long numeric string
         if (in_array($columnLetter, $this->textColumnLetters) || (is_numeric($value) && strlen((string)$value) > 10)) {
             $cell->setValueExplicit($value, DataType::TYPE_STRING);
@@ -164,15 +173,23 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                 // Column Sizing Logic
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $colIndex = 2;
-                foreach (array_values($this->columns) as $label) {
+                foreach (array_keys($this->columns) as $columnKey) {
+                    $label = $this->columns[$columnKey];
                     $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
-                    
-                    // If header has multiple words, wrap the entire column and set a reasonable width
-                    if (str_contains(trim($label), ' ')) {
+
+                    // Check if this is a nama/name column
+                    $isNameColumn = strtolower($columnKey) === 'nama' ||
+                        str_contains(strtolower($label), 'nama');
+
+                    if ($isNameColumn) {
+                        // Set larger width for nama column and disable wrap text
+                        $sheet->getColumnDimension($columnLetter)->setAutoSize(false);
+                        $sheet->getColumnDimension($columnLetter)->setWidth(35);
+                        $sheet->getStyle("{$columnLetter}{$startRow}:{$columnLetter}{$lastRow}")->getAlignment()->setWrapText(false);
+                    } elseif (str_contains(trim($label), ' ')) {
+                        // Other multi-word columns: wrap text
                         $sheet->getColumnDimension($columnLetter)->setAutoSize(false);
                         $sheet->getColumnDimension($columnLetter)->setWidth(20);
-                        
-                        // Enable wrap text for the whole column
                         $sheet->getStyle("{$columnLetter}{$startRow}:{$columnLetter}{$lastRow}")->getAlignment()->setWrapText(true);
                     } else {
                         $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
@@ -185,7 +202,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
 
                 // Center align the NO column
                 $sheet->getStyle("A{$startRow}:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                
+
                 // Set default alignment for all table cells to center vertical and set font size
                 $sheet->getStyle($tableRange)->applyFromArray([
                     'alignment' => [
@@ -195,7 +212,7 @@ class DynamicExport extends DefaultValueBinder implements FromCollection, WithHe
                         'size' => 10,
                     ],
                 ]);
-                
+
                 // Re-apply bold and white to headers because we just overwrote with general font style
                 $sheet->getStyle($headerRange)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE));
 

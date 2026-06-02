@@ -28,7 +28,16 @@ class LaporanGedungForm
                     }),
                 TextInput::make('nama_ruang')
                     ->label('Nama Ruang')
+                    ->columnSpan(2)
                     ->required(),
+                Select::make('status_kepemilikan')
+                    ->label('Status Kepemilikan')
+                    ->options([
+                        'milik' => 'Milik',
+                        'pinjam' => 'Pinjam',
+                    ])
+                    ->required()
+                    ->default('milik'),
                 TextInput::make('jumlah_total')
                     ->label('Jumlah Total')
                     ->required()
@@ -48,7 +57,7 @@ class LaporanGedungForm
                     ->minValue(0)
                     ->default(0)
                     ->rules([
-                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get): void {
+                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get): void {
                             $total = $get('jumlah_total');
                             $baik = $get('jumlah_baik');
 
@@ -61,14 +70,6 @@ class LaporanGedungForm
                             }
                         },
                     ]),
-                Select::make('status_kepemilikan')
-                    ->label('Status Kepemilikan')
-                    ->options([
-                        'milik' => 'Milik',
-                        'pinjam' => 'Pinjam',
-                    ])
-                    ->required()
-                    ->default('milik'),
             ])->columns(3);
     }
 }

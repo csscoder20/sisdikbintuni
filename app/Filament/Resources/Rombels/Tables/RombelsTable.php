@@ -30,15 +30,16 @@ class RombelsTable
             ->poll('5s')
             ->columns([
                 TextColumn::make('nama')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('tingkat')
+                    ->alignCenter()
                     ->sortable(),
                 TextColumn::make('siswa_count')
+                    ->alignCenter()
                     ->counts('siswa')
                     ->label('Jumlah Siswa')
                     ->sortable(),
-                // TextColumn::make('sekolah.nama')
-                //     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
@@ -59,7 +60,7 @@ class RombelsTable
                         ->label('Kelola Rombel')
                         ->icon('heroicon-o-user-plus')
                         ->color('success')
-                        ->url(fn (\App\Models\Rombel $record): string => \App\Filament\Resources\Rombels\RombelResource::getUrl('assign-siswa', ['record' => $record])),
+                        ->url(fn(\App\Models\Rombel $record): string => \App\Filament\Resources\Rombels\RombelResource::getUrl('assign-siswa', ['record' => $record])),
                     ViewAction::make()
                         ->modalWidth(\Filament\Support\Enums\Width::Medium)
                         ->icon(Heroicon::OutlinedEye),

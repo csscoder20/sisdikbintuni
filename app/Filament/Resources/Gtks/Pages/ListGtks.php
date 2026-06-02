@@ -113,7 +113,15 @@ class ListGtks extends ListRecords
                         ]),
                 ])
                 ->action(function (array $data) {
-                    $records = $this->getFilteredTableQuery()->get();
+                    $records = $this->getFilteredTableQuery()
+                        ->with('pendidikan')
+                        ->get()
+                        ->map(function ($record) {
+                            $record->setAttribute('nama', self::formatGtkName($record));
+
+                            return $record;
+                        });
+
                     $allColumns = [
                         'nama' => 'Nama GTK',
                         'nik' => 'NIK',
@@ -171,6 +179,7 @@ class ListGtks extends ListRecords
                         'columns' => $selectedColumns,
                         'sekolah' => $sekolah,
                         'fontSize' => $fontSize,
+                        'formatGtkName' => fn ($gtk): string => self::formatGtkName($gtk),
                     ])->render();
 
                     $browsershot = $this->makeBrowsershot($html);
@@ -187,5 +196,15 @@ class ListGtks extends ListRecords
                     );
                 }),
         ];
+    }
+
+    protected static function formatGtkName($gtk): string
+    {
+        $nama = trim((string) ($gtk?->nama ?? ''));
+        $pendidikan = $gtk?->pendidikan->first();
+        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
     }
 }

@@ -33,10 +33,20 @@ class GtksTable
             ->recordAction(null)
             ->striped()
             ->defaultSort('id', 'asc')
+            ->modifyQueryUsing(fn($query) => $query->with('pendidikan'))
             ->columns([
                 TextColumn::make('nama')
                     ->label('Nama GTK')
-                    ->searchable(),
+                    ->formatStateUsing(function ($state, $record): string {
+                        $nama = trim((string) $state);
+                        $pendidikan = $record->pendidikan->first();
+                        $gelarDepan = trim((string) ($pendidikan?->gelar_depan ?? ''));
+                        $gelarBelakang = trim((string) ($pendidikan?->gelar_belakang ?? ''));
+
+                        return trim(($gelarDepan ? $gelarDepan . ' ' : '') . $nama . ($gelarBelakang ? ', ' . $gelarBelakang : ''));
+                    })
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('nik')
                     ->label('NIK')
                     ->searchable(),
@@ -58,9 +68,11 @@ class GtksTable
                     ->searchable(),
                 TextColumn::make('status_kepegawaian')
                     ->label('Status Kepegawaian')
+                    ->alignCenter()
                     ->searchable(),
                 TextColumn::make('pangkat_gol_terakhir')
                     ->label('Pangkat Gol Terakhir')
+                    ->alignCenter()
                     ->searchable(),
                 TextColumn::make('tmt_pns')
                     ->label('TMT PNS')
