@@ -5,8 +5,9 @@ namespace App\Filament\Resources\Notifikasis\Pages;
 use App\Filament\Resources\Notifikasis\NotifikasiResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
-use App\Models\User;
 use Filament\Actions\Action;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 class CreateNotifikasi extends CreateRecord
 {
@@ -23,6 +24,7 @@ class CreateNotifikasi extends CreateRecord
         $record = $this->getRecord();
         $recipientType = $record->recipient_type;
         $targetIds = $record->target_ids;
+        $isReleaseNote = $record->type === 'release_note';
 
         $usersQuery = User::whereHas('roles', fn($q) => $q->where('name', 'operator'));
 
@@ -35,17 +37,36 @@ class CreateNotifikasi extends CreateRecord
         $targets = $usersQuery->get();
 
         foreach ($targets as $user) {
-            Notification::make()
+            $notification = Notification::make()
                 ->title($record->subject)
-                ->body(strip_tags($record->content))
-                ->info()
-                ->sendToDatabase($user);
+                ->body(Str::limit(strip_tags($record->content), 80));
+
+            if ($isReleaseNote) {
+                $notification
+                    ->icon('heroicon-o-rocket-launch')
+                    ->color('success')
+                    ->actions([
+                        Action::make('detail')
+                            ->label('Lihat Detail')
+                            ->button()
+                            ->color('success')
+                            ->dispatch('openNotifikasiDetail', ['id' => $record->id])
+                            ->markAsRead(),
+                    ]);
+            } else {
+                $notification->info();
+            }
+
+            $notification->sendToDatabase($user);
         }
 
-        Notification::make()
-            ->title('Pemberitahuan Berhasil Dikirim')
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
             ->success()
-            ->send();
+            ->title('Pemberitahuan Berhasil Dikirim');
     }
 
     protected function getRedirectUrl(): string

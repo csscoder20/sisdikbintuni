@@ -20,13 +20,13 @@ class OperatorPending extends BaseWidget
     {
         return $table
             ->query(
-                OperatorSekolah::query()->whereHas('user', fn (Builder $query) => $query->where('status', 'pending'))
+                OperatorSekolah::query()->whereHas('user', fn(Builder $query) => $query->where('status', 'pending'))
             )
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama Operator')
                     ->searchable(),
-                
+
                 Tables\Columns\TextColumn::make('sekolah.nama')
                     ->label('Sekolah')
                     ->searchable(),
@@ -44,7 +44,7 @@ class OperatorPending extends BaseWidget
                     ->requiresConfirmation()
                     ->modalHeading('Aktivasi Akun Operator')
                     ->modalDescription('Apakah Anda yakin ingin menyetujui akun operator ini?')
-                    ->action(fn (OperatorSekolah $record) => $record->user->update(['status' => 'approved'])),
+                    ->action(fn(OperatorSekolah $record) => $record->user->update(['status' => 'active'])),
             ]);
     }
 }

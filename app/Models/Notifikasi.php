@@ -12,6 +12,7 @@ class Notifikasi extends Model
     protected $table = 'notifikasi';
     protected $fillable = [
         'subject',
+        'type',
         'content',
         'recipient_type',
         'target_ids',

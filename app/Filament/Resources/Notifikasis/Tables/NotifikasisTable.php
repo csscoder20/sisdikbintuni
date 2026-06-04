@@ -26,6 +26,18 @@ class NotifikasisTable
                 TextColumn::make('subject')
                     ->label('Subject')
                     ->searchable(),
+                TextColumn::make('type')
+                    ->label('Tipe')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'release_note' => '🚀 Rilis Note',
+                        'general'      => '📢 Umum',
+                        default        => $state,
+                    })
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'release_note' => 'success',
+                        default        => 'info',
+                    }),
                 TextColumn::make('recipient_type')
                     ->label('Penerima')
                     ->formatStateUsing(fn($state) => match ($state) {

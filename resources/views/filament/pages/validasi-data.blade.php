@@ -707,7 +707,8 @@
                                         <strong>{{ count($emptyRombels) }} rombel</strong> yang belum memiliki siswa.
                                         Harap tambahkan siswa ke rombel tersebut. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.rombel.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -841,7 +842,8 @@
                                         <strong>{{ count($incompleteSiswa) }} siswa</strong> dengan data yang belum
                                         lengkap. Silakan lengkapi data siswa tersebut. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.siswa.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -951,7 +953,8 @@
                                         <strong>{{ count($incompleteGtk) }} GTK</strong> dengan data yang belum
                                         lengkap. Silakan lengkapi data GTK tersebut. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.gtk.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -1061,7 +1064,8 @@
                                         <strong>{{ count($tanpaPendidikan) }} GTK</strong> yang belum mengisi riwayat
                                         pendidikan terakhir. Harap lengkapi data tersebut. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.gtk.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -1208,7 +1212,8 @@
                                         <strong>{{ count($tanpaRekening) }} GTK</strong> yang belum mengisi data
                                         rekening atau NPWP. Harap lengkapi data tersebut. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.rekening-npwp-gtk.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -1283,7 +1288,8 @@
                                         <strong>{{ count($belowMinJam) }} guru</strong> dengan total jam mengajar
                                         kurang dari 24 jam. Silakan periksa kembali data sebaran jam mengajar. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.sebaran-jam-ajar.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -1355,7 +1361,8 @@
                                         <strong>{{ count($gtkTanpaKehadiran) }} GTK</strong> yang belum memiliki rekap
                                         kehadiran. Harap lengkapi data kehadiran terlebih dahulu. <a
                                             href="{{ route('filament.' . filament()->getId() . '.resources.kehadiran-gtk.index', ['tenant' => filament()->getTenant()]) }}"
-                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a></p>
+                                            style="color:#dc2626;font-weight:700;">Perbaiki Sekarang!</a>
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -1458,121 +1465,163 @@
 
         </div>{{-- end vd-card --}}
     </div>{{-- end vd --}}
-    <div x-data="{
-        open: false,
-        title: '',
-        message: '',
-        confirmText: 'Ya, Lanjutkan',
-        confirmColor: '#3b82f6',
-        cancelable: true,
-        onConfirm: null,
-        showDialog(opts) {
-            this.title = opts.title;
-            this.message = opts.message;
-            this.confirmText = opts.confirmText || 'Ya';
-            this.confirmColor = opts.confirmColor || '#3b82f6';
-            this.cancelable = opts.cancelable !== false;
-            this.onConfirm = opts.onConfirm;
-            this.open = true;
-        },
-        confirm() {
-            this.open = false;
-            if (this.onConfirm) this.onConfirm();
-        },
-        cancel() {
-            this.open = false;
-        },
-        init() {
-            window.addEventListener('swal-confirm-next', (event) => {
-                const detail = Array.isArray(event.detail) ? event.detail[0] : event.detail;
-                const msg = typeof detail.message === 'string' ? detail.message : '';
-                this.showDialog({
-                    title: 'Data Belum Lengkap',
-                    message: msg + '<br><br>Apakah Anda yakin ingin melanjutkan ke langkah berikutnya?',
-                    confirmText: 'Ya, lanjutkan',
-                    confirmColor: '#3b82f6',
-                    onConfirm: () => $wire.forceNextStep()
-                });
-            });
-            window.addEventListener('swal-confirm-submit', (event) => {
-                const detail = Array.isArray(event.detail) ? event.detail[0] : event.detail;
-                const msg = typeof detail.message === 'string' ? detail.message : '';
-                this.showDialog({
-                    title: 'Selesai & Simpan Data',
-                    message: msg,
-                    confirmText: 'Ya, Simpan',
-                    confirmColor: '#10b981',
-                    onConfirm: () => $wire.forceSubmit()
-                });
-            });
-            window.addEventListener('swal-success', (event) => {
-                const detail = Array.isArray(event.detail) ? event.detail[0] : event.detail;
-                const msg = typeof detail.message === 'string' ? detail.message : '';
-                this.showDialog({
-                    title: 'Berhasil!',
-                    message: msg,
-                    confirmText: 'OK',
-                    confirmColor: '#3b82f6',
-                    cancelable: false,
-                    onConfirm: () => window.location.reload()
-                });
-            });
-        }
-    }">
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('vdDialog', ($wire) => ({
+                open: false,
+                title: '',
+                message: '',
+                confirmText: 'Ya',
+                confirmColor: '#3b82f6',
+                cancelable: true,
+                canProceed: true,
+                onConfirm: null,
+                showDialog(opts) {
+                    this.title = opts.title || '';
+                    this.message = opts.message || '';
+                    this.confirmText = opts.confirmText !== undefined ? opts.confirmText : 'Ya';
+                    this.confirmColor = opts.confirmColor || '#3b82f6';
+                    this.cancelable = opts.cancelable !== false;
+                    this.canProceed = opts.canProceed !== false;
+                    this.onConfirm = opts.onConfirm || null;
+                    this.open = true;
+                },
+                confirm() {
+                    this.open = false;
+                    if (this.onConfirm) this.onConfirm();
+                },
+                cancel() {
+                    this.open = false;
+                },
+                init() {
+                    window.addEventListener('swal-confirm-next', (event) => {
+                        const detail = Array.isArray(event.detail) ? event.detail[0] : event
+                            .detail;
+                        const msg = typeof detail.message === 'string' ? detail.message : '';
+                        const canProceed = detail.canProceed !== false;
+
+                        const extraMsg = canProceed ?
+                            '<br><br>Apakah Anda yakin ingin melanjutkan ke langkah berikutnya?' :
+                            '<br><br>Proses validasi belum dapat dilanjutkan.';
+
+                        this.showDialog({
+                            title: canProceed ? 'Data Belum Lengkap' :
+                                'Wajib Isi Data Terlebih Dahulu',
+                            message: msg + extraMsg,
+                            confirmText: canProceed ? 'Ya, lanjutkan' : '',
+                            confirmColor: '#3b82f6',
+                            canProceed: canProceed,
+                            onConfirm: () => $wire.forceNextStep(),
+                            cancelable: true,
+                        });
+                    });
+
+                    window.addEventListener('swal-confirm-submit', (event) => {
+                        const detail = Array.isArray(event.detail) ? event.detail[0] : event
+                            .detail;
+                        const msg = typeof detail.message === 'string' ? detail.message : '';
+                        this.showDialog({
+                            title: 'Selesai & Simpan Data',
+                            message: msg,
+                            confirmText: 'Ya, Simpan',
+                            confirmColor: '#10b981',
+                            canProceed: true,
+                            onConfirm: () => $wire.forceSubmit(),
+                        });
+                    });
+
+                    window.addEventListener('swal-success', (event) => {
+                        const detail = Array.isArray(event.detail) ? event.detail[0] : event
+                            .detail;
+                        const msg = typeof detail.message === 'string' ? detail.message : '';
+                        this.showDialog({
+                            title: 'Berhasil!',
+                            message: msg,
+                            confirmText: 'OK',
+                            confirmColor: '#3b82f6',
+                            canProceed: true,
+                            cancelable: false,
+                            onConfirm: () => window.location.reload(),
+                        });
+                    });
+                },
+            }));
+        });
+    </script>
+
+    <div x-data="vdDialog($wire)">
         <template x-teleport="body">
-            <div x-show="open" x-cloak
-                style="position: fixed; inset: 0; z-index: 9999;"
+            <div x-show="open" x-cloak style="position: fixed; inset: 0; z-index: 9999;"
                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                 {{-- Backdrop --}}
-                <div style="position: absolute; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px);"></div>
+                <div style="position: absolute; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px);">
+                </div>
 
                 {{-- Centering wrapper --}}
-                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; pointer-events: none;">
+                <div
+                    style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; pointer-events: none;">
                     {{-- Dialog Panel --}}
                     <div style="position: relative; background: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); padding: 1.5rem; max-width: 28rem; width: 100%; pointer-events: auto;"
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
                         {{-- Close Button (X) --}}
-                        <button
-                            type="button"
-                            x-show="cancelable"
-                            x-on:click="cancel()"
+                        <button type="button" x-show="cancelable" x-on:click="cancel()"
                             style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 9999px; border: none; background: transparent; color: #9ca3af; cursor: pointer; transition: all 0.15s ease-in-out;"
                             onmouseover="this.style.backgroundColor='#f3f4f6'; this.style.color='#4b5563';"
-                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#9ca3af';"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.15rem; height: 1.15rem;">
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#9ca3af';">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" style="width: 1.15rem; height: 1.15rem;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
 
-                        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+                        <div
+                            style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
                             <div style="width: 3.5rem; height: 3.5rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;"
-                                :style="{ background: title === 'Berhasil!' ? '#dcfce7' : '#eff6ff' }">
+                                :style="{
+                                    background: title === 'Berhasil!' ? '#dcfce7' : (canProceed ? '#eff6ff' :
+                                        '#fef2f2')
+                                }">
                                 <template x-if="title === 'Berhasil!'">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#16a34a" style="width: 1.75rem; height: 1.75rem;">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="#16a34a" style="width: 1.75rem; height: 1.75rem;">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </template>
-                                <template x-if="title !== 'Berhasil!'">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#3b82f6" style="width: 1.75rem; height: 1.75rem;">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                                <template x-if="title !== 'Berhasil!' && canProceed">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="#3b82f6" style="width: 1.75rem; height: 1.75rem;">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                                    </svg>
+                                </template>
+                                <template x-if="title !== 'Berhasil!' && !canProceed">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="#dc2626" style="width: 1.75rem; height: 1.75rem;">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                                     </svg>
                                 </template>
                             </div>
-                            <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; text-align: center;" x-text="title"></h3>
-                            <p style="font-size: 0.875rem; color: #6b7280; margin: 0; line-height: 1.5; text-align: center;" x-html="message"></p>
+                            <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem; text-align: center;"
+                                :style="{ color: canProceed ? '#111827' : '#991b1b' }" x-text="title"></h3>
+                            <p style="font-size: 0.875rem; color: #6b7280; margin: 0; line-height: 1.5; text-align: center;"
+                                x-html="message"></p>
                         </div>
                         <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; width: 100%;">
+                            {{-- Tombol Batal / Tutup: full-width jika tidak ada tombol konfirmasi --}}
                             <button type="button" x-show="cancelable" x-on:click="cancel()"
-                                style="flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; color: #1f2937; cursor: pointer; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
+                                :style="{ flex: canProceed ? '1' : '1 1 100%' }"
+                                style="display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; color: #1f2937; cursor: pointer; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
                                 onmouseover="this.style.backgroundColor='#f9fafb'; this.style.transform='scale(1.02)';"
                                 onmouseout="this.style.backgroundColor='#ffffff'; this.style.transform='none';">
-                                Batal
+                                <span x-text="canProceed ? 'Batal' : 'Tutup'"></span>
                             </button>
-                            <button type="button" x-on:click="confirm()"
+                            {{-- Tombol konfirmasi: disembunyikan jika data kosong (canProceed=false) --}}
+                            <button type="button" x-show="confirmText !== ''" x-on:click="confirm()"
                                 style="flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.5rem; border: none; color: white !important; cursor: pointer; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);"
                                 :style="{ backgroundColor: confirmColor, color: 'white' }"
                                 onmouseover="this.style.filter='brightness(92%)'; this.style.transform='scale(1.02)';"

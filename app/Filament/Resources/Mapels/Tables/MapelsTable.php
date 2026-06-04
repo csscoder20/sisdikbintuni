@@ -12,6 +12,8 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Actions\ImportAction;
 use App\Filament\Imports\MapelImporter;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Actions\RestoreAction;
@@ -65,6 +67,34 @@ class MapelsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('tingkat')
+                    ->label('Tingkat')
+                    ->options([
+                        '10' => '10',
+                        '11' => '11',
+                        '12' => '12',
+                    ]),
+                SelectFilter::make('jjp')
+                    ->label('Jam Pelajaran')
+                    ->options(function (HasTable $livewire): array {
+                        $query = (clone $livewire->getFilteredTableQuery())
+                            ->whereNotNull('jjp');
+
+                        $tingkat = $livewire->getTableFilterState('tingkat')['value'] ?? null;
+
+                        if (filled($tingkat)) {
+                            $query->where('tingkat', $tingkat);
+                        }
+
+                        return $query
+                            ->pluck('jjp')
+                            ->map(fn ($value): int => (int) trim((string) $value))
+                            ->filter(fn (int $value): bool => $value > 0)
+                            ->unique()
+                            ->sort()
+                            ->mapWithKeys(fn (int $value): array => [(string) $value => (string) $value])
+                            ->all();
+                    }),
                 TrashedFilter::make(),
             ])
             ->recordActions([

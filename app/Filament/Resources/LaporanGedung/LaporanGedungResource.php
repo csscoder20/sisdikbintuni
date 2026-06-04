@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LaporanGedung;
 use App\Filament\Resources\LaporanGedung\Pages\ListLaporanGedung;
 use App\Filament\Resources\LaporanGedung\Schemas\LaporanGedungForm;
 use App\Filament\Resources\LaporanGedung\Tables\LaporanGedungTable;
+use App\Models\Laporan;
 use App\Models\LaporanGedung;
 use BackedEnum;
 use Filament\Facades\Filament;
@@ -84,7 +85,7 @@ class LaporanGedungResource extends Resource
             $sekolahId = Filament::getTenant()?->id;
         }
 
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ])
@@ -93,6 +94,19 @@ class LaporanGedungResource extends Resource
                     $query->where('sekolah_id', $sekolahId);
                 }
             });
+
+        if (! $sekolahId) {
+            return $query;
+        }
+
+        $latestLaporanId = Laporan::where('sekolah_id', $sekolahId)
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->value('id');
+
+        return $latestLaporanId
+            ? $query->where('laporan_id', $latestLaporanId)
+            : $query;
     }
 
     public static function getRelations(): array

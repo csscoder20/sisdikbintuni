@@ -72,6 +72,18 @@ class NotifikasiResource extends Resource
                     ->label('Judul Pemberitahuan')
                     ->weight('bold')
                     ->size('lg'),
+                \Filament\Infolists\Components\TextEntry::make('type')
+                    ->label('Tipe')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'release_note' => '🚀 Rilis Note / Pembaruan Sistem',
+                        'general'      => '📢 Pemberitahuan Umum',
+                        default        => $state,
+                    })
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'release_note' => 'success',
+                        default        => 'info',
+                    }),
                 \Filament\Infolists\Components\TextEntry::make('created_at')
                     ->label('Tanggal Kirim')
                     ->dateTime('d M Y, H:i')

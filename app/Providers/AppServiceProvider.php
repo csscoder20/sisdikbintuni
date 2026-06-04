@@ -73,6 +73,10 @@ class AppServiceProvider extends ServiceProvider
         // Globally disable modal click-away using the unified Action class
         Action::configureUsing(fn (Action $action) => $action->closeModalByClickingAway(false));
 
+        TrashedFilter::configureUsing(function (TrashedFilter $filter): void {
+            $filter->hidden(fn (): bool => filament()->getCurrentPanel()?->getId() !== 'dinas');
+        }, isImportant: true);
+
         $hideNonReadOnlyActions = function ($action): void {
             if (self::isReadOnlyAction($action)) {
                 return;

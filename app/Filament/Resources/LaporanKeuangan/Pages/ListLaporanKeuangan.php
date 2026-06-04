@@ -54,7 +54,29 @@ class ListLaporanKeuangan extends ListRecords
                 ->label('Tambah Transaksi')
                 ->modalHeading('Tambah Transaksi Baru')
                 ->modalSubmitActionLabel('Simpan Transaksi')
-                ->createAnother(false),
+                ->createAnother(false)
+                ->mutateFormDataUsing(function (array $data): array {
+                    if (! empty($data['laporan_id'])) {
+                        return $data;
+                    }
+
+                    $sekolahId = Filament::getCurrentPanel()?->getId() === 'dinas'
+                        ? session('dinas_selected_sekolah_id')
+                        : (Filament::getTenant()?->id ?? auth()->user()?->sekolah_id);
+
+                    if (! $sekolahId) {
+                        return $data;
+                    }
+
+                    $tanggal = \Carbon\Carbon::parse($data['tanggal'] ?? now());
+                    $data['laporan_id'] = \App\Models\Laporan::firstOrCreate([
+                        'sekolah_id' => $sekolahId,
+                        'bulan' => $tanggal->month,
+                        'tahun' => $tanggal->year,
+                    ])->id;
+
+                    return $data;
+                }),
             Action::make('export')
                 ->label('Ekspor Data')
                 // ->icon('heroicon-o-arrow-down-tray')

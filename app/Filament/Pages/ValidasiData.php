@@ -250,7 +250,24 @@ class ValidasiData extends Page
     protected function checkStep2(?int $id): bool
     {
         if (!$id) return false;
-        return LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', $id))->exists();
+        $month = (int) date('m');
+        $year = (int) date('Y');
+
+        // Cek apakah ada laporan untuk bulan/tahun ini
+        $laporan = Laporan::where('sekolah_id', $id)
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        if (!$laporan) return false;
+
+        // Cek apakah ada minimal 1 data laporan_gedung untuk laporan ini
+        if (!LaporanGedung::where('laporan_id', $laporan->id)->exists()) {
+            return false;
+        }
+
+        // Cek apakah semua data laporan_gedung sudah lengkap (field tidak ada yang kosong)
+        return empty($this->getIncompleteSarprasInfo());
     }
 
     protected function checkStep3(?int $id): bool
@@ -274,6 +291,14 @@ class ValidasiData extends Page
     protected function checkMapel(?int $id): bool
     {
         if (!$id) return false;
+
+        // Cek apakah ada data mapel
+        if ($this->getMapelCount() == 0) return false;
+
+        // Cek apakah semua data mapel sudah lengkap
+        if (!empty($this->getIncompleteMapelInfo())) return false;
+
+        // Cek apakah ada guru yang ditugaskan ke mata pelajaran
         return Mengajar::whereHas('gtk', fn($q) => $q->where('sekolah_id', $id))
             ->whereNotNull('mapel_id')
             ->exists();
@@ -282,8 +307,24 @@ class ValidasiData extends Page
     protected function checkKeuangan(?int $id): bool
     {
         if (!$id) return false;
-        return LaporanKeuangan::whereHas('laporan', fn($q) => $q->where('sekolah_id', $id))
-            ->exists();
+        $month = (int) date('m');
+        $year = (int) date('Y');
+
+        // Cek apakah ada laporan untuk bulan/tahun ini
+        $laporan = Laporan::where('sekolah_id', $id)
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        if (!$laporan) return false;
+
+        // Cek apakah ada minimal 1 data keuangan
+        if (!LaporanKeuangan::where('laporan_id', $laporan->id)->exists()) {
+            return false;
+        }
+
+        // Cek apakah semua data keuangan sudah lengkap (field tidak ada yang kosong)
+        return empty($this->getIncompleteLaporanKeuanganInfo());
     }
 
     protected function checkPendidikanGtk(?int $id): bool
@@ -307,6 +348,11 @@ class ValidasiData extends Page
     protected function checkStep7(?int $id): bool
     {
         if (!$id) return false;
+
+        // Pengecekan 1: Ada minimal 1 data kehadiran?
+        if ($this->getKehadiranCount() === 0) {
+            return false;
+        }
 
         $gtks = Gtk::where('sekolah_id', $id)->get();
         if ($gtks->isEmpty()) return false;
@@ -334,19 +380,49 @@ class ValidasiData extends Page
                 break;
             case 2:
                 if ($this->getSarprasCount() == 0) {
-                    return "Belum ada data pada tabel Sarana & Prasarana.";
+                    return "Belum ada data pada tabel <b>Sarana & Prasarana</b>. Tambahkan minimal 1 data gedung/ruang untuk melanjutkan.";
+                } else {
+                    $inc = $this->getIncompleteSarprasInfo();
+                    if (!empty($inc)) {
+                        $allMissingCols = [];
+                        foreach ($inc as $i) {
+                            foreach ($i['missing'] as $m) {
+                                $allMissingCols[] = $m;
+                            }
+                        }
+                        $uniqueCols = array_unique($allMissingCols);
+                        $colsString = implode(', ', $uniqueCols);
+                        return "Masih terdapat data pada tabel Sarana & Prasarana yang kolom <b>{$colsString}</b> masih kosong.";
+                    }
                 }
                 break;
             case 3:
                 if ($this->getMapelCount() == 0) {
-                    return "Belum ada data pada tabel Mata Pelajaran.";
-                } elseif (!\App\Models\Mengajar::whereHas('gtk', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))->whereNotNull('mapel_id')->exists()) {
+                    return "Belum ada data pada tabel <b>Mata Pelajaran</b>. Tambahkan minimal 1 mata pelajaran untuk melanjutkan.";
+                }
+
+                // Cek apakah data mapel lengkap
+                $inc = $this->getIncompleteMapelInfo();
+                if (!empty($inc)) {
+                    $allMissingCols = [];
+                    foreach ($inc as $i) {
+                        foreach ($i['missing'] as $m) {
+                            $allMissingCols[] = $m;
+                        }
+                    }
+                    $uniqueCols = array_unique($allMissingCols);
+                    $colsString = implode(', ', $uniqueCols);
+                    return "Masih terdapat data pada tabel Mata Pelajaran yang kolom <b>{$colsString}</b> masih kosong.";
+                }
+
+                // Cek apakah ada guru yang ditugaskan ke mata pelajaran
+                if (!\App\Models\Mengajar::whereHas('gtk', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))->whereNotNull('mapel_id')->exists()) {
                     return "Belum ada guru yang ditugaskan ke mata pelajaran.";
                 }
                 break;
             case 4:
                 if ($this->getRombelCount() == 0) {
-                    return "Belum ada data pada tabel Rombel.";
+                    return "Belum ada data pada tabel <b>Rombel</b>. Silakan tambahkan minimal 1 rombel untuk melanjutkan.";
                 } else {
                     $empty = $this->getEmptyRombels();
                     if (!empty($empty)) {
@@ -356,12 +432,25 @@ class ValidasiData extends Page
                 break;
             case 5:
                 if ($this->getLaporanKeuanganCount() == 0) {
-                    return "Belum ada data Keuangan.";
+                    return "Belum ada data pada tabel <b>Keuangan</b>. Tambahkan minimal 1 data transaksi keuangan untuk melanjutkan.";
+                } else {
+                    $inc = $this->getIncompleteLaporanKeuanganInfo();
+                    if (!empty($inc)) {
+                        $allMissingCols = [];
+                        foreach ($inc as $i) {
+                            foreach ($i['missing'] as $m) {
+                                $allMissingCols[] = $m;
+                            }
+                        }
+                        $uniqueCols = array_unique($allMissingCols);
+                        $colsString = implode(', ', $uniqueCols);
+                        return "Masih terdapat data pada tabel Keuangan yang kolom <b>{$colsString}</b> masih kosong.";
+                    }
                 }
                 break;
             case 6:
                 if ($this->getSiswaCount() == 0) {
-                    return "Belum ada data pada tabel Nominatif Siswa.";
+                    return "Belum ada data pada tabel <b>Nominatif Siswa</b>. Silakan tambahkan minimal 1 data siswa untuk melanjutkan.";
                 } else {
                     $inc = $this->getIncompleteSiswaInfo();
                     if (!empty($inc)) {
@@ -379,7 +468,7 @@ class ValidasiData extends Page
                 break;
             case 7:
                 if ($this->getGtkCount() == 0) {
-                    return "Belum ada data pada tabel Nominatif GTK.";
+                    return "Belum ada data pada tabel <b>Nominatif GTK</b>. Silakan tambahkan minimal 1 data GTK untuk melanjutkan.";
                 } else {
                     $inc = $this->getIncompleteGtkInfo();
                     if (!empty($inc)) {
@@ -396,24 +485,48 @@ class ValidasiData extends Page
                 }
                 break;
             case 8:
+                // Pengecekan 1: Ada minimal 1 GTK?
+                if ($this->getGtkCount() == 0) {
+                    return "Belum ada data GTK. Input minimal 1 data pada tabel <b>Nominatif GTK</b> sebelum melanjutkan.";
+                }
+
+                // Pengecekan 2: Apakah setiap GTK sudah punya riwayat pendidikan?
                 $tanpaPend = $this->getGtkTanpaPendidikan();
                 if (!empty($tanpaPend)) {
                     return "Masih terdapat data GTK yang belum melengkapi <b>Riwayat Pendidikan</b>.";
                 }
                 break;
             case 9:
+                // Pengecekan 1: Ada minimal 1 GTK?
+                if ($this->getGtkCount() == 0) {
+                    return "Belum ada data GTK. Input minimal 1 data pada tabel <b>Nominatif GTK</b> sebelum melanjutkan.";
+                }
+
+                // Pengecekan 2: Apakah setiap GTK sudah punya rekening/NPWP?
                 $tanpaRek = $this->getGtkTanpaRekening();
                 if (!empty($tanpaRek)) {
                     return "Masih terdapat data GTK yang belum melengkapi data <b>Rekening atau NPWP</b>.";
                 }
                 break;
             case 10:
+                // Pengecekan 1: Ada minimal 1 tugas mengajar?
+                if ($this->getSebaranCount() == 0) {
+                    return "Belum ada data pada tabel <b>Sebaran Jam Mengajar</b>. Input minimal 1 data tugas mengajar sebelum melanjutkan.";
+                }
+
+                // Pengecekan 2: Apakah ada GTK dengan jam < 24?
                 $below = $this->getGtkBelowMinJam();
                 if (!empty($below)) {
                     return "Masih terdapat data GTK yang jumlah jam mengajarnya <b>kurang dari 24 jam</b>.";
                 }
                 break;
             case 11:
+                // Pengecekan 1: Ada minimal 1 data kehadiran?
+                if ($this->getKehadiranCount() === 0) {
+                    return "Belum ada data pada tabel <b>Kehadiran GTK</b>. Silakan input minimal 1 data kehadiran sebelum melanjutkan.";
+                }
+
+                // Pengecekan 2: Apakah setiap GTK sudah lengkap kehadirannya?
                 $tanpaHadir = $this->getGtkWithoutKehadiran();
                 if (!empty($tanpaHadir)) {
                     return "Masih terdapat data GTK yang <b>belum lengkap rekap kehadirannya</b>.";
@@ -423,13 +536,34 @@ class ValidasiData extends Page
         return "Terdapat data yang belum lengkap pada langkah ini.";
     }
 
+    /**
+     * Check if step has NO data at all (Level 1 check)
+     * Returns true if there's no data in the required table
+     */
+    public function isStepDataEmpty(int $step): bool
+    {
+        return match ($step) {
+            2 => $this->getSarprasCount() == 0,
+            3 => $this->getMapelCount() == 0,
+            4 => $this->getRombelCount() == 0,
+            5 => $this->getLaporanKeuanganCount() == 0,
+            6 => $this->getSiswaCount() == 0,
+            7 => $this->getGtkCount() == 0,
+            8, 9 => $this->getGtkCount() == 0,
+            10 => $this->getSebaranCount() == 0,
+            11 => $this->getKehadiranCount() === 0,
+            default => false
+        };
+    }
+
     public function nextStep(): void
     {
         $this->computeStatuses();
 
         if (!($this->stepStatuses[$this->currentStep] ?? false)) {
             $msg = $this->getMissingMessageForStep($this->currentStep);
-            $this->dispatch('swal-confirm-next', message: $msg);
+            $canProceed = !$this->isStepDataEmpty($this->currentStep);
+            $this->dispatch('swal-confirm-next', message: $msg, canProceed: $canProceed);
             return;
         }
 
@@ -620,14 +754,42 @@ class ValidasiData extends Page
 
     public function getSarprasList(): LengthAwarePaginator
     {
-        return LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))
+        $month = (int) date('m');
+        $year = (int) date('Y');
+
+        $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        if (!$laporan) {
+            return new \Illuminate\Pagination\LengthAwarePaginator(
+                [],
+                0,
+                10,
+                1,
+                ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+            );
+        }
+
+        return LaporanGedung::where('laporan_id', $laporan->id)
             ->orderBy('id', 'asc')
             ->paginate(10);
     }
 
     public function getSarprasCount(): int
     {
-        return LaporanGedung::whereHas('laporan', fn($q) => $q->where('sekolah_id', $this->getSchoolId()))->count();
+        $month = (int) date('m');
+        $year = (int) date('Y');
+
+        $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        if (!$laporan) return 0;
+
+        return LaporanGedung::where('laporan_id', $laporan->id)->count();
     }
 
     public function getRombelList(): LengthAwarePaginator
@@ -670,6 +832,40 @@ class ValidasiData extends Page
         return Siswa::where('sekolah_id', $this->getSchoolId())->count();
     }
 
+    protected array $requiredSarprasFields = [
+        'nama_ruang'       => 'Nama Ruang',
+        'jumlah_total'     => 'Jumlah Total',
+        'status_kepemilikan' => 'Status Kepemilikan',
+    ];
+
+    public function getIncompleteSarprasInfo(): array
+    {
+        $month = (int) date('m');
+        $year = (int) date('Y');
+
+        $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        if (!$laporan) return [];
+
+        $sarpras = LaporanGedung::where('laporan_id', $laporan->id)->get();
+        $incomplete = [];
+
+        foreach ($sarpras as $s) {
+            $missing = [];
+            foreach ($this->requiredSarprasFields as $field => $label) {
+                if (empty($s->$field)) $missing[] = $label;
+            }
+            if (!empty($missing)) {
+                $incomplete[] = ['nama' => $s->nama_ruang ?? 'N/A', 'missing' => $missing];
+            }
+        }
+
+        return $incomplete;
+    }
+
     protected array $requiredSiswaFields = [
         'nisn'          => 'NISN',
         'nik'           => 'NIK',
@@ -704,6 +900,76 @@ class ValidasiData extends Page
             if (empty($s->$field)) return false;
         }
         return true;
+    }
+
+    protected array $requiredMapelFields = [
+        'kode_mapel'   => 'Kode Mapel',
+        'nama_mapel'   => 'Nama Mapel',
+        'jjp'          => 'JJP',
+    ];
+
+    public function getIncompleteMapelInfo(): array
+    {
+        $id = $this->getSchoolId();
+        $sekolah = Sekolah::find($id);
+        $query = Mapel::query();
+
+        if ($sekolah && $sekolah->jenjang) {
+            $query->where(function ($q) use ($sekolah, $id) {
+                $q->whereNull('sekolah_id')
+                    ->where('jenjang', $sekolah->jenjang)
+                    ->orWhere('sekolah_id', $id);
+            });
+        }
+
+        $mapels = $query->get();
+        $incomplete = [];
+
+        foreach ($mapels as $m) {
+            $missing = [];
+            foreach ($this->requiredMapelFields as $field => $label) {
+                if (empty($m->$field)) $missing[] = $label;
+            }
+            if (!empty($missing)) {
+                $incomplete[] = ['nama' => $m->nama_mapel ?? 'N/A', 'missing' => $missing];
+            }
+        }
+
+        return $incomplete;
+    }
+
+    protected array $requiredLaporanKeuanganFields = [
+        'tanggal'          => 'Tanggal',
+        'jenis_transaksi'  => 'Jenis Transaksi',
+        'nominal'          => 'Nominal',
+    ];
+
+    public function getIncompleteLaporanKeuanganInfo(): array
+    {
+        $month = (int) date('m');
+        $year = (int) date('Y');
+
+        $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->first();
+
+        if (!$laporan) return [];
+
+        $keuangans = LaporanKeuangan::where('laporan_id', $laporan->id)->get();
+        $incomplete = [];
+
+        foreach ($keuangans as $k) {
+            $missing = [];
+            foreach ($this->requiredLaporanKeuanganFields as $field => $label) {
+                if (empty($k->$field)) $missing[] = $label;
+            }
+            if (!empty($missing)) {
+                $incomplete[] = ['nama' => $k->keterangan ?? 'Transaksi', 'missing' => $missing];
+            }
+        }
+
+        return $incomplete;
     }
 
     public function getGtkList(): LengthAwarePaginator
@@ -846,8 +1112,8 @@ class ValidasiData extends Page
         if ($sekolah && $sekolah->jenjang) {
             $query->where(function ($q) use ($sekolah, $id) {
                 $q->whereNull('sekolah_id')
-                  ->where('jenjang', $sekolah->jenjang)
-                  ->orWhere('sekolah_id', $id);
+                    ->where('jenjang', $sekolah->jenjang)
+                    ->orWhere('sekolah_id', $id);
             });
         }
         $query->withExists(['mengajars' => function ($q) use ($id) {
@@ -864,8 +1130,8 @@ class ValidasiData extends Page
         if ($sekolah && $sekolah->jenjang) {
             $query->where(function ($q) use ($sekolah, $id) {
                 $q->whereNull('sekolah_id')
-                  ->where('jenjang', $sekolah->jenjang)
-                  ->orWhere('sekolah_id', $id);
+                    ->where('jenjang', $sekolah->jenjang)
+                    ->orWhere('sekolah_id', $id);
             });
         }
         return $query->count();

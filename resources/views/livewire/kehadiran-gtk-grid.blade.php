@@ -3,9 +3,14 @@
     showHolidayDialog: false,
     showHadirDialog: false,
     showActionDialog: false,
+    showCellMenu: false,
     holidayDay: null,
     hadirDay: null,
     actionDay: null,
+    cellMenuX: 0,
+    cellMenuY: 0,
+    cellGtkId: null,
+    cellDay: null,
     isHolidayActive: false,
     actionIsHoliday: false,
     lockedAlert() {
@@ -32,6 +37,18 @@
         this.actionDay = day;
         this.actionIsHoliday = isHoliday;
         this.showActionDialog = true;
+    },
+    openCellMenu(event, gtkId, day) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        this.cellMenuX = Math.min(rect.left + (rect.width / 2), window.innerWidth - 96);
+        this.cellMenuY = Math.min(rect.bottom + 8, window.innerHeight - 238);
+        this.cellGtkId = gtkId;
+        this.cellDay = day;
+        this.showCellMenu = true;
+    },
+    chooseAttendance(value) {
+        this.showCellMenu = false;
+        $wire.updateAttendance(this.cellGtkId, this.cellDay, value);
     }
 }"
     style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;">
@@ -88,6 +105,78 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </template>
+
+    {{-- Popover: Pilih Status Kehadiran per Cell --}}
+    <template x-teleport="body">
+        <div x-show="showCellMenu" x-cloak x-on:keydown.escape.window="showCellMenu = false"
+            style="position: fixed; inset: 0; z-index: 9997;" x-transition.opacity>
+            <div style="position: absolute; inset: 0;" x-on:click="showCellMenu = false"></div>
+            <div class="attendance-popover"
+                :style="`left: ${cellMenuX}px; top: ${cellMenuY}px; transform: translateX(-50%);`">
+                <button type="button" class="attendance-option option-h" x-on:click="chooseAttendance('H')">
+                    <span class="option-icon badge-h">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    <span>Hadir</span>
+                    <strong>H</strong>
+                </button>
+                <button type="button" class="attendance-option option-i" x-on:click="chooseAttendance('I')">
+                    <span class="option-icon badge-i">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+                            <path
+                                d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+                        </svg>
+                    </span>
+                    <span>Izin</span>
+                    <strong>I</strong>
+                </button>
+                <button type="button" class="attendance-option option-s" x-on:click="chooseAttendance('S')">
+                    <span class="option-icon badge-s">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    <span>Sakit</span>
+                    <strong>S</strong>
+                </button>
+                <button type="button" class="attendance-option option-a" x-on:click="chooseAttendance('A')">
+                    <span class="option-icon badge-a">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    <span>Alpa</span>
+                    <strong>A</strong>
+                </button>
+                <button type="button" class="attendance-option option-l" x-on:click="chooseAttendance('L')">
+                    <span class="option-icon badge-l">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                            <path d="M15.5 14h-7c-.28 0-.5-.22-.5-.5v-3c0-.28.22-.5.5-.5h7c.28 0 .5.22.5.5v3c0 .28-.22.5-.5.5z" />
+                        </svg>
+                    </span>
+                    <span>Libur</span>
+                    <strong>L</strong>
+                </button>
+                <button type="button" class="attendance-option option-clear" x-on:click="chooseAttendance('')">
+                    <span class="option-icon">-</span>
+                    <span>Kosongkan</span>
+                    <strong></strong>
+                </button>
             </div>
         </div>
     </template>
@@ -316,6 +405,15 @@
             text-transform: uppercase;
         }
 
+        button.att-input {
+            display: block;
+            padding: 0;
+        }
+
+        button.att-input:hover:not(:disabled) {
+            background-color: #f8fafc;
+        }
+
         .att-input:focus {
             background: #dbeafe;
         }
@@ -402,6 +500,74 @@
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fecaca;
+        }
+
+        .badge-l {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+
+        .attendance-popover {
+            position: fixed;
+            width: 172px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+        }
+
+        .attendance-option {
+            display: grid;
+            grid-template-columns: 24px 1fr 20px;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            border: 0;
+            border-bottom: 1px solid #f3f4f6;
+            background: #ffffff;
+            padding: 8px 10px;
+            color: #374151;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .attendance-option:last-child {
+            border-bottom: 0;
+        }
+
+        .attendance-option:hover {
+            background: #f9fafb;
+        }
+
+        .attendance-option strong {
+            color: #6b7280;
+            font-size: 0.72rem;
+            text-align: right;
+        }
+
+        .option-icon {
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .option-icon svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .option-clear .option-icon {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #64748b;
         }
 
         /* Icon styling for inputs */
@@ -659,16 +825,18 @@
                                 };
                             @endphp
                             <td class="day-header {{ $d['is_sunday'] ? 'sunday-cell' : '' }}">
-                                <input type="text" value="{{ $val }}"
-                                    class="att-input {{ $statusClass }}" maxlength="1"
+                                <button type="button" class="att-input {{ $statusClass }}"
                                     wire:key="att-{{ $gtk->id }}-{{ $d['day'] }}"
-                                    @if ($d['is_sunday']) disabled placeholder=" " @endif
-                                    @if ($locked && !$d['is_sunday']) readonly @endif
-                                    oninput="this.value = this.value.toUpperCase().replace(/[^HISAL]/g, '')"
-                                    @if ($locked) x-on:click="lockedAlert()"
-                                        x-on:keydown.prevent="lockedAlert()"
-                                    @else
-                                        onchange="@this.updateAttendance({{ $gtk->id }}, {{ $d['day'] }}, this.value)" @endif>
+                                    title="{{ $d['is_sunday'] ? 'Hari Minggu' : 'Pilih status kehadiran' }}"
+                                    aria-label="Pilih status kehadiran {{ $this->formatGtkName($gtk) }} tanggal {{ $d['day'] }}"
+                                    @if ($d['is_sunday']) disabled @endif
+                                    @if ($locked && !$d['is_sunday']) x-on:click="lockedAlert()"
+                                        x-on:keydown.enter.prevent="lockedAlert()"
+                                        x-on:keydown.space.prevent="lockedAlert()"
+                                    @elseif (!$d['is_sunday'])
+                                        x-on:click="openCellMenu($event, {{ $gtk->id }}, {{ $d['day'] }})"
+                                        x-on:keydown.enter.prevent="openCellMenu($event, {{ $gtk->id }}, {{ $d['day'] }})"
+                                        x-on:keydown.space.prevent="openCellMenu($event, {{ $gtk->id }}, {{ $d['day'] }})" @endif>{{ $val }}</button>
                             </td>
                         @endforeach
                         <td class="total-col" style="border-right: none; color: #0369a1; font-size: 0.9rem;">

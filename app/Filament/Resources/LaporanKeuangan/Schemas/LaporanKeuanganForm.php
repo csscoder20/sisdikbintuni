@@ -71,12 +71,7 @@ class LaporanKeuanganForm
 
         try {
             $date = \Carbon\Carbon::parse($dateString);
-            $sekolahId = Filament::getTenant()?->id;
-
-            if (!$sekolahId) {
-                // Fallback untuk admin dinas yang mungkin sedang mengakses tanpa tenant
-                $sekolahId = auth()->user()->sekolah_id;
-            }
+            $sekolahId = self::getCurrentSekolahId();
 
             if (!$sekolahId) return null;
 
@@ -93,7 +88,7 @@ class LaporanKeuanganForm
 
     private static function getLaporanOptions(): array
     {
-        $sekolahId = Filament::getTenant()?->id ?? auth()->user()->sekolah_id;
+        $sekolahId = self::getCurrentSekolahId();
 
         if (!$sekolahId) return [];
 
@@ -126,10 +121,19 @@ class LaporanKeuanganForm
 
     private static function getLatestLaporan(): ?\App\Models\Laporan
     {
-        return \App\Models\Laporan::where('sekolah_id', Filament::getTenant()?->id)
+        return \App\Models\Laporan::where('sekolah_id', self::getCurrentSekolahId())
             ->orderByDesc('tahun')
             ->orderByDesc('bulan')
             ->first();
+    }
+
+    private static function getCurrentSekolahId(): ?int
+    {
+        if (Filament::getCurrentPanel()?->getId() === 'dinas') {
+            return session('dinas_selected_sekolah_id');
+        }
+
+        return Filament::getTenant()?->id ?? auth()->user()?->sekolah_id;
     }
 
     private static function parseNominal(mixed $value): float

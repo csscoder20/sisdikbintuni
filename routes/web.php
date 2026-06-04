@@ -161,3 +161,5 @@ Route::get('/stop-impersonating', function () {
 
 Route::get('/cetak-laporan/{sekolah}/pdf', [\App\Http\Controllers\CetakLaporanController::class, 'downloadPdf'])->name('cetak-laporan.pdf')->middleware('auth');
 Route::post('/activity-log/access-location', [\App\Http\Controllers\ActivityLogAccessLocationController::class, 'store'])->name('activity-log.access-location')->middleware('auth');
+Route::get('/notifikasi/{id}/detail', [\App\Http\Controllers\NotifikasiDetailController::class, 'show'])->name('notifikasi.detail')->middleware('auth');
+

@@ -650,7 +650,9 @@ class AdminPanelProvider extends PanelProvider
             })
 
             ->renderHook('panels::body.end', function () {
-                return \App\Providers\Filament\AdminPanelProvider::renderGlobalOperationLoader() . <<<'HTML'
+                return \App\Providers\Filament\AdminPanelProvider::renderGlobalOperationLoader()
+                    . \Illuminate\Support\Facades\Blade::render('<livewire:notifikasi-modal />')
+                    . <<<'HTML'
                     <style>
                         .fi-sidebar-nav::-webkit-scrollbar {
                             display: none;

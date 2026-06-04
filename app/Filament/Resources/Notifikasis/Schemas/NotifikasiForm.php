@@ -22,6 +22,16 @@ class NotifikasiForm
                         ->required()
                         ->placeholder('Contoh: Pemutakhiran Data Siswa')
                         ->columnSpanFull(),
+                    Select::make('type')
+                        ->label('Tipe Pemberitahuan')
+                        ->options([
+                            'general'      => '📢 Pemberitahuan Umum',
+                            'release_note' => '🚀 Rilis Note / Pembaruan Sistem',
+                        ])
+                        ->default('general')
+                        ->required()
+                        ->native(false)
+                        ->columnSpanFull(),
                     RichEditor::make('content')
                         ->label('Isi Pesan')
                         ->required()

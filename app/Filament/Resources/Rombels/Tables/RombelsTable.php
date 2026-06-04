@@ -11,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Actions\RestoreAction;
@@ -50,6 +51,13 @@ class RombelsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('tingkat')
+                    ->label('Tingkat')
+                    ->options([
+                        10 => '10',
+                        11 => '11',
+                        12 => '12',
+                    ]),
                 TrashedFilter::make(),
             ])
             ->recordActions([
