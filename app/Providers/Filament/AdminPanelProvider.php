@@ -247,7 +247,7 @@ class AdminPanelProvider extends PanelProvider
                             align-items: center;
                             width: 100%;
                             display:flex;
-                            background-image: url("/assets/images/indonesia_map_bg.png");
+                            background-image: url("/assets/images/indonesia_map_bg.jpeg");
                             background-size: cover;
                             background-position: center;
                             background-repeat: no-repeat;
@@ -673,7 +673,7 @@ class AdminPanelProvider extends PanelProvider
                             align-items: center;
                             width: 100%;
                             display:flex;
-                            background-image: url("/assets/images/indonesia_map_bg.png");
+                            background-image: url("/assets/images/indonesia_map_bg.jpeg");
                             background-size: cover;
                             background-position: center;
                         }
