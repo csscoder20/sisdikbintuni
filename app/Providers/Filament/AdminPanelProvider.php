@@ -241,6 +241,19 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('panels::body.end', function () {
                 return self::renderGlobalOperationLoader() . <<<'HTML'
                     <style>
+                        .fi-simple-main-ctn {
+                            flex-grow: 1;
+                            justify-content: center;
+                            align-items: center;
+                            width: 100%;
+                            display:flex;
+                            background-image: url("/assets/images/indonesia_map_bg.png");
+                            background-size: cover;
+                            background-position: center;
+                            background-repeat: no-repeat;
+                        }
+                        
+                        .fi-topbar
                         .fi-ta-header-cell > * {
                             padding-top: 0px !important;
                             padding-bottom: 0px !important;
@@ -654,6 +667,17 @@ class AdminPanelProvider extends PanelProvider
                     . \Illuminate\Support\Facades\Blade::render('<livewire:notifikasi-modal />')
                     . <<<'HTML'
                     <style>
+                        .fi-simple-main-ctn {
+                            flex-grow: 1;
+                            justify-content: center;
+                            align-items: center;
+                            width: 100%;
+                            display:flex;
+                            background-image: url("/assets/images/indonesia_map_bg.png");
+                            background-size: cover;
+                            background-position: center;
+                        }
+                        
                         .fi-sidebar-nav::-webkit-scrollbar {
                             display: none;
                         }
