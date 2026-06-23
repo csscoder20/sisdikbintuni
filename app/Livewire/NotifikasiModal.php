@@ -42,7 +42,7 @@ class NotifikasiModal extends Component implements HasActions, HasForms
             ->label('Detail')
             ->extraAttributes(['style' => 'display:none!important;'])
             ->modalHeading(function () use ($notifikasi, $isReleaseNote) {
-                $prefix = $isReleaseNote ? '🚀 Rilis Note — ' : '📢 ';
+                $prefix = $isReleaseNote ? 'Rilis Note — ' : ' ';
                 return $prefix . ($notifikasi?->subject ?? 'Detail Pemberitahuan');
             })
             ->modalDescription(function () use ($notifikasi) {

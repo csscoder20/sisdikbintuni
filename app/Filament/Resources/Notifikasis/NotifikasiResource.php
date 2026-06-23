@@ -67,49 +67,13 @@ class NotifikasiResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            \Filament\Schemas\Components\Group::make()->schema([
-                \Filament\Infolists\Components\TextEntry::make('subject')
-                    ->label('Judul Pemberitahuan')
-                    ->weight('bold')
-                    ->size('lg'),
-                \Filament\Infolists\Components\TextEntry::make('type')
-                    ->label('Tipe')
-                    ->formatStateUsing(fn($state) => match ($state) {
-                        'release_note' => '🚀 Rilis Note / Pembaruan Sistem',
-                        'general'      => '📢 Pemberitahuan Umum',
-                        default        => $state,
-                    })
-                    ->badge()
-                    ->color(fn($state) => match ($state) {
-                        'release_note' => 'success',
-                        default        => 'info',
-                    }),
-                \Filament\Infolists\Components\TextEntry::make('created_at')
-                    ->label('Tanggal Kirim')
-                    ->dateTime('d M Y, H:i')
-                    ->color('gray'),
-                \Filament\Infolists\Components\TextEntry::make('sender.name')
-                    ->label('Pengirim')
-                    ->icon('heroicon-m-user'),
-                \Filament\Infolists\Components\TextEntry::make('recipient_type')
-                    ->label('Tipe Penerima')
-                    ->formatStateUsing(fn($state) => match ($state) {
-                        'all' => 'Semua Operator',
-                        'schools' => 'Sekolah Tertentu',
-                        'users' => 'Pengguna Tertentu',
-                        default => $state,
-                    })
-                    ->badge()
-                    ->color('info'),
-                \Filament\Schemas\Components\Section::make('Isi Pemberitahuan')
-                    ->schema([
-                        \Filament\Infolists\Components\TextEntry::make('content')
-                            ->hiddenLabel()
-                            ->html()
-                            ->prose(),
-                    ])
-                    ->columnSpanFull(),
-            ])->columns(2)->columnSpanFull()
+            \Filament\Schemas\Components\Section::make('')
+                ->columnSpanFull()
+                ->schema([
+                    \Filament\Infolists\Components\ViewEntry::make('notifikasi_details')
+                        ->hiddenLabel()
+                        ->view('infolists.components.notifikasi-details-list'),
+                ])
         ]);
     }
 

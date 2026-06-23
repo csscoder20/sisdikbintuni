@@ -8,6 +8,7 @@ use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Schemas\Components\Section;
@@ -65,32 +66,16 @@ class UserResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema
-            ->inlineLabel()
             ->components([
                 Section::make('Ringkasan Data')
-                    ->columns(2)
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('name')->label('Nama Lengkap')->placeholder('-'),
-                        TextEntry::make('email')->label('Alamat Email')->placeholder('-'),
-                        TextEntry::make('nohp')->label('Nomor WA')->placeholder('-'),
-                        TextEntry::make('roles_ringkas')
-                            ->label('Peran')
-                            ->state(fn(User $record): ?string => $record->roles->pluck('name')->implode(', ') ?: null)
-                            ->placeholder('-'),
-                        TextEntry::make('status')
-                            ->label('Status')
-                            ->formatStateUsing(fn(?string $state): string => match ($state) {
-                                'active' => 'Aktif',
-                                'pending' => 'Menunggu Verifikasi',
-                                'rejected' => 'Tidak Aktif',
-                                default => $state ?: '-',
-                            }),
-                        TextEntry::make('sekolah.nama')->label('Asal Sekolah')->placeholder('-'),
-                        TextEntry::make('email_verified_at')->label('Email Terverifikasi Pada')->dateTime('d/m/Y H:i')->placeholder('-'),
+                        ViewEntry::make('user_details')
+                            ->hiddenLabel()
+                            ->view('infolists.components.user-details-list'),
                     ]),
             ]);
     }
-
 
 
     public static function table(Table $table): Table

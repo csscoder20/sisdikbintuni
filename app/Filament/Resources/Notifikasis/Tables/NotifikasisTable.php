@@ -29,8 +29,8 @@ class NotifikasisTable
                 TextColumn::make('type')
                     ->label('Tipe')
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'release_note' => '🚀 Rilis Note',
-                        'general'      => '📢 Umum',
+                        'release_note' => 'Rilis Note',
+                        'general'      => 'Umum',
                         default        => $state,
                     })
                     ->badge()
@@ -51,10 +51,10 @@ class NotifikasisTable
                 TextColumn::make('sender.name')
                     ->label('Pengirim'),
                 TextColumn::make('content')
-                    ->label('Isi Notifikasi')
+                    ->label('Isi Pemberitahuan')
                     ->formatStateUsing(function ($state) {
                         $plainText = strip_tags($state);
-                        return Str::limit($plainText, 100);
+                        return Str::limit($plainText, 60);
                     }),
                 TextColumn::make('created_at')
                     ->label('Tanggal Kirim')
@@ -67,7 +67,7 @@ class NotifikasisTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()
-                        ->modalWidth('lg'),
+                        ->modalWidth(\Filament\Support\Enums\Width::FourExtraLarge),
                     RestoreAction::make(),
                     ForceDeleteAction::make(),
                     DeleteAction::make(),

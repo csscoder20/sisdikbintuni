@@ -132,6 +132,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Resources\KehadiranGtk\KehadiranGtkResource::class,
                 \App\Filament\Resources\CetakLaporan\CetakLaporanResource::class,
                 \App\Filament\Resources\ActivityLog\ActivityLogResource::class,
+                \App\Filament\Resources\Pengaduans\PengaduanResource::class,
             ])
             ->pages([
                 SuperAdminDashboard::class,
@@ -736,7 +737,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 .fi-dropdown-panel {
-                    z-index: 80 !important;
+                    z-index: 30 !important;
                 }
             </style>
             <div data-validation-period-notice style="position: sticky; top: 0; width: 100%; padding: 8px 44px 8px 16px; background: #ecfdf5; border-bottom: 1px solid #a7f3d0; color: #065f46;">

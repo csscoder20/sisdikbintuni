@@ -10,6 +10,7 @@ use App\Models\LaporanGedung;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,19 +57,15 @@ class LaporanGedungResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema
-            ->inlineLabel()
             ->components([
-                TextEntry::make('nama_ruang')->label('Nama Ruang')->prefix(': ')->placeholder('-'),
-                TextEntry::make('status_kepemilikan')->label('Status Kepemilikan')->prefix(': ')->placeholder('-'),
-                TextEntry::make('jumlah_total')->label('Jumlah Total')->prefix(': ')->placeholder('-'),
-                TextEntry::make('jumlah_baik')->label('Jumlah Baik')->prefix(': ')->placeholder('-'),
-                TextEntry::make('jumlah_rusak')->label('Jumlah Rusak')->prefix(': ')->placeholder('-'),
-                TextEntry::make('periode_laporan')
-                    ->label('Periode Laporan')
-                    ->state(fn(LaporanGedung $record): ?string => $record->laporan ? "Tahun {$record->laporan->tahun} - Bulan {$record->laporan->bulan}" : null)
-                    ->prefix(': ')
-                    ->placeholder('-'),
-            ])->columns(2);
+                Section::make('')
+                    ->columnSpanFull()
+                    ->schema([
+                        ViewEntry::make('sarpras_details')
+                            ->hiddenLabel()
+                            ->view('infolists.components.laporan-gedung-details-list'),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
