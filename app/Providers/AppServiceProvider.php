@@ -82,7 +82,13 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $action->hidden(function () {
+            $action->hidden(function (?Component $livewire) {
+                // Pengaduan/Tiket tidak terkunci oleh periode validasi
+                // Operator selalu bisa membuat dan mengelola pengaduan
+                if ($livewire instanceof \App\Filament\Resources\Pengaduans\Pages\ListPengaduans) {
+                    return false;
+                }
+
                 if (auth()->check() && auth()->user()->hasRole('pengawas')) {
                     return true;
                 }

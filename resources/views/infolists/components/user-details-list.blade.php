@@ -192,7 +192,7 @@
                 <td class="label-col">Email Terverifikasi Pada</td>
                 <td class="colon-col">:</td>
                 <td class="value-col">
-                    {{ $user->email_verified_at ? $user->email_verified_at->format('d M Y, H:i') : '-' }}</td>
+                    {{ $user->email_verified_at ? \Carbon\Carbon::parse($user->email_verified_at)->format('d M Y, H:i') : '-' }}</td>
             </tr>
         </tbody>
     </table>

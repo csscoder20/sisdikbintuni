@@ -321,6 +321,12 @@ class AdminPanelProvider extends PanelProvider
                             font-size: 10px;
                             color: #ea580c;
                         }
+
+                        .fi-modal-close-overlay .fi-modal-window-ctn form.fi-modal-window .fi-modal-footer .fi-modal-footer-actions {
+                            align-items: center !important;
+                            justify-content: center !important;
+                            display: flex;
+                        }
                     </style>
                 HTML;
             });
@@ -713,6 +719,13 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sc.fi-sc-has-gap {
                             gap: calc(var(--spacing) * 3);
                         }
+
+                        .fi-modal-close-overlay .fi-modal-window-ctn form.fi-modal-window .fi-modal-footer .fi-modal-footer-actions {
+                            align-items: center !important;
+                            justify-content: center !important;
+                            display: flex;
+                        }
+
                     </style>
                 HTML;
             });

@@ -8,6 +8,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\RichEditor;
 
 class PengaduanForm
 {
@@ -18,10 +19,24 @@ class PengaduanForm
                 TextInput::make('judul')
                     ->label('Judul Pengaduan')
                     ->required()
-                    ->maxLength(255),
-                Textarea::make('deskripsi')
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                RichEditor::make('deskripsi')
                     ->label('Deskripsi Pengaduan')
                     ->required()
+                    ->toolbarButtons([
+                        'bold',
+                        'italic',
+                        'h2',
+                        'h3',
+                        'bulletList',
+                        'orderedList',
+                        'redo',
+                        'undo',
+                    ])
+                    ->extraInputAttributes([
+                        'style' => 'min-height: 200px; height: 100%;',
+                    ])
                     ->columnSpanFull(),
                 Select::make('status')
                     ->options([

@@ -31,8 +31,20 @@ class PengaduanResource extends Resource
 
     public static function canCreate(): bool
     {
-        // Hanya operator sekolah (panel selain dinas) yang bisa membuat tiket/pengaduan baru
-        return Filament::getCurrentPanel()?->getId() !== 'dinas';
+        if (!auth()->check()) {
+            return false;
+        }
+        $user = auth()->user();
+        // Super admin bisa buat
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+        // Operator sekolah bisa buat
+        if ($user->hasRole('operator')) {
+            return true;
+        }
+        // Admin dinas tidak bisa buat
+        return false;
     }
 
     public static function form(Schema $schema): Schema
