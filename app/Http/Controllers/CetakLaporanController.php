@@ -51,27 +51,22 @@ class CetakLaporanController extends Controller
             Log::info('Step 3: Initializing laporan bulanan');
             $this->initializeLaporanBulanan();
 
-            // Generate base64 Dinas Logo
+            // Gunakan file:// path langsung (tanpa base64) untuk mempercepat PDF
             $dinasLogoPath = public_path('assets/logo/logo-bintuni.png');
-            $dinasLogoBase64 = '';
-            if (file_exists($dinasLogoPath)) {
-                $dinasLogoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($dinasLogoPath));
-            }
+            $dinasLogoBase64 = file_exists($dinasLogoPath) ? 'file://' . $dinasLogoPath : '';
 
-            // Generate base64 School Logo
+            // School Logo
             $sekolahLogoBase64 = '';
             if ($sekolah->logo) {
                 $sekolahLogoPath = storage_path('app/public/' . $sekolah->logo);
                 if (file_exists($sekolahLogoPath)) {
-                    $sekolahLogoBase64 = 'data:image/' . pathinfo($sekolahLogoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($sekolahLogoPath));
+                    $sekolahLogoBase64 = 'file://' . $sekolahLogoPath;
                 }
             }
 
             if (empty($sekolahLogoBase64)) {
                 $fallbackLogoPath = public_path('assets/logo/tut-wuri-handayani.png');
-                if (file_exists($fallbackLogoPath)) {
-                    $sekolahLogoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($fallbackLogoPath));
-                }
+                $sekolahLogoBase64 = file_exists($fallbackLogoPath) ? 'file://' . $fallbackLogoPath : '';
             }
 
             $periode = \Carbon\Carbon::now()->translatedFormat('F Y');

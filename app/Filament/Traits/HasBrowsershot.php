@@ -37,8 +37,7 @@ trait HasBrowsershot
         }
 
         // === KONFIGURASI LINUX (VPS Production) ===
-        // HARDCODE PATH YANG SUDAH TERBUKTI BERHASIL DI TINKER
-        $chromePath = '/home/deploy/.cache/puppeteer/chrome-headless-shell/linux-149.0.7827.22/chrome-headless-shell-linux64/chrome-headless-shell';
+        $chromePath = '/var/www/.cache/puppeteer/chrome-headless-shell/linux-149.0.7827.22/chrome-headless-shell-linux64/chrome-headless-shell';
 
         return Browsershot::html($html)
             ->setNodeBinary('/usr/bin/node')
@@ -51,6 +50,7 @@ trait HasBrowsershot
                 'disable-crash-reporter',
                 'no-first-run',
                 'disable-extensions',
+                'allow-file-access-from-files',
                 'user-data-dir=/tmp/chrome-browsershot-' . getmypid(),
             ])
             ->format('A4')
