@@ -51,22 +51,17 @@ class CetakLaporanController extends Controller
             Log::info('Step 3: Initializing laporan bulanan');
             $this->initializeLaporanBulanan();
 
-            // Gunakan file:// path langsung (tanpa base64) untuk mempercepat PDF
-            $dinasLogoPath = public_path('assets/logo/logo-bintuni.png');
-            $dinasLogoBase64 = file_exists($dinasLogoPath) ? 'file://' . $dinasLogoPath : '';
+            // Resize gambar sebelum base64 untuk memperkecil HTML
+            $dinasLogoBase64 = $this->imageToBase64(public_path('assets/logo/logo-bintuni.png'));
 
-            // School Logo
             $sekolahLogoBase64 = '';
             if ($sekolah->logo) {
                 $sekolahLogoPath = storage_path('app/public/' . $sekolah->logo);
-                if (file_exists($sekolahLogoPath)) {
-                    $sekolahLogoBase64 = 'file://' . $sekolahLogoPath;
-                }
+                $sekolahLogoBase64 = $this->imageToBase64($sekolahLogoPath);
             }
 
             if (empty($sekolahLogoBase64)) {
-                $fallbackLogoPath = public_path('assets/logo/tut-wuri-handayani.png');
-                $sekolahLogoBase64 = file_exists($fallbackLogoPath) ? 'file://' . $fallbackLogoPath : '';
+                $sekolahLogoBase64 = $this->imageToBase64(public_path('assets/logo/tut-wuri-handayani.png'));
             }
 
             $periode = \Carbon\Carbon::now()->translatedFormat('F Y');
@@ -120,5 +115,80 @@ class CetakLaporanController extends Controller
 
             return back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Resize gambar menggunakan GD dan encode ke base64.
+     * Mengurangi ukuran logo secara signifikan sebelum di-embed ke HTML.
+     */
+    private function imageToBase64(string $path, int $maxDimension = 300): string
+    {
+        if (!file_exists($path)) {
+            return '';
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mimeType = match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png'         => 'image/png',
+            default       => 'image/png',
+        };
+
+        // Jika file sudah kecil (<= 50KB), langsung encode tanpa resize
+        if (filesize($path) <= 50 * 1024) {
+            return 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($path));
+        }
+
+        $info = @getimagesize($path);
+        if (!$info) {
+            return 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($path));
+        }
+
+        [$origWidth, $origHeight] = $info;
+
+        // Jika sudah dalam batas, langsung encode
+        if ($origWidth <= $maxDimension && $origHeight <= $maxDimension) {
+            return 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($path));
+        }
+
+        // Hitung dimensi baru dengan mempertahankan rasio aspek
+        $scale     = min($maxDimension / $origWidth, $maxDimension / $origHeight);
+        $newWidth  = (int) ($origWidth * $scale);
+        $newHeight = (int) ($origHeight * $scale);
+
+        $src = match ($ext) {
+            'png'        => @imagecreatefrompng($path),
+            'jpg','jpeg' => @imagecreatefromjpeg($path),
+            default      => null,
+        };
+
+        if (!$src) {
+            return 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($path));
+        }
+
+        $dst = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Pertahankan transparansi untuk PNG
+        if ($ext === 'png') {
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+            $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+            imagefill($dst, 0, 0, $transparent);
+        }
+
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+
+        ob_start();
+        if ($ext === 'png') {
+            imagepng($dst, null, 6);
+        } else {
+            imagejpeg($dst, null, 80);
+        }
+        $data = ob_get_clean();
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return 'data:' . $mimeType . ';base64,' . base64_encode($data);
     }
 }
