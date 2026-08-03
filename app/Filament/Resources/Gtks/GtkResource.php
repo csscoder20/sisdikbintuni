@@ -88,7 +88,7 @@ class GtkResource extends Resource
                 TextEntry::make('no_rek_gaji')->label('No. Rekening Gaji')->prefix(': ')->placeholder('-'),
                 TextEntry::make('nama_bank_tunjangan')->label('Bank Tunjangan')->prefix(': ')->placeholder('-'),
                 TextEntry::make('no_rek_tunjangan')
-                ->label('No. Rekening Tunjangan')->prefix(': ')->placeholder('-'),
+                    ->label('No. Rekening Tunjangan')->prefix(': ')->placeholder('-'),
                 TextEntry::make('npwp')->label('NPWP')->prefix(': ')->placeholder('-'),
             ])->columns(2);
     }
@@ -109,10 +109,7 @@ class GtkResource extends Resource
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        return parent::getRecordRouteBindingEloquentQuery();
     }
 
     public static function getPages(): array

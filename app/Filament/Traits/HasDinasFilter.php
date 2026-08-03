@@ -21,10 +21,7 @@ trait HasDinasFilter
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                \Illuminate\Database\Eloquent\SoftDeletingScope::class,
-            ]);
+        $query = parent::getEloquentQuery();
 
         $sekolahId = null;
         if (Filament::getCurrentPanel()?->getId() === 'dinas') {
@@ -60,7 +57,7 @@ trait HasDinasFilter
         // Detect if the 'sekolah' relationship is a HasOneThrough (read-only for save)
         $modelClass = static::getModel();
         $model = new $modelClass;
-        
+
         if (method_exists($model, 'sekolah')) {
             try {
                 $relation = $model->sekolah();
