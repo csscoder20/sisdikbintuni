@@ -885,7 +885,7 @@ class ValidasiData extends Page
         foreach ($siswas as $s) {
             $missing = [];
             foreach ($this->requiredSiswaFields as $field => $label) {
-                if (empty($s->$field)) $missing[] = $label;
+                if (blank($s->$field)) $missing[] = $label;
             }
             if (!empty($missing)) {
                 $incomplete[] = ['nama' => $s->nama, 'missing' => $missing];
@@ -897,7 +897,7 @@ class ValidasiData extends Page
     public function isSiswaComplete(Siswa $s): bool
     {
         foreach (array_keys($this->requiredSiswaFields) as $field) {
-            if (empty($s->$field)) return false;
+            if (blank($s->$field)) return false;
         }
         return true;
     }
@@ -1020,7 +1020,7 @@ class ValidasiData extends Page
         foreach ($gtks as $g) {
             $missing = [];
             foreach ($this->requiredGtkFields as $field => $label) {
-                if (empty($g->$field)) $missing[] = $label;
+                if (blank($g->$field)) $missing[] = $label;
             }
             if (!empty($missing)) {
                 $incomplete[] = ['nama' => $g->nama, 'missing' => $missing];
@@ -1032,7 +1032,7 @@ class ValidasiData extends Page
     public function isGtkComplete(Gtk $g): bool
     {
         foreach (array_keys($this->requiredGtkFields) as $field) {
-            if (empty($g->$field)) return false;
+            if (blank($g->$field)) return false;
         }
         return true;
     }
@@ -1162,8 +1162,7 @@ class ValidasiData extends Page
                             $fields = ['thn_tamat_s1', 'jurusan_s1', 'perguruan_tinggi_s1'];
                             foreach ($fields as $f) {
                                 $sq->orWhereNull($f)
-                                    ->orWhere($f, '')
-                                    ->orWhere($f, '-');
+                                    ->orWhereRaw("TRIM(COALESCE({$f}, '')) = ''");
                             }
                         });
                     });
@@ -1178,7 +1177,7 @@ class ValidasiData extends Page
         return Gtk::where('sekolah_id', $id)
             ->where(function ($query) {
                 foreach (['no_rek_gaji', 'nama_bank_gaji', 'no_rek_tunjangan', 'nama_bank_tunjangan', 'npwp'] as $field) {
-                    $query->orWhereNull($field)->orWhere($field, '');
+                    $query->orWhereRaw("TRIM(COALESCE({$field}, '')) = ''");
                 }
             })
             ->pluck('nama')

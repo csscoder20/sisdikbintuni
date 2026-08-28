@@ -175,7 +175,8 @@ class Sekolah extends Model
         $required = ['nisn', 'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'agama', 'alamat', 'daerah_asal'];
         foreach ($siswas as $s) {
             foreach ($required as $field) {
-                if (empty($s->$field)) return false;
+                // A value such as "0" or "-" is an explicit entry, not an empty value.
+                if (blank($s->$field)) return false;
             }
         }
         return true;
@@ -192,7 +193,8 @@ class Sekolah extends Model
         $required = ['nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'agama', 'alamat', 'daerah_asal', 'jenis_gtk', 'status_kepegawaian', 'pendidikan_terakhir'];
         foreach ($gtks as $g) {
             foreach ($required as $field) {
-                if (empty($g->$field)) return false;
+                // A value such as "0" or "-" is an explicit entry, not an empty value.
+                if (blank($g->$field)) return false;
             }
         }
         return true;
@@ -210,7 +212,7 @@ class Sekolah extends Model
             if (!$g->pendidikan()->exists()) return false;
             
             $p = $g->pendidikan->first();
-            if (empty($p->thn_tamat_s1) || empty($p->jurusan_s1) || empty($p->perguruan_tinggi_s1)) {
+            if (blank($p->thn_tamat_s1) || blank($p->jurusan_s1) || blank($p->perguruan_tinggi_s1)) {
                 return false;
             }
         }
@@ -226,7 +228,7 @@ class Sekolah extends Model
         if ($gtks->isEmpty()) return false;
 
         foreach ($gtks as $g) {
-            if (empty($g->no_rek_gaji) || empty($g->nama_bank_gaji) || empty($g->npwp)) {
+            if (blank($g->no_rek_gaji) || blank($g->nama_bank_gaji) || blank($g->npwp)) {
                 return false;
             }
         }
