@@ -456,6 +456,17 @@
 
         {{-- Top: stepper --}}
         <div class="vd-top">
+            <div style="display:flex; align-items:center; justify-content:flex-end; gap:.75rem; margin-bottom:1rem;">
+                <label for="validation-period" style="font-size:.85rem; font-weight:600; color:#475569;">Periode:</label>
+                <select id="validation-period" wire:model.live="selectedLaporanId"
+                    style="border:1px solid #cbd5e1; border-radius:6px; padding:.4rem .65rem; background:white;">
+                    @foreach ($this->getAvailablePeriods() as $periodOption)
+                        <option value="{{ $periodOption->id }}">
+                            {{ \Carbon\Carbon::createFromDate($periodOption->tahun, $periodOption->bulan, 1)->translatedFormat('F Y') }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <div class="vd-stepper">
                 @foreach ($labels as $n => $lbl)
                     @php
@@ -1424,8 +1435,7 @@
                         <p
                             style="font-size: 1.1rem; color: #333; line-height: 1.6; font-weight: 500; margin-bottom: 2rem;">
                             "Data yang saya masukkan sudah benar dan data akan direkam sebagai laporan resmi<br>periode
-                            bulan {{ \Carbon\Carbon::now()->translatedFormat('F') }} tahun
-                            {{ \Carbon\Carbon::now()->translatedFormat('Y') }}."
+                            {{ $this->getCurrentPeriod() }}."
                         </p>
 
                         @if ($locked)

@@ -18,26 +18,13 @@ class SchoolSelector extends Component
 
     public function updatedSelectedSekolahId($value)
     {
-        session(['dinas_selected_sekolah_id' => $value]);
-
-        // If school selection is cleared and user is on a page that requires school selection,
-        // redirect to dashboard instead of referer
         if ($value === null || $value === '') {
-            $pagesRequiringSchool = [
-                'validasi-data',
-                'sekolah',
-                'sma',
-                'smk',
-            ];
+            session()->forget('dinas_selected_sekolah_id');
 
-            $currentPath = request()->path();
-            foreach ($pagesRequiringSchool as $page) {
-                if (str_contains($currentPath, $page)) {
-                    $dashboardUrl = Filament::getUrl();
-                    return redirect($dashboardUrl);
-                }
-            }
+            return redirect()->route('filament.dinas.pages.dinas-dashboard');
         }
+
+        session(['dinas_selected_sekolah_id' => $value]);
 
         // Refresh to apply filters
         return redirect(request()->header('Referer'));
@@ -46,7 +33,7 @@ class SchoolSelector extends Component
     public function selectSekolah($id)
     {
         $this->selectedSekolahId = $id;
-        $this->updatedSelectedSekolahId($id);
+        return $this->updatedSelectedSekolahId($id);
     }
 
     public function render()

@@ -104,6 +104,7 @@ class CetakCustom extends Page implements HasForms
             'siswa_columns' => ['nama', 'nisn'],
             'gtk_columns' => ['nama', 'nik', 'nip'],
             'sarpras_columns' => ['sekolah_nama', 'nama_ruang'],
+            'kuantitatif_columns' => array_keys(static::getKuantitatifMetricOptions()),
         ]);
     }
 
@@ -166,6 +167,13 @@ class CetakCustom extends Page implements HasForms
                 'sarpras_columns' => ['sekolah_nama', 'nama_ruang'],
                 'sarpras_sekolah' => [],
                 'sarpras_status_kepemilikan' => [],
+            ]);
+        } elseif ($activeTab === 'CETAK KUANTITATIF') {
+            $this->form->fill([
+                'kuantitatif_jenjang' => [],
+                'kuantitatif_sekolah' => [],
+                'kuantitatif_status_sekolah' => [],
+                'kuantitatif_columns' => array_keys(static::getKuantitatifMetricOptions()),
             ]);
         }
     }
@@ -277,6 +285,26 @@ class CetakCustom extends Page implements HasForms
             'jumlah_baik' => 'Jumlah Kondisi Baik',
             'jumlah_rusak' => 'Jumlah Kondisi Rusak',
             'status_kepemilikan' => 'Status Kepemilikan',
+        ];
+    }
+
+    public static function getKuantitatifColumns(): array
+    {
+        return [
+            'jenjang' => 'Jenjang Sekolah',
+            'status_sekolah' => 'Status Sekolah',
+            'nama_sekolah' => 'Nama Sekolah',
+            'jumlah_siswa' => 'Jumlah Siswa',
+            'jumlah_guru' => 'Jumlah Guru',
+            'jumlah_rombel' => 'Jumlah Rombel',
+        ];
+    }
+    public static function getKuantitatifMetricOptions(): array
+    {
+        return [
+            'jumlah_siswa' => 'Jumlah Siswa',
+            'jumlah_guru' => 'Jumlah Guru',
+            'jumlah_rombel' => 'Jumlah Rombel',
         ];
     }
 
@@ -884,6 +912,89 @@ class CetakCustom extends Page implements HasForms
                                         ->action('downloadSarprasPdf'),
                                 ])->alignment('end'),
                             ]),
+
+                        Tab::make('CETAK KUANTITATIF')
+                            ->icon('heroicon-o-chart-bar')
+                            ->schema([
+                                Section::make('Filter Rekap Kuantitatif')
+                                    ->schema([
+                                        Grid::make(3)
+                                            ->schema([
+                                                Select::make('kuantitatif_jenjang')
+                                                    ->label('Jenjang Sekolah')
+                                                    ->multiple()
+                                                    ->options(['sma' => 'SMA', 'smk' => 'SMK'])
+                                                    ->placeholder('Semua Jenjang')
+                                                    ->live()
+                                                    ->afterStateUpdated(fn($state, $set) => $set('kuantitatif_sekolah', [])),
+
+                                                Select::make('kuantitatif_status_sekolah')
+                                                    ->label('Status Sekolah')
+                                                    ->multiple()
+                                                    ->options(['negeri' => 'Negeri', 'swasta' => 'Swasta'])
+                                                    ->placeholder('Semua Status')
+                                                    ->live()
+                                                    ->afterStateUpdated(fn($state, $set) => $set('kuantitatif_sekolah', [])),
+
+                                                Select::make('kuantitatif_sekolah')
+                                                    ->label('Nama Sekolah')
+                                                    ->multiple()
+                                                    ->searchable()
+                                                    ->options(function ($get) {
+                                                        $jenjang = $get('kuantitatif_jenjang') ?? [];
+                                                        $status = $get('kuantitatif_status_sekolah') ?? [];
+
+                                                        return ['all' => 'Pilih Semua Sekolah'] + $this->getKuantitatifSchoolQuery($jenjang, $status)
+                                                            ->orderBy('nama')
+                                                            ->pluck('nama', 'id')
+                                                            ->toArray();
+                                                    })
+                                                    ->placeholder('Semua Sekolah')
+                                                    ->live()
+                                                    ->afterStateUpdated(function ($state, $get, $set) {
+                                                        if (in_array('all', $state ?? [], true)) {
+                                                            $jenjang = $get('kuantitatif_jenjang') ?? [];
+                                                            $status = $get('kuantitatif_status_sekolah') ?? [];
+
+                                                            $set('kuantitatif_sekolah', $this->getKuantitatifSchoolQuery($jenjang, $status)->pluck('id')->all());
+                                                        }
+                                                    }),
+                                            ]),
+                                    ]),
+
+                                Section::make('Data Kuantitatif yang Dicetak')
+                                    ->schema([
+                                        CheckboxList::make('kuantitatif_columns')
+                                            ->label('Pilih jumlah yang ditampilkan')
+                                            ->options(static::getKuantitatifMetricOptions())
+                                            ->default(array_keys(static::getKuantitatifMetricOptions()))
+                                            ->columns(3)
+                                            ->columnSpanFull(),
+                                    ]),
+
+                                Actions::make([
+                                    Action::make('preview_kuantitatif')
+                                        ->label('Preview')
+                                        ->color('info')
+                                        ->modalHeading('Preview Cetak Kuantitatif')
+                                        ->modalWidth('7xl')
+                                        ->modalContent(function () {
+                                            $html = $this->getKuantitatifPreviewHtml();
+                                            if (!$html) return new \Illuminate\Support\HtmlString('<div class="p-4 text-center text-gray-500">Tidak ada data yang sesuai filter.</div>');
+                                            return new \Illuminate\Support\HtmlString('<div style="width: 100%; height: 70vh; border: 1px solid #d1d5db; border-radius: 0.375rem; overflow: hidden; background-color: #ffffff;"><iframe style="width: 100%; height: 100%; border: none;" srcdoc="' . htmlspecialchars($html, ENT_QUOTES, 'UTF-8') . '"></iframe></div>');
+                                        })
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelActionLabel('Tutup'),
+                                    Action::make('download_kuantitatif_excel')
+                                        ->label('Unduh Excel')
+                                        ->color('success')
+                                        ->action('downloadKuantitatifExcel'),
+                                    Action::make('download_kuantitatif_pdf')
+                                        ->label('Unduh PDF')
+                                        ->color('danger')
+                                        ->action('downloadKuantitatifPdf'),
+                                ])->alignment('end'),
+                            ]),
                     ])
                     ->columnSpanFull()
             ])
@@ -891,6 +1002,118 @@ class CetakCustom extends Page implements HasForms
     }
 
     // --- DOWNLOAD METHOD IMPLEMENTATIONS ---
+
+    protected function getKuantitatifSchoolQuery(array $jenjang = [], array $status = []): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = Sekolah::query();
+
+        if (!empty($jenjang)) {
+            $query->whereIn('jenjang', $jenjang);
+        }
+        if (!empty($status)) {
+            $query->whereIn('status_sekolah', $status);
+        }
+
+        return $query;
+    }
+
+    protected function getKuantitatifRecords()
+    {
+        $state = $this->form->getState();
+        $query = $this->getKuantitatifSchoolQuery(
+            $state['kuantitatif_jenjang'] ?? [],
+            $state['kuantitatif_status_sekolah'] ?? []
+        )->withCount([
+            'siswa',
+            'gtk as jumlah_guru_count' => fn($query) => $query->whereIn('jenis_gtk', ['Guru', 'Kepala Sekolah']),
+            'rombel',
+        ]);
+
+        $sekolahIds = array_filter($state['kuantitatif_sekolah'] ?? [], fn($id) => $id !== 'all');
+        if (!empty($sekolahIds)) {
+            $query->whereIn('id', $sekolahIds);
+        }
+
+        return $query->get()
+            ->map(function ($sekolah) {
+                return (object) [
+                    'jenjang' => strtoupper((string) ($sekolah->jenjang ?? '-')),
+                    'status_sekolah' => ucfirst(strtolower((string) ($sekolah->status_sekolah ?? '-'))),
+                    'nama_sekolah' => $sekolah->nama,
+                    'jumlah_siswa' => $sekolah->siswa_count,
+                    'jumlah_guru' => $sekolah->jumlah_guru_count,
+                    'jumlah_rombel' => $sekolah->rombel_count,
+                ];
+            })
+            ->sortBy('nama_sekolah')
+            ->values();
+    }
+
+    protected function getSelectedKuantitatifColumns(): array
+    {
+        $state = $this->form->getState();
+        $selectedMetrics = $state['kuantitatif_columns'] ?? array_keys(static::getKuantitatifMetricOptions());
+        $selectedKeys = array_merge(['jenjang', 'status_sekolah', 'nama_sekolah'], $selectedMetrics);
+
+        return array_intersect_key(static::getKuantitatifColumns(), array_flip($selectedKeys));
+    }
+
+    public function getKuantitatifPreviewHtml(): ?string
+    {
+        $records = $this->getKuantitatifRecords();
+        if ($records->isEmpty()) {
+            return null;
+        }
+
+        $columns = $this->getSelectedKuantitatifColumns();
+
+        return view('pdf.dataset-custom', [
+            'title' => 'REKAP KUANTITATIF SEKOLAH SEKABUPATEN TELUK BINTUNI',
+            'subTitle' => 'Data per ' . now()->translatedFormat('d F Y'),
+            'records' => $records,
+            'columns' => $columns,
+            'fontSize' => $this->calculateFontSize(count($columns)),
+            'sekolah' => null,
+        ])->render();
+    }
+
+    public function downloadKuantitatifExcel()
+    {
+        $records = $this->getKuantitatifRecords();
+        if ($records->isEmpty()) {
+            Notification::make()
+                ->title('Data tidak ditemukan')
+                ->body('Tidak ada data kuantitatif yang sesuai dengan kriteria filter.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        return Excel::download(
+            new DynamicExport($records, $this->getSelectedKuantitatifColumns(), null, 'REKAP KUANTITATIF SEKOLAH SEKABUPATEN TELUK BINTUNI'),
+            'Rekap Kuantitatif Sekolah - ' . now()->translatedFormat('F Y') . '.xlsx'
+        );
+    }
+
+    public function downloadKuantitatifPdf()
+    {
+        $html = $this->getKuantitatifPreviewHtml();
+        if (!$html) {
+            Notification::make()
+                ->title('Data tidak ditemukan')
+                ->body('Tidak ada data kuantitatif yang sesuai dengan kriteria filter.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $pdfContent = $this->configureBrowsershot($html, count($this->getSelectedKuantitatifColumns()))->pdf();
+
+        return response()->streamDownload(
+            fn() => print($pdfContent),
+            'Rekap Kuantitatif Sekolah - ' . now()->translatedFormat('F Y') . '.pdf'
+        );
+    }
 
     public function downloadSekolahExcel()
     {

@@ -61,6 +61,7 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('status')
                     ->badge()
+                    ->sortable()
                     ->colors([
                         'success' => 'active',
                         'warning' => 'pending',

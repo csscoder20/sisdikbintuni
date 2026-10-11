@@ -69,7 +69,7 @@ class DinasDashboard extends BaseDashboard
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->hasRole(['admin_dinas', 'pengawas']);
+        return auth()->check() && auth()->user()->hasRole(['admin_dinas', 'pengawas', 'super_admin']);
     }
 
     public static function getNavigationIcon(): ?string

@@ -46,6 +46,9 @@ class ValidasiData extends Page
     public array $bypassedSteps = [];
     public bool  $isSubmitted = false;
 
+    #[Url(as: 'laporan_id')]
+    public ?int $selectedLaporanId = null;
+
     /**
      * Mengontrol apakah menu navigasi ini muncul di sidebar.
      */
@@ -109,10 +112,12 @@ class ValidasiData extends Page
     public function mount(): void
     {
         $id = $this->getSchoolId();
-        $month = (int) date('m');
-        $year  = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year  = $period['year'];
 
         $laporan = Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->first();
+        $this->selectedLaporanId ??= $laporan?->id;
         if ($laporan && ($laporan->status === 'valid' || $laporan->tanggal_submit)) {
             $this->isSubmitted = true;
         }
@@ -123,6 +128,16 @@ class ValidasiData extends Page
     public function updatedCurrentStep(): void
     {
         $this->resetPage();
+    }
+
+    public function updatedSelectedLaporanId(): void
+    {
+        $this->isSubmitted = false;
+        $laporan = $this->getSelectedPeriodLaporan();
+        if ($laporan && ($laporan->status === 'valid' || $laporan->tanggal_submit)) {
+            $this->isSubmitted = true;
+        }
+        $this->computeStatuses();
     }
 
     /* ------------------------------------------------------------------ */
@@ -143,12 +158,41 @@ class ValidasiData extends Page
         return auth()->user()?->sekolah?->id;
     }
 
+    protected function getValidationPeriod(): array
+    {
+        $laporan = $this->getSelectedPeriodLaporan();
+        return $laporan
+            ? ['month' => (int) $laporan->bulan, 'year' => (int) $laporan->tahun]
+            : ['month' => (int) date('m'), 'year' => (int) date('Y')];
+    }
+
+    protected function getSelectedPeriodLaporan(): ?Laporan
+    {
+        $id = $this->getSchoolId();
+        if (!$id || !$this->selectedLaporanId) {
+            return null;
+        }
+
+        return Laporan::where('sekolah_id', $id)->find($this->selectedLaporanId);
+    }
+
+    public function getAvailablePeriods(): iterable
+    {
+        $id = $this->getSchoolId();
+        if (!$id) return collect();
+
+        return Laporan::where('sekolah_id', $id)
+            ->orderByDesc('tahun')->orderByDesc('bulan')
+            ->get(['id', 'bulan', 'tahun', 'status']);
+    }
+
     protected function computeStatuses(): void
     {
         $id = $this->getSchoolId();
 
-        $month = (int) date('m');
-        $year  = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year  = $period['year'];
         $laporan = Laporan::where('sekolah_id', $id)->where('bulan', $month)->where('tahun', $year)->first();
 
         $s1  = $this->checkStep1($id);
@@ -250,8 +294,9 @@ class ValidasiData extends Page
     protected function checkStep2(?int $id): bool
     {
         if (!$id) return false;
-        $month = (int) date('m');
-        $year = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year = $period['year'];
 
         // Cek apakah ada laporan untuk bulan/tahun ini
         $laporan = Laporan::where('sekolah_id', $id)
@@ -307,8 +352,9 @@ class ValidasiData extends Page
     protected function checkKeuangan(?int $id): bool
     {
         if (!$id) return false;
-        $month = (int) date('m');
-        $year = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year = $period['year'];
 
         // Cek apakah ada laporan untuk bulan/tahun ini
         $laporan = Laporan::where('sekolah_id', $id)
@@ -650,8 +696,9 @@ class ValidasiData extends Page
         $this->saveProgressToDatabase();
 
         $id = $this->getSchoolId();
-        $month = (int) date('m');
-        $year  = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year  = $period['year'];
 
         $laporan = Laporan::updateOrCreate(
             ['sekolah_id' => $id, 'bulan' => $month, 'tahun' => $year],
@@ -674,8 +721,9 @@ class ValidasiData extends Page
         $id = $this->getSchoolId();
         if (!$id) return;
 
-        $month = (int) date('m');
-        $year  = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year  = $period['year'];
 
         Laporan::updateOrCreate(
             ['sekolah_id' => $id, 'bulan' => $month, 'tahun' => $year],
@@ -754,8 +802,9 @@ class ValidasiData extends Page
 
     public function getSarprasList(): LengthAwarePaginator
     {
-        $month = (int) date('m');
-        $year = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year = $period['year'];
 
         $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
             ->where('bulan', $month)
@@ -779,8 +828,9 @@ class ValidasiData extends Page
 
     public function getSarprasCount(): int
     {
-        $month = (int) date('m');
-        $year = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year = $period['year'];
 
         $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
             ->where('bulan', $month)
@@ -840,8 +890,9 @@ class ValidasiData extends Page
 
     public function getIncompleteSarprasInfo(): array
     {
-        $month = (int) date('m');
-        $year = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year = $period['year'];
 
         $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
             ->where('bulan', $month)
@@ -946,8 +997,9 @@ class ValidasiData extends Page
 
     public function getIncompleteLaporanKeuanganInfo(): array
     {
-        $month = (int) date('m');
-        $year = (int) date('Y');
+        $period = $this->getValidationPeriod();
+        $month = $period['month'];
+        $year = $period['year'];
 
         $laporan = Laporan::where('sekolah_id', $this->getSchoolId())
             ->where('bulan', $month)
@@ -1196,7 +1248,8 @@ class ValidasiData extends Page
 
     public function getCurrentPeriod(): string
     {
-        return Carbon::now()->translatedFormat('F Y');
+        $period = $this->getValidationPeriod();
+        return Carbon::createFromDate($period['year'], $period['month'], 1)->translatedFormat('F Y');
     }
 
     public function getStepLabels(): array

@@ -38,6 +38,7 @@ use App\Filament\Pages\Auth\CustomRegister;
 use App\Filament\Pages\Auth\CustomRequestPasswordReset;
 use App\Filament\Pages\Auth\CustomResetPassword;
 use App\Filament\Pages\HelpGuide;
+use App\Filament\Pages\Revalidasi;
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
 use App\Filament\Resources\Gtks\GtkResource;
@@ -142,6 +143,7 @@ class AdminPanelProvider extends PanelProvider
                 CustomProfile::class,
                 RiwayatLaporan::class,
                 \App\Filament\Pages\ValidasiData::class,
+                Revalidasi::class,
                 HelpGuide::class,
             ])
             ->navigationGroups([
