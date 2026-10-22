@@ -41,10 +41,12 @@ class CustomRegister extends BaseRegister
                     ->searchable(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
-                \Filament\Schemas\Components\View::make('filament.components.captcha'),
+                \Filament\Schemas\Components\View::make('filament.components.captcha')
+                    ->visible(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled()),
                 \Filament\Forms\Components\Hidden::make('captcha_token')
                     ->extraAttributes(['data-captcha-token' => 'true'])
-                    ->required()
+                    ->required(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled())
+                    ->visible(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled())
                     ->rule(new \App\Rules\Captcha()),
             ]);
     }
@@ -125,7 +127,7 @@ class CustomRegister extends BaseRegister
             ->modalSubmitActionLabel('Mengerti, ke Halaman Login')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
-            ->action(fn () => $this->redirect(route('filament.dinas.auth.login')));
+            ->action(fn() => $this->redirect(route('filament.dinas.auth.login')));
     }
 
     public function rateLimitedErrorAction(): \Filament\Actions\Action
@@ -136,11 +138,11 @@ class CustomRegister extends BaseRegister
             ->modalIconColor('danger')
             ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
             ->modalWidth('md')
-            ->modalDescription(fn (array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
+            ->modalDescription(fn(array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
             ->modalSubmitActionLabel('Mengerti')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
-            ->action(fn () => null);
+            ->action(fn() => null);
     }
 
     public function getSubheading(): string | \Illuminate\Contracts\Support\Htmlable | null

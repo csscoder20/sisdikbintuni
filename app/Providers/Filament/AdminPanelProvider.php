@@ -39,6 +39,9 @@ use App\Filament\Pages\Auth\CustomRequestPasswordReset;
 use App\Filament\Pages\Auth\CustomResetPassword;
 use App\Filament\Pages\HelpGuide;
 use App\Filament\Pages\Revalidasi;
+use App\Filament\Pages\DatabaseBackup;
+use App\Filament\Pages\SystemInfo;
+use App\Filament\Pages\SystemSettings;
 use App\Filament\Resources\GtkJamAjars\GtkJamAjarResource;
 use App\Filament\Resources\GtkRiwayatPendidikans\GtkRiwayatPendidikanResource;
 use App\Filament\Resources\Gtks\GtkResource;
@@ -63,7 +66,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset(CustomRequestPasswordReset::class, CustomResetPassword::class)
             ->emailVerification()
             ->darkMode()
-            ->brandName('ADMIN')
+            ->brandName(fn(): string => (string) config('app.name'))
             ->databaseNotifications()
             ->brandLogo(fn() => request()->routeIs('filament.*.auth.*')
                 ? new \Illuminate\Support\HtmlString('
@@ -144,6 +147,9 @@ class AdminPanelProvider extends PanelProvider
                 RiwayatLaporan::class,
                 \App\Filament\Pages\ValidasiData::class,
                 Revalidasi::class,
+                DatabaseBackup::class,
+                SystemInfo::class,
+                SystemSettings::class,
                 HelpGuide::class,
             ])
             ->navigationGroups([

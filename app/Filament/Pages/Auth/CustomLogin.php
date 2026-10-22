@@ -32,17 +32,19 @@ class CustomLogin extends BaseLogin
             return null;
         }
 
-        try {
-            \Illuminate\Support\Facades\Validator::make(
-                ['captcha_token' => $this->form->getState()['captcha_token'] ?? null],
-                ['captcha_token' => ['required', new \App\Rules\Captcha]],
-                ['captcha_token.required' => 'Selesaikan captcha terlebih dahulu.']
-            )->validate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->dispatch('reset-captcha');
-            $this->mountAction('captchaError', ['message' => $e->getMessage()]);
+        if (\App\Support\RuntimeSettings::captchaEnabled()) {
+            try {
+                \Illuminate\Support\Facades\Validator::make(
+                    ['captcha_token' => $this->form->getState()['captcha_token'] ?? null],
+                    ['captcha_token' => ['required', new \App\Rules\Captcha]],
+                    ['captcha_token.required' => 'Selesaikan captcha terlebih dahulu.']
+                )->validate();
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->dispatch('reset-captcha');
+                $this->mountAction('captchaError', ['message' => $e->getMessage()]);
 
-            return null;
+                return null;
+            }
         }
 
         try {
@@ -117,10 +119,12 @@ class CustomLogin extends BaseLogin
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
-                \Filament\Schemas\Components\View::make('filament.components.captcha'),
+                \Filament\Schemas\Components\View::make('filament.components.captcha')
+                    ->visible(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled()),
                 \Filament\Forms\Components\Hidden::make('captcha_token')
                     ->extraAttributes(['data-captcha-token' => 'true'])
-                    ->required(),
+                    ->required(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled())
+                    ->visible(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled()),
             ]);
     }
 
@@ -148,7 +152,7 @@ class CustomLogin extends BaseLogin
             ->modalSubmitActionLabel('Mengerti')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
-            ->action(fn () => null);
+            ->action(fn() => null);
     }
 
     public function rejectedAlertAction(): \Filament\Actions\Action
@@ -165,7 +169,7 @@ class CustomLogin extends BaseLogin
             ->modalSubmitActionLabel('Mengerti')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
-            ->action(fn () => null);
+            ->action(fn() => null);
     }
 
     public function rateLimitedErrorAction(): \Filament\Actions\Action
@@ -176,11 +180,11 @@ class CustomLogin extends BaseLogin
             ->modalIconColor('danger')
             ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
             ->modalWidth('md')
-            ->modalDescription(fn (array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
+            ->modalDescription(fn(array $arguments) => 'Silakan coba lagi dalam ' . ($arguments['seconds'] ?? 'beberapa') . ' detik.')
             ->modalSubmitActionLabel('Mengerti')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
-            ->action(fn () => null);
+            ->action(fn() => null);
     }
 
     public function captchaErrorAction(): \Filament\Actions\Action
@@ -191,11 +195,11 @@ class CustomLogin extends BaseLogin
             ->modalIconColor('danger')
             ->modalAlignment(\Filament\Support\Enums\Alignment::Center)
             ->modalWidth('md')
-            ->modalDescription(fn (array $arguments) => $arguments['message'] ?? 'Selesaikan captcha terlebih dahulu.')
+            ->modalDescription(fn(array $arguments) => $arguments['message'] ?? 'Selesaikan captcha terlebih dahulu.')
             ->modalSubmitActionLabel('Tutup')
             ->modalCancelAction(false)
             ->closeModalByClickingAway(false)
-            ->action(fn () => null);
+            ->action(fn() => null);
     }
 
     public function content(Schema $schema): Schema
@@ -209,5 +213,3 @@ class CustomLogin extends BaseLogin
             ]);
     }
 }
-
-

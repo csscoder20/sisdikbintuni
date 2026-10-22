@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\ValidationPeriod;
+use App\Support\RuntimeSettings;
 use Illuminate\Support\ServiceProvider;
 use Filament\Actions\Action;
 use Filament\Actions\Imports\ImportColumn;
@@ -35,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RuntimeSettings::apply();
+
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
             if ($user->hasRole('pengawas')) {
                 if (in_array($ability, ['create', 'update', 'delete', 'restore', 'forceDelete', 'replicate'])) {
@@ -71,10 +74,10 @@ class AppServiceProvider extends ServiceProvider
         );
 
         // Globally disable modal click-away using the unified Action class
-        Action::configureUsing(fn (Action $action) => $action->closeModalByClickingAway(false));
+        Action::configureUsing(fn(Action $action) => $action->closeModalByClickingAway(false));
 
         TrashedFilter::configureUsing(function (TrashedFilter $filter): void {
-            $filter->hidden(fn (): bool => filament()->getCurrentPanel()?->getId() !== 'dinas');
+            $filter->hidden(fn(): bool => filament()->getCurrentPanel()?->getId() !== 'dinas');
         }, isImportant: true);
 
         $hideNonReadOnlyActions = function ($action): void {
@@ -92,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
                 if (auth()->check() && auth()->user()->hasRole('pengawas')) {
                     return true;
                 }
-                
+
                 return ValidationPeriod::isLockedForOperatorPanel();
             });
         };

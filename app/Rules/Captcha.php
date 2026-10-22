@@ -15,6 +15,10 @@ class Captcha implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        if (! \App\Support\RuntimeSettings::captchaEnabled()) {
+            return;
+        }
+
         $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
             'secret' => config('services.recaptcha.secret_key'),
             'response' => $value,

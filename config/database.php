@@ -5,6 +5,10 @@ use Pdo\Mysql;
 
 return [
 
+    'backup' => [
+        'pg_dump_path' => env('PG_DUMP_PATH', 'pg_dump'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Default Database Connection Name
