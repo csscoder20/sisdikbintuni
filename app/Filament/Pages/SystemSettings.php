@@ -59,6 +59,8 @@ class SystemSettings extends Page implements HasForms
             'smtp_password' => '',
             'smtp_from_address' => config('mail.from.address'),
             'smtp_from_name' => config('mail.from.name'),
+            'session_idle_timeout_enabled' => RuntimeSettings::sessionIdleTimeoutEnabled(),
+            'session_idle_timeout_minutes' => RuntimeSettings::sessionIdleTimeoutMinutes(),
         ]);
     }
 
@@ -107,6 +109,20 @@ class SystemSettings extends Page implements HasForms
                                                 ? 'Secret sudah dikonfigurasi dan tidak ditampilkan. Isi hanya jika ingin menggantinya.'
                                                 : 'Secret akan disimpan terenkripsi. Isi bila reCAPTCHA diaktifkan.'),
                                     ]),
+                            ]),
+                        Section::make('Masa Sesi')
+                            ->description('Akhiri sesi setelah pengguna tidak aktif. Pengguna harus login kembali setelah timeout.')
+                            ->schema([
+                                Toggle::make('session_idle_timeout_enabled')
+                                    ->label('Aktifkan auto-logout saat tidak aktif')
+                                    ->helperText('Berlaku untuk sesi aplikasi dan panel administrasi.'),
+                                TextInput::make('session_idle_timeout_minutes')
+                                    ->label('Batas waktu tidak aktif (menit)')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(1)
+                                    ->maxValue(1440)
+                                    ->helperText('Default yang disarankan: 10 menit.'),
                             ]),
                         Section::make('SMTP')
                             ->columnSpanFull()
@@ -187,6 +203,11 @@ class SystemSettings extends Page implements HasForms
         $data['smtp_password'] = '';
         $data['smtp_enabled'] = RuntimeSettings::smtpEnabled();
         $this->form->fill($data);
+        $this->dispatch(
+            'idle-timeout-updated',
+            enabled: RuntimeSettings::sessionIdleTimeoutEnabled(),
+            minutes: RuntimeSettings::sessionIdleTimeoutMinutes(),
+        );
 
         Notification::make()
             ->title('Pengaturan berhasil disimpan')
@@ -215,7 +236,14 @@ class SystemSettings extends Page implements HasForms
             'smtp_password' => '',
             'smtp_from_address' => config('mail.from.address'),
             'smtp_from_name' => config('mail.from.name'),
+            'session_idle_timeout_enabled' => RuntimeSettings::sessionIdleTimeoutEnabled(),
+            'session_idle_timeout_minutes' => RuntimeSettings::sessionIdleTimeoutMinutes(),
         ]);
+        $this->dispatch(
+            'idle-timeout-updated',
+            enabled: RuntimeSettings::sessionIdleTimeoutEnabled(),
+            minutes: RuntimeSettings::sessionIdleTimeoutMinutes(),
+        );
 
         Notification::make()
             ->title('Pengaturan kembali menggunakan .env')

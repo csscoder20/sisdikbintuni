@@ -22,6 +22,8 @@ class RuntimeSettings
     public const SMTP_PASSWORD_KEY = 'runtime.smtp_password';
     public const SMTP_FROM_ADDRESS_KEY = 'runtime.smtp_from_address';
     public const SMTP_FROM_NAME_KEY = 'runtime.smtp_from_name';
+    public const SESSION_IDLE_ENABLED_KEY = 'runtime.session_idle_enabled';
+    public const SESSION_IDLE_MINUTES_KEY = 'runtime.session_idle_minutes';
 
     private const ENCRYPTED_PREFIX = 'encrypted:';
 
@@ -45,6 +47,9 @@ class RuntimeSettings
             'smtp_password' => config('mail.mailers.smtp.password'),
             'smtp_from_address' => config('mail.from.address'),
             'smtp_from_name' => config('mail.from.name'),
+            'session_idle_timeout_enabled' => config('session.idle_timeout_enabled', true),
+            'session_idle_timeout_minutes' => config('session.idle_timeout_minutes', 10),
+            'session_lifetime' => config('session.lifetime'),
         ];
 
         try {
@@ -65,6 +70,16 @@ class RuntimeSettings
             self::SMTP_ENABLED_KEY,
             self::$environmentDefaults['mail_default'] === 'smtp'
         );
+        $sessionIdleEnabled = (bool) self::value(
+            $settings,
+            self::SESSION_IDLE_ENABLED_KEY,
+            self::$environmentDefaults['session_idle_timeout_enabled']
+        );
+        $sessionIdleMinutes = max(1, (int) self::value(
+            $settings,
+            self::SESSION_IDLE_MINUTES_KEY,
+            self::$environmentDefaults['session_idle_timeout_minutes']
+        ));
 
         $mailConfig = [
             'mail.default' => $smtpEnabled ? 'smtp' : self::$environmentDefaults['mail_default'],
@@ -105,6 +120,11 @@ class RuntimeSettings
                 self::RECAPTCHA_SECRET_KEY,
                 self::$environmentDefaults['recaptcha_secret_key']
             ),
+            'session.idle_timeout_enabled' => $sessionIdleEnabled,
+            'session.idle_timeout_minutes' => $sessionIdleMinutes,
+            'session.lifetime' => $sessionIdleEnabled
+                ? $sessionIdleMinutes
+                : self::$environmentDefaults['session_lifetime'],
             ...$mailConfig,
         ]);
     }
@@ -132,6 +152,9 @@ class RuntimeSettings
             self::storeSecret(self::SMTP_PASSWORD_KEY, $data['smtp_password']);
         }
 
+        AppSetting::setValue(self::SESSION_IDLE_ENABLED_KEY, (bool) ($data['session_idle_timeout_enabled'] ?? false));
+        AppSetting::setValue(self::SESSION_IDLE_MINUTES_KEY, max(1, (int) ($data['session_idle_timeout_minutes'] ?? 10)));
+
         self::apply();
     }
 
@@ -158,6 +181,16 @@ class RuntimeSettings
         return config('mail.default') === 'smtp';
     }
 
+    public static function sessionIdleTimeoutEnabled(): bool
+    {
+        return (bool) config('session.idle_timeout_enabled');
+    }
+
+    public static function sessionIdleTimeoutMinutes(): int
+    {
+        return max(1, (int) config('session.idle_timeout_minutes', 10));
+    }
+
     private static function keys(): array
     {
         return [
@@ -174,6 +207,8 @@ class RuntimeSettings
             self::SMTP_PASSWORD_KEY,
             self::SMTP_FROM_ADDRESS_KEY,
             self::SMTP_FROM_NAME_KEY,
+            self::SESSION_IDLE_ENABLED_KEY,
+            self::SESSION_IDLE_MINUTES_KEY,
         ];
     }
 

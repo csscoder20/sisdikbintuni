@@ -34,6 +34,10 @@ return [
 
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
 
+    'idle_timeout_enabled' => (bool) env('SESSION_IDLE_TIMEOUT_ENABLED', true),
+
+    'idle_timeout_minutes' => max(1, (int) env('SESSION_IDLE_TIMEOUT_MINUTES', 10)),
+
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*
@@ -129,7 +133,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel')).'-session'
+        Str::slug((string) env('APP_NAME', 'laravel')) . '-session'
     ),
 
     /*

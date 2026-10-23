@@ -248,7 +248,8 @@ class AdminPanelProvider extends PanelProvider
                     (request()->routeIs('filament.*.auth.*') ? '<script src="https://www.google.com/recaptcha/api.js" async defer></script>' : '')
             )
             ->renderHook('panels::body.end', function () {
-                return self::renderGlobalOperationLoader() . <<<'HTML'
+                return self::renderIdleSessionTimeout()
+                    . self::renderGlobalOperationLoader() . <<<'HTML'
                     <style>
                         .fi-simple-main-ctn {
                             flex-grow: 1;
@@ -678,7 +679,8 @@ class AdminPanelProvider extends PanelProvider
             })
 
             ->renderHook('panels::body.end', function () {
-                return \App\Providers\Filament\AdminPanelProvider::renderGlobalOperationLoader()
+                return self::renderIdleSessionTimeout()
+                    . \App\Providers\Filament\AdminPanelProvider::renderGlobalOperationLoader()
                     . \Illuminate\Support\Facades\Blade::render('<livewire:notifikasi-modal />')
                     . <<<'HTML'
                     <style>
@@ -737,6 +739,224 @@ class AdminPanelProvider extends PanelProvider
                     </style>
                 HTML;
             });
+    }
+
+    protected static function renderIdleSessionTimeout(): string
+    {
+        if (! auth()->check()) {
+            return '';
+        }
+
+        $logoutRoute = match (Filament::getCurrentPanel()?->getId()) {
+            'sma' => 'filament.sma.auth.logout',
+            'smk' => 'filament.smk.auth.logout',
+            default => 'filament.dinas.auth.logout',
+        };
+
+        $timeoutMilliseconds = \App\Support\RuntimeSettings::sessionIdleTimeoutMinutes() * 60 * 1000;
+        $timeoutEnabled = json_encode(\App\Support\RuntimeSettings::sessionIdleTimeoutEnabled());
+        $logoutUrl = json_encode(route($logoutRoute), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        $loginUrl = json_encode(Filament::getLoginUrl(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        $csrfToken = json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+
+        return <<<HTML
+            <script>
+                (() => {
+                    let timeoutMilliseconds = {$timeoutMilliseconds};
+                    let timeoutEnabled = {$timeoutEnabled};
+                    const logoutUrl = {$logoutUrl};
+                    const loginUrl = {$loginUrl};
+                    const csrfToken = {$csrfToken};
+                    const activityStorageKey = 'filament-idle-activity:' + logoutUrl;
+                    const settingsStorageKey = activityStorageKey + ':settings';
+                    const warningMilliseconds = 30 * 1000;
+                    let idleTimer;
+                    let warningTimer;
+                    let logoutTimer;
+                    let countdownInterval;
+                    let warningOverlay;
+                    let loggingOut = false;
+                    let lastActivityAt = Date.now();
+
+                    const logout = () => {
+                        if (loggingOut) return;
+                        loggingOut = true;
+
+                        fetch(logoutUrl, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'text/html',
+                                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: new URLSearchParams({ _token: csrfToken }).toString(),
+                            keepalive: true,
+                        }).catch(() => {}).finally(() => {
+                            window.location.assign(loginUrl);
+                        });
+                    };
+
+                    const hideWarning = () => {
+                        window.clearInterval(countdownInterval);
+                        warningOverlay?.remove();
+                        warningOverlay = null;
+                    };
+
+                    const showWarning = (deadline) => {
+                        if (!warningOverlay) {
+                            warningOverlay = document.createElement('div');
+                            warningOverlay.dataset.idleTimeoutWarning = 'true';
+                            warningOverlay.setAttribute('role', 'alertdialog');
+                            warningOverlay.setAttribute('aria-modal', 'true');
+                            warningOverlay.setAttribute('aria-labelledby', 'idle-timeout-title');
+                            warningOverlay.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(15,23,42,.58);';
+
+                            const dialog = document.createElement('div');
+                            dialog.style.cssText = 'width:min(100%,28rem);padding:1.5rem;border-radius:.75rem;background:#fff;color:#111827;box-shadow:0 24px 60px rgba(0,0,0,.24);font-family:inherit;';
+
+                            const title = document.createElement('h2');
+                            title.id = 'idle-timeout-title';
+                            title.textContent = 'Sesi akan berakhir';
+                            title.style.cssText = 'margin:0 0 .75rem;font-size:1.25rem;font-weight:700;';
+
+                            const message = document.createElement('p');
+                            message.style.cssText = 'margin:0 0 1.5rem;font-size:.95rem;line-height:1.5;color:#4b5563;';
+                            message.append('Anda akan otomatis keluar dalam ');
+
+                            const countdown = document.createElement('strong');
+                            countdown.dataset.idleTimeoutCountdown = 'true';
+                            countdown.style.cssText = 'color:#c2410c;font-variant-numeric:tabular-nums;';
+                            message.append(countdown, ' detik karena tidak ada aktivitas.');
+
+                            const actions = document.createElement('div');
+                            actions.style.cssText = 'display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.75rem;';
+
+                            const stayButton = document.createElement('button');
+                            stayButton.type = 'button';
+                            stayButton.textContent = 'Tetap aktif';
+                            stayButton.style.cssText = 'padding:.6rem 1rem;border:0;border-radius:.5rem;background:#ea580c;color:#fff;font-weight:600;cursor:pointer;';
+                            stayButton.addEventListener('click', () => recordActivity());
+
+                            actions.appendChild(stayButton);
+                            dialog.append(title, message, actions);
+                            warningOverlay.appendChild(dialog);
+                            document.body.appendChild(warningOverlay);
+                        }
+
+                        const countdown = warningOverlay.querySelector('[data-idle-timeout-countdown]');
+                        const updateCountdown = () => {
+                            const secondsRemaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+                            countdown.textContent = String(secondsRemaining);
+
+                            if (secondsRemaining === 0) {
+                                logout();
+                            }
+                        };
+
+                        window.clearInterval(countdownInterval);
+                        updateCountdown();
+                        countdownInterval = window.setInterval(updateCountdown, 1000);
+                    };
+
+                    const resetIdleTimer = () => {
+                        window.clearTimeout(idleTimer);
+                        window.clearTimeout(warningTimer);
+                        window.clearTimeout(logoutTimer);
+                        hideWarning();
+
+                        if (!timeoutEnabled) return;
+
+                        let sharedActivityAt = lastActivityAt;
+
+                        try {
+                            sharedActivityAt = Math.max(
+                                sharedActivityAt,
+                                Number(window.localStorage.getItem(activityStorageKey)) || 0,
+                            );
+                        } catch (error) {}
+
+                        const deadline = sharedActivityAt + timeoutMilliseconds;
+                        const remainingMilliseconds = deadline - Date.now();
+
+                        if (remainingMilliseconds <= 0) {
+                            logout();
+                            return;
+                        }
+
+                        const warningDelay = remainingMilliseconds - warningMilliseconds;
+
+                        if (warningDelay <= 0) {
+                            showWarning(deadline);
+                        } else {
+                            warningTimer = window.setTimeout(() => showWarning(deadline), warningDelay);
+                        }
+
+                        logoutTimer = window.setTimeout(logout, remainingMilliseconds);
+                    };
+
+                    const recordActivity = (event) => {
+                        if (event && warningOverlay?.contains(event.target)) return;
+
+                        lastActivityAt = Date.now();
+
+                        try {
+                            window.localStorage.setItem(activityStorageKey, String(lastActivityAt));
+                        } catch (error) {}
+
+                        resetIdleTimer();
+                    };
+
+                    const applyTimeoutSettings = (settings) => {
+                        if (typeof settings.enabled === 'boolean') {
+                            timeoutEnabled = settings.enabled;
+                        }
+
+                        const minutes = Number(settings.minutes);
+                        if (Number.isFinite(minutes) && minutes >= 1) {
+                            timeoutMilliseconds = minutes * 60 * 1000;
+                        }
+
+                        if (timeoutEnabled) {
+                            recordActivity();
+                        } else {
+                            window.clearTimeout(idleTimer);
+                            window.clearTimeout(warningTimer);
+                            window.clearTimeout(logoutTimer);
+                            hideWarning();
+                        }
+                    };
+
+                    window.addEventListener('idle-timeout-updated', (event) => {
+                        const settings = event.detail ?? {};
+                        applyTimeoutSettings(settings);
+
+                        try {
+                            window.localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+                        } catch (error) {}
+                    });
+
+                    window.addEventListener('storage', (event) => {
+                        if (event.key === activityStorageKey) {
+                            lastActivityAt = Math.max(lastActivityAt, Number(event.newValue) || 0);
+                            resetIdleTimer();
+                        }
+
+                        if (event.key === settingsStorageKey && event.newValue) {
+                            try {
+                                applyTimeoutSettings(JSON.parse(event.newValue));
+                            } catch (error) {}
+                        }
+                    });
+
+                    ['pointerdown', 'pointermove', 'keydown', 'scroll', 'touchstart'].forEach((eventName) => {
+                        window.addEventListener(eventName, recordActivity, { passive: true });
+                    });
+
+                    recordActivity();
+                })();
+            </script>
+            HTML;
     }
 
     public static function renderValidationPeriodClosedNotice(): string

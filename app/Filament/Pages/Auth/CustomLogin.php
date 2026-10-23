@@ -54,7 +54,13 @@ class CustomLogin extends BaseLogin
             throw $e;
         }
 
-        if (! Filament::auth()->attempt($this->getCredentialsFromFormData($data), $data['remember'] ?? false)) {
+        $remember = $data['remember'] ?? false;
+
+        if (\App\Support\RuntimeSettings::sessionIdleTimeoutEnabled()) {
+            $remember = false;
+        }
+
+        if (! Filament::auth()->attempt($this->getCredentialsFromFormData($data), $remember)) {
             $this->dispatch('reset-captcha');
             $this->throwFailureValidationException();
         }
@@ -118,7 +124,8 @@ class CustomLogin extends BaseLogin
             ->components([
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
-                $this->getRememberFormComponent(),
+                $this->getRememberFormComponent()
+                    ->visible(fn(): bool => ! \App\Support\RuntimeSettings::sessionIdleTimeoutEnabled()),
                 \Filament\Schemas\Components\View::make('filament.components.captcha')
                     ->visible(fn(): bool => \App\Support\RuntimeSettings::captchaEnabled()),
                 \Filament\Forms\Components\Hidden::make('captcha_token')
